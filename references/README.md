@@ -18,6 +18,8 @@ The current [Sankofa plan](../Sankofa-PRD.md) targets Adapted / Significantly Up
 
 ## Files copied into this local workspace
 
+The repository-root `HACKATHON.local.md` is a separate, locally maintained working brief required by [agent instructions](../AGENTS.md). It is also Git-ignored. Use [local competition setup](../docs/development.md#local-competition-context) to restore it in a fresh checkout; do not confuse it with the verbatim supplied snapshots below.
+
 ```text
 references/hackathon/description.txt     Full pasted overview
 references/hackathon/rules.txt           Full pasted official rules

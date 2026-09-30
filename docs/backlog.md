@@ -10,6 +10,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 - [x] Separate proposed competition coverage from the long-term ambition of broad histories and languages.
 - [x] Create the separate SankofaVR repository with current plans and ignored local references; preserve the previous workspace.
 - [x] Identify the previous Unity/web starting points without importing runtime code.
+- [x] Define module boundaries and require the ignored local competition brief in agent instructions, with presence/exclusion checks and fresh-checkout setup.
 - [ ] Confirm weekly hours, repeated Quest access, art/audio/tool/API budget and hosting allowance; reconcile with the delivery estimate.
 - [ ] Record original web revision, ownership/contributors and the intended code/asset reuse and licence path.
 - [ ] Select one precise place/period, two interest themes, three complete scene plans and two inspectable objects.

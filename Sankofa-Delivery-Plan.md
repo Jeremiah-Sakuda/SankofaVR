@@ -68,6 +68,8 @@ The probes can be developed independently. Integration follows once both establi
 
 ## 5. Proposed architecture and responsibilities
 
+The [modular architecture](docs/architecture.md) defines dependency direction, adapter boundaries and replacement tests for these responsibilities. Read the local competition brief through [agent instructions](AGENTS.md) before implementation; it guides prioritisation without becoming a runtime dependency.
+
 | Component | Responsibility | Boundary |
 |---|---|---|
 | Unity client | Fire, hands, scene state, audio/caption playback, local journal and controls | Owns what actually happens; feedback does not wait for inference |

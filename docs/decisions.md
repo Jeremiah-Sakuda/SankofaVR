@@ -8,6 +8,8 @@ This repository starts with documents and repository checks. No Unity implementa
 
 ## Product direction
 
+The user requested modular implementation and a Git-ignored hackathon brief on September 30, 2026. `HACKATHON.local.md` holds competition-specific working context; tracked [agent instructions](../AGENTS.md) require reading it and explain recovery in a fresh checkout. [Architecture](architecture.md) separates the story core, application, XR, services, content, storage and production tooling. The brief is not packaged or read at runtime. Workspace checks verify exclusion and optional presence; implementation and competition acceptance remain unverified.
+
 | Decision | Status |
 |---|---|
 | Sankofa product name | User selected |

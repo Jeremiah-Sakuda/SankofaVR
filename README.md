@@ -15,6 +15,7 @@ A proposed hands-first spatial storytelling experience for Meta Quest. A living 
 | [Backlog](docs/backlog.md) | Current work in dependency order |
 | [Decisions](docs/decisions.md) | Confirmed direction, planning defaults and outstanding choices |
 | [Development](docs/development.md) | Workspace setup, checks and future implementation boundaries |
+| [Modular architecture](docs/architecture.md) | Story core, adapters, content and presentation boundaries |
 | [Asset register](docs/asset-register.md) | Provenance and acceptance records |
 | [References](references/README.md) | Official competition and original web Sankofa sources |
 | [Workspace provenance](docs/workspace-provenance.md) | Where the planning documents came from and what was transferred |
@@ -39,5 +40,7 @@ The check covers tracked Markdown links and local-only file protections. It does
 ## Local-only material
 
 Full supplied rules, description, reference provenance and the original chat are copied into ignored `references/hackathon/` and `references/ideation/` folders in the initial workspace. They are not included in GitHub or fresh clones.
+
+`HACKATHON.local.md` is the local competition brief. Every working agent must read it through the instructions in [AGENTS.md](AGENTS.md). It is excluded from Git and must remain outside application packaging. Follow [local competition setup](docs/development.md#local-competition-context) in a new checkout; the tracked workspace check can verify its presence with `--competition`.
 
 Keep personal input, real recordings, credentials, raw vendor assets and generated builds out of Git. See [working instructions](AGENTS.md). This repository is private; no open-source licence has been selected. Reuse from the separate [web Sankofa project](https://github.com/Jeremiah-Sakuda/Sankofa) requires an explicit code/asset licensing decision.

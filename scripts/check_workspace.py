@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Validate tracked documentation and protections for local-only material."""
 from pathlib import Path
+import argparse
 import re
 import subprocess
 import sys
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+COMPETITION_BRIEF = "HACKATHON.local.md"
 LOCAL_ONLY = (
     "references/hackathon/", "references/ideation/", "data/", "recordings/",
     "results/", "artifacts/", "vendor/", "unity/Assets/LocalOnly/",
@@ -21,6 +23,12 @@ def git(*args):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--competition", action="store_true",
+        help="Also require a nonempty local competition brief (never included in CI).",
+    )
+    args = parser.parse_args()
     result = git("ls-files", "-z")
     if result.returncode:
         print("Run inside an initialised Git repository.", file=sys.stderr)
@@ -32,7 +40,7 @@ def main():
     errors = []
     for name in sorted(tracked):
         path = ROOT / name
-        if name.startswith(LOCAL_ONLY):
+        if name == COMPETITION_BRIEF or name.startswith(LOCAL_ONLY):
             errors.append(f"Local-only file in index: {name}")
         if git("check-ignore", "--no-index", "-q", name).returncode == 0:
             errors.append(f"Ignored file in index: {name}")
@@ -62,6 +70,7 @@ def main():
             elif resolved.is_file() and resolved.relative_to(ROOT).as_posix() not in tracked:
                 errors.append(f"Link to untracked material in {name}: {target}")
     protected = (
+        COMPETITION_BRIEF,
         "references/hackathon/rules.txt", "references/hackathon/description.txt",
         "references/ideation/original-chat.txt", "data/session.json",
         "recordings/session.wav", "results/report.md", "artifacts/build.apk",
@@ -77,10 +86,19 @@ def main():
                  "unity/Packages/manifest.json", "unity/ProjectSettings/ProjectVersion.txt"):
         if git("check-ignore", "--no-index", "-q", name).returncode == 0:
             errors.append(f"Required future Unity source would be ignored: {name}")
+    if args.competition:
+        try:
+            brief = (ROOT / COMPETITION_BRIEF).read_text(encoding="utf-8")
+            if not brief.strip():
+                errors.append(f"Empty {COMPETITION_BRIEF}; follow docs/development.md local competition setup.")
+        except (OSError, UnicodeError):
+            errors.append(f"Missing or unreadable {COMPETITION_BRIEF}; follow docs/development.md local competition setup.")
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
     print(f"Workspace check passed: {len(tracked)} tracked files; document links and local-only exclusions verified.")
+    if args.competition:
+        print("Local competition brief is present. Read it; this check does not establish competition compliance.")
     return 0
 
 

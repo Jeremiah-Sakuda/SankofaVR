@@ -1,0 +1,48 @@
+# Modular architecture
+
+September 30, 2026 · Implementation contract; no runtime modules exist yet
+
+Sankofa should support different reviewed stories, languages and service providers without rebuilding the visitor journey. The [PRD](../Sankofa-PRD.md) defines behaviour and acceptance; the [delivery plan](../Sankofa-Delivery-Plan.md) sequences delivery. Competition strategy stays in the ignored local brief described in [development](development.md#local-competition-context).
+
+## Responsibilities and dependencies
+
+| Module | Owns | Boundary |
+|---|---|---|
+| Story core | Intent, claims, capabilities, validated plans, beat state, legal actions, checkpoints and replay records | Plain data and deterministic logic; no Unity, network, provider SDK or file-system dependency |
+| Application flow | Welcome → preparation → story → return, consent, cancellation, timeouts and fallback selection | Calls core logic and narrow adapter contracts; owns accepted state changes, never model prose |
+| XR input and presentation | Hands/head-direction input, accessibility controls, fire, scenes, audio, captions and stationary transitions | Translates input into intent and renders accepted events; no embedded provider calls, historical claims or episode-specific branching rules |
+| AI adapters | Planning, narration and optional live conversation | Translate provider formats into shared contracts; planning, TTS and live conversation can be selected independently; credentials stay server-side |
+| Content packages | Reviewed context, claim/source links, scene capabilities, assets, locale coverage, captions and bundled story | Versioned data selected by stable IDs; no executable model-generated scripts or arbitrary asset URLs |
+| Persistence adapter | Opt-in saved visits, realised narration, keepsakes, deletion and schema migration | Implements storage contracts; preserves replay without new inference and keeps continuation separate |
+| Production and release tooling | Asset import, provenance, optimisation, build selection and evidence collection | Runs outside the visitor experience; private strategy and raw research are excluded from published artifacts |
+
+Dependency direction: core depends on no outer module. Application flow depends on core and its contracts. Provider, storage and XR adapters depend on those contracts; the composition point wires implementations together. The Unity host may perform composition, but scene scripts must not reach into provider SDKs or storage internals. Content is validated before use. Logical separation does not require one deployed service per module.
+
+## Contracts to introduce with the first vertical slice
+
+- **Story request:** confirmed context, interest and locale, supported coverage, consent and a request ID.
+- **Content manifest:** package/version IDs, approved claims and assets, supported actions, narration/live-language capabilities and provenance references.
+- **Plan proposal:** source-linked beats, referenced asset IDs, permitted actions and an ending. An unvalidated proposal is never playable state.
+- **Accepted story events:** state/version, visit and beat IDs, cues and resolved choices. Presentation consumes these; model suggestions cannot bypass them.
+- **Narration/conversation result:** linked request/visit/beat IDs, locale, text/caption/audio references and cancellation status. Late results cannot resurrect an interrupted beat.
+- **Saved visit:** schema/content versions, realised plan and permitted replay media. Missing content or incompatible versions require an explicit recovery path.
+
+Keep contracts small, serialisable and versioned at persistence/service boundaries. Deterministic tests use synthetic records and fake clocks/adapters. Add concrete schemas and interfaces when they carry actual behaviour; this document does not authorise a framework build or unneeded plugin system.
+
+## Replacement and failure tests
+
+| Change or failure | Expected independence |
+|---|---|
+| Replace a model/TTS vendor | Adapter/configuration changes; core plans, scene rendering and saved replay still work |
+| Add a reviewed setting or narration language | New content package and coverage entries; shared visitor flow remains; language support is evaluated independently |
+| No network or microphone permission | Local hands and complete bundled story remain available; fallback is disclosed |
+| Swap simulator input for Quest hands | Input adapter changes; accepted story actions keep their meaning |
+| Enable or remove room-aware MR | Placement adapter changes; full VR remains usable and story logic is unchanged |
+| Interruption, timeout or out-of-order response | Application invalidates request; stale cues never reach the active scene |
+| Replay after service changes | Saved realised content plays; a new generation is never represented as an exact replay |
+
+These are implementation acceptance intentions, not completed checks. For each substantial change, record its owning module, affected requirement, observable behaviour and relevant evidence. A feature that crosses boundaries should have one owner and explicit contracts, not duplicate state in several scenes.
+
+## Competition context is removable
+
+The tracked agent entry point requires a local competition brief during development. The product runtime never reads that file, and the file is not a feature flag or deployed model prompt. Durable product requirements such as accessible interaction, reliable recovery and accurate content live in the PRD. Prize strategy, current scoring and submission notes remain in the local brief. Changing a future competition profile must not require rewriting the story engine.
