@@ -1,0 +1,70 @@
+# Full supplied competition material and conversations remain local.
+/references/hackathon/
+/references/ideation/
+
+# Personal input, studies, media, builds and raw third-party assets.
+/data/
+/recordings/
+/results/
+/artifacts/
+/vendor/
+
+# Credentials and local configuration.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+*.jks
+.DS_Store
+.idea/
+.vscode/
+.codex/
+.agents/
+
+# Python.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Unity generated files. Source assets, packages and project settings stay tracked.
+/unity/[Ll]ibrary/
+/unity/.utmp/
+/unity/[Tt]emp/
+/unity/[Oo]bj/
+/unity/[Bb]uild/
+/unity/[Bb]uilds/
+/unity/[Ll]ogs/
+/unity/[Uu]ser[Ss]ettings/
+/unity/[Mm]emoryCaptures/
+/unity/[Rr]ecordings/
+/unity/.vs/
+/unity/*.csproj
+/unity/*.sln
+/unity/*.slnx
+/unity/*.user
+/unity/*.pidb
+/unity/*.pdb
+/unity/*.opendb
+/unity/*.VC.db
+/unity/Assets/Resources/DevAgentSettings.asset
+/unity/Assets/Resources/DevAgentSettings.asset.meta
+/unity/Assets/StreamingAssets/
+/unity/Assets/StreamingAssets.meta
+/unity/Assets/LocalOnly/
+/unity/Assets/LocalOnly.meta
+*.apk
+*.aab
+
+# .NET build outputs.
+/dotnet/**/bin/
+/dotnet/**/obj/
+/dotnet/**/TestResults/
