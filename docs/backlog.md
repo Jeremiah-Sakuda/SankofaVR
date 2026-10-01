@@ -11,6 +11,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 - [x] Create the separate SankofaVR repository with current plans and ignored local references; preserve the previous workspace.
 - [x] Identify the previous Unity/web starting points without importing runtime code.
 - [x] Define module boundaries and require the ignored local competition brief in agent instructions, with presence/exclusion checks and fresh-checkout setup.
+- [x] Stress-test the current framing and assumptions; record [proposed comparisons](reviews/2026-10-01-product-stress-test.md) and a local competition audit without claiming user/device validation.
 - [ ] Confirm weekly hours, repeated Quest access, art/audio/tool/API budget and hosting allowance; reconcile with the delivery estimate.
 - [ ] Record original web revision, ownership/contributors and the intended code/asset reuse and licence path.
 - [ ] Select one precise place/period, two interest themes, three complete scene plans and two inspectable objects.
@@ -19,6 +20,8 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 ## G1 — fire and visual proof
 
+- [ ] Compare heritage-led and curiosity-led invitations to the same concrete story; test the dramatic arc inexpensively before final scene production (stress-test T1–T2).
+- [ ] Measure whether directed fire states improve perceived responsiveness and whether a visitor can explain an embodied consequence (stress-test T3–T4).
 - [ ] Create the Sankofa Unity project and scene here; assess reuse explicitly and preserve the original music workspace.
 - [ ] Build a 30–45-second hearth with welcome, listening and telling states, hands, captions and local sound.
 - [ ] Implement a stationary fire-entry/return transition and reduced-motion variant.
@@ -28,6 +31,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 ## G2 — personalisation proof
 
+- [ ] Compare bounded personalisation with an equally polished authored benchmark for relevance, coherence and pacing; separately evaluate the added value of live answers (stress-test T5).
 - [ ] Define confirmed-intent, coverage, claim/source, asset, beat and realised-plan records with stable IDs.
 - [ ] Add a small reviewed context package; preserve uncertainty and reject unsupported geographic substitutions.
 - [ ] Generate two contrasting requests into visibly different legal scene plans before producing final narration.

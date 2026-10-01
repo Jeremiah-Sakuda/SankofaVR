@@ -16,6 +16,7 @@ A proposed hands-first spatial storytelling experience for Meta Quest. A living 
 | [Decisions](docs/decisions.md) | Confirmed direction, planning defaults and outstanding choices |
 | [Development](docs/development.md) | Workspace setup, checks and future implementation boundaries |
 | [Modular architecture](docs/architecture.md) | Story core, adapters, content and presentation boundaries |
+| [Product stress test](docs/reviews/2026-10-01-product-stress-test.md) | Challenged assumptions and proposed experiments; no validation claimed |
 | [Asset register](docs/asset-register.md) | Provenance and acceptance records |
 | [References](references/README.md) | Official competition and original web Sankofa sources |
 | [Workspace provenance](docs/workspace-provenance.md) | Where the planning documents came from and what was transferred |

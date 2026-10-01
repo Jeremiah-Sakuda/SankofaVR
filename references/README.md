@@ -31,6 +31,8 @@ These files are copied verbatim from the user's supplied attachments. They are s
 
 Historical reviews remain in the previous Nafasi workspace. See [workspace provenance](../docs/workspace-provenance.md). Current requirements and decisions are in this repository’s PRD and delivery plan.
 
+The October 1 competition stress test is local-only in `references/hackathon/stress-test-2026-10-01.md`. It rechecks rules/judging and records strategy risks. Its [product counterpart](../docs/reviews/2026-10-01-product-stress-test.md) is tracked and contains challenged assumptions and proposed experiments, with no claim of completed validation.
+
 ## Sankofa adaptation sources
 
 - [Original web project and repository](https://github.com/Jeremiah-Sakuda/Sankofa), [submission](https://devpost.com/software/sankofa-y47f9p), and [source licence](https://github.com/Jeremiah-Sakuda/Sankofa/blob/main/LICENSE).
