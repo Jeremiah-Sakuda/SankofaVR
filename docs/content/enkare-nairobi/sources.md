@@ -1,0 +1,66 @@
+# Enkare Nairobi: source register
+
+October 4, 2026 · Draft for review · Every factual statement in the [stories](stories.md) must trace to a claim here. Everything else in the stories is reconstruction and is labelled so.
+
+## How to read this register
+
+- **State.** Either *documented* (a published source states it), *family account* (to be supplied by the user's Maasai and Kikuyu relatives, labelled as theirs), or *reconstruction* (imagined to tell the story).
+- **Confidence.** High, medium or low, as the research stands.
+- **Verified.** Whether the passage was read directly this session, or only seen through a secondary summary.
+- **Gating.** Medium-confidence claims are not narrated until their page is confirmed. Claims that a reviewer from the community disputes are removed or reworded, whatever their source says.
+- **Retrieval.** Web pages were retrieved on October 4, 2026. Book claims cite the edition and page where known.
+
+## Documented claims
+
+| ID | Claim | Sources | Confidence | Verified |
+|---|---|---|---|---|
+| C1 | "Nairobi" comes from a Maa phrase usually written *Enkare Nyirobi* or *Enkare Nairobi*, "cool water(s)", naming the stream. | [History of Nairobi](https://en.wikipedia.org/wiki/History_of_Nairobi) (Wikipedia, no specific source given for the etymology); [Paukwa: Navigating Nairobi](https://www.paukwa.or.ke/story-series/trackingourrailways/construction-of-the-railway-navigating-nairobi/) | High that the etymology is the standard one; spelling and pronunciation open | Secondary only. **A Maa speaker to confirm spelling and pronunciation.** |
+| C2 | Before the railway, the site was a swampy plain where Maasai grazed cattle and wildlife roamed. Maasai pastoralists, Akamba traders and Kikuyu farmers all used the area. | Paukwa (above); Freeman, D. B. (1991) *City of Farmers*, McGill-Queen's, cited by the Wikipedia article | High | Paukwa read; Freeman secondary |
+| C3 | The Uganda Railway reached the site, 326 km from Mombasa, on 30 May 1899. It became a supply depot, a resting camp for the construction workers (many of them labourers from India) and, from 1899, the railway's head offices. | Paukwa (above); Cybriwsky, R. A. (2013) *Capital Cities around the World*, ABC-CLIO, p. 303, cited by Wikipedia | High | Paukwa read |
+| C4 | A Kikuyu trader taking a load of foxtail millet, sorghum or banana flour to the Maasai could get a ewe or a ram in exchange. Banana flour (green bananas dried and pounded) "was made only for the Maasai trade". | Leakey, L. S. B. (1977) *The Southern Kikuyu before 1903*, Academic Press, vol. 1, p. 20 (the oral account of an elder, Kabetũ) | High | Read in an online excerpt; **confirm against the printed book** |
+| C5 | Much of the Kikuyu–Maasai trade was carried by women, under standing agreements that traders were not to be harmed even when the men of the two peoples were raiding each other. | Repeated in secondary summaries that attribute it to Leakey (1977); [Blue Gecko: Kikuyu pre-colonial history](http://www.bluegecko.org/kenya/tribes/kikuyu/history1.htm) (cites no sources) | **Medium** | **Page not located. Do not narrate until confirmed in Leakey, vol. 1, or in Muriuki (1974)** |
+| C6 | The Kikuyu and Maasai traded, raided each other occasionally, intermarried widely, and borrowed cultural practices. In the crises of the late nineteenth century, Kikuyu families, especially in Kiambu, took in Maasai refugees. | Muriuki, G. (1974) *A History of the Kikuyu 1500–1900*, Oxford University Press (via secondary summaries); thesis record: [Muriuki, A history of the Kikuyu to 1904, SOAS](https://soas-repository.worktribe.com/output/402032/a-history-of-the-kikuyu-to-1904) | Medium-high | Secondary; **confirm in Muriuki** |
+| C7 | The Maasai milk and blood gourd (*ekukuri*) was smoked inside with wood called *oloirien*. | National Museums of Kenya, [28 Incredible Containers Used by Kenyan Communities](https://artsandculture.google.com/story/_gUx7TIiep4KKA) (Google Arts & Culture); [The Met, Maasai vessel 315012](https://www.metmuseum.org/art/collection/search/315012) | High | NMK read |
+| C8 | Kikuyu households kept honey in log hives and barrels (*mwatũ*), and honey was a valued gift. | Leakey (1977) vol. 1, p. 23 ("a barrel of honey" given by a father); National Museums of Kenya, [Aspects of Beekeeping and Honey Harvesting](https://artsandculture.google.com/story/aspects-of-beekeeping-and-honey-harvesting-national-museums-of-kenya/jwURNk7TDRNmKQ) | Medium-high | Leakey excerpt read; NMK not yet read |
+| C9 | The Maasai call the years 1883–1902 *Emutai*. Cattle epidemics (pleuropneumonia, then rinderpest) ran through 1883–1891, smallpox followed in 1892, and the rains failed in 1897–1898. The losses of people and herds were very heavy. | Waller, R. (1988) "Emutai: crisis and response in Maasailand 1883–1902", in Johnson, D. and Anderson, D. (eds.) *The Ecology of Survival*, Lester Crook (via secondary summaries) | Medium (dates); **no casualty figures will be narrated** | Secondary; **obtain Waller** |
+| C10 | The famine the Kikuyu remember as *Ng'aragu ya Ruraya* (1898–1899) followed locusts, three failed rainy seasons and smallpox, and devastated the Mount Kenya region and the land around it. | Gathogo, J. (2020) "Karubiu wa Munyi and the making of modern Kirinyaga, Kenya", *HTS Teologiese Studies* 76(4), a6198, [doi:10.4102/hts.v76i4.6198](https://doi.org/10.4102/hts.v76i4.6198), citing Wamagatta | High (that it occurred and its causes) | Read |
+| C11 | In 1904, and again under the 1911 Agreement, the colonial government forcibly moved the Maasai off much of their best land, including the land around Nairobi, to make way for European settlers. | Hughes, L. (2006) *Moving the Maasai: A Colonial Misadventure*, Palgrave Macmillan; [Open University record](https://oro.open.ac.uk/7869/) | High | Summary read |
+| C12 | Kikuyu traders also went to Ngong to meet traders from the coast, exchanging goods for beads, cloth and brass wire. | Leakey (1977) vol. 1, p. 22 | High | Excerpt read |
+| C13 | Red ochre mixed with fat was used to anoint the body (Leakey's account describes a Kikuyu young man using a ram's fat). | Leakey (1977) vol. 1, p. 24 | High for this Kikuyu account | Excerpt read. Maasai use needs its own source |
+| C14 | *Sankofa* is an Akan (Ghanaian) word, roughly "go back and get it". It is widely used across the African diaspora to mean learning from the past. | [NMAAHC, Sankofa II](https://nmaahc.si.edu/object/nmaahc_2014.321); [Sankofa](https://en.wikipedia.org/wiki/Sankofa) (Wikipedia) | Medium-high | Summary only; **read the NMAAHC record before narrating** |
+| C15 | Today the Nairobi River is the focus of a city-wide regeneration programme, and community groups farm and garden along stretches of its banks that were reclaimed from dumping. | [Nairobi City County: restoring Nairobi's rivers](https://nairobi.go.ke/restoring-nairobis-rivers-in-order-to-improve-quality-of-life); [UN-Habitat Youth: river walk](https://www.unhabitatyouth.org/en/a-transect-through-nairobis-past-present-and-future-outlook-river-walk-for-urban-regeneration/); [Dreamtown: youth-led clean-ups](https://www.dreamtown.ngo/newsandstories/2025/12/1/reclaiming-the-nairobi-river-how-youth-led-clean-ups-are-restoring-water-dignity-and-hope) | Medium (it changes year to year) | Summaries only; **recheck at production time** |
+
+## Reconstruction (never presented as fact)
+
+- **Characters.** All characters and their families are fictional composites. No identifiable person appears, which follows competition rules §4.17.
+  - The engineers who chose the depot site are named in the sources. They are neither named nor depicted.
+- **The meetings.** The meeting of two women traders at this particular stream, and the Era 2 meeting of their granddaughters.
+- **Gifts.** The bead gift, the seed gift, and what each trader says.
+- **Behaviour.** Any visual detail of clothing, hairstyles, ornaments or homesteads beyond what review approves.
+- **Seed custom.** Whether seed millet was kept back even in famine. This is plausible but unsourced, so it is told as one family's choice, not a custom.
+
+The fire tells the visitor that this is how the story is told: the place, the trade and the hard years are true; the people are imagined.
+
+## Sensitivities and handling
+
+- **Famine and loss (C9, C10).** These are told through absence, not depiction:
+  - empty gourds
+  - no cattle bells
+  - thin smoke
+  - the grandmothers remembered rather than present
+
+  No bodies, no suffering imagery and no mortality figures appear.
+- **Colonial land loss (C3, C11).** Named plainly, without trauma spectacle and without making the railway a heroic arrival. The labourers from India are part of the camp's sound and life, not a backdrop to blame.
+- **Maasai imagery.** Tourist clichés are avoided: warriors posing, anachronistic dress, a "timeless" framing. Ornament, colour and dress are decided by family review.
+- **Language.** Gĩkũyũ and Maa words are chosen and checked by family speakers. Narration is English with captions.
+- **Leakey and colonial-era ethnography (C4, C8, C12, C13).** Leakey (1977) records Kikuyu elders' testimony but was compiled by a colonial-era European ethnographer. It is used for concrete material detail, never for judgements about people. Family and community review take precedence.
+
+## Questions for the family
+
+1. **Kikuyu.** What would a woman carry down to trade with Maasai women? How would she greet them, and what would she call the gourd of flour?
+2. **Maasai.** What would a Maasai woman bring in a dry season? How was the milk gourd prepared, and is there a better word than *ekukuri* in your family's dialect?
+3. **The bead.** Would a small gift to a child at a trade be plausible, and what would it be: a bead, a gourd stopper, something else? What colour, if any, would carry meaning?
+4. **Stories.** Did our families keep any stories about trading, intermarriage, the famine of 1898–1899 or the railway coming? (These would be credited as family accounts.)
+5. **Greeting.** Which greetings should the griot use at the hearth, in Gĩkũyũ and in Maa, and how are they pronounced?
+6. **Absences.** Is there anything in these stories you would not want shown or said?
+7. **Review.** Who could listen to the narration and check the words and the tone?

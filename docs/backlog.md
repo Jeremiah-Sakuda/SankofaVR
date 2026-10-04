@@ -14,7 +14,9 @@ A checked item means the named artifact exists. It does not imply device, conten
 - [x] Stress-test the current framing and assumptions; record [proposed comparisons](reviews/2026-10-01-product-stress-test.md) and a local competition audit without claiming user/device validation.
 - [ ] Confirm weekly hours, repeated Quest access, art/audio/tool/API budget and hosting allowance; reconcile with the delivery estimate.
 - [ ] Record original web revision, ownership/contributors and the intended code/asset reuse and licence path.
-- [ ] Select one precise place/period, two interest themes, three complete scene plans and two inspectable objects.
+- [x] Select one precise place: [Enkare Nairobi](content/enkare-nairobi/README.md), told across two eras and a "today" continuation, with stories and scenes scoped. Draft; no family or community review yet.
+- [ ] Confirm the gated claims in the [source register](content/enkare-nairobi/sources.md) (C5, C6, C9, C14, the name *Ng'aragu ya Ruraya*) against Leakey, Muriuki, Waller and NMAAHC.
+- [ ] Send the family review questions; record answers as family accounts and apply corrections before production.
 - [ ] Identify historical/context and fluent-language reviewers; confirm the proposed English/Kiswahili pair or replace it explicitly.
 - [ ] Verify entrant/Start status, content restrictions and any unresolved organiser questions; prepare questions without sending unsolicited messages.
 

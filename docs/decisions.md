@@ -62,3 +62,29 @@ Not established: device, simulator-with-hands, comfort, sound, performance or pa
 ## Hearth presentation — October 3–4, 2026
 
 The user asked for a visual standard beyond the blockout. The hearth (present in every version of the story) was rebuilt procedurally: generated geometry, baked fire and moon shadows, two-tone lighting, a shared filmic grade in place of post-processing, synthesised night ambience, and TextMeshPro captions and labels with a fitted backing and a one-degree minimum line height. On October 4 the user approved downloading four 1K CC0 Poly Haven materials (rock, burned ground, dry ground, bark) and the OFL Atkinson Hyperlegible typeface, listed by file, source and size beforehand; their provenance is in the [asset register](asset-register.md). The story yard stays a blockout until an episode is chosen. Desktop renders and mixes are development aids, not Quest evidence.
+
+## Setting and structure: Enkare Nairobi — October 4, 2026
+
+The user asked for an evaluation of the proposal against the competition. Four parallel reviews were commissioned: a simulated judging panel, an advocate for depth, an advocate for breadth, and a research brief on comparable work. All four favoured specific content with a broad invitation over coverage of many cultures. These are judgements, not predictions of a result.
+
+The user then chose to set the experience in **East Africa, their own history**. Their family is Maasai and Kikuyu. The chosen frame is **one place, many times**: the cool-water stream whose Maa name gave Nairobi its name, where the two peoples traded and intermarried. The visitor chooses *when* to go:
+
+- before the railway (mid-1800s);
+- when the railway came (1899);
+- today, opened by a kept keepsake.
+
+The user decided to keep the words *griot* and *Sankofa*, and to keep the narrator from the original web Sankofa. That repository is the user's copyright; its other contributors are AI agents acting for the user. The original's TTS configuration was Gemini `gemini-2.5-flash-preview-tts` with the voice Kore and a griot delivery direction. The adaptation of that direction to this world is still open.
+
+On the user's instruction, Vertex AI was enabled on their "Sankofa Project" Google Cloud project for voice generation. No voice has been generated yet.
+
+| Decision | Status |
+|---|---|
+| Setting: Enkare Nairobi across eras ([content](content/enkare-nairobi/README.md)) | User selected; replaces the Swahili-coast candidate and the placeholder package once built |
+| Era choice replaces interest choice at the hearth | Proposed in the scene scope; satisfies observable personalisation through era and hand paths |
+| Facts only from the [source register](content/enkare-nairobi/sources.md); medium-confidence claims gated | Adopted |
+| People as fictional composites shown as ember-and-smoke figures | Proposed; needs a technical spike |
+| The visitor's own fragments, woven in by a live model | Deferred beyond the MVP |
+| Second narration language | Deferred; Gĩkũyũ and Maa words at the hearth, chosen by family |
+| Family as reviewers | Requested; questions are in the source register |
+
+This does not establish content review, cultural acceptance, voice quality or device results.
