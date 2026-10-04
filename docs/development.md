@@ -1,6 +1,6 @@
 # Development guide
 
-This repository currently contains product planning and workspace checks. There is no runnable app, Unity project or backend here yet.
+This repository contains the product plans, a first Unity slice under `unity/` and the engine-free story core with its tests under `dotnet/`. The slice plays a development placeholder story; no backend or provider integration exists yet.
 
 ## Check documentation and exclusions
 
@@ -30,13 +30,28 @@ This mode fails if the local brief is missing or empty, or its Git exclusion is 
 
 Keep the brief, copied rules and any local review evidence outside runtime prompts, Unity Resources/StreamingAssets/Addressables, container build contexts and release archives. Future packaging must explicitly select runtime files and inspect the output; `.gitignore` alone is not a packaging rule. Do not add the brief to CI secrets or upload it as an artifact.
 
-## Proposed implementation layout
+## Implementation layout and checks
 
-When implementation is authorised, introduce engine-independent story logic and a separate Unity application under `unity/`. Pin the actual editor/SDK/importer versions after verifying build compatibility. The [delivery plan](../Sankofa-Delivery-Plan.md) records the previous workspace's versions only as possible reuse context.
+[The modular architecture](architecture.md) defines responsibilities and permitted dependencies. The current modules:
 
-Follow [the modular architecture](architecture.md) when those components are introduced. It defines responsibilities and permitted dependencies without committing to a provider, service count or package layout prematurely.
+| Folder | Module | Checked by |
+|---|---|---|
+| `unity/Assets/Sankofa/Core` | Story core: episode model, reader, validator, story run, visit journal | .NET tests, EditMode tests |
+| `unity/Assets/Sankofa/Flow` | Application flow: phases, cues, timing, pause, stale-result rejection | .NET tests |
+| `unity/Assets/Sankofa/Interaction` | Engine-free gesture logic | .NET tests |
+| `unity/Assets/Sankofa/Runtime` | Unity presentation, hands and composition | EditMode tests, builds |
+| `unity/Assets/Sankofa/Editor` | Project setup, generated scene, build and build guards | EditMode tests, builds |
+| `unity/Assets/Sankofa/Content` | Bundled episode data | .NET and EditMode tests |
 
-Keep approved runtime assets with source provenance. Raw downloads go in ignored `vendor/`; experiments and generated builds go in ignored `artifacts/`; personal data and recordings stay in their ignored folders. Keep source, synthetic fixtures, project settings and Unity `.meta` files versioned. Add implementation-specific checks when those components exist.
+The engine-free folders build outside Unity as .NET Standard 2.1 with C# 9, the level Unity 6 accepts, with warnings as errors. With the .NET 10 SDK (for example installed in `~/.dotnet` by Microsoft's [install script](https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script)):
+
+```sh
+dotnet test dotnet/Sankofa.Tests
+```
+
+GitHub Actions runs these tests alongside the documentation check. Unity commands, the simulator and headset installation are in the [Unity README](../unity/README.md). Run the .NET tests after changing the core, flow, gestures or episode data; run the EditMode tests and regenerate the scene after changing runtime or editor code.
+
+Keep approved runtime assets with source provenance in the [asset register](asset-register.md). Raw downloads go in ignored `vendor/`; experiments, logs and builds go in ignored `artifacts/`; personal data and recordings stay in their ignored folders; unlicensed candidates belong in ignored `unity/Assets/LocalOnly/`, which builds refuse to include. Keep source, synthetic fixtures, project settings and Unity `.meta` files versioned.
 
 ## Secrets and external services
 

@@ -31,7 +31,7 @@ Follow [the modular architecture](docs/architecture.md). Keep story rules indepe
 
 ## Current workspace boundaries
 
-This fresh repository contains planning documents only. No Unity project or backend is present. Earlier Nafasi source and tests remain in their original repository. Web Sankofa is a separate AGPL-licensed project; do not import its code or assets without assessing ownership, contributor and dependency terms.
+The repository contains the first Unity slice (`unity/`) and the engine-free story core with its tests (`dotnet/`). It plays a development placeholder episode; no selected episode, backend or provider integration exists. Deliberate imports from the previous Nafasi workspace are recorded in [workspace provenance](docs/workspace-provenance.md); its other source and tests remain in their original repository. Web Sankofa is a separate AGPL-licensed project; do not import its code or assets without assessing ownership, contributor and dependency terms.
 
 Use [workspace provenance](docs/workspace-provenance.md) for the origin of these documents. Do not infer implementation, purchases, provider access or device results from a planning entry. Maintain the PRD/backlog/decision distinctions when work progresses.
 
@@ -43,4 +43,5 @@ Use [workspace provenance](docs/workspace-provenance.md) for the origin of these
 - Do not spawn subagents unless the user or an applicable instruction explicitly requests delegation.
 - Run `python3 scripts/check_workspace.py` and `git diff --check` for document changes. Stage intended new files so the link check can inspect them.
 - Add meaningful focused tests for story validation, state, cancellation and replay when implemented. Do not invent commands for toolchains that are not installed in this repository.
+- Run `dotnet test dotnet/Sankofa.Tests` after changing the story core, flow, gestures or episode data. For Unity changes, run the EditMode tests and regenerate generated scenes and materials through the editor tools rather than editing them by hand; commands are in [the Unity README](unity/README.md). Custom shaders keep Unity's single-pass stereo macros; the .NET suite checks them.
 - Software, simulator, device, cultural review and participant evidence remain distinct. Record what was actually tested, with its limitations.

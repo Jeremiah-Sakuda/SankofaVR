@@ -10,7 +10,11 @@ Created September 30, 2026 at the user's request for a new folder and repository
 | README, working instructions, decisions, development guide, asset register and checks | Created for SankofaVR | Versioned |
 | Previous Unity/music implementation and Git history | Previous Nafasi workspace | Preserved there; not imported |
 | Web Sankofa code and media | Separate original Sankofa repository | Linked as a potential adaptation source; not imported |
+| Quest platform tooling and small engine-free helpers | Nafasi revision `26fe07a15ee8ead80eaeb440b890b4d30bdac174`, the user's own repository | Ported on October 1, 2026 with renamed namespaces and Sankofa settings: JSON reader/writer, poke gesture and its tests, poke panel, project setup, build, build privacy, local-only build guard, simulator launcher, scene-builder helpers, .NET project layout and build-guard tests |
+| Nafasi package set (Unity 6000.3.25f1, Meta XR Core 207, OpenXR 1.18, XR Hands 1.9) | Same revision | Reused as the starting configuration; the Unity project itself was created fresh |
 
 The [previous repository](https://github.com/Jeremiah-Sakuda/nafasi) identifies the source project. The exact source revision above was verified in its local checkout; remote availability of that revision has not been established. The original local workspace is the sibling folder `Nafasi` under the same parent directory. No old workspace files were moved or deleted.
 
 [Web Sankofa](https://github.com/Jeremiah-Sakuda/Sankofa) uses [AGPL-3.0-or-later](https://github.com/Jeremiah-Sakuda/Sankofa/blob/main/LICENSE). Copying these planning documents does not import that application or determine this repository's future source licence. Evaluate actual code/assets, ownership and contributors before reuse.
+
+The Nafasi repository has no licence file; every commit in its history is authored by the user. The ported code is the user's own work and is recorded here so later licensing decisions cover it. No Nafasi music, samples, motion data or scenes were imported.

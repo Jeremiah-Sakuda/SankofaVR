@@ -2,7 +2,7 @@
 
 September 30, 2026 · [PRD v1.0](../Sankofa-PRD.md) · [Delivery plan](../Sankofa-Delivery-Plan.md)
 
-A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Current runtime requirements remain unimplemented. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
+A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Some runtime requirements now exist in software with a placeholder story; none has device, content or participant acceptance. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
 
 ## Product baseline
 
@@ -21,10 +21,10 @@ A checked item means the named artifact exists. It does not imply device, conten
 ## G1 — fire and visual proof
 
 - [ ] Compare heritage-led and curiosity-led invitations to the same concrete story; test the dramatic arc inexpensively before final scene production (stress-test T1–T2).
-- [ ] Measure whether directed fire states improve perceived responsiveness and whether a visitor can explain an embodied consequence (stress-test T3–T4).
-- [ ] Create the Sankofa Unity project and scene here; assess reuse explicitly and preserve the original music workspace.
-- [ ] Build a 30–45-second hearth with welcome, listening and telling states, hands, captions and local sound.
-- [ ] Implement a stationary fire-entry/return transition and reduced-motion variant.
+- [ ] Measure whether directed fire states improve perceived responsiveness and whether a visitor can explain an embodied consequence (stress-test T3–T4). The directed/steady fire toggle and the receive-and-reveal slice exist; recorded narration, a headset and participants do not.
+- [x] Create the Sankofa Unity project and scene here; assess reuse explicitly and preserve the original music workspace. Platform tooling ported from Nafasi is recorded in [provenance](workspace-provenance.md).
+- [x] Build a 30–45-second hearth with welcome, listening and telling states, hands, captions and local sound. Software only, with placeholder lines and synthesised fire sound; no headset review.
+- [x] Implement a stationary fire-entry/return transition and reduced-motion variant. Software only; comfort untested.
 - [ ] Produce one coherent scene kit and one close-inspection object; record provenance and context review.
 - [ ] Compare generated spatial scenery with an editable mesh candidate on actual hardware if worthwhile within the probe allowance.
 - [ ] Review presence, depth, fire cost, reach and sound on a Quest; label simulator-only evidence accurately (SK-01, SK-02, SK-07, SK-11, SK-15).
@@ -32,7 +32,8 @@ A checked item means the named artifact exists. It does not imply device, conten
 ## G2 — personalisation proof
 
 - [ ] Compare bounded personalisation with an equally polished authored benchmark for relevance, coherence and pacing; separately evaluate the added value of live answers (stress-test T5).
-- [ ] Define confirmed-intent, coverage, claim/source, asset, beat and realised-plan records with stable IDs.
+- [x] Define episode, claim, staged-object, beat, invitation and visit-journal records with stable IDs and validation (schema 1).
+- [ ] Define confirmed-intent, coverage and realised-plan records.
 - [ ] Add a small reviewed context package; preserve uncertainty and reject unsupported geographic substitutions.
 - [ ] Generate two contrasting requests into visibly different legal scene plans before producing final narration.
 - [ ] Validate evidence, asset availability, continuity, actions and endings; test malformed/stale/missing-asset proposals.
@@ -43,9 +44,9 @@ A checked item means the named artifact exists. It does not imply device, conten
 - [ ] Hands-first setup and input confirmation with optional speech and microphone-denied completion.
 - [ ] Generate/prepare a full story, including timed loading escape and explicit bundled-story selection.
 - [ ] Connect narration cues to fire, scene entry, inspection, a consequential hand moment, reveal and return.
-- [ ] Make passive progression complete and acknowledge explicit choices accurately.
+- [x] Make passive progression complete and acknowledge explicit choices accurately. Placeholder episode; software tests only.
 - [ ] Support contextual hand questions plus accepted live-language interruptions with coherent resume.
-- [ ] Cancel queued speech/actions after interruption or scene change; discard late replies (SK-01–10, SK-14).
+- [ ] Cancel queued speech/actions after interruption or scene change; discard late replies (SK-01–10, SK-14). Narration and transition completions already carry tokens and stale ones are rejected; generated and conversational replies do not exist yet.
 
 ## G4 — coverage, return and recovery
 

@@ -6,7 +6,7 @@ Version 1.0 · September 30, 2026 · Product direction selected; implementation 
 
 Sankofa welcomes you around a living fire, listens to the histories and questions that brought you there, and brings a personalised story into the space around you. The fire is the griot: its voice, movement, light and pauses create the sense of someone being present. You enter its stories through the flame and return to the same hearth carrying something that now has meaning.
 
-This is the current product contract. It supersedes the Nafasi concert proposal. The [delivery plan](Sankofa-Delivery-Plan.md), [backlog](docs/backlog.md) and [decision record](docs/decisions.md) distinguish proposed work from evidence. Existing music code and research remain preserved in the previous Nafasi workspace. This fresh SankofaVR repository contains planning documents only. No Sankofa VR build or on-device result exists yet.
+This is the current product contract. It supersedes the Nafasi concert proposal. The [delivery plan](Sankofa-Delivery-Plan.md), [backlog](docs/backlog.md) and [decision record](docs/decisions.md) distinguish proposed work from evidence. Existing music code and research remain preserved in the previous Nafasi workspace. A first Unity slice with a placeholder story now exists in software; no on-device result exists yet.
 
 ## 1. Product decisions and planning assumptions
 
