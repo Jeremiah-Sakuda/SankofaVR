@@ -29,6 +29,8 @@ namespace Sankofa.Runtime.App
         [SerializeField] HearthFire fire;
         [SerializeField] NarrationPlayer narration;
         [SerializeField] NightAmbience ambience;
+        [Tooltip("The sound of each story scene; each plays only while its scene is shown.")]
+        [SerializeField] StoryAmbience[] storyAmbience = new StoryAmbience[0];
         [SerializeField] CaptionBoard captions;
         [SerializeField] PokePanel controls;
         [SerializeField] PokePanel questionsPanel;
@@ -115,7 +117,8 @@ namespace Sankofa.Runtime.App
                 }
                 // Kept visits stay on this headset, in the application's private storage.
                 StoreFolder = StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "visits");
-                if (playable.Package.Status != ContentStatus.Reviewed) baseStatus = "Development placeholder story · not reviewed content";
+                if (playable.Package.Status == ContentStatus.Placeholder) baseStatus = "Development placeholder story · not reviewed content";
+                else if (playable.Package.Status == ContentStatus.Draft) baseStatus = "Draft story · not yet reviewed by family or community";
                 return new VisitFlow(playable, null, new FileVisitStore(StoreFolder), stage);
             }
             catch (StoryFormatException e)
@@ -161,6 +164,7 @@ namespace Sankofa.Runtime.App
             Dispatch();
             fire.SpeechLevel = narration.Level;
             ambience.Duck = narration.Speaking;
+            foreach (var a in storyAmbience) a.Duck = narration.Speaking;
             attention.Listening = flow.Phase == VisitPhase.Story;
             if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
         }
@@ -399,6 +403,7 @@ namespace Sankofa.Runtime.App
             transition.ReducedMotion = settings.ReducedMotion;
             fire.Mode = settings.FireMode;
             ambience.Level = settings.AmbienceLevel;
+            foreach (var a in storyAmbience) a.Level = settings.AmbienceLevel;
         }
 
         void ShowSettings()

@@ -7,8 +7,9 @@ namespace Sankofa.EditorTools
     public sealed class SankofaArtSet
     {
         public Texture2D Noise, Detail;
-        public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Button;
-        public Material EarthWall, FiredClay, Workbench, Brass, LanternCore;
+        public Material Flame, Glow, Sparks, Curtain, CaptionBacking;
+        public Material Workbench, Brass, LanternCore;
+        public Material Water, Spill, River, EmberFigure, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, Stars, Smoke, Halo, Plaque;
     }
 
@@ -49,24 +50,8 @@ namespace Sankofa.EditorTools
                 }),
                 Curtain = Make("Curtain", "Sankofa/Curtain", m => m.SetTexture("_Noise", noise)),
                 CaptionBacking = Make("Caption backing", "Sprites/Default", m => m.color = new Color(0.025f, 0.02f, 0.018f, 0.55f)),
-                Button = Make("Button", "Sprites/Default", m => m.color = Color.white),
 
-                // Story scenes: hand-built earthen walls (the dry ground scan reads as cracked mud plaster), fired clay
-                // whose painted line is vertex colour, and plain workbench wood.
-                EarthWall = Scanned(Baked("Earthen wall", new Color(0.95f, 0.82f, 0.7f), detail, "_DETAIL_TRIPLANAR", new Vector2(0.35f, 0.35f), 0f, 0.3f),
-                    "dry_ground_01", new Vector2(0.65f, 0.65f), 0.8f),
-                FiredClay = Make("Fired clay", "Sankofa/Fire Lit", m =>
-                {
-                    m.SetColor("_Color", new Color(0.64f, 0.38f, 0.24f));
-                    m.SetFloat("_UseBake", 1);
-                    m.SetTexture("_Detail", detail);
-                    m.SetVector("_DetailScale", new Vector4(5f, 2f, 0, 0));
-                    m.SetFloat("_DetailStrength", 0.15f);
-                    m.SetFloat("_DetailAlbedo", 0.25f);
-                    m.SetFloat("_Wrap", 0.35f);
-                    m.SetFloat("_Rim", 0.35f);
-                    m.EnableKeyword("_DETAIL_UV");
-                }),
+                // Story scenes at the water.
                 Workbench = Make("Workbench wood", "Sankofa/Fire Lit", m =>
                 {
                     m.SetColor("_Color", new Color(0.4f, 0.28f, 0.18f));
@@ -78,6 +63,64 @@ namespace Sankofa.EditorTools
                     m.EnableKeyword("_DETAIL_UV");
                 }),
                 Brass = Lit("Lantern frame", new Color(0.36f, 0.27f, 0.14f)),
+                Water = Make("Stream water", "Sankofa/Water", m =>
+                {
+                    m.SetTexture("_Noise", noise);
+                    m.SetColor("_Deep", new Color(0.015f, 0.03f, 0.028f));
+                    m.SetColor("_Shallow", new Color(0.06f, 0.08f, 0.065f));
+                    m.SetColor("_Sky", new Color(0.1f, 0.11f, 0.17f));
+                    m.SetFloat("_Flow", 0.35f);
+                    m.SetFloat("_Scale", 1.6f);
+                }),
+                Spill = Make("Spill water", "Sankofa/Water", m =>
+                {
+                    m.SetTexture("_Noise", noise);
+                    m.SetColor("_Deep", new Color(0.05f, 0.07f, 0.07f));
+                    m.SetColor("_Shallow", new Color(0.16f, 0.2f, 0.2f));
+                    m.SetColor("_Sky", new Color(0.2f, 0.22f, 0.28f));
+                    m.SetFloat("_Flow", 1.6f);
+                    m.SetFloat("_Scale", 4f);
+                    m.SetFloat("_Foam", 0.55f);
+                }),
+                River = Make("River water", "Sankofa/Water", m =>
+                {
+                    m.SetTexture("_Noise", noise);
+                    m.SetColor("_Deep", new Color(0.02f, 0.025f, 0.02f));
+                    m.SetColor("_Shallow", new Color(0.05f, 0.055f, 0.04f));
+                    m.SetColor("_Sky", new Color(0.18f, 0.12f, 0.08f));
+                    m.SetFloat("_Flow", 0.25f);
+                    m.SetFloat("_Scale", 0.7f);
+                    // A slow, broad river: gentle ripples, so the glints stay few.
+                    m.SetFloat("_Strength", 0.16f);
+                }),
+                EmberFigure = Make("Ember figure", "Sankofa/Ember Figure", m => m.SetTexture("_Noise", noise)),
+                City = Make("City", "Sankofa/City", m => { m.SetFloat("_Lit", 0.22f); m.SetFloat("_Glow", 0.9f); }),
+                Gourd = Baked("Gourd", new Color(0.72f, 0.5f, 0.27f), detail, "_DETAIL_UV", new Vector2(3f, 1f), 0.1f, 0.3f),
+                Hide = Baked("Hide", new Color(0.45f, 0.3f, 0.2f), detail, "_DETAIL_TRIPLANAR", new Vector2(6f, 6f), 0.5f, 0.5f),
+                Canvas = Baked("Canvas", new Color(0.78f, 0.72f, 0.6f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.15f, 0.2f),
+                Steel = Make("Rail steel", "Sankofa/Fire Lit", m =>
+                {
+                    m.SetColor("_Color", new Color(0.22f, 0.19f, 0.17f));
+                    m.SetTexture("_Detail", detail);
+                    m.SetVector("_DetailScale", new Vector4(2f, 2f, 0, 0));
+                    m.SetFloat("_DetailStrength", 0.4f);
+                    m.SetFloat("_DetailAlbedo", 0.5f);
+                    m.SetFloat("_Rim", 1f);
+                    m.SetColor("_HighlightColor", new Color(0.55f, 0.7f, 0.9f));
+                    m.EnableKeyword("_DETAIL_UV");
+                }),
+                Soil = Baked("Garden soil", new Color(0.2f, 0.14f, 0.1f), detail, "_DETAIL_TRIPLANAR", new Vector2(5f, 5f), 0.7f, 0.6f),
+                Leaf = Baked("Leaf", new Color(0.24f, 0.32f, 0.12f), detail, "_DETAIL_TRIPLANAR", new Vector2(8f, 8f), 0.2f, 0.3f),
+                Bead = Make("Glass bead", "Sankofa/Fire Lit", m =>
+                {
+                    // Colour is a placeholder until family review.
+                    m.SetColor("_Color", new Color(0.12f, 0.25f, 0.55f));
+                    m.SetColor("_Emission", new Color(0.02f, 0.04f, 0.09f));
+                    m.SetFloat("_Rim", 1.6f);
+                    m.SetFloat("_Wrap", 0.5f);
+                }),
+                Metal = Lit("Jiko metal", new Color(0.3f, 0.27f, 0.24f)),
+                Paint = Baked("Gate paint", new Color(0.12f, 0.32f, 0.3f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
                 LanternCore = Lit("Lantern flame", new Color(0.3f, 0.2f, 0.1f), new Color(1f, 0.72f, 0.4f)),
 
                 // Hearth materials: baked occlusion and fire shadows, generated surface detail.

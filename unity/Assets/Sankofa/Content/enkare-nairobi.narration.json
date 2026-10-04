@@ -1,0 +1,597 @@
+{
+  "again.bead.bring": {
+    "characters": 41,
+    "fingerprint": "f9f89d7a6afcad8ddec6055975948cf31a6c8050b9283bc1588e713ea39d6922",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.0,
+    "voice": "Kore"
+  },
+  "again.bead.held": {
+    "characters": 44,
+    "fingerprint": "5b502048b338bdd02063e96e4976140da70dc94372b51686aa35ed69aad9bc3f",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.2,
+    "voice": "Kore"
+  },
+  "again.bead.left": {
+    "characters": 43,
+    "fingerprint": "a7cbdf1ec442ee19d3df2ad9a97411b05d9bbc67412662eeb34eda7435b1833b",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.28,
+    "voice": "Kore"
+  },
+  "again.seed.bring": {
+    "characters": 41,
+    "fingerprint": "f9f89d7a6afcad8ddec6055975948cf31a6c8050b9283bc1588e713ea39d6922",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 5.16,
+    "voice": "Kore"
+  },
+  "again.seed.held": {
+    "characters": 69,
+    "fingerprint": "c0428c68b764e3b7507062eadda37a43d89e0e38a76408d493346ff3c847717e",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.32,
+    "voice": "Kore"
+  },
+  "again.seed.left": {
+    "characters": 48,
+    "fingerprint": "899d8adc0d46a53a56aa2f4f384593589270bcd1df0d9630843f8ebca705f727",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.4,
+    "voice": "Kore"
+  },
+  "back.kept": {
+    "characters": 150,
+    "fingerprint": "45680603c57e532e3e82d7af1ac82eade8b47afc8dd8bb549a74d71542a14dc0",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 16.56,
+    "voice": "Kore"
+  },
+  "back.sit": {
+    "characters": 27,
+    "fingerprint": "314612e4225236d3a8e0b64b21302549a8796f150226494674ba5079f40dea6e",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 4.28,
+    "voice": "Kore"
+  },
+  "choose.again": {
+    "characters": 27,
+    "fingerprint": "ae7008da02b23c82297b12d390351a6b02f07979c7c0eaacaef8a2f5cd60e592",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 3.8,
+    "voice": "Kore"
+  },
+  "e1.bead": {
+    "characters": 101,
+    "fingerprint": "6c2e59c1d6e7df3d07cc0c4c672fed6375c4f49d5871737ae79ba551c95f8226",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 10.8,
+    "voice": "Kore"
+  },
+  "e1.bead.no": {
+    "characters": 63,
+    "fingerprint": "4da0b6be781c14d94ec06f4b3bf37d9758275a773697f6e43f87f3d028c9adc9",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.24,
+    "voice": "Kore"
+  },
+  "e1.bead.yes": {
+    "characters": 31,
+    "fingerprint": "bc2363dcae8ca3c60ede3f0a1239bc40ab80706925e2e349d0eee2872b7a94ce",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 4.2,
+    "voice": "Kore"
+  },
+  "e1.carry": {
+    "characters": 64,
+    "fingerprint": "78755d21331b7a2494abab239188e0b74fca40e4edd0db3234ef768fe737c77a",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 7.4,
+    "voice": "Kore"
+  },
+  "e1.carry.no": {
+    "characters": 42,
+    "fingerprint": "5fdad11e501d85f8fc8f3ca739308ab0720cc19c5a97813f3eb909c41c68884c",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 5.56,
+    "voice": "Kore"
+  },
+  "e1.carry.yes": {
+    "characters": 43,
+    "fingerprint": "f178fbc7545805a80dcb1541ec166527f8ee6abda3c6e6e84e977ad3c02f8df8",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 7.28,
+    "voice": "Kore"
+  },
+  "e1.flour": {
+    "characters": 135,
+    "fingerprint": "93bda5f1ce37bb80f4fda69da54b4a93594d5a24a99a4a52f81131e92fe20416",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 17.28,
+    "voice": "Kore"
+  },
+  "e1.gather": {
+    "characters": 107,
+    "fingerprint": "b859512c434c7e08782b6f1ddfd743eb437ec8976a3ccd01dcccd8e550224780",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 14.48,
+    "voice": "Kore"
+  },
+  "e1.hide": {
+    "characters": 80,
+    "fingerprint": "80907cbf1c548c21d8d5a5775b995be5c2060860da3d2163366563627e7b01ec",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.44,
+    "voice": "Kore"
+  },
+  "e1.kin": {
+    "characters": 211,
+    "fingerprint": "8764e12edf957f38ff09082f61bff61c06580e6e05614bb8fc5175e10787a981",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 22.96,
+    "voice": "Kore"
+  },
+  "e1.listen": {
+    "characters": 26,
+    "fingerprint": "995d17be7e56d0c9f87ab71490c0f06bc9b59b3f42d3b10688d3c2da30c5eb51",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 4.72,
+    "voice": "Kore"
+  },
+  "e1.milk": {
+    "characters": 65,
+    "fingerprint": "53f0f4baf32a8167063f0593ff1d85dd12aa0b4e19d4036f208e231cb8e71513",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.48,
+    "voice": "Kore"
+  },
+  "e1.naserian.arrives": {
+    "characters": 71,
+    "fingerprint": "6854ba9febe0fc9b46d05b8eacfcfd2170f319dbca0baf86e70d3d6b9b46a289",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 10.44,
+    "voice": "Kore"
+  },
+  "e1.offer.no": {
+    "characters": 66,
+    "fingerprint": "23318f1178d589ca1e818f534c99fcc43f2b749e5305c6d2b5603a09111d47fe",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.2,
+    "voice": "Kore"
+  },
+  "e1.offer.yes": {
+    "characters": 85,
+    "fingerprint": "d34d3a43183620bba9060f982b8616c33c00edce7a63263ea6f2d57e8d16447e",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.12,
+    "voice": "Kore"
+  },
+  "e1.part": {
+    "characters": 78,
+    "fingerprint": "8138dcb023320a39cfcc62cc3604e3852be095b83a2e6fdd58fb15e98808cb57",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 11.68,
+    "voice": "Kore"
+  },
+  "e1.price": {
+    "characters": 58,
+    "fingerprint": "bf9204c42796db624eac475fd77c59eb6f8315b02fb77b53b6fa851e90f30753",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.96,
+    "voice": "Kore"
+  },
+  "e1.problem": {
+    "characters": 178,
+    "fingerprint": "154fdd73f7f6c20c30f3439446127882069f0b4e74ea5ebf2c1ddb5748c8242c",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 18.44,
+    "voice": "Kore"
+  },
+  "e1.rest": {
+    "characters": 73,
+    "fingerprint": "da26287b93e9f3f7b3556246f327173839808c421956eeff7064e6f0915f6c76",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.76,
+    "voice": "Kore"
+  },
+  "e1.sides": {
+    "characters": 185,
+    "fingerprint": "85377f7bbe85ac2a30c8a4a794a96fd99ab755c60c267d44f4a07b776285a9cb",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 19.56,
+    "voice": "Kore"
+  },
+  "e1.touch": {
+    "characters": 20,
+    "fingerprint": "856d5dd5df0012885471cd8cad6d07214d12a9e9670463191c82aa5f7a6d1070",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 3.08,
+    "voice": "Kore"
+  },
+  "e1.wambui.arrives": {
+    "characters": 69,
+    "fingerprint": "7bd09e07fc8b2bc94ba9ab86ad1ecd858d822041723e710103eba1f6659f4402",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 10.04,
+    "voice": "Kore"
+  },
+  "e1.water.felt": {
+    "characters": 147,
+    "fingerprint": "d7501a73e8aeb11d60feb33943f9f63b6ceb635d0a95059a49f376cc056f2f9e",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 22.04,
+    "voice": "Kore"
+  },
+  "e1.water.heard": {
+    "characters": 130,
+    "fingerprint": "b9267f18bf160bb640162982f7b67c3b721e285012c3f380616a0ce84a0a8b18",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 19.2,
+    "voice": "Kore"
+  },
+  "e2.bundle": {
+    "characters": 173,
+    "fingerprint": "1ecc33ca4e1b2567f7112d71d3de6a1b15712d962064e3b0244f15499c81d58b",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 20.28,
+    "voice": "Kore"
+  },
+  "e2.depot": {
+    "characters": 209,
+    "fingerprint": "3654faa3cb3aab927f11ff5ea28e2e4bfe9f9df8bf7640df2dae2c7cc4b73920",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 23.36,
+    "voice": "Kore"
+  },
+  "e2.famine": {
+    "characters": 183,
+    "fingerprint": "96dd1cb646a9514a3381e6e1e8ff50afaf4d7fd8f4b6ab52606679f80dd1f668",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 21.6,
+    "voice": "Kore"
+  },
+  "e2.gather": {
+    "characters": 100,
+    "fingerprint": "782357beca1232fd0008a4841783459af03b7823ab5d24cebc3e747699c9ed88",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 14.44,
+    "voice": "Kore"
+  },
+  "e2.measuring": {
+    "characters": 69,
+    "fingerprint": "ca4dd4f63aca34fffae288a949bd2f57acf2ba14e3cde4e3fd8b2bd38357a8c7",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 7.72,
+    "voice": "Kore"
+  },
+  "e2.naisula": {
+    "characters": 98,
+    "fingerprint": "38ec1e065d7734cbdfb3b2072e571f9a0325d1ade5729a3ea663d2bd35770f47",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 15.2,
+    "voice": "Kore"
+  },
+  "e2.njeri": {
+    "characters": 141,
+    "fingerprint": "efa0e14190c83b91d55d5a3327e1ba60f3fcbda9ef1b7867d0ee3987fa67bea3",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 16.12,
+    "voice": "Kore"
+  },
+  "e2.nothing": {
+    "characters": 61,
+    "fingerprint": "c52f656b897f05d5fd547d3e963fe8f4671d21fbf80e5e3de2e69147a0c0e5ff",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.92,
+    "voice": "Kore"
+  },
+  "e2.plain": {
+    "characters": 96,
+    "fingerprint": "ef10eeed92c8e6fce571d36aa49f930f2151e06c3b388fcd0d6f2cb29cfce22f",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.92,
+    "voice": "Kore"
+  },
+  "e2.rail.felt": {
+    "characters": 87,
+    "fingerprint": "3dd90398ecc617a3f3ce95ee863ed3eb4ecc7e5cb1a2e7e24127fa61ec9f1ddd",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 11.52,
+    "voice": "Kore"
+  },
+  "e2.rail.heard": {
+    "characters": 112,
+    "fingerprint": "83f4aaab14c2991d372f1e6feb03f4ae4704ad267388b4f68a59fe796479868f",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 13.24,
+    "voice": "Kore"
+  },
+  "e2.same": {
+    "characters": 68,
+    "fingerprint": "628a19ef0ae227d582ec9dcaba892ac67f4dde7793cdf02c78a4567c7e677488",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 12.4,
+    "voice": "Kore"
+  },
+  "e2.seed.no": {
+    "characters": 80,
+    "fingerprint": "d0af8319029e2c6bcc7791e488ac98af255a3608d7461f77dd798922dd7f2a56",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 10.44,
+    "voice": "Kore"
+  },
+  "e2.seed.yes": {
+    "characters": 29,
+    "fingerprint": "e37d39c61af2b7020289de5cf961ff5912ea29d709fb5ea5c58451f7143cad5c",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 4.12,
+    "voice": "Kore"
+  },
+  "e2.share": {
+    "characters": 110,
+    "fingerprint": "ebb5df838783e6cee2ce02bddc9b0a2489c54c7fc73253b915e61a6ffff7a9cd",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 13.32,
+    "voice": "Kore"
+  },
+  "e2.today": {
+    "characters": 53,
+    "fingerprint": "e574b730846ae7060e4b28fb4d3db980d7780a73963623f4c28096e9e94eb85c",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 7.24,
+    "voice": "Kore"
+  },
+  "e2.touch": {
+    "characters": 15,
+    "fingerprint": "d5452f5e37b2ce04c915ad3a378f5277c3f65aef6ef2741b519c8257c8fd1d85",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 2.68,
+    "voice": "Kore"
+  },
+  "e2.town": {
+    "characters": 153,
+    "fingerprint": "b0c756c51fec44dc54c28c06063d5cac6349791871018abb06b079869b6c87a2",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 17.52,
+    "voice": "Kore"
+  },
+  "early.later": {
+    "characters": 64,
+    "fingerprint": "23dbda7f75f9122a4f6ec34711848a7d0a77a0e8cfde2a75d2fc56030fb2b1e6",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 7.72,
+    "voice": "Kore"
+  },
+  "home.back.ember": {
+    "characters": 74,
+    "fingerprint": "438d1e48330aa9ce429c8016389782d630ee1d34b90a1a9335f86d3c080f681f",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 11.96,
+    "voice": "Kore"
+  },
+  "home.bead": {
+    "characters": 110,
+    "fingerprint": "0fc45369cfcf2a04e3cf6e1792726d72dfa2a1c1bc07c3cc0b11598d67e96873",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 14.68,
+    "voice": "Kore"
+  },
+  "home.seed": {
+    "characters": 75,
+    "fingerprint": "f6d72646a1f5fbe2eaea1e0192436a609890f6fb16530a5d6edbcaf95a005ef7",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.44,
+    "voice": "Kore"
+  },
+  "home.today.ember": {
+    "characters": 127,
+    "fingerprint": "247729d235045dbda24a46e0fb50260879cdaaf2d3a53d61284049ddf930b1f0",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 15.92,
+    "voice": "Kore"
+  },
+  "offer.accepted": {
+    "characters": 40,
+    "fingerprint": "cb47a17c0fa4ec5b9698e859cbdee7bfd1bbf83cd4aee08d0b67e3ff95fa760d",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.48,
+    "voice": "Kore"
+  },
+  "offer.default": {
+    "characters": 50,
+    "fingerprint": "d4cca0b2a1114f06e6704c06b1a7fd43f23156579880e927541fe1a73ec30511",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.28,
+    "voice": "Kore"
+  },
+  "offer.hand": {
+    "characters": 72,
+    "fingerprint": "3f0ce586c6e500be143fc0e5e1ae8884cf5c5f3b49a0411702e5866429dd95bb",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 10.04,
+    "voice": "Kore"
+  },
+  "offer.light": {
+    "characters": 52,
+    "fingerprint": "84b052360b2ae2b8f2f57131f5f14b8c158da31c62d6baf4f128829d4139ca64",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.92,
+    "voice": "Kore"
+  },
+  "q.e1.flour.answer": {
+    "characters": 154,
+    "fingerprint": "c818257f2a26e704b5c6899188653d88c17215bd794db03b85832d4ef3687bfe",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 18.48,
+    "voice": "Kore"
+  },
+  "q.e1.friends.answer": {
+    "characters": 149,
+    "fingerprint": "34d99dcc6249ccf82fe6328bdfe65ea3fca2055982c2446e323e44013ba18598",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 16.36,
+    "voice": "Kore"
+  },
+  "q.e1.milk.answer": {
+    "characters": 106,
+    "fingerprint": "a2b7799656eecb2e96c9b284d58de8959631113c9716f7d22744da5c7298a831",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 11.76,
+    "voice": "Kore"
+  },
+  "q.e1.real.answer": {
+    "characters": 190,
+    "fingerprint": "8e3a98ce48317d728f8ab6b97674145d3e9642502b2b4b46833e82d0203e2645",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 22.04,
+    "voice": "Kore"
+  },
+  "q.e2.again.answer": {
+    "characters": 51,
+    "fingerprint": "e4443b06ac4afddfabd5e4d0f9d31d903a6a36841c45eaed242998094193d767",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 6.76,
+    "voice": "Kore"
+  },
+  "q.e2.cattle.answer": {
+    "characters": 171,
+    "fingerprint": "81451f64360c55663ac1bdc54f28292dd4cb56532cfb6eac7b46db8cdbe3d4b3",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 16.96,
+    "voice": "Kore"
+  },
+  "q.e2.real.answer": {
+    "characters": 110,
+    "fingerprint": "b14b2b891cf57a5a1b48cc644ac75451fe3d7a35e6939d02df310122b204a731",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 14.04,
+    "voice": "Kore"
+  },
+  "q.e2.workers.answer": {
+    "characters": 114,
+    "fingerprint": "d955088d2af00033a4cfd97e58f357b885fcab4bee518c6b0ac7326fcb82f2e7",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 14.72,
+    "voice": "Kore"
+  },
+  "q.today.who.answer": {
+    "characters": 112,
+    "fingerprint": "58211d5cf0e6d61315cf1cd33da03d01ff3833079c1b079669cec28cc0a3ef17",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 9.32,
+    "voice": "Kore"
+  },
+  "today.bead.ask": {
+    "characters": 33,
+    "fingerprint": "a6cc3c34c016c372f1f55c855910bba2fb866d5c5cd2883e447b86c294136029",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 4.72,
+    "voice": "Kore"
+  },
+  "today.bead.no": {
+    "characters": 131,
+    "fingerprint": "6208426139845b0fa3b9095af10f409337102e0af176f03e16977c8d369e435d",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 12.72,
+    "voice": "Kore"
+  },
+  "today.bead.yes": {
+    "characters": 163,
+    "fingerprint": "32f61ff8779733fe03328558b1ac8dccb34a741ac4310cefb273f40baddc4908",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 17.56,
+    "voice": "Kore"
+  },
+  "today.brought": {
+    "characters": 42,
+    "fingerprint": "0f4b99bbe1625c310b4b1a3face6e8d39df3da9de9e9d3a896717c8ce1ff746f",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 5.76,
+    "voice": "Kore"
+  },
+  "today.name": {
+    "characters": 55,
+    "fingerprint": "cab3214bfb0f27a0b0ece252078d283c3ad4981533f11c73185bda34e9b44c06",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 7.08,
+    "voice": "Kore"
+  },
+  "today.rubbish": {
+    "characters": 108,
+    "fingerprint": "5f515af215f30890c48d284122e263a48d6542d178111425263d9add5694103b",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 14.0,
+    "voice": "Kore"
+  },
+  "today.same": {
+    "characters": 61,
+    "fingerprint": "5f802a8babe144fab0067f668d22a106f2c4ae594ba20d95cf1ba7d59329887c",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.64,
+    "voice": "Kore"
+  },
+  "today.seed.ask": {
+    "characters": 9,
+    "fingerprint": "07fbc784de03dda9eb1f3df99cfd9e4be2515efbf45251306603488598ae5b14",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 1.68,
+    "voice": "Kore"
+  },
+  "today.seed.no": {
+    "characters": 122,
+    "fingerprint": "c2a2fe5f69d70ffa88ba2b4fc61cbf183cffe9fdc18d8692910e7e6b3b270df2",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 13.12,
+    "voice": "Kore"
+  },
+  "today.seed.yes": {
+    "characters": 115,
+    "fingerprint": "259be25f8cc6f635d71185be8edc91145567f002a52ad0722ed918c66b2cb3d6",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 12.52,
+    "voice": "Kore"
+  },
+  "today.word": {
+    "characters": 67,
+    "fingerprint": "171696ce57df877f966ffa205264a5e3ca381922f64c7aa1c31cc9e9512a3922",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 11.12,
+    "voice": "Kore"
+  },
+  "welcome.choose": {
+    "characters": 39,
+    "fingerprint": "062456a2edf3217f55981c910cfae1648b485812c5dd895e11361104aab495f9",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 5.84,
+    "voice": "Kore"
+  },
+  "welcome.griot": {
+    "characters": 65,
+    "fingerprint": "81558e7743a7b2ec064323d40138fcd5fcea243fe8824632bed3bfe839bba64b",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 8.76,
+    "voice": "Kore"
+  },
+  "welcome.reach": {
+    "characters": 30,
+    "fingerprint": "36788700626e896640da1ba98850dde29b1ff574b8bb834958845540c194c504",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 4.2,
+    "voice": "Kore"
+  },
+  "welcome.sit": {
+    "characters": 18,
+    "fingerprint": "fb266aecd4abfb5c4cafe0e034f8b4c1593311b1fccfa385b1d750ddebfab484",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 3.24,
+    "voice": "Kore"
+  },
+  "welcome.water": {
+    "characters": 164,
+    "fingerprint": "b664dc4017c827fdf6b655aca0fc2ecd8480712ae60720df3face70934b41f64",
+    "model": "gemini-3.1-flash-tts-preview",
+    "seconds": 17.56,
+    "voice": "Kore"
+  }
+}

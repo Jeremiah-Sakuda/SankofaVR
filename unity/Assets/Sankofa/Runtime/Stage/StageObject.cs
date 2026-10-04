@@ -13,6 +13,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] string objectId;
         [SerializeField] string sceneId;
         [SerializeField] bool visibleAtStart;
+        [Tooltip("Grow from nothing when revealed. Off for shapes of light, which fade in place instead.")]
+        [SerializeField] bool scaleWithVisibility = true;
         [SerializeField] Renderer[] surfaces;
         [SerializeField] Renderer glow;
         [SerializeField] float glowIntensity = 1f;
@@ -196,7 +198,7 @@ namespace Sankofa.Runtime.Stage
         void Apply()
         {
             var eased = 1f - (1f - shown) * (1f - shown);
-            transform.localScale = startScale * Mathf.Max(0.0001f, eased);
+            transform.localScale = scaleWithVisibility ? startScale * Mathf.Max(0.0001f, eased) : startScale;
             var visible = shown > 0.001f;
             var lift = Mathf.Max(highlight, pulse * 0.45f + Feedback * 0.35f);
             foreach (var s in surfaces)

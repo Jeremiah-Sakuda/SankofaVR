@@ -21,7 +21,7 @@ namespace Sankofa.Runtime.Audio
         [SerializeField] int seed = 41;
 
         // Insects and wind need no more: half the output rate halves memory and start-up synthesis.
-        const int SampleRate = 24000;
+        internal const int SampleRate = 24000;
 
         float duck = 1f;
         bool started;
@@ -78,10 +78,10 @@ namespace Sankofa.Runtime.Audio
             if (wind != null) wind.volume = windVolume * level;
         }
 
-        delegate void Synth(float[] buffer, System.Random random);
+        internal delegate void Synth(float[] buffer, System.Random random);
 
         /// <summary>Renders a second longer than needed and crossfades the tail into the head for a seamless loop.</summary>
-        static AudioClip Loop(string name, float seconds, Synth synth, int seed)
+        internal static AudioClip Loop(string name, float seconds, Synth synth, int seed)
         {
             var length = (int)(seconds * SampleRate);
             var fade = SampleRate;
@@ -106,7 +106,7 @@ namespace Sankofa.Runtime.Audio
         /// A field cricket: chirps of three to five short pulses of a high tone, about a second apart, with the
         /// occasional rest so it sounds alive rather than mechanical.
         /// </summary>
-        static void Cricket(float[] buffer, System.Random random, float carrier, float gain)
+        internal static void Cricket(float[] buffer, System.Random random, float carrier, float gain)
         {
             var i = (int)(random.NextDouble() * SampleRate);
             var pulse = (int)(0.011f * SampleRate);
@@ -132,7 +132,7 @@ namespace Sankofa.Runtime.Audio
         }
 
         /// <summary>Many distant crickets, quieter and at other pitches, over a faint high hiss of insects.</summary>
-        static void Chorus(float[] buffer, System.Random random)
+        internal static void Chorus(float[] buffer, System.Random random)
         {
             for (var c = 0; c < 8; c++)
                 Cricket(buffer, random, 3700f + 220f * c + (float)random.NextDouble() * 90f, 0.12f + 0.2f * (float)random.NextDouble());
@@ -147,7 +147,7 @@ namespace Sankofa.Runtime.Audio
         }
 
         /// <summary>Low, slowly gusting wind, with a leafy rustle that rises with each gust.</summary>
-        static void Wind(float[] buffer, System.Random random)
+        internal static void Wind(float[] buffer, System.Random random)
         {
             float low = 0, lower = 0, rustle = 0, gust = 0.5f, target = 0.5f;
             var change = 0;

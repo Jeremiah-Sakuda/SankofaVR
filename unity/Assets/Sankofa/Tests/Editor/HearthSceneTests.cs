@@ -144,9 +144,9 @@ namespace Sankofa.Tests
             Assert.That(playable, Is.Not.Null, report.ToString());
             var flow = new VisitFlow(playable);
             flow.Start(skipWelcome: true);
-            Assert.That(flow.Choose("makers"), Is.True);
+            Assert.That(flow.Choose("era.1850s"), Is.True);
             var cues = flow.DrainCues();
-            Assert.That(cues.OfType<Cue.Speak>().Last().Line.Id, Is.EqualTo("makers.gather"));
+            Assert.That(cues.OfType<Cue.Speak>().Last().Line.Id, Is.EqualTo("e1.gather"));
         }
     }
 

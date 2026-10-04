@@ -23,7 +23,7 @@ namespace Sankofa.EditorTools
     public static partial class SankofaSceneBuilder
     {
         public const string HearthScene = "Assets/Sankofa/Scenes/Hearth.unity";
-        public const string PackagePath = "Assets/Sankofa/Content/placeholder-hearth-stories.json";
+        public const string PackagePath = "Assets/Sankofa/Content/enkare-nairobi.json";
         const string CoreSdk = "Packages/com.meta.xr.sdk.core/Prefabs/";
 
         /// <summary>Eye position the layout is designed around; the world anchor follows the visitor's real head.</summary>
@@ -51,10 +51,12 @@ namespace Sankofa.EditorTools
 
             var hearth = Child(world, "Scene hearth");
             var (restTop, keepsakeTop) = BuildHearth(hearth, art);
-            var yard = Child(world, "Scene story.yard");
-            var yardObjects = BuildYard(yard, art);
-            var road = Child(world, "Scene story.road");
-            var roadObjects = BuildRoad(road, art);
+            var early = Child(world, "Scene story.water.1850s");
+            var (earlyObjects, earlySound) = BuildWater1850s(early, art);
+            var railway = Child(world, "Scene story.water.1899");
+            var (railwayObjects, railwaySound) = BuildWater1899(railway, art);
+            var today = Child(world, "Scene story.water.today");
+            var (todayObjects, todaySound) = BuildWaterToday(today, art);
 
             var fire = BuildFire(world, art);
             var narration = BuildNarrator(world);
@@ -68,8 +70,8 @@ namespace Sankofa.EditorTools
             var keepsake = Point(world, "Keepsake point", keepsakeAt);
             var carry = Point(world, "Carry point", new Vector3(0.14f, 0.86f, 0.38f));
             // What a kept visit leaves at the hearth waits on the keepsake stone.
-            var shardKept = BuildShard(hearth, art, "shard.kept", "hearth", keepsakeAt);
-            var waystoneKept = BuildWaystone(hearth, art, "waystone.kept", "hearth", keepsakeAt);
+            var beadKept = BuildBead(hearth, art, "bead.kept", "hearth", keepsakeAt + Vector3.up * 0.012f);
+            var seedKept = BuildSeed(hearth, art, "seed.kept", "hearth", keepsakeAt + Vector3.up * 0.01f);
 
             var captions = BuildCaptions(world, art);
             var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.34f), 2);
@@ -84,8 +86,8 @@ namespace Sankofa.EditorTools
 
             var stageObject = new GameObject("Story stage");
             var stage = stageObject.AddComponent<StoryStage>();
-            ConfigureScenes(stage, hearth, yard, road);
-            SetArray(stage, "objects", new Object[] { ember, shardKept, waystoneKept }.Concat(yardObjects).Concat(roadObjects).ToArray());
+            ConfigureScenes(stage, hearth, early, railway, today);
+            SetArray(stage, "objects", new Object[] { ember, beadKept, seedKept }.Concat(earlyObjects).Concat(railwayObjects).Concat(todayObjects).ToArray());
             Set(stage, "fire", fire);
             Set(stage, "eye", rig.Eye);
             Set(stage, "head", rig.Head);
@@ -105,6 +107,7 @@ namespace Sankofa.EditorTools
             Set(app, "fire", fire);
             Set(app, "narration", narration);
             Set(app, "ambience", ambience);
+            SetArray(app, "storyAmbience", new Object[] { earlySound, railwaySound, todaySound });
             Set(app, "captions", captions);
             Set(app, "controls", controls);
             Set(app, "questionsPanel", questions);
@@ -116,8 +119,9 @@ namespace Sankofa.EditorTools
             Set(app, "attention", attention);
             SetArray(app, "hands", rig.Hands.Cast<Object>().ToArray());
 
-            yard.gameObject.SetActive(false);
-            road.gameObject.SetActive(false);
+            early.gameObject.SetActive(false);
+            railway.gameObject.SetActive(false);
+            today.gameObject.SetActive(false);
             EditorSceneManager.SaveScene(scene, HearthScene);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HearthScene, true) };
             AssetDatabase.SaveAssets();
@@ -635,11 +639,11 @@ namespace Sankofa.EditorTools
             return renderer;
         }
 
-        static void ConfigureScenes(StoryStage stage, Transform hearth, Transform yard, Transform road)
+        static void ConfigureScenes(StoryStage stage, Transform hearth, Transform early, Transform railway, Transform today)
         {
             var so = new SerializedObject(stage);
             var list = so.FindProperty("scenes");
-            list.arraySize = 3;
+            list.arraySize = 4;
             var night = list.GetArrayElementAtIndex(0);
             Scene(night, "hearth", true, hearth, new Color(0.012f, 0.016f, 0.035f),
                 new Color(0.02f, 0.026f, 0.048f), new Color(0.014f, 0.011f, 0.009f), 9f, 45f);
@@ -648,8 +652,9 @@ namespace Sankofa.EditorTools
             night.FindPropertyRelative("MistColor").colorValue = new Color(0.045f, 0.055f, 0.08f);
             night.FindPropertyRelative("Mist").vector4Value = new Vector4(0.65f, 0.15f, 1.3f, 6f);
             night.FindPropertyRelative("Grade").vector4Value = new Vector4(1.3f, 0.92f, 1f, 1f);
-            ConfigureYard(list.GetArrayElementAtIndex(1), yard);
-            ConfigureRoad(list.GetArrayElementAtIndex(2), road);
+            ConfigureWater1850s(list.GetArrayElementAtIndex(1), early);
+            ConfigureWater1899(list.GetArrayElementAtIndex(2), railway);
+            ConfigureWaterToday(list.GetArrayElementAtIndex(3), today);
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

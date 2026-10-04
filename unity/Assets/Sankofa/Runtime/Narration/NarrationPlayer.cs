@@ -42,6 +42,8 @@ namespace Sankofa.Runtime.Narration
             if (usingClip)
             {
                 voice.clip = clip;
+                // Speech follows the time scale, as everything else does; in the experience it is always 1.
+                voice.pitch = Mathf.Max(0.01f, Time.timeScale);
                 voice.Play();
                 duration = clip.length;
                 DurationMeasured?.Invoke(lineToken, clip.length);

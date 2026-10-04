@@ -99,12 +99,15 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        [Timeout(900000)] // Three visits rendered at review resolution take longer than the default three minutes.
         public IEnumerator CaptureVisits()
         {
             if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1") Assert.Ignore("Set SANKOFA_CAPTURE=1 to write review images.");
             LogAssert.ignoreFailingMessages = true;
             var store = Path.Combine(Path.GetTempPath(), "sankofa-capture-" + Guid.NewGuid().ToString("N"));
             SankofaApp.StoreFolderOverride = store;
+            // The mixes are rendered from the clips themselves; nothing needs to reach the speakers.
+            AudioListener.volume = 0;
             try
             {
                 SceneManager.LoadScene("Hearth");
@@ -117,71 +120,87 @@ namespace Sankofa.Tests
                 var app = Object.FindFirstObjectByType<SankofaApp>();
                 var stage = Object.FindFirstObjectByType<StoryStage>();
                 var flow = app.Flow;
-                var bench = new Vector3(0.12f, 0.55f, 0.62f);
-                IEnumerator Line(string id, float seconds = 60) => WaitFor(() => flow.CurrentLine?.Id == id, seconds);
+                var right = new Vector3(0.25f, 0.5f, 0.55f);
+                var people = new Vector3(0.05f, 1.0f, 1.4f);
+                IEnumerator Line(string id, float seconds = 90) => WaitFor(() => flow.CurrentLine?.Id == id, seconds);
+                IEnumerator Invited(string id, float seconds = 90) => WaitFor(() => flow.OpenInvitation?.Id == id, seconds);
 
                 yield return WaitFor(() => flow.Phase == VisitPhase.Welcome, 10);
                 yield return new WaitForSeconds(1.5f);
                 CaptureBoth(eye, "01-welcome");
                 WriteMix(Path.Combine(Folder, "hearth-sound.wav"), eye.transform.position, 30f);
-                Time.timeScale = 3;
-                yield return WaitFor(() => flow.Phase == VisitPhase.Choosing, 30);
+                Time.timeScale = 4;
+                yield return WaitFor(() => flow.Phase == VisitPhase.Choosing, 60);
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "02-choice");
 
-                flow.Choose("makers");
-                yield return WaitFor(() => flow.OpenInvitation != null, 30);
+                flow.Choose("era.1850s");
+                yield return Invited("receive-ember");
                 yield return new WaitForSeconds(2f);
                 CaptureBoth(eye, "03-offer");
                 flow.Accept("receive-ember");
                 yield return WaitFor(() => flow.Phase == VisitPhase.Transitioning, 30);
                 yield return new WaitForSeconds(0.8f);
                 Capture(eye, "04-entering");
-                yield return Line("yard.dusk");
+                yield return Line("e1.sides");
                 yield return new WaitForSeconds(1f);
-                CaptureBoth(eye, "05-yard", bench);
-                yield return WaitFor(() => flow.OpenInvitation?.Id == "touch-bowl", 60);
+                CaptureBoth(eye, "05-water", right);
+                WriteMix(Path.Combine(Folder, "water-1850s-sound.wav"), eye.transform.position, 20f);
+                yield return Invited("touch-water");
+                flow.Accept("touch-water");
+                yield return Invited("receive-flour");
+                yield return new WaitForSeconds(2f);
+                CaptureBoth(eye, "06-wambui", people);
+                flow.Accept("receive-flour");
+                yield return Line("e1.problem");
                 yield return new WaitForSeconds(1f);
-                CaptureBoth(eye, "06-bowl", bench);
-                flow.Accept("touch-bowl");
-                yield return WaitFor(() => flow.OpenInvitation?.Id == "receive-shard", 60);
+                CaptureBoth(eye, "07-naserian", people);
+                yield return Invited("offer-flour");
+                flow.Accept("offer-flour");
+                yield return Invited("receive-bead");
                 yield return new WaitForSeconds(2f);
-                CaptureBoth(eye, "07-piece", bench);
-                flow.Accept("receive-shard");
-                yield return WaitFor(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null, 90);
+                CaptureBoth(eye, "08-bead", right);
+                flow.Accept("receive-bead");
+                yield return WaitFor(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null, 120);
                 yield return new WaitForSeconds(2f);
-                CaptureBoth(eye, "08-keepsake");
+                CaptureBoth(eye, "09-keepsake");
 
                 flow.Keep();
                 flow.BeginAgain();
                 yield return new WaitForSeconds(1f);
-                CaptureBoth(eye, "09-returning");
                 flow.Follow();
-                yield return WaitFor(() => flow.OpenInvitation?.Id == "touch-mend", 90);
-                flow.Accept("touch-mend");
-                yield return new WaitForSeconds(2.5f);
-                CaptureBoth(eye, "10-mended", bench);
-                yield return WaitFor(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null, 90);
+                yield return Line("today.rubbish", 120);
+                yield return new WaitForSeconds(1f);
+                CaptureBoth(eye, "10-today", right);
+                WriteMix(Path.Combine(Folder, "water-today-sound.wav"), eye.transform.position, 20f);
+                yield return Invited("hang-bead");
+                flow.Accept("hang-bead");
+                yield return new WaitForSeconds(2f);
+                CaptureBoth(eye, "11-gate", right);
+                yield return WaitFor(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null, 120);
 
                 flow.BeginAgain();
                 yield return null;
                 flow.NewStory();
-                flow.Choose("travellers");
-                yield return WaitFor(() => stage.ActiveScene == "story.road" && flow.Phase == VisitPhase.Story, 90);
-                yield return Line("road.rest");
-                CaptureBoth(eye, "11-road", new Vector3(0.25f, 0.45f, 0.5f));
-                yield return WaitFor(() => flow.OpenInvitation?.Id == "touch-marker", 90);
+                flow.Choose("era.1899");
+                yield return Line("e2.depot", 120);
                 yield return new WaitForSeconds(1f);
-                CaptureBoth(eye, "12-waymarker", new Vector3(0.25f, 0.45f, 0.5f));
-                flow.Accept("touch-marker");
-                yield return WaitFor(() => flow.OpenInvitation?.Id == "receive-waystone", 60);
+                CaptureBoth(eye, "12-depot", right);
+                WriteMix(Path.Combine(Folder, "water-1899-sound.wav"), eye.transform.position, 20f);
+                yield return Invited("touch-rail");
+                flow.Accept("touch-rail");
+                yield return Line("e2.nothing", 120);
+                yield return new WaitForSeconds(1f);
+                CaptureBoth(eye, "13-granddaughters", people);
+                yield return Invited("receive-seed");
                 yield return new WaitForSeconds(2f);
-                Capture(eye, "13-waystone");
-                Assert.That(stage.ActiveScene, Is.EqualTo("story.road"));
+                Capture(eye, "14-seed");
+                Assert.That(stage.ActiveScene, Is.EqualTo("story.water.1899"));
             }
             finally
             {
                 Time.timeScale = 1;
+                AudioListener.volume = 1;
                 SankofaApp.StoreFolderOverride = null;
                 if (Directory.Exists(store)) Directory.Delete(store, true);
             }
