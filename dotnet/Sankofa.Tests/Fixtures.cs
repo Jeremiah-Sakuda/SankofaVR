@@ -9,7 +9,8 @@ namespace Sankofa.Tests
 {
     static class Fixtures
     {
-        public const string PlaceholderPackage = "unity/Assets/Sankofa/Content/placeholder-hearth-stories.json";
+        public const string PlaceholderPackage = "dotnet/Sankofa.Tests/Fixtures/placeholder-hearth-stories.json";
+        public const string EnkareNairobiPackage = "unity/Assets/Sankofa/Content/enkare-nairobi.json";
 
         public static string RepositoryFile(string relative)
         {
@@ -21,6 +22,7 @@ namespace Sankofa.Tests
         }
 
         public static StoryPackage ReadPlaceholder() => StoryReader.ReadPackage(File.ReadAllText(RepositoryFile(PlaceholderPackage)));
+        public static StoryPackage ReadEnkareNairobi() => StoryReader.ReadPackage(File.ReadAllText(RepositoryFile(EnkareNairobiPackage)));
 
         public static PlayablePackage Playable(StoryPackage package)
         {

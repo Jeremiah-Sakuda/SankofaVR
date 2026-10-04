@@ -1,0 +1,426 @@
+{
+  "schema": 2,
+  "kind": "package",
+  "id": "enkare-nairobi",
+  "version": "0.1.0",
+  "title": "Enkare Nairobi",
+  "locale": "en",
+  "status": "draft",
+  "note": "One place across time: the cool-water stream that gave Nairobi its name, where Kikuyu and Maasai traded and intermarried. Facts come from docs/content/enkare-nairobi/sources.md; people are fictional composites. Draft: not yet reviewed by family or community.",
+  "scenes": [
+    { "id": "hearth", "kind": "hearth" },
+    { "id": "story.water.1850s", "kind": "story" },
+    { "id": "story.water.1899", "kind": "story" },
+    { "id": "story.water.today", "kind": "story" }
+  ],
+  "objects": [
+    { "id": "ember", "scene": "hearth", "capabilities": ["offer", "place", "withdraw"] },
+    { "id": "bead.kept", "scene": "hearth", "capabilities": ["place"] },
+    { "id": "seed.kept", "scene": "hearth", "capabilities": ["place"] },
+
+    { "id": "fire.1850s", "scene": "story.water.1850s", "capabilities": ["reveal", "illuminate"], "continues": "ember" },
+    { "id": "water.spill", "scene": "story.water.1850s", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "figure.wambui", "scene": "story.water.1850s", "capabilities": ["reveal", "illuminate", "withdraw"] },
+    { "id": "gourd.flour", "scene": "story.water.1850s", "capabilities": ["offer", "place", "reveal"] },
+    { "id": "figure.naserian", "scene": "story.water.1850s", "capabilities": ["reveal", "illuminate", "withdraw"] },
+    { "id": "figure.ewe", "scene": "story.water.1850s", "capabilities": ["reveal", "withdraw"] },
+    { "id": "gourd.milk", "scene": "story.water.1850s", "capabilities": ["reveal", "illuminate"] },
+    { "id": "hide", "scene": "story.water.1850s", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "bead", "scene": "story.water.1850s", "capabilities": ["offer", "place"], "continues": "bead.kept" },
+
+    { "id": "lantern.1899", "scene": "story.water.1899", "capabilities": ["reveal", "illuminate"], "continues": "ember" },
+    { "id": "rails", "scene": "story.water.1899", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "figure.njeri", "scene": "story.water.1899", "capabilities": ["reveal", "illuminate", "withdraw"] },
+    { "id": "gourd.empty", "scene": "story.water.1899", "capabilities": ["reveal", "illuminate"] },
+    { "id": "figure.naisula", "scene": "story.water.1899", "capabilities": ["reveal", "illuminate", "withdraw"] },
+    { "id": "gourd.old", "scene": "story.water.1899", "capabilities": ["reveal", "illuminate"] },
+    { "id": "seed", "scene": "story.water.1899", "capabilities": ["offer", "place"], "continues": "seed.kept" },
+
+    { "id": "jiko", "scene": "story.water.today", "capabilities": ["reveal", "illuminate"], "continues": "ember" },
+    { "id": "gate", "scene": "story.water.today", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "soil", "scene": "story.water.today", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "sprout", "scene": "story.water.today", "capabilities": ["reveal"] },
+    { "id": "bead.today", "scene": "story.water.today", "capabilities": ["place"], "continues": "bead.kept" },
+    { "id": "seed.today", "scene": "story.water.today", "capabilities": ["place"], "continues": "seed.kept" }
+  ],
+  "claims": [
+    { "id": "C1", "state": "documented", "text": "The name Nairobi comes from a Maa phrase usually written Enkare Nyirobi, 'cool water', naming the stream.", "sources": ["https://en.wikipedia.org/wiki/History_of_Nairobi", "https://www.paukwa.or.ke/story-series/trackingourrailways/construction-of-the-railway-navigating-nairobi/"] },
+    { "id": "C2", "state": "documented", "text": "Before the railway the site was a swampy plain where Maasai grazed cattle; Maasai, Akamba and Kikuyu all used the area.", "sources": ["https://www.paukwa.or.ke/story-series/trackingourrailways/construction-of-the-railway-navigating-nairobi/", "Freeman, D. B. (1991) City of Farmers. McGill-Queen's University Press."] },
+    { "id": "C3", "state": "documented", "text": "The Uganda Railway reached the site, 326 km from Mombasa, on 30 May 1899; it became a supply depot, a camp for construction workers (many from India) and the railway's headquarters.", "sources": ["https://www.paukwa.or.ke/story-series/trackingourrailways/construction-of-the-railway-navigating-nairobi/", "Cybriwsky, R. A. (2013) Capital Cities around the World. ABC-CLIO, p. 303."] },
+    { "id": "C4", "state": "documented", "text": "A load of foxtail millet, sorghum or banana flour could be exchanged with the Maasai for a ewe or a ram; banana flour was made only for the Maasai trade.", "sources": ["Leakey, L. S. B. (1977) The Southern Kikuyu before 1903. Academic Press, vol. 1, p. 20."] },
+    { "id": "C6", "state": "documented", "text": "Kikuyu and Maasai traded, raided occasionally and intermarried widely.", "sources": ["Muriuki, G. (1974) A History of the Kikuyu 1500-1900. Oxford University Press.", "https://soas-repository.worktribe.com/output/402032/a-history-of-the-kikuyu-to-1904"] },
+    { "id": "C7", "state": "documented", "text": "The Maasai milk gourd (ekukuri) was smoked inside with oloirien wood.", "sources": ["https://artsandculture.google.com/story/_gUx7TIiep4KKA"] },
+    { "id": "C8", "state": "documented", "text": "Kikuyu households kept honey in log hives and barrels.", "sources": ["Leakey, L. S. B. (1977) The Southern Kikuyu before 1903. Academic Press, vol. 1, p. 23."] },
+    { "id": "C9", "state": "documented", "text": "From 1883 Maasai herds were struck by cattle epidemics including rinderpest, then smallpox; the rains failed in 1897 and 1898.", "sources": ["Waller, R. (1988) 'Emutai: crisis and response in Maasailand 1883-1902', in Johnson and Anderson (eds.) The Ecology of Survival.", "https://en.wikipedia.org/wiki/Maasai_people"] },
+    { "id": "C10", "state": "documented", "text": "The famine of 1898-1899 followed locusts, failed rains and smallpox and devastated the Mount Kenya region and the land around it.", "sources": ["https://doi.org/10.4102/hts.v76i4.6198"] },
+    { "id": "C11", "state": "documented", "text": "In 1904 and again from 1911 the colonial government moved the Maasai off much of their land, including around Nairobi, for European settlers.", "sources": ["Hughes, L. (2006) Moving the Maasai: A Colonial Misadventure. Palgrave Macmillan.", "https://oro.open.ac.uk/7869/"] },
+    { "id": "C12", "state": "documented", "text": "Kikuyu traders exchanged goods with coastal traders at Ngong for beads, cloth and brass wire.", "sources": ["Leakey, L. S. B. (1977) The Southern Kikuyu before 1903. Academic Press, vol. 1, p. 22."] },
+    { "id": "C14", "state": "documented", "text": "Sankofa is an Akan word meaning, literally, 'go back and get it'.", "sources": ["https://en.wikipedia.org/wiki/Sankofa", "https://nmaahc.si.edu/object/nmaahc_2014.321"] },
+    { "id": "C15", "state": "documented", "text": "The Nairobi River is the focus of a regeneration programme, and community groups garden along banks reclaimed from dumping.", "sources": ["https://nairobi.go.ke/restoring-nairobis-rivers-in-order-to-improve-quality-of-life", "https://www.dreamtown.ngo/newsandstories/2025/12/1/reclaiming-the-nairobi-river-how-youth-led-clean-ups-are-restoring-water-dignity-and-hope"] },
+    { "id": "R1", "state": "reconstruction", "text": "Wambui, Naserian, Njeri and Naisula are fictional composites; their meetings, words and gifts are imagined." }
+  ],
+  "welcome": [
+    { "id": "welcome.sit", "text": "Come. Sit with me.", "seconds": 3.2, "pause_after": 1.2, "fire": "welcoming" },
+    { "id": "welcome.griot", "text": "I am a griot, a keeper of the stories that time tries to scatter.", "seconds": 5.6, "pause_after": 0.6, "fire": "telling" },
+    { "id": "welcome.reach", "text": "Tonight, I reach back for you.", "seconds": 3.8, "pause_after": 1.0, "fire": "telling" },
+    { "id": "welcome.water", "text": "There is a stream where the forest meets the plain, so cool that the people who watered their herds there named the place for it. I have been back to it many times.", "seconds": 10.0, "pause_after": 0.8, "fire": "telling", "claims": ["C1"] },
+    { "id": "welcome.choose", "text": "When shall we go? Reach out and choose.", "seconds": 3.6, "fire": "listening" }
+  ],
+  "welcome_back": [
+    { "id": "back.sit", "text": "You came back. Sit with me.", "seconds": 3.4, "pause_after": 0.8, "fire": "welcoming" },
+    { "id": "back.kept", "text": "I kept what you carried home. We can go back to the water and see what became of it, hear your visit again as it was, or begin somewhere else in time.", "seconds": 9.6, "fire": "listening" }
+  ],
+  "choose": [
+    { "id": "choose.again", "text": "When shall we go this time?", "seconds": 3.0, "fire": "listening" }
+  ],
+  "routes": [
+    {
+      "id": "era.1850s",
+      "label": "Before the railway",
+      "beats": ["gather.1850s", "offer", "e1.water", "e1.wambui", "e1.naserian", "e1.offer", "e1.turn", "e1.gift", "e1.dusk", "home.back", "home.1850s"],
+      "keepsake": "bead.kept",
+      "next": "today.from-1850s"
+    },
+    {
+      "id": "era.1899",
+      "label": "When the railway came",
+      "beats": ["gather.1899", "offer", "e2.camp", "e2.hunger", "e2.meeting", "e2.turn", "e2.seed", "e2.after", "home.back", "home.1899"],
+      "keepsake": "seed.kept",
+      "next": "today.from-1899"
+    },
+    {
+      "id": "today.from-1850s",
+      "label": "The same water, today",
+      "follows": "era.1850s",
+      "beats": ["again.bead", "offer", "today.enter", "today.river", "today.bead", "today.sankofa", "home.today"],
+      "keepsake": "ember"
+    },
+    {
+      "id": "today.from-1899",
+      "label": "The same water, today",
+      "follows": "era.1899",
+      "beats": ["again.seed", "offer", "today.enter", "today.river", "today.seed", "today.sankofa", "home.today"],
+      "keepsake": "ember"
+    }
+  ],
+  "beats": [
+    {
+      "id": "offer",
+      "scene": "hearth",
+      "lines": [
+        { "id": "offer.light", "text": "Every story I tell begins with a little of my light.", "seconds": 4.0, "pause_after": 0.6, "fire": "telling" },
+        { "id": "offer.hand", "text": "Hold out your open hand, palm up, and I will give you an ember to carry.", "seconds": 5.0, "fire": "holding", "actions": [{ "do": "offer", "object": "ember" }] }
+      ],
+      "invitation": {
+        "id": "receive-ember",
+        "kind": "receive",
+        "object": "ember",
+        "alternative": "Take the ember",
+        "wait_seconds": 14,
+        "accepted": [{ "id": "offer.accepted", "text": "It is yours to carry now. Keep it close.", "seconds": 3.6, "pause_after": 0.8, "fire": "welcoming" }],
+        "default": [{ "id": "offer.default", "text": "I will set it beside you, then. It will follow us.", "seconds": 4.0, "pause_after": 0.8, "fire": "holding", "actions": [{ "do": "place", "object": "ember" }] }]
+      }
+    },
+    {
+      "id": "gather.1850s",
+      "scene": "hearth",
+      "lines": [
+        { "id": "e1.gather", "text": "Before the railway, then. Before the town, before the roads. Only the water, and the people who came to it.", "seconds": 7.0, "pause_after": 0.8, "fire": "gathering" }
+      ]
+    },
+    {
+      "id": "e1.water",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.listen", "text": "Listen. That is the water.", "seconds": 3.0, "pause_after": 1.2, "fire": "gathering", "actions": [{ "do": "reveal", "object": "water.spill" }] },
+        { "id": "e1.sides", "text": "Up the slope, the forest, where the Kikuyu grow millet and keep their hives. Down the slope, the plain, where the Maasai graze their cattle and their sheep. Everyone comes to the water.", "seconds": 11.0, "pause_after": 0.8, "fire": "telling", "claims": ["C2", "C8"] },
+        { "id": "e1.touch", "text": "Put your hand in it.", "seconds": 2.4, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "touch-water",
+        "kind": "touch",
+        "object": "water.spill",
+        "alternative": "Touch the water",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "e1.water.felt", "text": "Cold, even now, at the end of the dry season. Enkare Nairobi, they call it. Cool water. Remember that name; it will outlive everyone in this story.", "seconds": 10.0, "pause_after": 1.0, "fire": "telling", "claims": ["C1"], "actions": [{ "do": "illuminate", "object": "water.spill" }] }],
+        "default": [{ "id": "e1.water.heard", "text": "You can hear how cold it is. Enkare Nairobi, they call it. Cool water. Remember that name; it will outlive everyone in this story.", "seconds": 9.6, "pause_after": 1.0, "fire": "telling", "claims": ["C1"], "actions": [{ "do": "illuminate", "object": "water.spill" }] }]
+      },
+      "questions": [
+        { "id": "q.e1.real", "label": "Is this a real place?", "lines": [{ "id": "q.e1.real.answer", "text": "It is. A city stands on it now and carries its name. The place is true, the trading is true, and so were the hard years. The people I show you are made of many people. That is how I tell it.", "seconds": 11.0, "fire": "holding", "claims": ["C1", "C3", "R1"] }] }
+      ]
+    },
+    {
+      "id": "e1.wambui",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.wambui.arrives", "text": "Here comes Wambui down the forest path. She has walked since morning.", "seconds": 4.6, "pause_after": 0.6, "fire": "telling", "actions": [{ "do": "reveal", "object": "figure.wambui" }] },
+        { "id": "e1.flour", "text": "She carries banana flour: green bananas dried in the sun and pounded. Her family makes it for one thing only, to trade with the Maasai.", "seconds": 8.6, "pause_after": 0.6, "fire": "telling", "claims": ["C4"] },
+        { "id": "e1.carry", "text": "She is tired. Hold out your hand, and she will let you carry it.", "seconds": 4.2, "fire": "holding", "actions": [{ "do": "offer", "object": "gourd.flour" }] }
+      ],
+      "invitation": {
+        "id": "receive-flour",
+        "kind": "receive",
+        "object": "gourd.flour",
+        "alternative": "Carry the flour",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "e1.carry.yes", "text": "Heavy, isn't it? A whole season of bananas.", "seconds": 3.4, "pause_after": 0.8, "fire": "welcoming" }],
+        "default": [{ "id": "e1.carry.no", "text": "She sets it down beside you. It will wait.", "seconds": 3.2, "pause_after": 0.8, "fire": "holding", "actions": [{ "do": "place", "object": "gourd.flour" }] }]
+      },
+      "questions": [
+        { "id": "q.e1.flour", "label": "Why banana flour?", "about": "gourd.flour", "lines": [{ "id": "q.e1.flour.answer", "text": "Because it keeps, and because the Maasai wanted it. An old Kikuyu man once said a load of it could fetch a ewe or a ram. They made it only for this trade.", "seconds": 9.0, "fire": "telling", "claims": ["C4"] }] }
+      ]
+    },
+    {
+      "id": "e1.naserian",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.naserian.arrives", "text": "And from the plain, Naserian, with a ewe on a rope and a gourd of milk.", "seconds": 4.8, "pause_after": 0.4, "fire": "telling", "actions": [{ "do": "reveal", "object": "figure.naserian" }, { "do": "reveal", "object": "figure.ewe" }, { "do": "reveal", "object": "gourd.milk" }] },
+        { "id": "e1.milk", "text": "The gourd is smoked inside with oloirien wood, so the milk keeps.", "seconds": 4.4, "pause_after": 0.6, "fire": "telling", "claims": ["C7"], "actions": [{ "do": "illuminate", "object": "gourd.milk" }] },
+        { "id": "e1.price", "text": "A load of flour for a ewe. That has always been the price.", "seconds": 4.0, "pause_after": 1.0, "fire": "telling", "claims": ["C4"] },
+        { "id": "e1.problem", "text": "But Wambui's harvest was small this year. There is less in that gourd than a full load. And on the plain the rains have not come. Naserian needs the flour more than she will say.", "seconds": 11.0, "pause_after": 1.2, "fire": "holding" }
+      ],
+      "questions": [
+        { "id": "q.e1.friends", "label": "Are they friends?", "lines": [{ "id": "q.e1.friends.answer", "text": "Trading partners first. Then, often, family. These two peoples traded, quarrelled, raided now and then, and married one another for a very long time.", "seconds": 9.0, "fire": "telling", "claims": ["C6"] }] },
+        { "id": "q.e1.milk", "label": "What is in the gourd?", "about": "gourd.milk", "lines": [{ "id": "q.e1.milk.answer", "text": "Milk. The gourd is cleaned and smoked with burning oloirien wood, and the smoke keeps it sweet for longer.", "seconds": 7.0, "fire": "telling", "claims": ["C7"] }] }
+      ]
+    },
+    {
+      "id": "e1.offer",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.hide", "text": "There is a hide spread on the flat stone between them. Set the flour down on it.", "seconds": 5.0, "fire": "holding", "actions": [{ "do": "reveal", "object": "hide" }] }
+      ],
+      "invitation": {
+        "id": "offer-flour",
+        "kind": "touch",
+        "object": "hide",
+        "alternative": "Offer the flour",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "e1.offer.yes", "text": "You set it on the hide between them. Naserian looks at it, and then she looks at you.", "seconds": 6.0, "pause_after": 1.0, "fire": "telling", "actions": [{ "do": "place", "object": "gourd.flour", "at": "hide" }] }],
+        "default": [{ "id": "e1.offer.no", "text": "Wambui sets it down herself. Naserian looks at it for a long time.", "seconds": 4.8, "pause_after": 1.0, "fire": "telling", "actions": [{ "do": "place", "object": "gourd.flour", "at": "hide" }] }]
+      }
+    },
+    {
+      "id": "e1.turn",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.rest", "text": "She does not take the ewe away. 'Bring the rest when your bananas ripen.'", "seconds": 5.4, "pause_after": 1.2, "fire": "welcoming" },
+        { "id": "e1.kin", "text": "That is how it was done here: season after season, a little owed each way. Families who trade like that for long enough stop being strangers. Their children marry. Between these two peoples, that happened often.", "seconds": 12.0, "pause_after": 1.2, "fire": "telling", "claims": ["C6"] }
+      ]
+    },
+    {
+      "id": "e1.gift",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.bead", "text": "Naserian slips a bead from the string at her neck, and holds it out to the one who carried the flour.", "seconds": 6.4, "fire": "holding", "claims": ["C12", "R1"], "actions": [{ "do": "offer", "object": "bead" }] }
+      ],
+      "invitation": {
+        "id": "receive-bead",
+        "kind": "receive",
+        "object": "bead",
+        "alternative": "Take the bead",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "e1.bead.yes", "text": "It is still warm from her skin.", "seconds": 2.8, "pause_after": 1.0, "fire": "welcoming" }],
+        "default": [{ "id": "e1.bead.no", "text": "She sets it on the stone beside you. 'For the one who carried.'", "seconds": 4.2, "pause_after": 1.0, "fire": "welcoming", "actions": [{ "do": "place", "object": "bead" }] }]
+      }
+    },
+    {
+      "id": "e1.dusk",
+      "scene": "story.water.1850s",
+      "lines": [
+        { "id": "e1.part", "text": "One goes up to the forest, one down to the plain. The water stays where it is.", "seconds": 5.6, "pause_after": 1.6, "fire": "holding", "actions": [{ "do": "withdraw", "object": "figure.wambui" }, { "do": "withdraw", "object": "figure.naserian" }, { "do": "withdraw", "object": "figure.ewe" }] }
+      ]
+    },
+    {
+      "id": "home.back",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.back.ember", "text": "We are home. The light you carried is my ember again; I will take it back.", "seconds": 5.0, "pause_after": 0.8, "fire": "welcoming", "actions": [{ "do": "withdraw", "object": "ember" }] }
+      ]
+    },
+    {
+      "id": "home.1850s",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.bead", "text": "The bead stays with you. Keep this visit, and next time I will take you back to that water, a long time later.", "seconds": 7.0, "fire": "welcoming" }
+      ]
+    },
+    {
+      "id": "gather.1899",
+      "scene": "hearth",
+      "lines": [
+        { "id": "e2.gather", "text": "When the railway came. That is a hard year to visit. I will be gentle with it, and I will be honest.", "seconds": 7.0, "pause_after": 0.8, "fire": "gathering" }
+      ]
+    },
+    {
+      "id": "e2.camp",
+      "scene": "story.water.1899",
+      "lines": [
+        { "id": "e2.same", "text": "The same water. Listen: still cool. Now look at what has come to it.", "seconds": 5.4, "pause_after": 1.2, "fire": "gathering", "actions": [{ "do": "reveal", "object": "rails" }] },
+        { "id": "e2.depot", "text": "In May of 1899, men laying iron reached this stream, three hundred kilometres from the sea. They made it a store for rails, a camp for the workers, many of them from India, and soon the railway's headquarters.", "seconds": 12.0, "pause_after": 0.8, "fire": "telling", "claims": ["C3"] },
+        { "id": "e2.touch", "text": "Touch the rail.", "seconds": 2.0, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "touch-rail",
+        "kind": "touch",
+        "object": "rails",
+        "alternative": "Touch the rail",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "e2.rail.felt", "text": "Cold, like the water. But it does not run anywhere on its own. Someone has to drive it.", "seconds": 6.0, "pause_after": 1.0, "fire": "telling", "actions": [{ "do": "illuminate", "object": "rails" }] }],
+        "default": [{ "id": "e2.rail.heard", "text": "I will touch it for you. Cold, like the water. But it does not run anywhere on its own. Someone has to drive it.", "seconds": 7.0, "pause_after": 1.0, "fire": "telling", "actions": [{ "do": "illuminate", "object": "rails" }] }]
+      },
+      "questions": [
+        { "id": "q.e2.workers", "label": "Who are the workers?", "lines": [{ "id": "q.e2.workers.answer", "text": "Men brought from India to build the line, a very long way from their own homes. Listen: you can hear them working.", "seconds": 7.0, "fire": "telling", "claims": ["C3"] }] },
+        { "id": "q.e2.real", "label": "Is this a real place?", "lines": [{ "id": "q.e2.real.answer", "text": "It is. The depot was real, and so was the hunger. The two women you are about to meet are made of many people.", "seconds": 7.4, "fire": "holding", "claims": ["C3", "R1"] }] }
+      ]
+    },
+    {
+      "id": "e2.hunger",
+      "scene": "story.water.1899",
+      "lines": [
+        { "id": "e2.famine", "text": "And this is a hungry year. The rains failed again and again; then came locusts, then sickness. Up in the forest, people would remember it as one of the worst famines anyone had known.", "seconds": 12.0, "pause_after": 1.0, "fire": "holding", "claims": ["C10"] },
+        { "id": "e2.plain", "text": "On the plain, cattle plague had already taken many of the herds, and the rains failed there too.", "seconds": 6.4, "pause_after": 1.2, "fire": "holding", "claims": ["C9"] }
+      ],
+      "questions": [
+        { "id": "q.e2.cattle", "label": "What happened to the cattle?", "lines": [{ "id": "q.e2.cattle.answer", "text": "For nearly twenty years, one sickness after another came through the herds, and then smallpox came for the people. The Maasai remember those years as a time of wiping out.", "seconds": 10.0, "fire": "holding", "claims": ["C9"] }] }
+      ]
+    },
+    {
+      "id": "e2.meeting",
+      "scene": "story.water.1899",
+      "lines": [
+        { "id": "e2.njeri", "text": "Wambui's granddaughter, Njeri, comes down to the water with a gourd that is almost empty. She comes because her grandmother always came here.", "seconds": 8.6, "pause_after": 0.8, "fire": "telling", "claims": ["R1"], "actions": [{ "do": "reveal", "object": "figure.njeri" }, { "do": "reveal", "object": "gourd.empty" }] },
+        { "id": "e2.naisula", "text": "From the plain, Naserian's granddaughter, Naisula. No ewe. No milk. The smoke in her gourd is old.", "seconds": 7.0, "pause_after": 1.0, "fire": "telling", "claims": ["C7", "R1"], "actions": [{ "do": "reveal", "object": "figure.naisula" }, { "do": "reveal", "object": "gourd.old" }] },
+        { "id": "e2.nothing", "text": "There is nothing to trade. Behind them, hammers ring on iron.", "seconds": 4.6, "pause_after": 1.6, "fire": "holding" }
+      ]
+    },
+    {
+      "id": "e2.turn",
+      "scene": "story.water.1899",
+      "lines": [
+        { "id": "e2.share", "text": "Njeri pours what flour she has into Naisula's gourd, and Naisula lets her. Neither of them says the old price.", "seconds": 7.4, "pause_after": 1.0, "fire": "welcoming", "actions": [{ "do": "illuminate", "object": "gourd.old" }] },
+        { "id": "e2.measuring", "text": "Naisula tells her where the strangers have been measuring the ground.", "seconds": 4.4, "pause_after": 1.2, "fire": "holding" }
+      ],
+      "questions": [
+        { "id": "q.e2.again", "label": "Did they keep meeting?", "lines": [{ "id": "q.e2.again.answer", "text": "I don't know. I hope so. That is the honest answer.", "seconds": 4.0, "fire": "holding" }] }
+      ]
+    },
+    {
+      "id": "e2.seed",
+      "scene": "story.water.1899",
+      "lines": [
+        { "id": "e2.bundle", "text": "Then Njeri unties a little bundle she did not open even this year: seed millet. She gives half to Naisula, for when her family can plant again, and holds a pinch out to you.", "seconds": 10.6, "fire": "holding", "claims": ["R1"], "actions": [{ "do": "offer", "object": "seed" }] }
+      ],
+      "invitation": {
+        "id": "receive-seed",
+        "kind": "receive",
+        "object": "seed",
+        "alternative": "Take the seed",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "e2.seed.yes", "text": "For when the rains come back.", "seconds": 2.6, "pause_after": 1.0, "fire": "welcoming" }],
+        "default": [{ "id": "e2.seed.no", "text": "She folds it into a leaf and sets it beside you. 'For when the rains come back.'", "seconds": 5.0, "pause_after": 1.0, "fire": "welcoming", "actions": [{ "do": "place", "object": "seed" }] }]
+      }
+    },
+    {
+      "id": "e2.after",
+      "scene": "story.water.1899",
+      "lines": [
+        { "id": "e2.town", "text": "A town will grow on this water and take its name. Within a few years the Maasai would be moved off this land, and Kikuyu farms nearby taken for settlers.", "seconds": 10.0, "pause_after": 1.0, "fire": "holding", "claims": ["C1", "C11"] },
+        { "id": "e2.today", "text": "But not today. Today, two women shared what they had.", "seconds": 4.0, "pause_after": 1.6, "fire": "welcoming", "actions": [{ "do": "withdraw", "object": "figure.njeri" }, { "do": "withdraw", "object": "figure.naisula" }] }
+      ]
+    },
+    {
+      "id": "home.1899",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.seed", "text": "Keep the seed. If you keep this visit, I will show you where it might grow.", "seconds": 5.4, "fire": "welcoming" }
+      ]
+    },
+    {
+      "id": "again.bead",
+      "scene": "hearth",
+      "lines": [
+        { "id": "again.bead.held", "recall": "receive-bead:accepted", "text": "Last time, Naserian put a bead in your hand.", "seconds": 3.4, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.bead.left", "recall": "receive-bead:default", "text": "Last time, Naserian left a bead beside you.", "seconds": 3.4, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.bead.bring", "text": "Bring it. We are going back to the water.", "seconds": 3.0, "pause_after": 0.6, "fire": "telling", "actions": [{ "do": "place", "object": "bead.kept" }] }
+      ]
+    },
+    {
+      "id": "again.seed",
+      "scene": "hearth",
+      "lines": [
+        { "id": "again.seed.held", "recall": "receive-seed:accepted", "text": "Last time, Njeri put seed in your hand, for when the rains come back.", "seconds": 4.6, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.seed.left", "recall": "receive-seed:default", "text": "Last time, Njeri left you seed folded in a leaf.", "seconds": 3.6, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.seed.bring", "text": "Bring it. We are going back to the water.", "seconds": 3.0, "pause_after": 0.6, "fire": "telling", "actions": [{ "do": "place", "object": "seed.kept" }] }
+      ]
+    },
+    {
+      "id": "today.enter",
+      "scene": "story.water.today",
+      "lines": [
+        { "id": "today.same", "text": "The same water. You can still hear it, under everything else.", "seconds": 4.6, "pause_after": 1.2, "fire": "gathering" },
+        { "id": "today.name", "text": "The city that grew here took its name from it: Nairobi.", "seconds": 4.0, "pause_after": 1.0, "fire": "telling", "claims": ["C1", "C3"] }
+      ]
+    },
+    {
+      "id": "today.river",
+      "scene": "story.water.today",
+      "lines": [
+        { "id": "today.rubbish", "text": "For years the river was buried in rubbish. Now people are pulling it out, and planting gardens on the banks.", "seconds": 7.0, "pause_after": 1.0, "fire": "telling", "claims": ["C15"], "actions": [{ "do": "reveal", "object": "gate" }, { "do": "reveal", "object": "soil" }] }
+      ],
+      "questions": [
+        { "id": "q.today.who", "label": "Who planted this garden?", "about": "soil", "lines": [{ "id": "q.today.who.answer", "text": "Young people from the neighbourhood, mostly. Gardens like this one have grown up where there used to be dumping.", "seconds": 6.4, "fire": "telling", "claims": ["C15"] }] }
+      ]
+    },
+    {
+      "id": "today.bead",
+      "scene": "story.water.today",
+      "lines": [
+        { "id": "today.bead.ask", "text": "Hang the bead on the garden gate.", "seconds": 2.8, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "hang-bead",
+        "kind": "touch",
+        "object": "gate",
+        "alternative": "Hang the bead",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "today.bead.yes", "text": "There. Someone will find it. Maybe one of Naserian's grandchildren's grandchildren; there are a great many of them in this city, and some of them are Wambui's too.", "seconds": 10.0, "pause_after": 1.2, "fire": "welcoming", "claims": ["C6"], "actions": [{ "do": "place", "object": "bead.today", "at": "gate" }] }],
+        "default": [{ "id": "today.bead.no", "text": "I will hang it for you. Someone will find it. Maybe one of Naserian's grandchildren's grandchildren; some of them are Wambui's too.", "seconds": 8.6, "pause_after": 1.2, "fire": "welcoming", "claims": ["C6"], "actions": [{ "do": "place", "object": "bead.today", "at": "gate" }] }]
+      }
+    },
+    {
+      "id": "today.seed",
+      "scene": "story.water.today",
+      "lines": [
+        { "id": "today.seed.ask", "text": "Plant it.", "seconds": 1.6, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "plant-seed",
+        "kind": "touch",
+        "object": "soil",
+        "alternative": "Plant the seed",
+        "wait_seconds": 12,
+        "accepted": [{ "id": "today.seed.yes", "text": "In the riverbank, in a garden that was a rubbish heap not long ago. The rains came back in the end. They always do.", "seconds": 8.0, "pause_after": 1.2, "fire": "welcoming", "actions": [{ "do": "place", "object": "seed.today", "at": "soil" }, { "do": "reveal", "object": "sprout" }] }],
+        "default": [{ "id": "today.seed.no", "text": "I will plant it for you, in a garden that was a rubbish heap not long ago. The rains came back in the end. They always do.", "seconds": 8.6, "pause_after": 1.2, "fire": "welcoming", "actions": [{ "do": "place", "object": "seed.today", "at": "soil" }, { "do": "reveal", "object": "sprout" }] }]
+      }
+    },
+    {
+      "id": "today.sankofa",
+      "scene": "story.water.today",
+      "lines": [
+        { "id": "today.word", "text": "There is a word I carry from far away: Sankofa. Go back and get it.", "seconds": 5.0, "pause_after": 1.0, "fire": "telling", "claims": ["C14"] },
+        { "id": "today.brought", "text": "You went back. You brought something here.", "seconds": 3.6, "pause_after": 1.6, "fire": "welcoming" }
+      ]
+    },
+    {
+      "id": "home.today",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.today.ember", "text": "We are home. This time, the ember stays with you. That is the end of this thread, and the beginning of whatever you do with it.", "seconds": 8.0, "fire": "welcoming" }
+      ]
+    }
+  ],
+  "early_return": [
+    { "id": "early.later", "text": "The water will still be there. We can go back whenever you like.", "seconds": 4.0, "fire": "welcoming" }
+  ]
+}
