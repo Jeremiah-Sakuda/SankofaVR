@@ -1,0 +1,20 @@
+{
+    "name": "Sankofa.Runtime",
+    "rootNamespace": "Sankofa.Runtime",
+    "references": [
+        "Sankofa.Core",
+        "Sankofa.Flow",
+        "Sankofa.Interaction",
+        "Oculus.VR",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

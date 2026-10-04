@@ -58,6 +58,8 @@ htmlcov/
 /unity/*.VC.db
 /unity/Assets/Resources/DevAgentSettings.asset
 /unity/Assets/Resources/DevAgentSettings.asset.meta
+# Left behind by Unity's performance test package after batch test runs; builds delete them first.
+/unity/Assets/Resources/PerformanceTestRun*
 /unity/Assets/StreamingAssets/
 /unity/Assets/StreamingAssets.meta
 /unity/Assets/LocalOnly/
