@@ -1,6 +1,6 @@
 # Development guide
 
-This repository contains the product plans, a first Unity slice under `unity/` and the engine-free story core with its tests under `dotnet/`. The slice plays a development placeholder story; no backend or provider integration exists yet.
+This repository contains the product plans, a first Unity slice under `unity/` and the engine-free story core with its tests under `dotnet/`. The slice plays the draft Enkare Nairobi story package with narration rendered ahead of time by `scripts/generate_narration.py` (Google Cloud Text-to-Speech). No backend exists, and the build makes no provider call at runtime.
 
 ## Check documentation and exclusions
 

@@ -24,9 +24,13 @@ A proposed hands-first spatial storytelling experience for Meta Quest. A living 
 
 ## Current status
 
-The first presence slice exists in software: a Unity project for Quest and an engine-free story core with .NET tests. A placeholder story exercises the hearth welcome, an ember offered to an open palm (or a nearby button), a passive default that never claims a choice, a stationary entry through the fire, a reveal that depends on the visitor's action, and the return. Pause, interruption and late-result handling are covered by tests.
+The first full slice exists in software: a Unity project for Quest and an engine-free story core with .NET tests. It tells **Enkare Nairobi**, a draft story of the cool-water stream that gave Nairobi its name, across two eras and today. The [content](docs/content/enkare-nairobi/README.md) cites a source register.
 
-Nothing has run on a headset, in the simulator with hands, or with a participant. The episode, setting, narration voice and second language are not selected; the placeholder makes no historical or cultural claims. The planned entry is Adapted / Significantly Updated Entertainment. Weekly hours, budget and current headset access remain open. AI-generated music is excluded.
+At the hearth the fire welcomes the visitor and offers a choice of when to go. The visitor enters through the flame, without moving, into a scene where people appear as shapes of firelight. Hands carry, offer and touch things, which changes later lines. Questions on a panel by the right hand are answered, and then the story resumes. The griot's pre-rendered voice comes from the original web Sankofa's direction.
+
+A visit can be kept by an explicit choice, replayed exactly, and continued to today. Passive progression, pause, early return and late-result handling are covered by tests.
+
+Nothing has run on a headset, in the simulator with hands, or with a participant. The stories are unreviewed by family or community, and some claims are gated until verified. The second language is not selected. The planned entry is Adapted / Significantly Updated Entertainment. Weekly hours, budget and current headset access remain open. AI-generated music is excluded.
 
 ## Check the workspace
 
@@ -38,7 +42,7 @@ git diff --check
 dotnet test dotnet/Sankofa.Tests
 ```
 
-The document check covers tracked Markdown links and local-only file protections. The .NET tests cover episode validation, the visit flow and gesture logic. Neither validates a VR experience; Unity checks are in the [Unity README](unity/README.md).
+The document check covers tracked Markdown links and local-only file protections. The .NET tests cover package and plan validation, the visit flow, kept visits and gesture logic. Neither validates a VR experience; Unity checks are in the [Unity README](unity/README.md).
 
 ## Local-only material
 

@@ -2,7 +2,7 @@
 
 September 30, 2026 · [PRD v1.0](../Sankofa-PRD.md) · [Delivery plan](../Sankofa-Delivery-Plan.md)
 
-A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Some runtime requirements now exist in software with a placeholder story; none has device, content or participant acceptance. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
+A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Some runtime requirements now exist in software with the draft Enkare Nairobi package; none has device, content or participant acceptance. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
 
 ## Product baseline
 
@@ -27,7 +27,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 - [x] Create the Sankofa Unity project and scene here; assess reuse explicitly and preserve the original music workspace. Platform tooling ported from Nafasi is recorded in [provenance](workspace-provenance.md).
 - [x] Build a 30–45-second hearth with welcome, listening and telling states, hands, captions and local sound. Software only, with placeholder lines and synthesised fire sound; no headset review.
 - [x] Implement a stationary fire-entry/return transition and reduced-motion variant. Software only; comfort untested.
-- [ ] Produce one coherent scene kit and one close-inspection object; record provenance and context review.
+- [x] Produce one coherent scene kit and one close-inspection object; record provenance and context review. Three procedural scenes at the water (before the railway, 1899, today) with touchable spill, hide, rails, gate and soil; provenance in the [asset register](asset-register.md). Desktop captures only; no art, context or headset review.
 - [ ] Compare generated spatial scenery with an editable mesh candidate on actual hardware if worthwhile within the probe allowance.
 - [ ] Review presence, depth, fire cost, reach and sound on a Quest; label simulator-only evidence accurately (SK-01, SK-02, SK-07, SK-11, SK-15).
 
@@ -35,26 +35,26 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 - [ ] Compare bounded personalisation with an equally polished authored benchmark for relevance, coherence and pacing; separately evaluate the added value of live answers (stress-test T5).
 - [x] Define episode, claim, staged-object, beat, invitation and visit-journal records with stable IDs and validation (schema 1).
-- [ ] Define confirmed-intent, coverage and realised-plan records.
-- [ ] Add a small reviewed context package; preserve uncertainty and reject unsupported geographic substitutions.
-- [ ] Generate two contrasting requests into visibly different legal scene plans before producing final narration.
-- [ ] Validate evidence, asset availability, continuity, actions and endings; test malformed/stale/missing-asset proposals.
-- [ ] Benchmark current narration/live candidates for the proposed languages, voice continuity, captions, cost and latency (SK-03–06, SK-09–10).
+- [ ] Define confirmed-intent, coverage and realised-plan records. Realised plans and kept visits (schema 1) exist and replay exactly; confirmed-intent and coverage records do not.
+- [ ] Add a small reviewed context package; preserve uncertainty and reject unsupported geographic substitutions. The [Enkare Nairobi package](../unity/Assets/Sankofa/Content/enkare-nairobi.json) cites every documented claim and labels reconstruction; it is unreviewed.
+- [ ] Generate two contrasting requests into visibly different legal scene plans before producing final narration. The two eras and the hand paths compose into different validated plans; nothing is generated at runtime yet.
+- [x] Validate evidence, asset availability, continuity, actions and endings; test malformed/stale/missing-asset proposals. Package and plan validators walk every route and outcome against the staged inventory; .NET and EditMode tests.
+- [ ] Benchmark current narration/live candidates for the proposed languages, voice continuity, captions, cost and latency (SK-03–06, SK-09–10). English narration is pre-rendered with Gemini 3.1 Flash TTS (voice Kore) and bundled; the user's listening preference is the only comparison so far.
 
 ## G3 — complete visitor journey
 
 - [ ] Hands-first setup and input confirmation with optional speech and microphone-denied completion.
 - [ ] Generate/prepare a full story, including timed loading escape and explicit bundled-story selection.
-- [ ] Connect narration cues to fire, scene entry, inspection, a consequential hand moment, reveal and return.
+- [x] Connect narration cues to fire, scene entry, inspection, a consequential hand moment, reveal and return. Software and desktop captures only.
 - [x] Make passive progression complete and acknowledge explicit choices accurately. Placeholder episode; software tests only.
-- [ ] Support contextual hand questions plus accepted live-language interruptions with coherent resume.
+- [ ] Support contextual hand questions plus accepted live-language interruptions with coherent resume. Authored questions on a hand panel answer and resume; live-language interruption does not exist.
 - [ ] Cancel queued speech/actions after interruption or scene change; discard late replies (SK-01–10, SK-14). Narration and transition completions already carry tokens and stale ones are rejected; generated and conversational replies do not exist yet.
 
 ## G4 — coverage, return and recovery
 
 - [ ] Complete three distinct scene plans for the reviewed context; compare paired interests for material differences.
 - [ ] Release the second reviewed narration language with accurate English subtitles and an explicit live-language support matrix.
-- [ ] Save realised narration/plans and local keepsakes only when enabled; implement replay, continuation, deletion and version handling.
+- [x] Save realised narration/plans and local keepsakes only when enabled; implement replay, continuation, deletion and version handling. A visit is kept only on **Keep this visit**; replay, continuation to today, forget with confirmation and schema checks exist in software.
 - [ ] Implement stable checkpoint resume, headset-removal pause, save failure and content-missing recovery.
 - [ ] Complete offline cold start, mid-question disconnect, invalid generation, permission denial and no-input endings.
 - [ ] Finalise privacy notices, retention/deletion behaviour, provider terms, credentials protection and asset/audio credits (SK-05–06, SK-12–16, SK-18).

@@ -1,6 +1,6 @@
 # Modular architecture
 
-September 30, 2026 · Implementation contract. Since October 1 the story core, application flow, gesture logic, Unity presentation and editor tooling exist for a placeholder slice; see the [development guide](development.md#implementation-layout-and-checks). Provider, persistence and content-service adapters do not exist yet.
+September 30, 2026 · Implementation contract. The story core, application flow, gesture logic, Unity presentation and editor tooling exist for the first slice. It plays the draft Enkare Nairobi package; see the [development guide](development.md#implementation-layout-and-checks). A local file store for kept visits implements the persistence contract. Narration is rendered offline by a production script, not by a runtime adapter. Runtime provider and content-service adapters do not exist yet.
 
 Sankofa should support different reviewed stories, languages and service providers without rebuilding the visitor journey. The [PRD](../Sankofa-PRD.md) defines behaviour and acceptance; the [delivery plan](../Sankofa-Delivery-Plan.md) sequences delivery. Competition strategy stays in the ignored local brief described in [development](development.md#local-competition-context).
 

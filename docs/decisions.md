@@ -88,3 +88,22 @@ On the user's instruction, Vertex AI was enabled on their "Sankofa Project" Goog
 | Family as reviewers | Requested; questions are in the source register |
 
 This does not establish content review, cultural acceptance, voice quality or device results.
+
+## The griot's voice and the first Enkare Nairobi build — October 4, 2026
+
+The user asked to keep the original griot's voice using the gcloud CLI. The Gemini API rejected gcloud credentials, and Vertex AI did not serve the text-to-speech models. With the user's approval, the Cloud Text-to-Speech API was enabled on the same "Sankofa Project", and narration is generated through it with the user's own gcloud sign-in. No API key is stored in the repository.
+
+The user compared the newer models and chose **Gemini 3.1 Flash TTS** (`gemini-3.1-flash-tts-preview`, a preview model) over 2.5 Flash. The voice is Kore, with the original web Sankofa's griot direction used verbatim; the user asked to keep that direction. `scripts/generate_narration.py` renders every line of the package ahead of time. The bundled build makes no network call to speak.
+
+On the first pass the provider's safety filter refused two harmless lines; both rendered on retry. The script reports such failures rather than silently skipping a line.
+
+The three water scenes, ember-and-smoke figures and synthesised story ambience replace the placeholder yard and road. The placeholder package remains only as a .NET test fixture.
+
+| Decision | Status |
+|---|---|
+| Narration: Gemini 3.1 Flash TTS, voice Kore, original griot direction, pre-rendered and bundled | User selected; output terms (including the preview model's) to confirm before release |
+| People as additive ember-and-smoke figures with no face or likeness | Implemented in software; not reviewed by family or on a headset |
+| Story ambience synthesised in code (stream, insects, wind, hammers, city) | Implemented; no recorded or generated audio, and no music |
+| The status line shows "Draft story · not yet reviewed by family or community" | Adopted until review |
+
+Not established: pronunciation review, fluent-listener or community review, headset listening, or Quest performance with 85 compressed clips.

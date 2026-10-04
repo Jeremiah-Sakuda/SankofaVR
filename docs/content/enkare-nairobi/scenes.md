@@ -1,6 +1,6 @@
 # Enkare Nairobi: scene scope
 
-October 4, 2026 · Scoping draft · This turns the [stories](stories.md) into buildable scenes for the existing Unity toolkit and story system. Coordinates are metres relative to the seat: x is to the visitor's right, y is up, z is ahead. The seated eye is at (0, 1.15, 0).
+October 4, 2026 · Scoping draft; the three water scenes are built in software (`SankofaWaterScenes`), with desktop captures only · This turns the [stories](stories.md) into buildable scenes for the existing Unity toolkit and story system. Coordinates are metres relative to the seat: x is to the visitor's right, y is up, z is ahead. The seated eye is at (0, 1.15, 0).
 
 ## Rules for every scene
 
@@ -41,7 +41,7 @@ October 4, 2026 · Scoping draft · This turns the [stories](stories.md) into bu
 |---|---|---|---|
 | Traders' fire (the ember's continuation) | `fire.1850s` | (−0.15, 0.08, 1.0) | Continues `ember`. The only light source; glow and sparks at a smaller scale than the hearth |
 | Water spilling over the rock lip | `water.spill` | Touch point (0.32, 0.6, 0.42) | **Touch:** the hand enters the falling water. Ripple, splash sound, cool-tinted hand highlight. Needs the water shader |
-| Stream bed | (static) | 0.8–1.6 m ahead, crossing left to right | Animated water surface, stones, reeds at the edges |
+| Stream bed | (static) | About 2–2.8 m ahead, crossing left to right, behind the traders | Animated water surface in a narrow channel whose banks hide its edges; stones and grass at the edges |
 | Gourd of banana flour | `gourd.flour` | Home at Wambui's figure; offered to (0, 0.85, 0.42) | **Receive.** Turned gourd (lathe), stopper, carrying strap |
 | Trading hide on a flat rock | `hide` | Touch point (0.26, 0.56, 0.5) | **Touch** (offer). The gourd is placed on it. Hide mesh draped over a scanned stone |
 | Milk gourd | `gourd.milk` | Beside Naserian's figure, about (0.9, 0.5, 1.2) | Reveal and illuminate; a soot-dark interior visible at the mouth |
