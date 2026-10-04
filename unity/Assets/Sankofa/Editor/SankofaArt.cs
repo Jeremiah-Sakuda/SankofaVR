@@ -8,7 +8,7 @@ namespace Sankofa.EditorTools
     {
         public Texture2D Noise, Detail;
         public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Button;
-        public Material YardEarth, Plaster, Timber, Clay, Pigment, Brass, LanternCore;
+        public Material EarthWall, FiredClay, Workbench, Brass, LanternCore;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, Stars, Smoke, Halo, Plaque;
     }
 
@@ -51,11 +51,32 @@ namespace Sankofa.EditorTools
                 CaptionBacking = Make("Caption backing", "Sprites/Default", m => m.color = new Color(0.025f, 0.02f, 0.018f, 0.55f)),
                 Button = Make("Button", "Sprites/Default", m => m.color = Color.white),
 
-                YardEarth = Lit("Packed earth", new Color(0.42f, 0.33f, 0.24f)),
-                Plaster = Lit("Plaster", new Color(0.6f, 0.5f, 0.39f)),
-                Timber = Lit("Timber", new Color(0.28f, 0.18f, 0.11f)),
-                Clay = Lit("Fired clay", new Color(0.55f, 0.31f, 0.19f)),
-                Pigment = Lit("Painted rim", new Color(0.72f, 0.56f, 0.28f)),
+                // Story scenes: hand-built earthen walls (the dry ground scan reads as cracked mud plaster), fired clay
+                // whose painted line is vertex colour, and plain workbench wood.
+                EarthWall = Scanned(Baked("Earthen wall", new Color(0.95f, 0.82f, 0.7f), detail, "_DETAIL_TRIPLANAR", new Vector2(0.35f, 0.35f), 0f, 0.3f),
+                    "dry_ground_01", new Vector2(0.65f, 0.65f), 0.8f),
+                FiredClay = Make("Fired clay", "Sankofa/Fire Lit", m =>
+                {
+                    m.SetColor("_Color", new Color(0.64f, 0.38f, 0.24f));
+                    m.SetFloat("_UseBake", 1);
+                    m.SetTexture("_Detail", detail);
+                    m.SetVector("_DetailScale", new Vector4(5f, 2f, 0, 0));
+                    m.SetFloat("_DetailStrength", 0.15f);
+                    m.SetFloat("_DetailAlbedo", 0.25f);
+                    m.SetFloat("_Wrap", 0.35f);
+                    m.SetFloat("_Rim", 0.35f);
+                    m.EnableKeyword("_DETAIL_UV");
+                }),
+                Workbench = Make("Workbench wood", "Sankofa/Fire Lit", m =>
+                {
+                    m.SetColor("_Color", new Color(0.4f, 0.28f, 0.18f));
+                    m.SetTexture("_Detail", detail);
+                    m.SetVector("_DetailScale", new Vector4(0.5f, 3f, 0, 0));
+                    m.SetFloat("_DetailStrength", 0.35f);
+                    m.SetFloat("_DetailAlbedo", 0.45f);
+                    m.SetFloat("_Wrap", 0.3f);
+                    m.EnableKeyword("_DETAIL_UV");
+                }),
                 Brass = Lit("Lantern frame", new Color(0.36f, 0.27f, 0.14f)),
                 LanternCore = Lit("Lantern flame", new Color(0.3f, 0.2f, 0.1f), new Color(1f, 0.72f, 0.4f)),
 

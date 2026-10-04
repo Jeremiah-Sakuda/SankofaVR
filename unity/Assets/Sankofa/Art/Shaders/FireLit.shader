@@ -174,7 +174,8 @@ Shader "Sankofa/Fire Lit"
 
                 half3 ambient = lerp(_SankofaAmbientGround.rgb, _SankofaAmbientSky.rgb, n.y * 0.5 + 0.5) * i.color.a;
                 half3 lit = albedo * (ambient + _SankofaLightColor.rgb * ndl * attenuation * i.visibility.x + _SankofaMoonColor.rgb * (moon + rim) * i.color.a);
-                lit += _Emission.rgb + _HighlightColor.rgb * _Highlight * (0.35 + 0.65 * ndl);
+                // Illumination warms the surface in proportion to its own colour, so painted detail stays legible.
+                lit += _Emission.rgb + _HighlightColor.rgb * (0.05 + albedo * 1.2) * _Highlight * (0.35 + 0.65 * ndl);
 
                 float distance = length(i.world - _WorldSpaceCameraPos);
                 half fog = saturate((distance - _SankofaFogParams.x) * _SankofaFogParams.y);

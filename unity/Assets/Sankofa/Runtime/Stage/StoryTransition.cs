@@ -9,7 +9,7 @@ namespace Sankofa.Runtime.Stage
     /// <summary>
     /// Changes the world around the stationary visitor without moving the camera. Full: the fire rises into a curtain
     /// of warm light, the scene changes behind it and the light parts. Reduced motion: a short, dim dissolve with no
-    /// rising fire or moving light. Both carry the same continuity (ember to lantern) and keep orientation.
+    /// rising fire or moving light. Both carry the same continuities (an ember becoming a lantern) and keep orientation.
     /// </summary>
     public sealed class StoryTransition : MonoBehaviour
     {
@@ -65,30 +65,13 @@ namespace Sankofa.Runtime.Stage
             yield return Fade(0, peak, reduced ? reducedIn : fullIn);
             if (!reduced) yield return new WaitForSeconds(fullHold);
 
-            foreach (var c in continuities)
-            {
-                var from = stage.Find(c.From);
-                var to = stage.Find(c.To);
-                if (from == null || to == null) continue;
-                var at = from.Visible ? from.transform.position : to.HomePosition;
-                from.Hide();
-                to.ShowAt(at);
-                // In a story the carried element settles at its own place; at the hearth it waits for the keepsake cue.
-                if (to.Scene == toScene && !IsHearth(toScene)) to.MoveTo(to.HomePosition, 2.4f);
-            }
+            foreach (var c in continuities) stage.Cross(c.From, c.To, toScene);
             stage.ShowScene(toScene);
 
             yield return Fade(peak, 0, reduced ? reducedOut : fullOut);
             curtain.enabled = false;
             routine = null;
             Finished?.Invoke(token);
-        }
-
-        bool IsHearth(string sceneId)
-        {
-            foreach (var s in stage.Scenes)
-                if (s.Id == sceneId) return s.IsHearth;
-            return false;
         }
 
         IEnumerator Fade(float from, float to, float seconds)

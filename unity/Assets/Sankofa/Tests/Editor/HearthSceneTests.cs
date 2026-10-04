@@ -14,16 +14,16 @@ using UnityEngine;
 
 namespace Sankofa.Tests
 {
-    /// <summary>The generated scene is fully wired and agrees with the bundled episode it plays.</summary>
+    /// <summary>The generated scene is fully wired and agrees with the bundled story package it plays.</summary>
     public class HearthSceneTests
     {
-        Episode episode;
+        StoryPackage package;
 
         [OneTimeSetUp]
         public void OpenScene()
         {
             EditorSceneManager.OpenScene(SankofaSceneBuilder.HearthScene, OpenSceneMode.Single);
-            episode = EpisodeReader.Read(AssetDatabase.LoadAssetAtPath<TextAsset>(SankofaSceneBuilder.EpisodePath).text);
+            package = StoryReader.ReadPackage(AssetDatabase.LoadAssetAtPath<TextAsset>(SankofaSceneBuilder.PackagePath).text);
         }
 
         static T Single<T>() where T : Object
@@ -45,7 +45,11 @@ namespace Sankofa.Tests
         [Test]
         public void EverySankofaComponentIsWired()
         {
-            var components = new List<Object> { Single<SankofaApp>(), Single<StoryStage>(), Single<StoryTransition>(), Single<PalmReceiver>(), Single<WorldAnchor>() };
+            var components = new List<Object>
+            {
+                Single<SankofaApp>(), Single<StoryStage>(), Single<StoryTransition>(), Single<PalmReceiver>(), Single<TouchReceiver>(),
+                Single<AttentionSource>(), Single<WorldAnchor>(),
+            };
             components.AddRange(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.AddRange(Object.FindObjectsByType<Runtime.Fire.HearthFire>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.AddRange(Object.FindObjectsByType<Runtime.Narration.NarrationPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None));
@@ -53,47 +57,76 @@ namespace Sankofa.Tests
             components.Add(Single<Runtime.Audio.NightAmbience>());
             Assert.That(components.SelectMany(MissingReferences), Is.Empty);
             // Panels may use their font's own material.
-            foreach (var panel in Object.FindObjectsByType<PokePanel>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            var panels = Object.FindObjectsByType<PokePanel>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Assert.That(panels.Length, Is.EqualTo(3), "controls, questions and settings");
+            foreach (var panel in panels)
                 Assert.That(MissingReferences(panel).Where(m => !m.EndsWith(".labelMaterial")), Is.Empty);
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
-            // A glow is optional for staged objects; their surfaces are not.
+            // A glow, touch point and place point are optional for staged objects; their surfaces are not.
+            var optional = new[] { ".glow", ".touchPoint", ".placePoint" };
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                Assert.That(MissingReferences(o).Where(m => !m.EndsWith(".glow")), Is.Empty, o.Id);
+                Assert.That(MissingReferences(o).Where(m => !optional.Any(m.EndsWith)), Is.Empty, o.Id);
                 Assert.That(new SerializedObject(o).FindProperty("surfaces").arraySize, Is.GreaterThan(0), o.Id);
             }
         }
 
         [Test]
-        public void StagedObjectsAndScenesMatchTheBundledEpisode()
+        public void TheStageHoldsExactlyWhatTheBundledPackageCanUse()
         {
             var staged = Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            Assert.That(staged.Select(o => o.Id).OrderBy(id => id), Is.EqualTo(episode.Objects.Select(o => o.Id).OrderBy(id => id)),
+            Assert.That(staged.Select(o => o.Id).OrderBy(id => id), Is.EqualTo(package.Objects.Select(o => o.Id).OrderBy(id => id)),
                 "every object the story can act on is staged, and nothing else");
-            foreach (var o in episode.Objects)
+            foreach (var o in package.Objects)
                 Assert.That(staged.Single(s => s.Id == o.Id).Scene, Is.EqualTo(o.Scene), o.Id);
 
             var stage = Single<StoryStage>();
-            Assert.That(stage.Scenes.Select(s => s.Id).OrderBy(id => id), Is.EqualTo(episode.Scenes.Select(s => s.Id).OrderBy(id => id)));
-            foreach (var s in episode.Scenes)
+            Assert.That(stage.Scenes.Select(s => s.Id).OrderBy(id => id), Is.EqualTo(package.Scenes.Select(s => s.Id).OrderBy(id => id)));
+            foreach (var s in package.Scenes)
                 Assert.That(stage.Scenes.Single(x => x.Id == s.Id).IsHearth, Is.EqualTo(s.Kind == SceneKind.Hearth), s.Id);
+            var playable = PackageValidator.Accept(package, out var report, stage);
+            Assert.That(playable, Is.Not.Null, "every route plays on this stage: " + report);
+
+            // A touch invitation needs somewhere to touch; a placement needs somewhere to set things down.
+            foreach (var o in package.Objects.Where(o => o.Capabilities.Contains(ActionKind.Touch)))
+                Assert.That(new SerializedObject(staged.Single(s => s.Id == o.Id)).FindProperty("touchPoint").objectReferenceValue, Is.Not.Null, o.Id);
+            var targets = package.Beats.SelectMany(b => b.Lines.Concat(b.Invitation?.Accepted ?? new Line[0]).Concat(b.Invitation?.Default ?? new Line[0]))
+                .SelectMany(l => l.Actions).Where(a => a.At != null).Select(a => a.At).Distinct();
+            foreach (var id in targets)
+                Assert.That(new SerializedObject(staged.Single(s => s.Id == id)).FindProperty("placePoint").objectReferenceValue, Is.Not.Null, id);
+        }
+
+        static void WithinReach(Vector3 local, string name)
+        {
+            var horizontal = new Vector2(local.x, local.z).magnitude;
+            Assert.That(horizontal, Is.LessThanOrEqualTo(0.61f), name + " within about two feet of the seat");
+            Assert.That(local.y, Is.InRange(0.5f, 1.1f), name + " between lap and chest height");
         }
 
         [Test]
-        public void ControlsAndRestingPlacesAreWithinSeatedReach()
+        public void ControlsRestingPlacesAndTouchTargetsAreWithinSeatedReach()
         {
             var anchor = Single<WorldAnchor>().transform;
-            var places = new[] { "Controls panel", "Settings panel", "Rest point", "Keepsake point", "Carry point" };
+            var places = new[] { "Controls panel", "Questions panel", "Settings panel", "Rest point", "Keepsake point", "Carry point" };
             foreach (var name in places)
+                WithinReach(anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == name).localPosition, name);
+            // Three rows of controls (the returning visitor's choices) still sit above the lap.
+            var controls = anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == "Controls panel").localPosition;
+            WithinReach(controls + Vector3.down * 2 * (0.05f + 0.012f), "the third row of controls");
+
+            foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                var local = anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == name).localPosition;
-                var horizontal = new Vector2(local.x, local.z).magnitude;
-                Assert.That(horizontal, Is.LessThanOrEqualTo(0.61f), name + " within about two feet of the seat");
-                Assert.That(local.y, Is.InRange(0.5f, 1.1f), name + " between lap and chest height");
+                var touch = (Transform)new SerializedObject(o).FindProperty("touchPoint").objectReferenceValue;
+                if (touch == null) continue;
+                var local = anchor.InverseTransformPoint(touch.position);
+                WithinReach(local, o.Id + " touch point");
+                // Reaching for a story object never passes through the controls, which are on the visitor's left.
+                Assert.That(local.x, Is.GreaterThan(-0.05f), o.Id + " is reached on the right");
+                Assert.That(Vector3.Distance(local, controls), Is.GreaterThan(0.25f), o.Id + " is clear of the controls");
             }
             var so = new SerializedObject(Single<StoryStage>());
-            Assert.That(so.FindProperty("offerForward").floatValue, Is.InRange(0.3f, 0.55f), "the ember is offered within reach");
+            Assert.That(so.FindProperty("offerForward").floatValue, Is.InRange(0.3f, 0.55f), "objects are offered within reach");
         }
 
         [Test]
@@ -107,13 +140,13 @@ namespace Sankofa.Tests
         [Test]
         public void TheEngineFreeCoreRunsUnderUnity()
         {
-            var playable = EpisodeValidator.Accept(episode, out var report);
+            var playable = PackageValidator.Accept(package, out var report, Single<StoryStage>());
             Assert.That(playable, Is.Not.Null, report.ToString());
             var flow = new VisitFlow(playable);
-            flow.Start();
-            Assert.That(flow.Begin(), Is.True);
+            flow.Start(skipWelcome: true);
+            Assert.That(flow.Choose("makers"), Is.True);
             var cues = flow.DrainCues();
-            Assert.That(cues.OfType<Cue.Speak>().Last().Line.Id, Is.EqualTo("offer.light"));
+            Assert.That(cues.OfType<Cue.Speak>().Last().Line.Id, Is.EqualTo("makers.gather"));
         }
     }
 

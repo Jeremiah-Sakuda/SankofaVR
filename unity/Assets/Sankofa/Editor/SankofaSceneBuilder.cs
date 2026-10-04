@@ -17,13 +17,13 @@ namespace Sankofa.EditorTools
     /// <summary>
     /// Generates the hearth scene from code so it is reproducible and reviewable:
     /// Unity -batchmode -quit -projectPath unity -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildScenes
-    /// Change this builder and regenerate rather than editing the scene by hand. The story yard is a blockout for
-    /// the placeholder episode, not art direction for a selected setting.
+    /// Change this builder and regenerate rather than editing the scene by hand. The story scenes serve the
+    /// placeholder package; they are not art direction for a selected setting.
     /// </summary>
-    public static class SankofaSceneBuilder
+    public static partial class SankofaSceneBuilder
     {
         public const string HearthScene = "Assets/Sankofa/Scenes/Hearth.unity";
-        public const string EpisodePath = "Assets/Sankofa/Content/placeholder-carried-ember.json";
+        public const string PackagePath = "Assets/Sankofa/Content/placeholder-hearth-stories.json";
         const string CoreSdk = "Packages/com.meta.xr.sdk.core/Prefabs/";
 
         /// <summary>Eye position the layout is designed around; the world anchor follows the visitor's real head.</summary>
@@ -52,32 +52,40 @@ namespace Sankofa.EditorTools
             var hearth = Child(world, "Scene hearth");
             var (restTop, keepsakeTop) = BuildHearth(hearth, art);
             var yard = Child(world, "Scene story.yard");
-            BuildYard(yard, art);
+            var yardObjects = BuildYard(yard, art);
+            var road = Child(world, "Scene story.road");
+            var roadObjects = BuildRoad(road, art);
 
             var fire = BuildFire(world, art);
             var narration = BuildNarrator(world);
             var ambience = BuildAmbience(hearth);
             var ember = BuildEmber(hearth, art);
-            var lantern = BuildLantern(yard, art);
-            var bowl = BuildBowl(yard, art);
 
             // The placed ember and the keepsake rest on the standing stones' actual tops.
-            var rest = Point(world, "Rest point", restTop + Vector3.up * 0.03f);
-            var keepsake = Point(world, "Keepsake point", keepsakeTop + Vector3.up * 0.03f);
+            var restAt = restTop + Vector3.up * 0.025f;
+            var keepsakeAt = keepsakeTop + Vector3.up * 0.015f;
+            var rest = Point(world, "Rest point", restAt);
+            var keepsake = Point(world, "Keepsake point", keepsakeAt);
             var carry = Point(world, "Carry point", new Vector3(0.14f, 0.86f, 0.38f));
+            // What a kept visit leaves at the hearth waits on the keepsake stone.
+            var shardKept = BuildShard(hearth, art, "shard.kept", "hearth", keepsakeAt);
+            var waystoneKept = BuildWaystone(hearth, art, "waystone.kept", "hearth", keepsakeAt);
 
             var captions = BuildCaptions(world, art);
-            var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.34f));
-            var settings = BuildPanel(world, art, "Settings", new Vector3(-0.5f, 0.7f, 0.2f));
+            var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.34f), 2);
+            var questions = BuildPanel(world, art, "Questions", new Vector3(0.4f, 1.0f, 0.3f), 1);
+            var settings = BuildPanel(world, art, "Settings", new Vector3(-0.5f, 0.7f, 0.2f), 2);
             var curtain = BuildCurtain(rig.Head, art);
 
             var receiver = new GameObject("Palm receiver").AddComponent<PalmReceiver>();
             SetArray(receiver, "hands", rig.Hands.Cast<Object>().ToArray());
+            var toucher = new GameObject("Touch receiver").AddComponent<TouchReceiver>();
+            SetArray(toucher, "hands", rig.Hands.Cast<Object>().ToArray());
 
             var stageObject = new GameObject("Story stage");
             var stage = stageObject.AddComponent<StoryStage>();
-            ConfigureScenes(stage, hearth, yard);
-            SetArray(stage, "objects", new Object[] { ember, lantern, bowl });
+            ConfigureScenes(stage, hearth, yard, road);
+            SetArray(stage, "objects", new Object[] { ember, shardKept, waystoneKept }.Concat(yardObjects).Concat(roadObjects).ToArray());
             Set(stage, "fire", fire);
             Set(stage, "eye", rig.Eye);
             Set(stage, "head", rig.Head);
@@ -87,22 +95,29 @@ namespace Sankofa.EditorTools
             var transition = stageObject.AddComponent<StoryTransition>();
             Set(transition, "curtain", curtain);
             Set(transition, "stage", stage);
+            var attention = stageObject.AddComponent<AttentionSource>();
+            Set(attention, "head", rig.Head);
+            Set(attention, "stage", stage);
 
             var app = new GameObject("Sankofa").AddComponent<SankofaApp>();
-            Set(app, "episodeJson", AssetDatabase.LoadAssetAtPath<TextAsset>(EpisodePath));
+            Set(app, "packageJson", AssetDatabase.LoadAssetAtPath<TextAsset>(PackagePath));
             Set(app, "anchor", anchor);
             Set(app, "fire", fire);
             Set(app, "narration", narration);
             Set(app, "ambience", ambience);
             Set(app, "captions", captions);
             Set(app, "controls", controls);
+            Set(app, "questionsPanel", questions);
             Set(app, "settingsPanel", settings);
             Set(app, "stage", stage);
             Set(app, "transition", transition);
             Set(app, "receiver", receiver);
+            Set(app, "toucher", toucher);
+            Set(app, "attention", attention);
             SetArray(app, "hands", rig.Hands.Cast<Object>().ToArray());
 
             yard.gameObject.SetActive(false);
+            road.gameObject.SetActive(false);
             EditorSceneManager.SaveScene(scene, HearthScene);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(HearthScene, true) };
             AssetDatabase.SaveAssets();
@@ -203,7 +218,10 @@ namespace Sankofa.EditorTools
                 var part = Part(SankofaMeshes.Stone(seed, 3, 0.26f, 0.75f), at, Quaternion.Euler(R(-4, 4), R(0, 360), R(-4, 4)), new Vector3(0.12f, 0.38f, 0.07f));
                 var shade = new Color(R(0.8f, 0.95f), R(0.8f, 0.92f), R(0.82f, 0.95f));
                 stones.Add(Tinted(part, (p, n) => shade));
-                var top = part.mesh.vertices.Max(v => part.transform.MultiplyPoint3x4(v).y);
+                // The surface height at the stone's centre, where things are set down, not its highest edge.
+                var placed = part.mesh.vertices.Select(v => part.transform.MultiplyPoint3x4(v)).ToList();
+                var centre = placed.Where(v => new Vector2(v.x - at.x, v.z - at.z).magnitude < 0.035f).ToList();
+                var top = (centre.Count > 0 ? centre : placed).Max(v => v.y);
                 tops.Add(new Vector3(at.x, top, at.z));
             }
             for (var i = 0; i < 120; i++)
@@ -293,7 +311,8 @@ namespace Sankofa.EditorTools
                 root.TransformPoint(FirePosition), root.TransformDirection(HearthMoon),
                 new HashSet<MeshFilter> { ground, stoneFilter, seatFilter, trunkFilter, canopyFilter });
             SaveMeshes(new[] { ground, stoneFilter, logFilter, coalFilter, seatFilter, trunkFilter, canopyFilter, grass, stars });
-            return (tops[0], tops[1]);
+            // The keepsake waits on the right stone, clear of the controls on the left.
+            return (tops[1], tops[0]);
         }
 
         static CombineInstance Part(Mesh mesh, Vector3 position, Quaternion rotation, Vector3 scale) =>
@@ -365,36 +384,6 @@ namespace Sankofa.EditorTools
                 var path = $"{MeshFolder}/{filter.sharedMesh.name}.asset";
                 AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(filter.sharedMesh, path);
-            }
-        }
-
-        // ---- the placeholder story yard at dusk ----
-
-        static void BuildYard(Transform root, SankofaArtSet art)
-        {
-            Prim(root, "Ground", PrimitiveType.Cylinder, new Vector3(0, -0.005f, 0), new Vector3(36, 0.005f, 36), art.YardEarth);
-            for (var i = 0; i < 14; i++)
-            {
-                var degrees = i / 14f * 360f;
-                if (Mathf.Abs(Mathf.DeltaAngle(degrees, 90f)) < 14f) continue; // doorway ahead
-                var angle = degrees * Mathf.Deg2Rad;
-                var direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
-                Prim(root, "Wall " + i, PrimitiveType.Cube, direction * 4.6f + Vector3.up * 0.8f, new Vector3(2.1f, 1.6f, 0.35f), art.Plaster,
-                    Quaternion.LookRotation(-direction, Vector3.up));
-            }
-            Prim(root, "Door post west", PrimitiveType.Cube, new Vector3(-0.65f, 1.15f, 4.6f), new Vector3(0.28f, 2.3f, 0.4f), art.Timber);
-            Prim(root, "Door post east", PrimitiveType.Cube, new Vector3(0.65f, 1.15f, 4.6f), new Vector3(0.28f, 2.3f, 0.4f), art.Timber);
-            Prim(root, "Lintel", PrimitiveType.Cube, new Vector3(0, 2.35f, 4.6f), new Vector3(1.6f, 0.22f, 0.45f), art.Timber);
-            Prim(root, "Bench", PrimitiveType.Cube, new Vector3(-2.7f, 0.22f, 2.3f), new Vector3(2.2f, 0.44f, 0.6f), art.Plaster, Quaternion.Euler(0, 52, 0));
-            Prim(root, "Lantern post", PrimitiveType.Cylinder, new Vector3(0.38f, 0.33f, 0.62f), new Vector3(0.05f, 0.33f, 0.05f), art.Timber);
-            Prim(root, "Bowl stand", PrimitiveType.Cylinder, new Vector3(-0.3f, 0.21f, 1.1f), new Vector3(0.22f, 0.21f, 0.22f), art.Timber);
-            var random = new System.Random(5);
-            for (var i = 0; i < 6; i++)
-            {
-                var angle = (200f + i * 22f) * Mathf.Deg2Rad;
-                var p = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * 3.9f;
-                var h = Range(random, 0.35f, 0.7f);
-                Prim(root, "Jar " + i, PrimitiveType.Sphere, p + Vector3.up * h * 0.5f, new Vector3(h * 0.7f, h, h * 0.7f), art.Clay);
             }
         }
 
@@ -595,51 +584,6 @@ namespace Sankofa.EditorTools
             return o;
         }
 
-        static StageObject BuildLantern(Transform yard, SankofaArtSet art)
-        {
-            var root = Child(yard, "Lantern");
-            root.localPosition = new Vector3(0.38f, 0.74f, 0.62f);
-            var parts = new[]
-            {
-                Prim(root, "Base", PrimitiveType.Cylinder, new Vector3(0, -0.06f, 0), new Vector3(0.11f, 0.012f, 0.11f), art.Brass),
-                Prim(root, "Flame", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 0.06f, art.LanternCore),
-                Prim(root, "Cap", PrimitiveType.Cylinder, new Vector3(0, 0.065f, 0), new Vector3(0.1f, 0.01f, 0.1f), art.Brass),
-                Prim(root, "Handle", PrimitiveType.Cylinder, new Vector3(0, 0.085f, 0), new Vector3(0.02f, 0.012f, 0.02f), art.Brass),
-            }.Select(p => p.GetComponent<Renderer>()).ToList();
-            for (var i = 0; i < 4; i++)
-            {
-                var angle = (45 + i * 90) * Mathf.Deg2Rad;
-                parts.Add(Prim(root, "Rib " + i, PrimitiveType.Cylinder, new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * 0.048f,
-                    new Vector3(0.008f, 0.06f, 0.008f), art.Brass).GetComponent<Renderer>());
-            }
-            var glow = GlowCard(root, art, 0.5f);
-            var o = root.gameObject.AddComponent<StageObject>();
-            Set(o, "objectId", "lantern");
-            Set(o, "sceneId", "story.yard");
-            Set(o, "visibleAtStart", false);
-            SetArray(o, "surfaces", parts.Cast<Object>().ToArray());
-            Set(o, "glow", glow);
-            Set(o, "glowIntensity", 1.1f);
-            Set(o, "emitsLight", true);
-            Set(o, "lightColor", new Color(1f, 0.72f, 0.44f));
-            Set(o, "lightIntensity", 1.4f);
-            return o;
-        }
-
-        static StageObject BuildBowl(Transform yard, SankofaArtSet art)
-        {
-            var root = Child(yard, "Bowl");
-            root.localPosition = new Vector3(-0.3f, 0.46f, 1.1f);
-            var body = Prim(root, "Body", PrimitiveType.Sphere, new Vector3(0, 0.03f, 0), new Vector3(0.3f, 0.13f, 0.3f), art.Clay);
-            var rim = Prim(root, "Painted rim", PrimitiveType.Cylinder, new Vector3(0, 0.09f, 0), new Vector3(0.27f, 0.006f, 0.27f), art.Pigment);
-            var o = root.gameObject.AddComponent<StageObject>();
-            Set(o, "objectId", "bowl");
-            Set(o, "sceneId", "story.yard");
-            Set(o, "visibleAtStart", false);
-            SetArray(o, "surfaces", new Object[] { body.GetComponent<Renderer>(), rim.GetComponent<Renderer>() });
-            return o;
-        }
-
         static Renderer GlowCard(Transform parent, SankofaArtSet art, float size)
         {
             var card = Prim(parent, "Glow", PrimitiveType.Quad, Vector3.zero, Vector3.one * size, art.Glow);
@@ -663,12 +607,13 @@ namespace Sankofa.EditorTools
             return board;
         }
 
-        static PokePanel BuildPanel(Transform world, SankofaArtSet art, string name, Vector3 position)
+        static PokePanel BuildPanel(Transform world, SankofaArtSet art, string name, Vector3 position, int columns)
         {
             var go = Child(world, name + " panel");
             go.localPosition = position;
             go.localRotation = FacingVisitor(position);
             var panel = go.gameObject.AddComponent<PokePanel>();
+            Set(panel, "columns", columns);
             Set(panel, "buttonMaterial", art.Plaque);
             Set(panel, "labelFont", SankofaText.LabelFont);
             Set(panel, "labelColor", new Color(1f, 0.9f, 0.74f));
@@ -690,11 +635,11 @@ namespace Sankofa.EditorTools
             return renderer;
         }
 
-        static void ConfigureScenes(StoryStage stage, Transform hearth, Transform yard)
+        static void ConfigureScenes(StoryStage stage, Transform hearth, Transform yard, Transform road)
         {
             var so = new SerializedObject(stage);
             var list = so.FindProperty("scenes");
-            list.arraySize = 2;
+            list.arraySize = 3;
             var night = list.GetArrayElementAtIndex(0);
             Scene(night, "hearth", true, hearth, new Color(0.012f, 0.016f, 0.035f),
                 new Color(0.02f, 0.026f, 0.048f), new Color(0.014f, 0.011f, 0.009f), 9f, 45f);
@@ -703,10 +648,8 @@ namespace Sankofa.EditorTools
             night.FindPropertyRelative("MistColor").colorValue = new Color(0.045f, 0.055f, 0.08f);
             night.FindPropertyRelative("Mist").vector4Value = new Vector4(0.65f, 0.15f, 1.3f, 6f);
             night.FindPropertyRelative("Grade").vector4Value = new Vector4(1.3f, 0.92f, 1f, 1f);
-            var dusk = list.GetArrayElementAtIndex(1);
-            Scene(dusk, "story.yard", false, yard, new Color(0.11f, 0.08f, 0.12f),
-                new Color(0.16f, 0.14f, 0.2f), new Color(0.07f, 0.05f, 0.04f), 6f, 20f);
-            dusk.FindPropertyRelative("Grade").vector4Value = new Vector4(1.25f, 0.95f, 0.8f, 0.8f);
+            ConfigureYard(list.GetArrayElementAtIndex(1), yard);
+            ConfigureRoad(list.GetArrayElementAtIndex(2), road);
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

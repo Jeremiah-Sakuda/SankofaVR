@@ -351,7 +351,8 @@ namespace Sankofa.EditorTools
         /// Tufts of curved blades scattered through an annulus around the fire, avoiding the visitor's seat.
         /// Colour runs from a dark base to a pale tip; alpha darkens the base like occlusion. Fire visibility is 1.
         /// </summary>
-        public static Mesh Grass(Vector3 fire, Vector3 seat, int seed, int tufts, float inner, float outer, System.Func<Vector3, float> height)
+        public static Mesh Grass(Vector3 fire, Vector3 seat, int seed, int tufts, float inner, float outer, System.Func<Vector3, float> height,
+            System.Func<Vector3, bool> allow = null)
         {
             var random = new System.Random(seed);
             float R(float a, float b) => a + (float)random.NextDouble() * (b - a);
@@ -368,6 +369,7 @@ namespace Sankofa.EditorTools
                 var at = fire + new Vector3(Mathf.Cos(angle) * radius, 0, Mathf.Sin(angle) * radius);
                 if (new Vector2(at.x - seat.x, at.z - seat.z).magnitude < 1.1f) continue;
                 if (Value(at * 0.6f, seed) < 0.42f) continue; // clumps, not an even lawn
+                if (allow != null && !allow(at)) continue;
                 at.y = height(at);
                 placed++;
                 var blades = 5 + random.Next(5);

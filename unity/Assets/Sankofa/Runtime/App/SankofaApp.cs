@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Sankofa.Core.Story;
+using Sankofa.Core.Visits;
 using Sankofa.Flow;
 using Sankofa.Runtime.Audio;
 using Sankofa.Runtime.Fire;
@@ -8,43 +11,53 @@ using Sankofa.Runtime.Input;
 using Sankofa.Runtime.Narration;
 using Sankofa.Runtime.Stage;
 using Sankofa.Runtime.UI;
+using Sankofa.Storage;
 using UnityEngine;
 
 namespace Sankofa.Runtime.App
 {
     /// <summary>
-    /// Composition root. Loads and validates the bundled episode, runs the visit flow and translates its cues into
-    /// presentation; translates hands and controls into flow commands. Story rules live in the flow, not here.
+    /// Composition root. Loads and validates the bundled story package against the stage, runs the visit flow with
+    /// on-device storage for kept visits, and translates its cues into presentation; translates hands, controls,
+    /// questions and noticing into flow commands. Story rules live in the flow, not here.
     /// </summary>
     [DefaultExecutionOrder(500)]
     public sealed class SankofaApp : MonoBehaviour
     {
-        [SerializeField] TextAsset episodeJson;
+        [SerializeField] TextAsset packageJson;
         [SerializeField] WorldAnchor anchor;
         [SerializeField] HearthFire fire;
         [SerializeField] NarrationPlayer narration;
         [SerializeField] NightAmbience ambience;
         [SerializeField] CaptionBoard captions;
         [SerializeField] PokePanel controls;
+        [SerializeField] PokePanel questionsPanel;
         [SerializeField] PokePanel settingsPanel;
         [SerializeField] StoryStage stage;
         [SerializeField] StoryTransition transition;
         [SerializeField] PalmReceiver receiver;
+        [SerializeField] TouchReceiver toucher;
+        [SerializeField] AttentionSource attention;
         [SerializeField] HandSource[] hands;
         const float MaxStep = 0.1f;
 
         [Tooltip("Offer the steady-fire baseline in development builds, for the fire presence comparison.")]
         [SerializeField] bool fireComparison = true;
 
+        /// <summary>Tests keep visits in a temporary folder instead of the application's own storage.</summary>
+        public static string StoreFolderOverride;
+
         VisitFlow flow;
         ExperienceSettings settings;
-        StageObject offered;
+        StageObject invited;
         HandSource acceptingHand;
+        string baseStatus = "";
         bool started;
 
         public VisitFlow Flow => flow;
         public string LoadProblem { get; private set; }
         public ExperienceSettings Settings => settings;
+        public string StoreFolder { get; private set; }
 
         void Awake()
         {
@@ -54,9 +67,11 @@ namespace Sankofa.Runtime.App
             {
                 var h = hand;
                 controls.AddFingertip(() => h.Fingertip);
+                questionsPanel.AddFingertip(() => h.Fingertip);
                 settingsPanel.AddFingertip(() => h.Fingertip);
             }
             controls.Pressed += OnControl;
+            questionsPanel.Pressed += OnQuestion;
             settingsPanel.Pressed += OnSetting;
             narration.Finished += token =>
             {
@@ -66,6 +81,8 @@ namespace Sankofa.Runtime.App
             narration.DurationMeasured += (token, seconds) => flow?.ReportLineDuration(token, seconds);
             transition.Finished += token => flow?.TransitionFinished(token);
             receiver.Received += OnReceived;
+            toucher.Touched += OnReceived;
+            attention.Noticed += OnNoticed;
             OVRManager.HMDUnmounted += OnHeadsetRemoved;
             OVRManager.InputFocusLost += OnFocusLost;
         }
@@ -78,26 +95,33 @@ namespace Sankofa.Runtime.App
 
         VisitFlow LoadFlow()
         {
-            if (episodeJson == null)
+            if (packageJson == null)
             {
-                LoadProblem = "No episode is assigned.";
+                LoadProblem = "No story package is assigned.";
                 return null;
             }
             try
             {
-                var playable = EpisodeValidator.Accept(EpisodeReader.Read(episodeJson.text), out var report);
+                var playable = PackageValidator.Accept(StoryReader.ReadPackage(packageJson.text), out var report, stage);
                 foreach (var issue in report.Issues)
                 {
                     if (issue.Severity == IssueSeverity.Error) Debug.LogError("[Sankofa] " + issue);
                     else Debug.LogWarning("[Sankofa] " + issue);
                 }
-                if (playable != null) return new VisitFlow(playable);
-                LoadProblem = report.Errors.First().ToString();
+                if (playable == null)
+                {
+                    LoadProblem = report.Errors.First().ToString();
+                    return null;
+                }
+                // Kept visits stay on this headset, in the application's private storage.
+                StoreFolder = StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "visits");
+                if (playable.Package.Status != ContentStatus.Reviewed) baseStatus = "Development placeholder story · not reviewed content";
+                return new VisitFlow(playable, null, new FileVisitStore(StoreFolder), stage);
             }
-            catch (EpisodeFormatException e)
+            catch (StoryFormatException e)
             {
                 LoadProblem = e.Message;
-                Debug.LogError("[Sankofa] Episode could not be read: " + e.Message);
+                Debug.LogError("[Sankofa] Story package could not be read: " + e.Message);
             }
             return null;
         }
@@ -115,8 +139,7 @@ namespace Sankofa.Runtime.App
                 controls.Show(new List<(string, string)> { ("leave", "Leave") });
                 return;
             }
-            if (flow.Episode.Episode.Status != ContentStatus.Reviewed)
-                captions.SetStatus("Development placeholder story · not reviewed content");
+            captions.SetStatus(baseStatus);
             anchor.PlacedEvent += BeginVisit;
             if (anchor.Placed) BeginVisit();
         }
@@ -133,11 +156,13 @@ namespace Sankofa.Runtime.App
         {
             if (flow == null || !started) return;
             // A hitch or a resumed process must not leap story time; an invitation never expires in one frame.
-            flow.Tick(Mathf.Min(Time.unscaledDeltaTime, MaxStep));
+            // Scaled time, so tests can run a visit faster; the experience itself always runs at a time scale of 1.
+            flow.Tick(Mathf.Min(Time.deltaTime, MaxStep * Mathf.Max(1f, Time.timeScale)));
             Dispatch();
             fire.SpeechLevel = narration.Level;
             ambience.Duck = narration.Speaking;
-            if (offered != null) offered.Feedback = receiver.Open ? receiver.Feedback : 0;
+            attention.Listening = flow.Phase == VisitPhase.Story;
+            if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
         }
 
         void Dispatch()
@@ -157,9 +182,13 @@ namespace Sankofa.Runtime.App
                         }
                         break;
                     case Cue.ResetStage _:
-                        receiver.Close();
-                        offered = null;
+                        CloseReceivers();
                         stage.ResetAll();
+                        captions.SetStatus(baseStatus);
+                        break;
+                    case Cue.VisitStarted v:
+                        var mode = v.Mode == VisitMode.Continued ? "Continuing a kept visit" : v.Mode == VisitMode.Replayed ? "Replay of a kept visit, as it was" : null;
+                        captions.SetStatus(string.Join(" · ", new[] { mode, baseStatus }.Where(s => !string.IsNullOrEmpty(s))));
                         break;
                     case Cue.Speak s:
                         narration.Play(s.Token, s.Line);
@@ -176,18 +205,22 @@ namespace Sankofa.Runtime.App
                         stage.Perform(a.Action);
                         break;
                     case Cue.InvitationOpened o:
-                        offered = stage.Find(o.Invitation.Object);
-                        if (offered != null) receiver.Listen(o.Invitation.Id, offered.transform);
+                        invited = stage.Find(o.Invitation.Object);
+                        // A replay shows the invitation but its kept outcome stands; hands cannot change it.
+                        if (invited == null || o.Replay) break;
+                        if (o.Invitation.Kind == InvitationKind.Receive) receiver.Listen(o.Invitation.Id, invited.transform);
+                        else toucher.Listen(o.Invitation.Id, invited);
                         break;
                     case Cue.InvitationClosed c:
                         receiver.Close();
-                        if (offered != null)
+                        toucher.Close();
+                        if (invited != null)
                         {
-                            offered.Feedback = 0;
-                            if (c.Outcome == Outcome.Accepted) stage.Carry(offered, acceptingHand);
+                            invited.Feedback = 0;
+                            if (c.Outcome == Outcome.Accepted && c.Invitation.Kind == InvitationKind.Receive) stage.Carry(invited, acceptingHand);
                         }
                         acceptingHand = null;
-                        offered = null;
+                        invited = null;
                         break;
                     case Cue.Transition t:
                         captions.Clear();
@@ -197,28 +230,84 @@ namespace Sankofa.Runtime.App
                     case Cue.Controls c:
                         controls.Show(c.Options.Select(o => (ControlId(o), ControlLabel(o))).ToList());
                         break;
+                    case Cue.Questions q:
+                        questionsPanel.Show(q.Available.Select(x => ("q:" + x.Id, x.Label)).ToList());
+                        break;
+                    case Cue.QuestionAsked _:
+                        fire.Acknowledge();
+                        break;
+                    case Cue.Noticed n:
+                        stage.Find(n.ObjectId)?.Pulse();
+                        if (n.QuestionId != null) questionsPanel.Pulse("q:" + n.QuestionId);
+                        break;
                     case Cue.Closed _:
                         LogJournal();
+                        stage.Settle();
                         break;
                     case Cue.Keepsake k:
                         stage.ShowKeepsake(k.ObjectId);
+                        break;
+                    case Cue.Shelf s:
+                        if (s.ObjectId != null) stage.ShowOnShelf(s.ObjectId);
+                        break;
+                    case Cue.Kept _:
+                        captions.Notice("Kept on this headset only. You can forget it here at any time.", 6);
+                        break;
+                    case Cue.Forgotten _:
+                        captions.Notice("Forgotten. Nothing of that visit is kept.", 5);
+                        break;
+                    case Cue.StoreFailed f:
+                        Debug.LogWarning($"[Sankofa] {f.Operation} failed: {f.Message}");
+                        captions.Notice(StoreMessage(f.Operation), 6);
                         break;
                 }
             }
         }
 
-        void LogJournal() => Debug.Log($"[Sankofa] Journal of visit {flow.Journal.VisitNumber}:\n" + string.Join("\n", flow.Journal.Entries));
+        void CloseReceivers()
+        {
+            receiver.Close();
+            toucher.Close();
+            if (invited != null) invited.Feedback = 0;
+            invited = null;
+            acceptingHand = null;
+        }
 
-        static string ControlId(ControlOption o) => o.Kind == ControlKind.Accept ? "accept:" + o.InvitationId : o.Kind.ToString();
+        void LogJournal()
+        {
+            if (flow.Journal != null)
+                Debug.Log($"[Sankofa] Journal of visit {flow.Journal.VisitNumber} ({flow.Journal.Route}, {flow.Journal.Mode}):\n" + string.Join("\n", flow.Journal.Entries));
+        }
+
+        static string StoreMessage(StoreOperation operation)
+        {
+            switch (operation)
+            {
+                case StoreOperation.Keep: return "That visit could not be kept. You can try again.";
+                case StoreOperation.Forget: return "That visit could not be forgotten. It is still kept.";
+                case StoreOperation.Replay: return "That kept visit cannot be replayed in this version.";
+                default: return "A kept visit could not be read. It has been left as it was.";
+            }
+        }
+
+        static string ControlId(ControlOption o) => o.Target == null ? o.Kind.ToString() : o.Kind + ":" + o.Target;
 
         static string ControlLabel(ControlOption o)
         {
             switch (o.Kind)
             {
-                case ControlKind.Begin: return "Begin";
+                case ControlKind.Choose: return o.Label;
+                case ControlKind.Follow: return o.Label;
+                case ControlKind.Replay: return "Hear it again";
+                case ControlKind.NewStory: return "Something new";
+                case ControlKind.Back: return "Back";
+                case ControlKind.Forget: return "Forget this visit";
+                case ControlKind.ConfirmForget: return "Forget it";
+                case ControlKind.CancelForget: return "Keep it";
                 case ControlKind.Pause: return "Pause";
                 case ControlKind.Resume: return "Resume";
                 case ControlKind.ReturnToHearth: return "Return to the fire";
+                case ControlKind.Keep: return o.Target == null ? "Keep this visit" : "Keep this instead";
                 case ControlKind.BeginAgain: return "Begin again";
                 case ControlKind.Leave: return "Leave";
                 default: return o.Label ?? "Accept";
@@ -232,17 +321,37 @@ namespace Sankofa.Runtime.App
                 if (id == "leave") Quit();
                 return;
             }
-            if (id.StartsWith("accept:"))
+            var colon = id.IndexOf(':');
+            var target = colon < 0 ? null : id.Substring(colon + 1);
+            if (!Enum.TryParse<ControlKind>(colon < 0 ? id : id.Substring(0, colon), out var kind)) return;
+            switch (kind)
             {
-                acceptingHand = null;
-                flow.Accept(id.Substring("accept:".Length));
+                case ControlKind.Choose: flow.Choose(target); break;
+                case ControlKind.Follow: flow.Follow(); break;
+                case ControlKind.Replay: flow.Replay(); break;
+                case ControlKind.NewStory: flow.NewStory(); break;
+                case ControlKind.Back: flow.Back(); break;
+                case ControlKind.Forget: flow.Forget(); break;
+                case ControlKind.ConfirmForget: flow.ConfirmForget(); break;
+                case ControlKind.CancelForget: flow.CancelForget(); break;
+                case ControlKind.Pause: flow.Pause("visitor"); break;
+                case ControlKind.Resume: flow.Resume(); break;
+                case ControlKind.ReturnToHearth: flow.ReturnToHearth(); break;
+                case ControlKind.Accept:
+                    acceptingHand = null;
+                    flow.Accept(target);
+                    break;
+                case ControlKind.Keep: flow.Keep(); break;
+                case ControlKind.BeginAgain: flow.BeginAgain(); break;
+                case ControlKind.Leave: flow.Leave(); break;
             }
-            else if (id == ControlKind.Begin.ToString()) flow.Begin();
-            else if (id == ControlKind.Pause.ToString()) flow.Pause("visitor");
-            else if (id == ControlKind.Resume.ToString()) flow.Resume();
-            else if (id == ControlKind.ReturnToHearth.ToString()) flow.ReturnToHearth();
-            else if (id == ControlKind.BeginAgain.ToString()) flow.BeginAgain();
-            else if (id == ControlKind.Leave.ToString()) flow.Leave();
+            Dispatch();
+        }
+
+        void OnQuestion(string id)
+        {
+            if (flow == null || !id.StartsWith("q:")) return;
+            flow.Ask(id.Substring(2));
             Dispatch();
         }
 
@@ -251,6 +360,11 @@ namespace Sankofa.Runtime.App
             acceptingHand = hand;
             if (!flow.Accept(invitationId)) acceptingHand = null;
             Dispatch();
+        }
+
+        void OnNoticed(string objectId)
+        {
+            if (flow != null && flow.Notice(objectId)) Dispatch();
         }
 
         void OnSetting(string id)

@@ -59,7 +59,7 @@ namespace Sankofa.Runtime.Narration
         void Update()
         {
             if (token == 0) return;
-            elapsed += Time.unscaledDeltaTime;
+            elapsed += Time.deltaTime;
             bool done;
             if (usingClip)
             {

@@ -30,28 +30,32 @@ namespace Sankofa.Runtime.Stage
     }
 
     /// <summary>
-    /// The scenes and staged objects around the stationary visitor. Performs accepted story actions and keeps
-    /// the scene lit by its one warm source: the fire at the hearth, a carried light in a story.
+    /// The scenes and staged objects around the stationary visitor. Performs accepted story actions, carries
+    /// objects across transitions and keeps the scene lit by its one warm source: the fire at the hearth, a carried
+    /// light in a story. Also the stage's inventory, so plans needing anything it lacks are refused before they play.
     /// </summary>
-    public sealed class StoryStage : MonoBehaviour
+    public sealed class StoryStage : MonoBehaviour, IStageInventory
     {
         [SerializeField] StageScene[] scenes;
         [SerializeField] StageObject[] objects;
         [SerializeField] HearthFire fire;
         [SerializeField] Camera eye;
         [SerializeField] Transform head;
-        [Tooltip("Beside the visitor: where an object rests when the default path places it.")]
+        [Tooltip("Beside the visitor: where an object rests when it is set down for them.")]
         [SerializeField] Transform restPoint;
-        [Tooltip("On the hearth stone: where the keepsake waits at the end of a visit.")]
+        [Tooltip("On the hearth stone: where the keepsake waits after a visit, and a kept visit's keepsake on return.")]
         [SerializeField] Transform keepsakePoint;
         [Tooltip("Just in front of the visitor: where a received object floats when not held in a palm.")]
         [SerializeField] Transform carryPoint;
         [SerializeField] float offerForward = 0.42f;
         [SerializeField] float offerDrop = 0.3f;
 
+        string keepsake;
+
         public string ActiveScene { get; private set; }
         public IReadOnlyList<StageObject> Objects => objects;
         public IReadOnlyList<StageScene> Scenes => scenes;
+        public Vector3 FireTop => fire.transform.position + Vector3.up * 0.3f;
 
         public StageObject Find(string id)
         {
@@ -60,10 +64,13 @@ namespace Sankofa.Runtime.Stage
             return null;
         }
 
-        public bool HasScene(string id) => Array.Exists(scenes, s => s.Id == id);
+        public bool HasScene(string sceneId) => Array.Exists(scenes, s => s.Id == sceneId);
+        public bool HasObject(string objectId, string sceneId) => Find(objectId)?.Scene == sceneId;
+        public bool IsHearth(string sceneId) => Array.Find(scenes, s => s.Id == sceneId)?.IsHearth ?? false;
 
         public void ResetAll()
         {
+            keepsake = null;
             foreach (var o in objects) o.ResetToStart();
             foreach (var s in scenes)
                 if (s.IsHearth) ShowScene(s.Id);
@@ -71,13 +78,16 @@ namespace Sankofa.Runtime.Stage
 
         public void ShowScene(string id)
         {
-            foreach (var s in scenes) s.Root.SetActive(s.Id == id);
             var scene = Array.Find(scenes, s => s.Id == id);
             if (scene == null)
             {
                 Debug.LogError("[Sankofa] Unknown scene " + id);
                 return;
             }
+            // Scenes may share geometry; activate the shown scene's root last.
+            foreach (var s in scenes)
+                if (s.Root != scene.Root) s.Root.SetActive(false);
+            scene.Root.SetActive(true);
             ActiveScene = id;
             if (eye != null) eye.backgroundColor = scene.Sky;
             SceneLighting.SetAmbient(scene.AmbientSky, scene.AmbientGround);
@@ -118,12 +128,21 @@ namespace Sankofa.Runtime.Stage
                     o.Illuminate();
                     break;
                 case ActionKind.Offer:
-                    o.ShowAt(fire.transform.position + Vector3.up * 0.3f);
+                    // The fire offers from its flames; a story offers from where the object rests.
+                    if (!o.Visible) o.ShowAt(IsHearth(o.Scene) ? FireTop : o.HomePosition);
                     o.MoveTo(OfferPosition(), 1.4f);
                     break;
-                case ActionKind.Place:
-                    o.Reveal();
+                case ActionKind.Place when action.At == null:
+                    if (!o.Visible) o.AppearAt(o.HomePosition);
                     o.MoveTo(restPoint.position, 1.2f);
+                    break;
+                case ActionKind.Place:
+                    var target = Find(action.At);
+                    o.Reveal();
+                    o.MoveTo(target != null ? target.PlacePosition : o.HomePosition, 1.3f);
+                    break;
+                case ActionKind.Withdraw:
+                    o.Withdraw(IsHearth(o.Scene) ? fire.transform.position + Vector3.up * 0.12f : o.HomePosition);
                     break;
             }
         }
@@ -139,7 +158,7 @@ namespace Sankofa.Runtime.Stage
                 o.MoveTo(carryPoint.position, 0.8f);
                 return;
             }
-            o.Follow(() =>
+            o.Carry(hand, () =>
             {
                 if (!hand.Tracked) return carryPoint.position;
                 var sample = hand.Sample;
@@ -148,12 +167,48 @@ namespace Sankofa.Runtime.Stage
             });
         }
 
+        /// <summary>
+        /// One object becomes its counterpart in the next scene where it stands: in a story it settles at its own
+        /// place; at the hearth it stays in the hand that carried it, or beside the visitor.
+        /// </summary>
+        public void Cross(string fromId, string toId, string toScene)
+        {
+            var from = Find(fromId);
+            var to = Find(toId);
+            if (from == null || to == null) return;
+            var at = from.Visible ? from.transform.position : to.HomePosition;
+            var hand = from.CarriedBy;
+            from.Hide();
+            to.ShowAt(at);
+            if (!IsHearth(toScene)) to.MoveTo(to.HomePosition, 2.4f);
+            else if (hand != null) Carry(to, hand);
+            else to.MoveTo(restPoint.position, 1.6f);
+        }
+
         public void ShowKeepsake(string id)
         {
             var o = Find(id);
             if (o == null) return;
+            keepsake = id;
             o.Reveal();
             o.MoveTo(keepsakePoint.position, 1.6f);
+        }
+
+        /// <summary>The kept visit's keepsake waits on the hearth stone while the visitor chooses.</summary>
+        public void ShowOnShelf(string id)
+        {
+            var o = Find(id);
+            if (o == null || !IsHearth(o.Scene)) return;
+            keepsake = id;
+            o.AppearAt(keepsakePoint.position);
+        }
+
+        /// <summary>At the end of a visit, whatever the visitor still has apart from the keepsake goes back into the fire.</summary>
+        public void Settle()
+        {
+            foreach (var o in objects)
+                if (o.Visible && o.Id != keepsake && IsHearth(o.Scene) && o.Scene == ActiveScene)
+                    o.Withdraw(fire.transform.position + Vector3.up * 0.12f, 1.6f);
         }
 
         void LateUpdate()

@@ -5,6 +5,7 @@
         "Sankofa.Core",
         "Sankofa.Flow",
         "Sankofa.Interaction",
+        "Sankofa.Storage",
         "Oculus.VR",
         "Unity.TextMeshPro"
     ],

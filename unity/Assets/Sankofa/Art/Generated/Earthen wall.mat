@@ -7,11 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Painted rim
+  m_Name: Earthen wall
   m_Shader: {fileID: 4800000, guid: bd7bb2edabf92452e97b8edb654e7aa6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _DETAIL_TRIPLANAR
+  - _SCANNED
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -24,7 +26,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _Detail:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 76d31b08acb414233a22134e13082b6c, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -32,29 +34,29 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ScanAlbedo:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 33de06ab106794b8b8e747e10657b61a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ScanNormal:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: e0df202450f074835a796e3c3cd13681, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Cull: 2
-    - _DetailAlbedo: 0.35
-    - _DetailStrength: 0.6
+    - _DetailAlbedo: 0.3
+    - _DetailStrength: 0
     - _Highlight: 0
     - _Rim: 0.6
-    - _ScanNormalStrength: 1
-    - _UseBake: 0
+    - _ScanNormalStrength: 0.8
+    - _UseBake: 1
     - _Wind: 0
     - _Wrap: 0.3
     m_Colors:
-    - _Color: {r: 0.72, g: 0.56, b: 0.28, a: 1}
-    - _DetailScale: {r: 1, g: 1, b: 0, a: 0}
+    - _Color: {r: 0.95, g: 0.82, b: 0.7, a: 1}
+    - _DetailScale: {r: 0.35, g: 0.35, b: 0, a: 0}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _HighlightColor: {r: 1, g: 0.72, b: 0.37999994, a: 1}
-    - _ScanScale: {r: 1, g: 1, b: 0, a: 0}
+    - _ScanScale: {r: 0.65, g: 0.65, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

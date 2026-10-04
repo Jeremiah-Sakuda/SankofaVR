@@ -92,6 +92,13 @@ namespace Sankofa.Runtime.Fire
 
         public void SetState(FireState state) => State = state;
 
+        /// <summary>Local acknowledgement, before any answer is heard: the flame swells and throws a few sparks.</summary>
+        public void Acknowledge()
+        {
+            breath = Mathf.Max(breath, ReducedMotion ? 0.4f : 0.9f);
+            Burst(0.6f);
+        }
+
         void Awake() => block = new MaterialPropertyBlock();
 
         void OnEnable()

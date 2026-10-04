@@ -25,6 +25,7 @@ namespace Sankofa.Runtime.UI
             public Vector2 Size;
             public readonly Dictionary<int, PokeGesture> Gestures = new Dictionary<int, PokeGesture>();
             public float Flash;
+            public float Glow;
             public bool Hover;
         }
 
@@ -62,6 +63,13 @@ namespace Sankofa.Runtime.UI
         }
 
         public void AddFingertip(Func<Vector3?> fingertip) => fingertips.Add(fingertip);
+
+        /// <summary>Draws the eye to one button for a moment, as when the fire notices what the visitor looks at.</summary>
+        public void Pulse(string id)
+        {
+            foreach (var b in buttons)
+                if (b.Id == id) b.Glow = 1f;
+        }
 
         /// <summary>Replaces the buttons. Order is kept; ids are returned in <see cref="Pressed"/>.
         /// An identical list leaves the existing buttons alone so a press in progress is not lost.</summary>
@@ -156,7 +164,9 @@ namespace Sankofa.Runtime.UI
                     }
                 }
                 b.Flash = Mathf.Max(0, b.Flash - Time.unscaledDeltaTime / 0.25f);
-                var color = Color.Lerp(b.Hover ? hover : idle, pressed, b.Flash);
+                b.Glow = Mathf.Max(0, b.Glow - Time.unscaledDeltaTime / 2.5f);
+                var rest = Color.Lerp(idle, hover, Mathf.Max(b.Hover ? 1f : 0f, Mathf.Sin(b.Glow * Mathf.PI) * 0.8f));
+                var color = Color.Lerp(rest, pressed, b.Flash);
                 b.Face.GetPropertyBlock(block);
                 block.SetColor(ColorId, color);
                 if (glow > 0) block.SetColor(EmissionId, color * glow * (0.25f + (b.Hover ? 0.5f : 0f) + b.Flash * 1.5f));
