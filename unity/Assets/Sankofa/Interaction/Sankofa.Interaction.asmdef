@@ -1,0 +1,14 @@
+{
+    "name": "Sankofa.Interaction",
+    "rootNamespace": "Sankofa.Interaction",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

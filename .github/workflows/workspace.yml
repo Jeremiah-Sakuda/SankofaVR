@@ -12,3 +12,12 @@ jobs:
           python-version: '3.12'
       - run: python3 scripts/check_workspace.py
       - run: git diff --check
+  core:
+    # The engine-free story core, flow and gesture logic; Unity itself is not installed in CI.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test dotnet/Sankofa.Tests
