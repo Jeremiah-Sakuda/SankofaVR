@@ -1,0 +1,87 @@
+{
+  "source": "Poly Haven",
+  "approved_by": "user, 2026-10-04",
+  "assets": [
+    {
+      "id": "rock_boulder_dry",
+      "name": "Rock Boulder Dry",
+      "page": "https://polyhaven.com/a/rock_boulder_dry",
+      "authors": [
+        "Dimitrios Savva",
+        "Rico Cilliers"
+      ],
+      "license": "CC0 1.0 (public domain)",
+      "downloaded": "2026-10-04",
+      "files": {
+        "rock_boulder_dry_diff_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_diff_1k.jpg",
+          "sha256": "20f653a42fb24f42aa40641663070d578678da49af18cc1049dbdd4ed8679f3c"
+        },
+        "rock_boulder_dry_nor_gl_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_nor_gl_1k.jpg",
+          "sha256": "5915fea28a97357c78a04fb31c2516f1f7ed1b3a9cef4ae25aa93e4655e6c595"
+        }
+      }
+    },
+    {
+      "id": "burned_ground_01",
+      "name": "Burned Ground 01",
+      "page": "https://polyhaven.com/a/burned_ground_01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (public domain)",
+      "downloaded": "2026-10-04",
+      "files": {
+        "burned_ground_01_diff_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/burned_ground_01/burned_ground_01_diff_1k.jpg",
+          "sha256": "be83310cad64d23539e628f14525af651a03646f5a1cc6029bd19a9446ea72f9"
+        },
+        "burned_ground_01_nor_gl_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/burned_ground_01/burned_ground_01_nor_gl_1k.jpg",
+          "sha256": "86125af02b64b05b0079dd6fa08ffae11878a3f9f50326a265e94c7a64cba865"
+        }
+      }
+    },
+    {
+      "id": "dry_ground_01",
+      "name": "Dry Ground 01",
+      "page": "https://polyhaven.com/a/dry_ground_01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (public domain)",
+      "downloaded": "2026-10-04",
+      "files": {
+        "dry_ground_01_diff_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dry_ground_01/dry_ground_01_diff_1k.jpg",
+          "sha256": "75222fc97a82b635a09cf8f2891dd58bc42e49599b9fda920b2c50193fe85e9f"
+        },
+        "dry_ground_01_nor_gl_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dry_ground_01/dry_ground_01_nor_gl_1k.jpg",
+          "sha256": "8faf30f0656721f861dba573006c3f90e38fcda8dad481d2369145b114c6b45e"
+        }
+      }
+    },
+    {
+      "id": "bark_brown_02",
+      "name": "Bark Brown 02",
+      "page": "https://polyhaven.com/a/bark_brown_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0 1.0 (public domain)",
+      "downloaded": "2026-10-04",
+      "files": {
+        "bark_brown_02_diff_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg",
+          "sha256": "920fa0bed0c9d78c1d530e99795113afd532d7db746de440f4a85d7c83ed0f1a"
+        },
+        "bark_brown_02_nor_gl_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_nor_gl_1k.jpg",
+          "sha256": "0d5e691e8ad8bcd093a3587887fda2a6b4a948b5708a4f256f7919584c6eb857"
+        }
+      }
+    }
+  ]
+}

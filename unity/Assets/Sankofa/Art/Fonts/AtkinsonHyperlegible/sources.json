@@ -1,0 +1,13 @@
+{
+  "name": "Atkinson Hyperlegible",
+  "designer": "Braille Institute of America",
+  "license": "SIL Open Font License 1.1 (OFL.txt)",
+  "source": "https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegible",
+  "downloaded": "2026-10-04",
+  "approved_by": "user, 2026-10-04",
+  "files": {
+    "AtkinsonHyperlegible-Bold.ttf": "5a3b0c8cc8ca545155150b4512a1fa248298df121c50d6557e651e61fbdab92f",
+    "AtkinsonHyperlegible-Regular.ttf": "7fb917c89019896d0b52ee84b7cbb3304c18cb90b19a62f5e32712bd23e97669",
+    "OFL.txt": "f32d22b3908fcad2c86a74000614ec22e6a7f66ea7e867e616026a27aebdc143"
+  }
+}
