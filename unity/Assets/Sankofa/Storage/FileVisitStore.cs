@@ -1,0 +1,121 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using Sankofa.Core.Story;
+using Sankofa.Core.Visits;
+
+namespace Sankofa.Storage
+{
+    /// <summary>
+    /// Kept visits as one JSON file each in a private folder (on Quest, the application's own storage). A save
+    /// writes a temporary file and moves it into place, so a failed save never leaves a half-written visit and
+    /// earlier visits stay intact. Unreadable files are reported, never deleted.
+    /// </summary>
+    public sealed class FileVisitStore : IVisitStore
+    {
+        const string Extension = ".json";
+        const string Temporary = ".tmp";
+        static readonly Encoding Utf8 = new UTF8Encoding(false);
+
+        public FileVisitStore(string directory)
+        {
+            if (string.IsNullOrWhiteSpace(directory)) throw new ArgumentException("A folder is required", nameof(directory));
+            Directory = directory;
+        }
+
+        public string Directory { get; }
+
+        public VisitStoreContents Load()
+        {
+            var visits = new List<SavedVisit>();
+            var problems = new List<string>();
+            if (!System.IO.Directory.Exists(Directory)) return new VisitStoreContents(visits, problems);
+            string[] files;
+            try
+            {
+                files = System.IO.Directory.GetFiles(Directory, "*" + Extension);
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+            {
+                problems.Add("Kept visits could not be listed: " + e.Message);
+                return new VisitStoreContents(visits, problems);
+            }
+            Array.Sort(files, StringComparer.Ordinal);
+            foreach (var file in files)
+            {
+                var name = Path.GetFileName(file);
+                try
+                {
+                    var visit = SavedVisitCodec.Read(File.ReadAllText(file, Utf8));
+                    if (visit.Id + Extension != name) problems.Add($"{name}: its id '{visit.Id}' does not match the file name");
+                    else visits.Add(visit);
+                }
+                catch (StoryFormatException e)
+                {
+                    problems.Add($"{name}: {e.Message}");
+                }
+                catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+                {
+                    problems.Add($"{name}: {e.Message}");
+                }
+            }
+            return new VisitStoreContents(visits, problems);
+        }
+
+        public void Save(SavedVisit visit)
+        {
+            if (visit == null) throw new ArgumentNullException(nameof(visit));
+            var target = PathFor(visit.Id);
+            var temporary = target + Temporary;
+            try
+            {
+                System.IO.Directory.CreateDirectory(Directory);
+                var bytes = Utf8.GetBytes(SavedVisitCodec.Write(visit));
+                using (var stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                    stream.Flush(true);
+                }
+                if (File.Exists(target)) File.Replace(temporary, target, null);
+                else File.Move(temporary, target);
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is NotSupportedException)
+            {
+                TryDelete(temporary);
+                throw new VisitStoreException("The visit could not be kept: " + e.Message, e);
+            }
+        }
+
+        public void Delete(string id)
+        {
+            var target = PathFor(id);
+            try
+            {
+                if (File.Exists(target)) File.Delete(target);
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+            {
+                throw new VisitStoreException("The visit could not be forgotten: " + e.Message, e);
+            }
+        }
+
+        string PathFor(string id)
+        {
+            if (!SavedVisitCodec.IsValidId(id)) throw new VisitStoreException($"'{id}' is not a valid visit id");
+            return Path.Combine(Directory, id + Extension);
+        }
+
+        static void TryDelete(string path)
+        {
+            try
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+            {
+                // The temporary file is ignored by Load; a later save overwrites it.
+            }
+        }
+    }
+}

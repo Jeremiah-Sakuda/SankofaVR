@@ -7,8 +7,11 @@ namespace Sankofa.Core.Story
     public enum JournalKind
     {
         Started, LineHeard, ActionPerformed, InvitationOpened, InvitationResolved, InvitationWithdrawn,
-        SceneEntered, Paused, Resumed, ReturnedEarly, Completed, Left,
+        SceneEntered, QuestionAsked, Noticed, Paused, Resumed, ReturnedEarly, Completed, Left,
     }
+
+    /// <summary>How a visit began: chosen by interest, continuing a kept visit, or replaying one exactly.</summary>
+    public enum VisitMode { Chosen, Continued, Replayed }
 
     /// <summary>One thing that actually happened, at visit time (seconds, excluding pauses).</summary>
     public sealed class JournalEntry
@@ -25,7 +28,7 @@ namespace Sankofa.Core.Story
         public int Sequence { get; }
         public double At { get; }
         public JournalKind Kind { get; }
-        /// <summary>The line, invitation, scene or object concerned, if any.</summary>
+        /// <summary>The line, invitation, scene, question or object concerned, if any.</summary>
         public string Subject { get; }
         public string Detail { get; }
 
@@ -33,70 +36,106 @@ namespace Sankofa.Core.Story
     }
 
     /// <summary>
-    /// Record of one visit: heard lines, completed actions and how each invitation was resolved. Heard and
-    /// performed are separate so a resumed line never repeats its completed action. Explicit and default outcomes
-    /// stay distinguishable so the story never claims the visitor chose a passive path.
+    /// Record of one visit: heard lines, completed actions, questions and how each invitation was resolved. Heard
+    /// and performed are separate so a resumed line never repeats its completed action. Explicit and default
+    /// outcomes stay distinguishable so the story never claims the visitor chose a passive path.
     /// </summary>
     public sealed class VisitJournal
     {
         readonly List<JournalEntry> entries = new List<JournalEntry>();
+        readonly List<string> heardInOrder = new List<string>();
         readonly HashSet<string> heard = new HashSet<string>();
         readonly HashSet<string> performed = new HashSet<string>();
         readonly Dictionary<string, Outcome> outcomes = new Dictionary<string, Outcome>();
+        readonly List<string> asked = new List<string>();
+        readonly HashSet<string> noticed = new HashSet<string>();
 
-        public VisitJournal(int visitNumber, string episodeId, string episodeVersion)
+        public VisitJournal(int visitNumber, StoryPlan plan, VisitMode mode, string relatedVisit = null)
         {
             VisitNumber = visitNumber;
-            EpisodeId = episodeId;
-            EpisodeVersion = episodeVersion;
+            Package = plan.Package;
+            Version = plan.Version;
+            Route = plan.Route;
+            Mode = mode;
+            RelatedVisit = relatedVisit;
         }
 
         public int VisitNumber { get; }
-        public string EpisodeId { get; }
-        public string EpisodeVersion { get; }
+        public string Package { get; }
+        public string Version { get; }
+        public string Route { get; }
+        public VisitMode Mode { get; }
+        /// <summary>The kept visit this one continues or replays, or null.</summary>
+        public string RelatedVisit { get; }
         public IReadOnlyList<JournalEntry> Entries => entries;
         public IReadOnlyDictionary<string, Outcome> Outcomes => outcomes;
+        public IReadOnlyList<string> Heard => heardInOrder;
+        public IReadOnlyList<string> Asked => asked;
         public bool Completed => entries.Any(e => e.Kind == JournalKind.Completed);
         public bool ReturnedEarly => entries.Any(e => e.Kind == JournalKind.ReturnedEarly);
 
         public bool HasHeard(string lineId) => heard.Contains(lineId);
+        public bool HasAsked(string questionId) => asked.Contains(questionId);
         public bool HasPerformed(string lineId, StoryAction action) => performed.Contains(Key(lineId, action));
 
         internal void Add(double at, JournalKind kind, string subject = null, string detail = null) =>
             entries.Add(new JournalEntry(entries.Count + 1, at, kind, subject, detail));
 
-        public void Started(double at) => Add(at, JournalKind.Started, EpisodeId, EpisodeVersion);
+        public void Started(double at)
+        {
+            var how = Mode == VisitMode.Chosen ? "chosen" : Mode == VisitMode.Continued ? "continues kept visit " + RelatedVisit : "exact replay of kept visit " + RelatedVisit;
+            Add(at, JournalKind.Started, Route, $"{Package} {Version}; {how}");
+        }
 
         public void LineHeard(double at, string lineId)
         {
-            if (heard.Add(lineId)) Add(at, JournalKind.LineHeard, lineId);
+            if (!heard.Add(lineId)) return;
+            heardInOrder.Add(lineId);
+            Add(at, JournalKind.LineHeard, lineId);
         }
 
         /// <summary>Records an action of a line. Returns false if it was already performed, so it is not repeated.</summary>
         public bool TryPerform(double at, string lineId, StoryAction action)
         {
             if (!performed.Add(Key(lineId, action))) return false;
-            Add(at, JournalKind.ActionPerformed, action.Object, action.Kind.ToString().ToLowerInvariant() + " by " + lineId);
+            Add(at, JournalKind.ActionPerformed, action.Object, action.Kind.ToString().ToLowerInvariant() + (action.At != null ? " at " + action.At : "") + " by " + lineId);
             return true;
         }
 
         public void InvitationOpened(double at, string invitationId) => Add(at, JournalKind.InvitationOpened, invitationId);
 
-        public void InvitationResolved(double at, string invitationId, Outcome outcome)
+        public void InvitationResolved(double at, string invitationId, Outcome outcome, bool replayed = false)
         {
             if (outcomes.ContainsKey(invitationId)) throw new InvalidOperationException($"Invitation '{invitationId}' was already resolved");
             outcomes.Add(invitationId, outcome);
-            Add(at, JournalKind.InvitationResolved, invitationId, outcome == Outcome.Accepted ? "accepted by the visitor" : "default path; no visitor choice");
+            var detail = replayed ? "as kept: " + (outcome == Outcome.Accepted ? "accepted" : "default path") + "; no new choice"
+                : outcome == Outcome.Accepted ? "accepted by the visitor" : "default path; no visitor choice";
+            Add(at, JournalKind.InvitationResolved, invitationId, detail);
         }
 
         public void InvitationWithdrawn(double at, string invitationId) => Add(at, JournalKind.InvitationWithdrawn, invitationId, "story left before resolution");
         public void SceneEntered(double at, string sceneId) => Add(at, JournalKind.SceneEntered, sceneId);
+
+        public void QuestionAsked(double at, string questionId)
+        {
+            asked.Add(questionId);
+            Add(at, JournalKind.QuestionAsked, questionId, "asked by hand");
+        }
+
+        /// <summary>Head direction rested on an object. Not eye tracking, and never consent to anything.</summary>
+        public bool Noticed(double at, string objectId)
+        {
+            if (!noticed.Add(objectId)) return false;
+            Add(at, JournalKind.Noticed, objectId, "head direction; not eye tracking");
+            return true;
+        }
+
         public void Paused(double at, string reason) => Add(at, JournalKind.Paused, null, reason);
         public void Resumed(double at) => Add(at, JournalKind.Resumed);
         public void ReturnedEarlyAt(double at, string beatId) => Add(at, JournalKind.ReturnedEarly, beatId);
-        public void CompletedAt(double at) => Add(at, JournalKind.Completed, EpisodeId);
+        public void CompletedAt(double at) => Add(at, JournalKind.Completed, Route);
         public void LeftAt(double at) => Add(at, JournalKind.Left);
 
-        static string Key(string lineId, StoryAction action) => lineId + "|" + action.Kind + "|" + action.Object;
+        static string Key(string lineId, StoryAction action) => lineId + "|" + action.Kind + "|" + action.Object + "|" + action.At;
     }
 }

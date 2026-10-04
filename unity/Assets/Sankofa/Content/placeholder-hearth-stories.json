@@ -1,0 +1,547 @@
+{
+  "schema": 2,
+  "kind": "package",
+  "id": "placeholder.hearth-stories",
+  "version": "0.2.0",
+  "title": "Hearth stories (development placeholder)",
+  "locale": "en",
+  "status": "placeholder",
+  "note": "Exercises interest choice, two routes through different scenes and objects, receive and touch invitations with passive defaults, hand questions, keepsakes, and a continuation per route that recalls only what a kept visit contained. Not a selected setting: its places and people are imagined, it makes no historical or cultural claims and it is not reviewed content.",
+  "scenes": [
+    { "id": "hearth", "kind": "hearth" },
+    { "id": "story.yard", "kind": "story" },
+    { "id": "story.road", "kind": "story" }
+  ],
+  "objects": [
+    { "id": "ember", "scene": "hearth", "capabilities": ["offer", "place", "withdraw"] },
+    { "id": "lantern", "scene": "story.yard", "capabilities": ["reveal", "illuminate"], "continues": "ember" },
+    { "id": "bowl", "scene": "story.yard", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "shard", "scene": "story.yard", "capabilities": ["offer", "place"] },
+    { "id": "shard.kept", "scene": "hearth", "capabilities": ["place"], "continues": "shard" },
+    { "id": "road.lantern", "scene": "story.road", "capabilities": ["reveal", "illuminate"], "continues": "ember" },
+    { "id": "waymarker", "scene": "story.road", "capabilities": ["reveal", "illuminate", "touch"] },
+    { "id": "waystone", "scene": "story.road", "capabilities": ["offer", "place"] },
+    { "id": "waystone.kept", "scene": "hearth", "capabilities": ["place"], "continues": "waystone" },
+    { "id": "cairn", "scene": "story.road", "capabilities": ["reveal", "illuminate", "touch"] }
+  ],
+  "claims": [],
+  "welcome": [
+    { "id": "welcome.sit", "text": "Come. Sit with me.", "seconds": 3.2, "pause_after": 1.2, "fire": "welcoming" },
+    { "id": "welcome.fire", "text": "I am the fire. People bring me what they are curious about, and I answer with a story.", "seconds": 6.6, "pause_after": 0.6, "fire": "telling" },
+    { "id": "welcome.choose", "text": "What draws you tonight? Reach out and touch it.", "seconds": 4.2, "fire": "listening" }
+  ],
+  "welcome_back": [
+    { "id": "back.sit", "text": "You came back. Sit with me.", "seconds": 3.4, "pause_after": 0.8, "fire": "welcoming" },
+    { "id": "back.kept", "text": "I kept what you left with me. We can follow where it leads, hear it again just as it was, or begin something new.", "seconds": 8.6, "fire": "listening" }
+  ],
+  "choose": [
+    { "id": "choose.again", "text": "What draws you this time?", "seconds": 2.8, "fire": "listening" }
+  ],
+  "routes": [
+    {
+      "id": "makers",
+      "label": "Hands that make",
+      "beats": ["gather.makers", "offer", "yard.enter", "yard.bowl", "yard.shard", "home.back", "home.makers"],
+      "keepsake": "shard.kept",
+      "next": "makers.again"
+    },
+    {
+      "id": "travellers",
+      "label": "Roads that carry",
+      "beats": ["gather.travellers", "offer", "road.enter", "road.marker", "road.stone", "home.back", "home.travellers"],
+      "keepsake": "waystone.kept",
+      "next": "travellers.again"
+    },
+    {
+      "id": "makers.again",
+      "label": "Bring the piece back",
+      "follows": "makers",
+      "beats": ["again.makers", "offer", "yard.again", "yard.mend", "home.again.makers"],
+      "keepsake": "ember"
+    },
+    {
+      "id": "travellers.again",
+      "label": "Walk the road on",
+      "follows": "travellers",
+      "beats": ["again.travellers", "offer", "road.again", "road.cairn", "home.again.travellers"],
+      "keepsake": "ember"
+    }
+  ],
+  "beats": [
+    {
+      "id": "gather.makers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "makers.gather", "text": "Hands that make. Then I know where to take you.", "seconds": 4.0, "pause_after": 0.8, "fire": "gathering" }
+      ]
+    },
+    {
+      "id": "gather.travellers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "travellers.gather", "text": "Roads that carry. Then come, I know a road.", "seconds": 3.8, "pause_after": 0.8, "fire": "gathering" }
+      ]
+    },
+    {
+      "id": "offer",
+      "scene": "hearth",
+      "lines": [
+        { "id": "offer.light", "text": "Every story I tell begins with a little of my light.", "seconds": 4.0, "pause_after": 0.6, "fire": "telling" },
+        {
+          "id": "offer.hand",
+          "text": "Hold out your open hand, palm up, and I will give you an ember to carry.",
+          "seconds": 5.0,
+          "fire": "holding",
+          "actions": [{ "do": "offer", "object": "ember" }]
+        }
+      ],
+      "invitation": {
+        "id": "receive-ember",
+        "kind": "receive",
+        "object": "ember",
+        "alternative": "Take the ember",
+        "wait_seconds": 14,
+        "accepted": [
+          { "id": "offer.accepted", "text": "It is yours to carry now. Keep it close.", "seconds": 3.6, "pause_after": 0.8, "fire": "welcoming" }
+        ],
+        "default": [
+          {
+            "id": "offer.default",
+            "text": "I will set it beside you, then. It will follow us.",
+            "seconds": 4.0,
+            "pause_after": 0.8,
+            "fire": "holding",
+            "actions": [{ "do": "place", "object": "ember" }]
+          }
+        ]
+      }
+    },
+    {
+      "id": "yard.enter",
+      "scene": "story.yard",
+      "lines": [
+        { "id": "yard.lantern", "text": "Look. The ember has become a lantern, and we are somewhere else.", "seconds": 4.8, "pause_after": 1.0, "fire": "gathering" },
+        { "id": "yard.dusk", "text": "A yard where someone works with clay. They have only just put their tools down.", "seconds": 5.8, "pause_after": 0.8, "fire": "telling" }
+      ],
+      "questions": [
+        {
+          "id": "q.yard.real",
+          "label": "Is this a real place?",
+          "lines": [
+            { "id": "q.yard.real.answer", "text": "No. This yard is imagined, so I can practise telling. A true story will name its place, and how we know it.", "seconds": 8.4, "fire": "holding" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yard.bowl",
+      "scene": "story.yard",
+      "lines": [
+        {
+          "id": "yard.bowl.reveal",
+          "text": "There. A bowl, still warm from the fire that made it. A piece of its rim is missing.",
+          "seconds": 6.8,
+          "pause_after": 0.8,
+          "fire": "telling",
+          "actions": [{ "do": "reveal", "object": "bowl" }]
+        },
+        {
+          "id": "yard.bowl.carried",
+          "when": "receive-ember:accepted",
+          "text": "The lantern you carried finds the painted line around its rim.",
+          "seconds": 4.6,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [{ "do": "illuminate", "object": "bowl" }]
+        },
+        {
+          "id": "yard.bowl.placed",
+          "when": "receive-ember:default",
+          "text": "The lantern I set beside you finds the painted line around its rim.",
+          "seconds": 4.8,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [{ "do": "illuminate", "object": "bowl" }]
+        },
+        { "id": "yard.bowl.touch", "text": "Reach out and touch the rim. Feel where the brush went around.", "seconds": 4.8, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "touch-bowl",
+        "kind": "touch",
+        "object": "bowl",
+        "alternative": "Touch the bowl",
+        "wait_seconds": 12,
+        "accepted": [
+          { "id": "yard.bowl.felt", "text": "There, under your fingers. The line is not quite even. A hand made this, and the hand was not hurrying.", "seconds": 7.6, "pause_after": 1.0, "fire": "telling" }
+        ],
+        "default": [
+          { "id": "yard.bowl.seen", "text": "Even from there you can see it. The line is not quite even. A hand made this, and the hand was not hurrying.", "seconds": 8.4, "pause_after": 1.0, "fire": "telling" }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.bowl.maker",
+          "label": "Who made it?",
+          "about": "bowl",
+          "lines": [
+            { "id": "q.bowl.maker.answer", "text": "Someone who lived and worked here. I do not know their name, so I will not give them one.", "seconds": 7.2, "fire": "holding" }
+          ]
+        },
+        {
+          "id": "q.bowl.line",
+          "label": "What does the line mean?",
+          "about": "bowl",
+          "lines": [
+            { "id": "q.bowl.line.answer", "text": "I do not know what it meant to the one who painted it. I only know it goes all the way around, and comes back to where it began.", "seconds": 9.8, "fire": "telling" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yard.shard",
+      "scene": "story.yard",
+      "lines": [
+        { "id": "yard.mark.turn", "text": "Underneath, the maker pressed a mark into the clay.", "seconds": 4.2, "pause_after": 0.6, "fire": "telling" },
+        { "id": "yard.mark.felt", "when": "touch-bowl:accepted", "text": "You touched the rim, so you will know this bowl again by its feel.", "seconds": 5.0, "pause_after": 0.8, "fire": "welcoming" },
+        { "id": "yard.mark.seen", "when": "touch-bowl:default", "text": "You will know this bowl again by its line.", "seconds": 3.6, "pause_after": 0.8, "fire": "telling" },
+        {
+          "id": "yard.shard.offer",
+          "text": "When a bowl chips in the firing, the maker keeps the piece that broke away. Hold out your hand. This one is for you.",
+          "seconds": 8.8,
+          "fire": "holding",
+          "actions": [{ "do": "offer", "object": "shard" }]
+        }
+      ],
+      "invitation": {
+        "id": "receive-shard",
+        "kind": "receive",
+        "object": "shard",
+        "alternative": "Take the piece",
+        "wait_seconds": 12,
+        "accepted": [
+          { "id": "yard.shard.taken", "text": "Carry it home. It remembers this yard.", "seconds": 3.6, "pause_after": 0.8, "fire": "welcoming" }
+        ],
+        "default": [
+          {
+            "id": "yard.shard.held",
+            "text": "I will keep it with us. It remembers this yard.",
+            "seconds": 4.0,
+            "pause_after": 0.8,
+            "fire": "holding",
+            "actions": [{ "do": "place", "object": "shard" }]
+          }
+        ]
+      }
+    },
+    {
+      "id": "road.enter",
+      "scene": "story.road",
+      "lines": [
+        { "id": "road.lantern", "text": "Look. The ember has become a lantern, and the road goes on ahead of us.", "seconds": 5.4, "pause_after": 1.0, "fire": "gathering" },
+        { "id": "road.rest", "text": "Travellers stop here to rest before the last stretch. The ground remembers their feet.", "seconds": 5.8, "pause_after": 0.8, "fire": "telling" }
+      ],
+      "questions": [
+        {
+          "id": "q.road.real",
+          "label": "Is this a real place?",
+          "lines": [
+            { "id": "q.road.real.answer", "text": "No. This road is imagined, so I can practise telling. A true story will name its place, and how we know it.", "seconds": 8.4, "fire": "holding" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "road.marker",
+      "scene": "story.road",
+      "lines": [
+        {
+          "id": "road.marker.reveal",
+          "text": "Beside the road stands a stone, worn smooth on one side.",
+          "seconds": 4.6,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [{ "do": "reveal", "object": "waymarker" }]
+        },
+        { "id": "road.marker.why", "text": "Everyone who passes touches it, to say they were here.", "seconds": 4.2, "pause_after": 0.4, "fire": "telling" },
+        { "id": "road.marker.touch", "text": "Reach out and touch it. Say you were here too.", "seconds": 4.0, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "touch-marker",
+        "kind": "touch",
+        "object": "waymarker",
+        "alternative": "Touch the stone",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "road.marker.touched",
+            "text": "There. Now you have passed this way. The stone is a little warmer for it.",
+            "seconds": 5.6,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "actions": [{ "do": "illuminate", "object": "waymarker" }]
+          }
+        ],
+        "default": [
+          {
+            "id": "road.marker.untouched",
+            "text": "Then I will touch it for both of us. Now we have passed this way.",
+            "seconds": 5.4,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "actions": [{ "do": "illuminate", "object": "waymarker" }]
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.marker.who",
+          "label": "Who wore it smooth?",
+          "about": "waymarker",
+          "lines": [
+            { "id": "q.marker.who.answer", "text": "Many hands, over many years. I do not know whose, and I will not pretend to.", "seconds": 6.2, "fire": "holding" }
+          ]
+        },
+        {
+          "id": "q.road.where",
+          "label": "Where does the road go?",
+          "lines": [
+            { "id": "q.road.where.answer", "text": "Somewhere I will tell you about another night. A good story leaves you a reason to come back.", "seconds": 7.0, "fire": "telling" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "road.stone",
+      "scene": "story.road",
+      "lines": [
+        { "id": "road.stone.custom", "text": "Travellers here carry a small stone from each place they rest, so the road comes home with them.", "seconds": 6.8, "pause_after": 0.6, "fire": "telling" },
+        {
+          "id": "road.stone.offer",
+          "text": "Hold out your hand. This one is yours.",
+          "seconds": 3.6,
+          "fire": "holding",
+          "actions": [{ "do": "offer", "object": "waystone" }]
+        }
+      ],
+      "invitation": {
+        "id": "receive-waystone",
+        "kind": "receive",
+        "object": "waystone",
+        "alternative": "Take the stone",
+        "wait_seconds": 12,
+        "accepted": [
+          { "id": "road.stone.taken", "text": "Keep it in your hand. It knows the way back.", "seconds": 4.0, "pause_after": 0.8, "fire": "welcoming" }
+        ],
+        "default": [
+          {
+            "id": "road.stone.carried",
+            "text": "I will carry it for you. It knows the way back.",
+            "seconds": 4.2,
+            "pause_after": 0.8,
+            "fire": "holding",
+            "actions": [{ "do": "place", "object": "waystone" }]
+          }
+        ]
+      }
+    },
+    {
+      "id": "home.back",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "home.back.ember",
+          "text": "We are home again. The lantern is my ember once more, and I will take it back.",
+          "seconds": 6.0,
+          "pause_after": 0.8,
+          "fire": "welcoming",
+          "actions": [{ "do": "withdraw", "object": "ember" }]
+        }
+      ]
+    },
+    {
+      "id": "home.makers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.makers.piece", "text": "The piece of the bowl stays with you. If you keep this visit, it will wait here for you, and so will the rest of its story.", "seconds": 9.4, "fire": "welcoming" }
+      ]
+    },
+    {
+      "id": "home.travellers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.travellers.stone", "text": "The stone stays with you. If you keep this visit, it will wait here for you, and so will the road.", "seconds": 8.2, "fire": "welcoming" }
+      ]
+    },
+    {
+      "id": "again.makers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "again.makers.carried", "recall": "receive-shard:accepted", "text": "Last time you carried a piece of a bowl home, in your own hand.", "seconds": 5.0, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.makers.held", "recall": "receive-shard:default", "text": "Last time I kept a piece of a bowl for you.", "seconds": 3.8, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.makers.felt", "recall": "touch-bowl:accepted", "text": "Your fingers already know its rim.", "seconds": 3.0, "pause_after": 0.6, "fire": "welcoming" },
+        {
+          "id": "again.makers.piece",
+          "text": "Here it is. Let us take it back to where it broke away.",
+          "seconds": 4.6,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [{ "do": "place", "object": "shard.kept" }]
+        }
+      ]
+    },
+    {
+      "id": "yard.again",
+      "scene": "story.yard",
+      "lines": [
+        {
+          "id": "yard.again.found",
+          "text": "The same yard. The lantern finds the bowl where we left it.",
+          "seconds": 4.8,
+          "pause_after": 0.8,
+          "fire": "gathering",
+          "actions": [{ "do": "reveal", "object": "bowl" }]
+        },
+        { "id": "yard.again.gap", "text": "Look at the rim. There is the gap your piece came from.", "seconds": 4.6, "pause_after": 0.6, "fire": "telling" }
+      ]
+    },
+    {
+      "id": "yard.mend",
+      "scene": "story.yard",
+      "lines": [
+        { "id": "yard.mend.ask", "text": "Touch the bowl, and I will set your piece back where it broke away.", "seconds": 5.2, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "touch-mend",
+        "kind": "touch",
+        "object": "bowl",
+        "alternative": "Mend the bowl",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "yard.mend.done",
+            "text": "There. Whole again, because you brought it back.",
+            "seconds": 3.8,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "actions": [{ "do": "place", "object": "shard", "at": "bowl" }, { "do": "illuminate", "object": "bowl" }]
+          }
+        ],
+        "default": [
+          {
+            "id": "yard.mend.set",
+            "text": "I will set it in place for you. Whole again.",
+            "seconds": 3.8,
+            "pause_after": 1.0,
+            "fire": "holding",
+            "actions": [{ "do": "place", "object": "shard", "at": "bowl" }, { "do": "illuminate", "object": "bowl" }]
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.mend.why",
+          "label": "Why bring it back?",
+          "about": "bowl",
+          "lines": [
+            { "id": "q.mend.why.answer", "text": "Because what is carried away and brought back becomes part of a story. Keeping those is what I am for.", "seconds": 7.4, "fire": "telling" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home.again.makers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.again.makers.held", "text": "A bowl that was broken and brought back together still holds what it is given.", "seconds": 5.8, "pause_after": 1.0, "fire": "telling" },
+        { "id": "home.again.makers.ember", "text": "We are home. The lantern is my ember again, and this time it stays with you. That is the end of this thread.", "seconds": 8.6, "fire": "welcoming" }
+      ]
+    },
+    {
+      "id": "again.travellers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "again.road.carried", "recall": "receive-waystone:accepted", "text": "Last time you carried a stone home from the road, in your own hand.", "seconds": 5.0, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.road.held", "recall": "receive-waystone:default", "text": "Last time I carried a stone home from the road for you.", "seconds": 4.4, "pause_after": 0.6, "fire": "welcoming" },
+        { "id": "again.road.touched", "recall": "touch-marker:accepted", "text": "You touched the stone beside the road, so the road knows you.", "seconds": 4.6, "pause_after": 0.6, "fire": "welcoming" },
+        {
+          "id": "again.road.stone",
+          "text": "Here it is. The road is waiting for it.",
+          "seconds": 3.8,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [{ "do": "place", "object": "waystone.kept" }]
+        }
+      ]
+    },
+    {
+      "id": "road.again",
+      "scene": "story.road",
+      "lines": [
+        { "id": "road.again.lantern", "text": "The same road. The lantern shows us a little further along it this time.", "seconds": 5.2, "pause_after": 0.8, "fire": "gathering" },
+        {
+          "id": "road.again.cairn",
+          "text": "Here, where the road bends, travellers leave their stones in a pile, one on another.",
+          "seconds": 6.0,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [{ "do": "reveal", "object": "cairn" }]
+        }
+      ]
+    },
+    {
+      "id": "road.cairn",
+      "scene": "story.road",
+      "lines": [
+        { "id": "road.cairn.ask", "text": "Touch the pile, and I will set your stone on top.", "seconds": 4.2, "fire": "holding" }
+      ],
+      "invitation": {
+        "id": "touch-cairn",
+        "kind": "touch",
+        "object": "cairn",
+        "alternative": "Add your stone",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "road.cairn.added",
+            "text": "There. The pile is one stone taller, because you came back.",
+            "seconds": 4.6,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "actions": [{ "do": "place", "object": "waystone", "at": "cairn" }, { "do": "illuminate", "object": "cairn" }]
+          }
+        ],
+        "default": [
+          {
+            "id": "road.cairn.set",
+            "text": "I will set it there for you. The pile is one stone taller.",
+            "seconds": 4.8,
+            "pause_after": 1.0,
+            "fire": "holding",
+            "actions": [{ "do": "place", "object": "waystone", "at": "cairn" }, { "do": "illuminate", "object": "cairn" }]
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.cairn.whose",
+          "label": "Whose stones are these?",
+          "about": "cairn",
+          "lines": [
+            { "id": "q.cairn.whose.answer", "text": "Travellers who came this way before us. I can tell you that they stopped. I cannot tell you who they were.", "seconds": 8.0, "fire": "holding" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home.again.travellers",
+      "scene": "hearth",
+      "lines": [
+        { "id": "home.again.road.next", "text": "Whoever comes next will find your stone, and know that someone passed this way before them.", "seconds": 6.4, "pause_after": 1.0, "fire": "telling" },
+        { "id": "home.again.road.ember", "text": "We are home. The lantern is my ember again, and this time it stays with you. That is the end of this thread.", "seconds": 8.6, "fire": "welcoming" }
+      ]
+    }
+  ],
+  "early_return": [
+    { "id": "early.later", "text": "We can come back to this story whenever you like.", "seconds": 3.6, "fire": "welcoming" }
+  ]
+}

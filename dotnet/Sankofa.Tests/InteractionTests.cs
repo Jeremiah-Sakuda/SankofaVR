@@ -136,4 +136,99 @@ namespace Sankofa.Tests
             Assert.That(g.Update(-0.001, true, 0.4), Is.False, "within the minimum interval");
         }
     }
+
+    public class TouchGestureTests
+    {
+        static HandSample PointingAt(Vector3 fingertip) => new HandSample
+        {
+            Tracked = true,
+            Wrist = fingertip - new Vector3(0, 0, 0.18f),
+            IndexProximal = fingertip - new Vector3(-0.02f, 0, 0.09f),
+            MiddleProximal = fingertip - new Vector3(0, 0, 0.088f),
+            LittleProximal = fingertip - new Vector3(0.035f, 0, 0.1f),
+            IndexTip = fingertip,
+            MiddleTip = fingertip - new Vector3(0, 0.01f, 0.01f),
+            RingTip = fingertip - new Vector3(0.02f, 0.01f, 0.02f),
+        };
+
+        static readonly Vector3 Rim = new Vector3(-0.2f, 0.62f, 0.5f);
+
+        [Test]
+        public void AFingertipRestingOnTheTargetTouchesItOnce()
+        {
+            var g = new TouchGesture();
+            var hand = PointingAt(Rim + new Vector3(0.03f, 0.02f, 0));
+            Assert.That(g.Update(hand, Rim, 0.2), Is.False);
+            Assert.That(g.InPlace, Is.True);
+            Assert.That(g.Update(hand, Rim, 0.2), Is.True);
+            Assert.That(g.Update(hand, Rim, 0.2), Is.False, "touched once");
+            Assert.That(g.Touched, Is.True);
+        }
+
+        [Test]
+        public void AHandPassingThroughOrFarAwayDoesNotTouch()
+        {
+            var g = new TouchGesture();
+            var near = PointingAt(Rim);
+            var away = PointingAt(Rim + new Vector3(0, 0, -0.3f));
+            Assert.That(g.Update(near, Rim, 0.1), Is.False);
+            Assert.That(g.Update(away, Rim, 0.1), Is.False, "left before the dwell completed");
+            Assert.That(g.InPlace, Is.False);
+            Assert.That(g.Proximity, Is.GreaterThan(0).And.LessThan(0.5f), "close enough for feedback, not to touch");
+            Assert.That(g.Update(near, Rim, 0.25), Is.False, "the dwell restarted");
+            Assert.That(g.Update(new HandSample(), Rim, 1), Is.False);
+            Assert.That(g.Proximity, Is.EqualTo(0));
+        }
+    }
+
+    public class AttentionTrackerTests
+    {
+        static readonly Vector3 Head = new Vector3(0, 1.15f, 0);
+        static readonly AttentionCandidate[] Objects =
+        {
+            new AttentionCandidate("bowl", new Vector3(-0.25f, 0.55f, 0.55f), 0.12f),
+            new AttentionCandidate("door", new Vector3(0.1f, 1.1f, 4.6f), 0.7f),
+        };
+
+        static Vector3 Toward(string id) => Vector3.Normalize(System.Array.Find(Objects, c => c.Id == id).Position - Head);
+
+        [Test]
+        public void ARestingLookIsNoticedOnceAfterTheDwell()
+        {
+            var t = new AttentionTracker();
+            string noticed = null;
+            for (var i = 0; i < 13; i++) noticed ??= t.Update(Head, Toward("bowl"), Objects, 0.1);
+            Assert.That(noticed, Is.Null, "1.3 s is a glance, not a look");
+            Assert.That(t.Current, Is.EqualTo("bowl"));
+            Assert.That(t.Update(Head, Toward("bowl"), Objects, 0.1), Is.EqualTo("bowl"));
+            for (var i = 0; i < 30; i++) Assert.That(t.Update(Head, Toward("bowl"), Objects, 0.1), Is.Null, "noticed once per look");
+        }
+
+        [Test]
+        public void AGlanceAwayKeepsTheLookButLookingElsewhereStartsAgain()
+        {
+            var t = new AttentionTracker();
+            var up = new Vector3(0, 1, 0);
+            for (var i = 0; i < 10; i++) t.Update(Head, Toward("bowl"), Objects, 0.1);
+            for (var i = 0; i < 5; i++) t.Update(Head, up, Objects, 0.1);
+            Assert.That(t.Current, Is.EqualTo("bowl"), "half a second away is still the same look");
+            string noticed = null;
+            for (var i = 0; i < 5 && noticed == null; i++) noticed = t.Update(Head, Toward("bowl"), Objects, 0.1);
+            Assert.That(noticed, Is.EqualTo("bowl"));
+
+            for (var i = 0; i < 10; i++) Assert.That(t.Update(Head, Toward("door"), Objects, 0.1), Is.Null);
+            Assert.That(t.Current, Is.EqualTo("door"));
+            for (var i = 0; i < 10; i++) t.Update(Head, up, Objects, 0.1);
+            Assert.That(t.Current, Is.Null, "looking away for long ends the look");
+        }
+
+        [Test]
+        public void NothingIsNoticedWhenFacingNothing()
+        {
+            var t = new AttentionTracker();
+            for (var i = 0; i < 50; i++) Assert.That(t.Update(Head, new Vector3(1, 0, 0), Objects, 0.1), Is.Null);
+            Assert.That(t.Update(Head, Vector3.Zero, Objects, 0.1), Is.Null);
+            Assert.That(t.Progress, Is.EqualTo(0));
+        }
+    }
 }

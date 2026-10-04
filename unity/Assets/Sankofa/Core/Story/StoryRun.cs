@@ -54,7 +54,7 @@ namespace Sankofa.Core.Story
     }
 
     /// <summary>
-    /// Deterministic progression through a validated episode's beats. It selects outcome-dependent lines, plays the
+    /// Deterministic progression through a validated plan's beats. It selects outcome-dependent lines, plays the
     /// accepted or default lines of each invitation exactly once and reports scene changes. It has no clock: the
     /// application flow decides when a step is complete.
     /// </summary>
@@ -62,21 +62,21 @@ namespace Sankofa.Core.Story
     {
         enum Stage { NotStarted, SceneCheck, BeatLines, Awaiting, OutcomeLines, Done }
 
-        readonly PlayableEpisode episode;
+        readonly PlayablePlan plan;
         readonly Dictionary<string, Outcome> outcomes = new Dictionary<string, Outcome>();
         Stage stage = Stage.NotStarted;
         int beatIndex = -1;
         int lineIndex;
 
-        public StoryRun(PlayableEpisode episode)
+        public StoryRun(PlayablePlan plan)
         {
-            this.episode = episode ?? throw new ArgumentNullException(nameof(episode));
-            CurrentScene = episode.Hearth;
+            this.plan = plan ?? throw new ArgumentNullException(nameof(plan));
+            CurrentScene = plan.Hearth;
         }
 
         /// <summary>The visitor begins at the hearth, where the welcome is spoken.</summary>
         public SceneDef CurrentScene { get; private set; }
-        public Beat CurrentBeat => beatIndex >= 0 && beatIndex < episode.Episode.Beats.Count ? episode.Episode.Beats[beatIndex] : null;
+        public Beat CurrentBeat => beatIndex >= 0 && beatIndex < plan.Plan.Beats.Count ? plan.Plan.Beats[beatIndex] : null;
         public bool IsComplete => stage == Stage.Done;
         public IReadOnlyDictionary<string, Outcome> Outcomes => outcomes;
 
@@ -93,7 +93,7 @@ namespace Sankofa.Core.Story
         /// <summary>Advances past the step just completed and returns the next one.</summary>
         public StoryStep Next()
         {
-            var beats = episode.Episode.Beats;
+            var beats = plan.Plan.Beats;
             while (true)
             {
                 switch (stage)
@@ -106,7 +106,7 @@ namespace Sankofa.Core.Story
                     case Stage.SceneCheck:
                         stage = Stage.BeatLines;
                         lineIndex = 0;
-                        var target = episode.Scene(beats[beatIndex].Scene);
+                        var target = plan.Scene(beats[beatIndex].Scene);
                         if (target != CurrentScene)
                         {
                             var from = CurrentScene;

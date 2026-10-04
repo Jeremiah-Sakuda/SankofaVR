@@ -15,5 +15,6 @@
     <ProjectReference Include="../Sankofa.Core/Sankofa.Core.csproj" />
     <ProjectReference Include="../Sankofa.Flow/Sankofa.Flow.csproj" />
     <ProjectReference Include="../Sankofa.Interaction/Sankofa.Interaction.csproj" />
+    <ProjectReference Include="../Sankofa.Storage/Sankofa.Storage.csproj" />
   </ItemGroup>
 </Project>
