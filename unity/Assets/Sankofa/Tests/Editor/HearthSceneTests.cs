@@ -54,6 +54,10 @@ namespace Sankofa.Tests
             components.AddRange(Object.FindObjectsByType<Runtime.Fire.HearthFire>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.AddRange(Object.FindObjectsByType<Runtime.Narration.NarrationPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.Add(Single<CaptionBoard>());
+            components.Add(Single<StartScreen>());
+            var pointers = Object.FindObjectsByType<PointerSource>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Assert.That(pointers.Length, Is.EqualTo(2), "a pointer for each side");
+            components.AddRange(pointers);
             components.Add(Single<Runtime.Audio.NightAmbience>());
             Assert.That(components.SelectMany(MissingReferences), Is.Empty);
             // Panels may use their font's own material.

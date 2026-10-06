@@ -17,9 +17,10 @@ using UnityEngine;
 namespace Sankofa.Runtime.App
 {
     /// <summary>
-    /// Composition root. Loads and validates the bundled story package against the stage, runs the visit flow with
-    /// on-device storage for kept visits, and translates its cues into presentation; translates hands, controls,
-    /// questions and noticing into flow commands. Story rules live in the flow, not here.
+    /// Composition root. Loads and validates the bundled story package against the stage, shows the start screen,
+    /// runs the visit flow with on-device storage for kept visits once the visitor begins, and translates its cues
+    /// into presentation; translates hands, controls, questions and noticing into flow commands. Story rules live in
+    /// the flow, not here.
     /// </summary>
     [DefaultExecutionOrder(500)]
     public sealed class SankofaApp : MonoBehaviour
@@ -32,6 +33,7 @@ namespace Sankofa.Runtime.App
         [Tooltip("The sound of each story scene; each plays only while its scene is shown.")]
         [SerializeField] StoryAmbience[] storyAmbience = new StoryAmbience[0];
         [SerializeField] CaptionBoard captions;
+        [SerializeField] StartScreen startScreen;
         [SerializeField] PokePanel controls;
         [SerializeField] PokePanel questionsPanel;
         [SerializeField] PokePanel settingsPanel;
@@ -42,6 +44,7 @@ namespace Sankofa.Runtime.App
         [SerializeField] AttentionSource attention;
         [SerializeField] HandSource[] hands;
         const float MaxStep = 0.1f;
+        const string StartId = "start", LeaveId = "leave";
 
         [Tooltip("Offer the steady-fire baseline in development builds, for the fire presence comparison.")]
         [SerializeField] bool fireComparison = true;
@@ -54,12 +57,14 @@ namespace Sankofa.Runtime.App
         StageObject invited;
         HandSource acceptingHand;
         string baseStatus = "";
-        bool started;
+        bool placed, started;
 
         public VisitFlow Flow => flow;
         public string LoadProblem { get; private set; }
         public ExperienceSettings Settings => settings;
         public string StoreFolder { get; private set; }
+        /// <summary>The start screen is showing: the hearth is placed and the visitor has not begun.</summary>
+        public bool AtStart => flow != null && placed && !started;
 
         void Awake()
         {
@@ -139,18 +144,29 @@ namespace Sankofa.Runtime.App
                 // Fail visibly and leave a way out; never improvise a different story.
                 captions.SetCaption("This story could not be opened.");
                 captions.SetStatus(LoadProblem);
-                controls.Show(new List<(string, string)> { ("leave", "Leave") });
+                controls.Show(new List<(string, string)> { (LeaveId, "Leave") });
                 return;
             }
             captions.SetStatus(baseStatus);
-            anchor.PlacedEvent += BeginVisit;
-            if (anchor.Placed) BeginVisit();
+            anchor.PlacedEvent += ShowStart;
+            if (anchor.Placed) ShowStart();
         }
 
-        void BeginVisit()
+        /// <summary>Once the hearth is placed before the visitor, the start screen waits for them to begin.</summary>
+        void ShowStart()
         {
-            if (started) return;
+            if (placed) return;
+            placed = true;
+            startScreen.Show();
+            controls.Show(new List<(string, string)> { (StartId, "Begin"), (LeaveId, "Leave") });
+        }
+
+        /// <summary>Leaves the start screen and opens the hearth: the fire's welcome, then the choice.</summary>
+        public void Begin()
+        {
+            if (!AtStart) return;
             started = true;
+            startScreen.Hide();
             flow.Start();
             Dispatch();
         }
@@ -320,9 +336,10 @@ namespace Sankofa.Runtime.App
 
         void OnControl(string id)
         {
-            if (flow == null)
+            if (flow == null || !started)
             {
-                if (id == "leave") Quit();
+                if (id == LeaveId) Quit();
+                else if (id == StartId) Begin();
                 return;
             }
             var colon = id.IndexOf(':');

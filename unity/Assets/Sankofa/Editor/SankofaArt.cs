@@ -7,7 +7,7 @@ namespace Sankofa.EditorTools
     public sealed class SankofaArtSet
     {
         public Texture2D Noise, Detail;
-        public Material Flame, Glow, Sparks, Curtain, CaptionBacking;
+        public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Pointer;
         public Material Workbench, Brass, LanternCore;
         public Material Water, Spill, River, EmberFigure, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, Stars, Smoke, Halo, Plaque;
@@ -50,6 +50,12 @@ namespace Sankofa.EditorTools
                 }),
                 Curtain = Make("Curtain", "Sankofa/Curtain", m => m.SetTexture("_Noise", noise)),
                 CaptionBacking = Make("Caption backing", "Sprites/Default", m => m.color = new Color(0.025f, 0.02f, 0.018f, 0.55f)),
+                // The pointing ray and its dot draw over the transition curtain, like the hands.
+                Pointer = Make("Pointer", "Sprites/Default", m =>
+                {
+                    m.color = new Color(1f, 0.82f, 0.56f, 1f);
+                    m.renderQueue = Sankofa.Runtime.Input.HandSource.HandRenderQueue;
+                }),
 
                 // Story scenes at the water.
                 Workbench = Make("Workbench wood", "Sankofa/Fire Lit", m =>

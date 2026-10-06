@@ -125,6 +125,10 @@ namespace Sankofa.Tests
                 IEnumerator Line(string id, float seconds = 90) => WaitFor(() => flow.CurrentLine?.Id == id, seconds);
                 IEnumerator Invited(string id, float seconds = 90) => WaitFor(() => flow.OpenInvitation?.Id == id, seconds);
 
+                yield return WaitFor(() => app.AtStart, 10);
+                yield return new WaitForSeconds(1.5f);
+                CaptureBoth(eye, "00-start");
+                app.Begin();
                 yield return WaitFor(() => flow.Phase == VisitPhase.Welcome, 10);
                 yield return new WaitForSeconds(1.5f);
                 CaptureBoth(eye, "01-welcome");

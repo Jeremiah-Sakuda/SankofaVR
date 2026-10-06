@@ -231,4 +231,50 @@ namespace Sankofa.Tests
             Assert.That(t.Progress, Is.EqualTo(0));
         }
     }
+
+    public class PointerSelectTests
+    {
+        [Test]
+        public void APinchBegunAndReleasedOverOneButtonPressesItOnRelease()
+        {
+            var s = new PointerSelect();
+            Assert.That(s.Update(true, 0.2, "begin"), Is.Null);
+            Assert.That(s.Update(true, 0.9, "begin"), Is.Null, "nothing happens on the pinch itself");
+            Assert.That(s.Held, Is.True);
+            Assert.That(s.Update(true, 0.7, "begin"), Is.Null, "still held between the thresholds");
+            Assert.That(s.Update(true, 0.3, "begin"), Is.EqualTo("begin"));
+            Assert.That(s.Update(true, 0.3, "begin"), Is.Null, "one press per pinch");
+        }
+
+        [Test]
+        public void SweepingAcrossButtonsOrLettingGoElsewherePressesNothing()
+        {
+            var s = new PointerSelect();
+            s.Update(true, 1, "begin");
+            s.Update(true, 1, "leave");
+            Assert.That(s.Update(true, 0, "leave"), Is.Null);
+
+            s.Update(true, 1, "begin");
+            s.Update(true, 1, null);
+            s.Update(true, 1, "begin");
+            Assert.That(s.Update(true, 0, "begin"), Is.Null, "moving off cancels even if the pointer comes back");
+
+            s.Update(true, 1, null);
+            Assert.That(s.Update(true, 0, "begin"), Is.Null, "a pinch begun over nothing cannot land on a button");
+        }
+
+        [Test]
+        public void LosingThePointerCancelsAHeldSelect()
+        {
+            var s = new PointerSelect();
+            s.Update(true, 1, "begin");
+            Assert.That(s.Update(false, 1, "begin"), Is.Null);
+            Assert.That(s.Held, Is.False);
+            Assert.That(s.Update(true, 0, "begin"), Is.Null, "a reappearing hand cannot finish a press it lost");
+        }
+
+        [Test]
+        public void ThePressStrengthMustExceedTheReleaseStrength() =>
+            Assert.That(() => new PointerSelect(0.4, 0.6), Throws.ArgumentException);
+    }
 }

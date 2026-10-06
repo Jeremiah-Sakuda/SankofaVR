@@ -76,6 +76,13 @@ namespace Sankofa.Tests
             Assert.That(app.Flow, Is.Not.Null, app.LoadProblem);
             stage = Object.FindFirstObjectByType<StoryStage>();
             Time.timeScale = pace;
+            // The start screen waits: nothing is spoken and no visit begins until the visitor presses Begin.
+            yield return WaitFor(() => app.AtStart, 10, "the start screen");
+            yield return new WaitForSeconds(1f);
+            Assert.That(app.Flow.Phase, Is.EqualTo(VisitPhase.Idle));
+            Assert.That(app.Flow.CurrentLine, Is.Null);
+            app.Begin();
+            Assert.That(app.AtStart, Is.False);
             yield return WaitFor(() => app.Flow.Phase == VisitPhase.Welcome || app.Flow.Phase == VisitPhase.Choosing, 10, "the hearth");
         }
 

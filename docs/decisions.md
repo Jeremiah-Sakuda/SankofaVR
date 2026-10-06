@@ -107,3 +107,15 @@ The three water scenes, ember-and-smoke figures and synthesised story ambience r
 | The status line shows "Draft story · not yet reviewed by family or community" | Adopted until review |
 
 Not established: pronunciation review, fluent-listener or community review, headset listening, or Quest performance with 85 compressed clips.
+
+## Start screen, pointing and the original music — October 5, 2026
+
+In the simulator, the user could not get past the choice of era. The panels accepted only a fingertip pushed through a button, and the simulator starts with controllers. Every panel can now also be used by pointing: a hand's system aim with an index pinch, or a Touch controller's trigger, with a select landing on release over the same button. This keeps every flow usable by hand, as the competition requires, with controllers optional. It also gives seated visitors a way to choose without reaching. The user asked for a start screen; a title card now waits for **Begin** before the fire speaks.
+
+The user asked to use the music from the original web Sankofa. Its history records `intro-music.mp3` as "Traces of Old Hands" by Djovan, which replaced an earlier cover of "Papaoutai". It records `drums.mp3` as an "African drums loop". Neither has a recorded source or licence, and a web search did not identify the track. The music is **not imported**. Its source and licence, and confirmation that it is not AI-generated, are needed first.
+
+| Decision | Status |
+|---|---|
+| Start screen before the welcome | User requested; implemented in software |
+| Point-and-pinch and controller selection alongside fingertip presses | Implemented in software; simulator and device checks pending |
+| Original Sankofa music | User requested; blocked on source, licence and the no-AI-music rule |

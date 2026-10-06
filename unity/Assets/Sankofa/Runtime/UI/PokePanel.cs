@@ -10,6 +10,8 @@ namespace Sankofa.Runtime.UI
     /// A hand-operated button panel. A press is a fingertip reaching the button face from in
     /// front, inside its rectangle; it must withdraw before it can press again. While a finger
     /// hovers near the panel, <see cref="FingerNear"/> is true so other hand input can yield to it.
+    /// A pointer (a hand's pinch or a controller's trigger, from a distance) can also hover and press
+    /// a button through <see cref="TryHit"/>, <see cref="PointAt"/> and <see cref="PressFromPointer"/>.
     /// </summary>
     // OVRSkeleton updates first, then HandSource (100) validates the current sample.
     // Menu gestures must not consume last frame's validity with this frame's position.
@@ -51,6 +53,9 @@ namespace Sankofa.Runtime.UI
         readonly List<Button> buttons = new List<Button>();
         readonly List<Func<Vector3?>> fingertips = new List<Func<Vector3?>>();
         MaterialPropertyBlock block;
+        string pointed;
+        string pointerPress;
+        float lastPointerPress = float.NegativeInfinity;
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int EmissionId = Shader.PropertyToID("_Emission");
 
@@ -63,6 +68,37 @@ namespace Sankofa.Runtime.UI
         }
 
         public void AddFingertip(Func<Vector3?> fingertip) => fingertips.Add(fingertip);
+
+        /// <summary>The nearest button a ray meets from in front, within reach, and how far along the ray.</summary>
+        public bool TryHit(Ray ray, float reach, out float distance, out string id)
+        {
+            distance = float.MaxValue;
+            id = null;
+            if (!isActiveAndEnabled) return false;
+            foreach (var b in buttons)
+            {
+                var face = b.Root.transform;
+                // Buttons are seen from their −Z side, so a ray from the visitor travels along +Z into them.
+                if (Vector3.Dot(ray.direction, face.forward) <= 0.05f) continue;
+                if (!new Plane(face.forward, face.position).Raycast(ray, out var d) || d > reach || d >= distance) continue;
+                var local = face.InverseTransformPoint(ray.GetPoint(d));
+                if (Mathf.Abs(local.x) > b.Size.x / 2f || Mathf.Abs(local.y) > b.Size.y / 2f) continue;
+                distance = d;
+                id = b.Id;
+            }
+            return id != null;
+        }
+
+        /// <summary>A pointer rests on this button for the current frame.</summary>
+        public void PointAt(string id) => pointed = id;
+
+        /// <summary>A pointer completed a select on this button; dispatched with this frame's presses.</summary>
+        public void PressFromPointer(string id)
+        {
+            if (Time.unscaledTime - lastPointerPress < minPressInterval) return;
+            lastPointerPress = Time.unscaledTime;
+            pointerPress = id;
+        }
 
         /// <summary>Draws the eye to one button for a moment, as when the fire notices what the visitor looks at.</summary>
         public void Pulse(string id)
@@ -136,7 +172,12 @@ namespace Sankofa.Runtime.UI
             string pressedId = null;
             foreach (var b in buttons)
             {
-                b.Hover = false;
+                b.Hover = b.Id == pointed;
+                if (b.Id == pointerPress)
+                {
+                    b.Flash = 1f;
+                    pressedId = b.Id;
+                }
                 for (var f = 0; f < fingertips.Count; f++)
                 {
                     if (!b.Gestures.TryGetValue(f, out var gesture))
@@ -173,6 +214,8 @@ namespace Sankofa.Runtime.UI
                 b.Face.SetPropertyBlock(block);
             }
             FingerNear = near;
+            pointed = null;
+            pointerPress = null;
             if (pressedId != null) Pressed?.Invoke(pressedId);
         }
     }

@@ -7,6 +7,7 @@ using Sankofa.Runtime.Input;
 using Sankofa.Runtime.Narration;
 using Sankofa.Runtime.Stage;
 using Sankofa.Runtime.UI;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -35,6 +36,7 @@ namespace Sankofa.EditorTools
             public Transform Head;
             public Camera Eye;
             public HandSource[] Hands;
+            public Transform[] Controllers;
         }
 
         [MenuItem("Sankofa/Build Scenes")]
@@ -74,9 +76,11 @@ namespace Sankofa.EditorTools
             var seedKept = BuildSeed(hearth, art, "seed.kept", "hearth", keepsakeAt + Vector3.up * 0.01f);
 
             var captions = BuildCaptions(world, art);
-            var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.34f), 2);
+            var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.29f), 2);
             var questions = BuildPanel(world, art, "Questions", new Vector3(0.4f, 1.0f, 0.3f), 1);
             var settings = BuildPanel(world, art, "Settings", new Vector3(-0.5f, 0.7f, 0.2f), 2);
+            var startScreen = BuildStartScreen(world);
+            BuildPointers(rig, art, new[] { controls, questions, settings });
             var curtain = BuildCurtain(rig.Head, art);
 
             var receiver = new GameObject("Palm receiver").AddComponent<PalmReceiver>();
@@ -109,6 +113,7 @@ namespace Sankofa.EditorTools
             Set(app, "ambience", ambience);
             SetArray(app, "storyAmbience", new Object[] { earlySound, railwaySound, todaySound });
             Set(app, "captions", captions);
+            Set(app, "startScreen", startScreen);
             Set(app, "controls", controls);
             Set(app, "questionsPanel", questions);
             Set(app, "settingsPanel", settings);
@@ -174,7 +179,8 @@ namespace Sankofa.EditorTools
                 Set(source, "skeleton", skeleton);
                 hands[i] = source;
             }
-            return new Rig { Head = head, Eye = eye, Hands = hands };
+            var controllers = new[] { Find(rig.transform, "LeftControllerAnchor"), Find(rig.transform, "RightControllerAnchor") };
+            return new Rig { Head = head, Eye = eye, Hands = hands, Controllers = controllers };
         }
 
         // ---- the hearth at night ----
@@ -609,6 +615,72 @@ namespace Sankofa.EditorTools
             Set(board, "textMaterial", SankofaText.CaptionMaterial(font));
             Set(board, "backingMaterial", art.CaptionBacking);
             return board;
+        }
+
+        /// <summary>
+        /// The title card over the fire before a visit, above where captions will appear: the name, the place, and
+        /// how to choose by touch, pinch or trigger. Sizes keep the smallest line above one degree from the seat.
+        /// </summary>
+        static StartScreen BuildStartScreen(Transform world)
+        {
+            var root = Child(world, "Start screen");
+            root.localPosition = new Vector3(0, 1.62f, 1.8f);
+            root.localRotation = FacingVisitor(root.localPosition);
+            var font = SankofaText.CaptionFont;
+            TextMeshPro Line(string name, string text, TMP_FontAsset face, float size, float y, float width, Color color, float spacing)
+            {
+                var go = Child(root, name);
+                go.localPosition = new Vector3(0, y, 0);
+                var t = go.gameObject.AddComponent<TextMeshPro>();
+                t.font = face;
+                t.fontSharedMaterial = SankofaText.CaptionMaterial(face);
+                t.text = text;
+                t.fontSize = size;
+                t.characterSpacing = spacing;
+                t.color = color;
+                t.alignment = TextAlignmentOptions.Center;
+                t.textWrappingMode = TextWrappingModes.Normal;
+                t.rectTransform.sizeDelta = new Vector2(width, size * 0.3f);
+                return t;
+            }
+            var screen = root.gameObject.AddComponent<StartScreen>();
+            Set(screen, "title", Line("Title", "Sankofa", SankofaText.LabelFont, 1.15f, 0.16f, 1.4f, new Color(1f, 0.8f, 0.52f), 12f));
+            Set(screen, "subtitle", Line("Place", "Enkare Nairobi \u00b7 the cool water", font, 0.42f, 0.02f, 1.4f, new Color(0.96f, 0.86f, 0.72f), 2f));
+            Set(screen, "hint", Line("How to choose", "Sit comfortably. To choose, touch a button with a fingertip, or point and pinch. With controllers, point and pull the trigger.",
+                font, 0.27f, -0.1f, 1.05f, new Color(0.86f, 0.8f, 0.72f), 0f));
+            return screen;
+        }
+
+        /// <summary>A pointer per side, for choosing by pinch or trigger from the seat; the right one also takes the mouse in the editor.</summary>
+        static void BuildPointers(Rig rig, SankofaArtSet art, PokePanel[] panels)
+        {
+            var sources = new GameObject("Pointers");
+            for (var i = 0; i < 2; i++)
+            {
+                var left = i == 0;
+                var go = new GameObject(left ? "Left pointer" : "Right pointer");
+                go.transform.SetParent(sources.transform, false);
+                var pointer = go.AddComponent<PointerSource>();
+                var line = go.AddComponent<LineRenderer>();
+                line.useWorldSpace = true;
+                line.positionCount = 2;
+                line.widthMultiplier = 0.003f;
+                line.numCapVertices = 2;
+                line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                line.receiveShadows = false;
+                line.sharedMaterial = art.Pointer;
+                line.enabled = false;
+                var dot = Prim(go.transform, "Dot", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 0.01f, art.Pointer);
+                dot.SetActive(false);
+                Set(pointer, "left", left);
+                Set(pointer, "hand", rig.Hands[i]);
+                Set(pointer, "controller", rig.Controllers[i]);
+                SetArray(pointer, "panels", panels.Cast<Object>().ToArray());
+                Set(pointer, "ray", line);
+                Set(pointer, "dot", dot.transform);
+                Set(pointer, "eye", rig.Eye);
+                Set(pointer, "mouseInEditor", !left);
+            }
         }
 
         static PokePanel BuildPanel(Transform world, SankofaArtSet art, string name, Vector3 position, int columns)

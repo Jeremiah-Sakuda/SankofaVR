@@ -24,6 +24,8 @@ namespace Sankofa.Runtime.Input
         Renderer handRenderer;
 
         public bool IsLeft => left;
+        /// <summary>Meta's hand, for its system aim pose and pinch strength.</summary>
+        public OVRHand Hand => hand;
         public bool Tracked { get; private set; }
         public Vector3? Fingertip => Tracked ? indexTip.position : (Vector3?)null;
         public Vector3 PalmCenter => Tracked ? (wrist.position + middleProximal.position) * 0.5f : Vector3.zero;

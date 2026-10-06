@@ -8,7 +8,7 @@
 | Meta XR | `com.meta.xr.sdk.core` 207.0.0 from Meta's npm registry (scoped registry in `Packages/manifest.json`) |
 | XR runtime | Unity OpenXR 1.18.0 with the Meta Quest, Meta XR and hand interaction features; single-pass instanced (multiview) |
 | Rendering | Built-in pipeline, Vulkan, linear colour. Surfaces are lit analytically by one warm source (no Unity lights) |
-| Input | Hands only, through Meta's OpenXR hand skeleton. Passthrough off: full VR is the baseline |
+| Input | Hands first, through Meta's OpenXR hand skeleton: touch, open palm and fingertip presses, or point and pinch at a panel. Touch controllers are optional (point and pull the trigger). Passthrough off: full VR is the baseline |
 | Application id | `com.sankofa.quest`, provisional. A store release channel fixes it permanently; confirm before the first upload |
 
 ## Layout
@@ -78,6 +78,8 @@ SANKOFA_CAPTURE=1 "$UNITY" -batchmode -projectPath "$PWD/unity" -buildTarget And
 
 ## What the slice does
 
+- **Start.** A title card over the fire names the experience and the place and says how to choose. The fire burns and the night sounds play, but nothing is spoken until **Begin** (or **Leave**).
+- **Choosing.** Every button can be pressed with a fingertip, or from the seat by pointing and pinching. With Touch controllers, point and pull the trigger. A select lands when the pinch or trigger is released over the same button, so sweeping across buttons presses nothing. In the editor with no headset, the mouse points.
 - **Welcome.** The fire speaks: "Come. Sit with me." It then asks when to go: *Before the railway* or *When the railway came*. The visitor can choose during the welcome. Without input the fire waits at the hearth.
 - **Entry.** The fire rises into a curtain of warm light, and the stream where the forest meets the plain surrounds the stationary visitor. The camera never moves. The ember crosses into the scene as the traders' fire or the camp lantern.
 - **The story.** People and the ewe are shapes of firelight; they have no faces, so no likeness is drawn. Each era has a hand moment: a gourd held out to an open palm (with a nearby button), and then touching the water, the trading hide or the rails. Lines after it differ by what the visitor did. Without input, a passive default plays, and the fire never says the visitor chose it.
@@ -124,7 +126,7 @@ Without a headset, the hearth runs in Play mode against the [Meta XR Simulator](
 "$UNITY" -projectPath "$PWD/unity" -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayHearth
 ```
 
-Set both simulated hands to hand input. The simulator exercises flow, visuals and wiring; it is not evidence of hand-tracking reliability, comfort, sound or Quest performance.
+The simulator starts with controllers: aim with the mouse and click to pull the trigger at a panel. Switch the simulated hands to hand input to try the open palm, touch and pinch. The simulator exercises flow, visuals and wiring; it is not evidence of hand-tracking reliability, comfort, sound or Quest performance.
 
 ## Running on a headset
 
