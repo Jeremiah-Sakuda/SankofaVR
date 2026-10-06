@@ -239,6 +239,7 @@ namespace Sankofa.Core.Story
         {
             { "reveal", ActionKind.Reveal }, { "illuminate", ActionKind.Illuminate }, { "offer", ActionKind.Offer },
             { "place", ActionKind.Place }, { "withdraw", ActionKind.Withdraw }, { "touch", ActionKind.Touch },
+            { "move", ActionKind.Move },
         };
         internal static readonly Dictionary<string, InvitationKind> InvitationKinds = new Dictionary<string, InvitationKind>
         {

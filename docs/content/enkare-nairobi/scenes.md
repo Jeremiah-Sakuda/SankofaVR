@@ -39,17 +39,17 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 
 | Element | Object ID | Position | Interaction and notes |
 |---|---|---|---|
-| Traders' fire (the ember's continuation) | `fire.1850s` | (−0.15, 0.08, 1.0) | Continues `ember`. The only light source; glow and sparks at a smaller scale than the hearth |
+| Traders' fire (the ember's continuation) | `fire.1850s` | (−0.5, 0.08, 1.05) | Continues `ember`. The only light source; glow and sparks at a smaller scale than the hearth |
 | Water spilling over the rock lip | `water.spill` | Touch point (0.32, 0.6, 0.42) | **Touch:** the hand enters the falling water. Ripple, splash sound, cool-tinted hand highlight. Needs the water shader |
 | Stream bed | (static) | About 2–2.8 m ahead, crossing left to right, behind the traders | Animated water surface in a narrow channel whose banks hide its edges; stones and grass at the edges |
 | Gourd of banana flour | `gourd.flour` | Home at Wambui's figure; offered to (0, 0.85, 0.42) | **Receive.** Turned gourd (lathe), stopper, carrying strap |
 | Trading hide on a flat rock | `hide` | Touch point (0.26, 0.56, 0.5) | **Touch** (offer). The gourd is placed on it. Hide mesh draped over a scanned stone |
 | Milk gourd | `gourd.milk` | Beside Naserian's figure, about (0.9, 0.5, 1.2) | Reveal and illuminate; a soot-dark interior visible at the mouth |
 | The bead | `bead` | Offered from Naserian to (0, 0.85, 0.42) | **Receive.** Keepsake; continues as `bead.kept` at the hearth. Colour and material from family review |
-| Wambui | `figure.wambui` | (−0.7, 0, 1.5) | Ember-and-smoke figure. Walks down the forest path on arrival, kneels at the hide for the trade |
-| Naserian and the ewe | `figure.naserian`, `figure.ewe` | (0.8, 0, 1.4) | Ember-and-smoke figures; bleat and tether rope sounds |
+| Wambui | `figure.wambui` | (−0.7, 0, 1.5) | Ember-and-smoke figure. Walks down the forest path on arrival, kneels at the hide for the trade (built: arrival walk, `move` to the hide, leaving walk) |
+| Naserian and the ewe | `figure.naserian`, `figure.ewe` | (0.8, 0, 1.4) | Ember-and-smoke figures that walk in from the plain; Naserian kneels across the hide. The ewe bleats now and then (built); the tether rope is not |
 
-**Sound.** Stream babble (close, right), dusk birds and insects, wind in the dry grass, a distant sheep bell. The fire's crackle, small and close.
+**Sound.** Stream babble (close, right), dusk birds and insects, wind in the dry grass, a distant sheep bell. The fire's crackle, small and close. All built, synthesised in code.
 
 **New technology.**
 - Stream and spill water shader.
@@ -82,6 +82,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 **Sound.**
 - Hammers ringing on iron at a distance; a work-gang's voices as a low murmur. The workers' languages are to be checked before any words are recorded.
 - Canvas flapping and a camp kettle. The stream, quieter.
+- Built: hammers, a wordless low murmur (no words, so no language is represented), canvas and the stream. The kettle is not.
 - No birdsong at first, then one bird later.
 - No train whistle until it is confirmed that working trains were running at the depot that week. Paukwa describes hand-propelled trolleys at the railhead.
 
@@ -110,7 +111,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 | Bead and seed (continuing the kept ones) | `bead.today`, `seed.today` | Arrive from the kept versions | Continue `bead.kept` and `seed.kept` |
 | City across the river | (static) | 20–200 m | Procedural blocks with emissive window patterns, kept within the far-field budget |
 
-**Sound.** Traffic, *matatu* horns at a distance, voices and a radio from a stall; any radio music must be a licensed recording of real performers, or it is cut. The river under it all.
+**Sound.** Traffic, *matatu* horns at a distance, voices and a radio from a stall; any radio music must be a licensed recording of real performers, or it is cut. The river under it all. Built: traffic, horns, a wordless murmur of voices and the river; there is no radio.
 
 **Review checks.** The garden and its sign, how present-day Nairobi is portrayed (neither poverty spectacle nor brochure), and the *jiko*'s form.
 

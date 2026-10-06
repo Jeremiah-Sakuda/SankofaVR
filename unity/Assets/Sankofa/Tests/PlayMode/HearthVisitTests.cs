@@ -140,6 +140,14 @@ namespace Sankofa.Tests
             Assert.That(app.Flow.Accept("offer-flour"), Is.True);
             yield return new WaitForSeconds(2.5f);
             Assert.That(Vector3.Distance(stage.Find("gourd.flour").transform.position, stage.Find("hide").PlacePosition), Is.LessThan(0.02f), "the flour sits on the hide");
+            // The two women came to the hide for the trade and knelt there, one each side.
+            var wambui = stage.Find("figure.wambui").GetComponent<FigureMotion>();
+            var naserian = stage.Find("figure.naserian").GetComponent<FigureMotion>();
+            Assert.That(wambui.Walking || naserian.Walking, Is.False, "both have arrived at the hide");
+            Assert.That(wambui.Kneel, Is.GreaterThan(0.9f), "Wambui kneels at the hide");
+            Assert.That(naserian.Kneel, Is.GreaterThan(0.9f), "Naserian kneels at the hide");
+            Assert.That(Vector3.Distance(wambui.transform.position, stage.Find("hide").ApproachFrom(stage.Find("figure.wambui").HomePosition).Place), Is.LessThan(0.03f));
+            Assert.That(Vector3.Distance(wambui.transform.position, naserian.transform.position), Is.GreaterThan(0.4f), "they take a side each");
             yield return AwaitInvitation("receive-bead", 60);
             Assert.That(app.Flow.Accept("receive-bead"), Is.True);
             yield return AwaitClosing(90);

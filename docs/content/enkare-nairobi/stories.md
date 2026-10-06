@@ -91,7 +91,7 @@ Every story then begins with the same ember: "Every story I tell begins with a l
 | 12 | Home (hearth) | We are home. The lantern is my ember again; I'll take it back. Keep the seed. If you keep this visit, I'll show you where it might grow. | | |
 
 **Hand questions:**
-- *Who are the workers?* "Men brought from India to build the line, far from their own homes. Many never went back." The last sentence is **gated**: it needs a source.
+- *Who are the workers?* "Men brought from India to build the line, a very long way from their own homes. Many never went back. Listen: you can hear them working." [C3, C16]
 - *Why is it called the famine of Ruraya?* **Gated** on the family confirming the name's meaning.
 - *What happened to the cattle?* From C9, without figures.
 - *Did they keep meeting?* "I don't know. I hope so. That is the honest answer."

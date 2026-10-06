@@ -28,6 +28,10 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] float attentionRadius;
         [Tooltip("Where something placed on it comes to rest; just above the object if empty.")]
         [SerializeField] Transform placePoint;
+        [Tooltip("Where a figure stands or kneels to use it, one per side it can be approached from.")]
+        [SerializeField] Transform[] approachPoints = new Transform[0];
+        [Tooltip("Whether someone using it kneels there (a hide on a low stone) or stands.")]
+        [SerializeField] bool approachKneels;
 
         static readonly int HighlightId = Shader.PropertyToID("_Highlight");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
@@ -60,6 +64,32 @@ namespace Sankofa.Runtime.Stage
         public float TouchRadius => touchRadius;
         public float AttentionRadius => attentionRadius;
         public Vector3 PlacePosition => placePoint != null ? placePoint.position : transform.position + Vector3.up * 0.05f;
+        /// <summary>
+        /// Where a figure coming from <paramref name="from"/> stands or kneels to use this: the nearest of its approach
+        /// points, so two people coming from either side take a side each; without one, half a metre short of it.
+        /// </summary>
+        public (Vector3 Place, bool Kneel) ApproachFrom(Vector3 from)
+        {
+            Transform best = null;
+            var bestDistance = float.MaxValue;
+            foreach (var p in approachPoints)
+            {
+                if (p == null) continue;
+                var d = (p.position - from).sqrMagnitude;
+                if (d < bestDistance)
+                {
+                    bestDistance = d;
+                    best = p;
+                }
+            }
+            if (best != null) return (best.position, approachKneels);
+            var toward = transform.position - from;
+            toward.y = 0;
+            var place = transform.position - toward.normalized * Mathf.Min(0.5f, toward.magnitude);
+            place.y = from.y;
+            return (place, approachKneels);
+        }
+
         public Vector3 HomePosition
         {
             get
@@ -168,6 +198,13 @@ namespace Sankofa.Runtime.Stage
             CarriedBy = hand;
             moveTarget = null;
             smoothTime = 0.06f;
+        }
+
+        /// <summary>Fades out after a while, wherever it is going.</summary>
+        public void FadeAway(float after)
+        {
+            Initialise();
+            fadeAfter = Mathf.Max(0f, after);
         }
 
         /// <summary>Goes back into the fire (or wherever it came from) and fades out on the way.</summary>

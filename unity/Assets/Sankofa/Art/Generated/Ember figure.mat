@@ -30,8 +30,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _Drift: 0.25
+    - _Height: 1.6
     - _Highlight: 0
     - _Intensity: 1
+    - _Kneel: 0
     - _Rim: 2.2
     m_Colors:
     - _Color: {r: 1, g: 0.54999995, b: 0.21999997, a: 1}

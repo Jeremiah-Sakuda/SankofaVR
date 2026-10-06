@@ -119,3 +119,32 @@ The user asked to use the music from the original web Sankofa. Its history recor
 | Start screen before the welcome | User requested; implemented in software |
 | Point-and-pinch and controller selection alongside fingertip presses | Implemented in software; simulator and device checks pending |
 | Original Sankofa music | User requested; blocked on source, licence and the no-AI-music rule |
+
+## Moving figures, scene sounds and the gated claims — October 6, 2026
+
+The user asked to implement three things: the held-back claims, Wambui walking and kneeling, and the missing sounds.
+
+**Claims.** Sources were read for the held-back claims (see the [source register](content/enkare-nairobi/sources.md)):
+- C6 and C14 have stronger sources and higher confidence.
+- C9 stays as narrated, in general terms.
+- C16 (Indian labourers who stayed) is new, so the line "Many never went back" is now narrated.
+- C5 (the women traders' protection) is still not narrated. A verbatim Leakey passage appears in secondary press, but its page is not confirmed.
+- *Ng'aragu ya Ruraya* has a published gloss but stays unnarrated until the family confirms it.
+
+No family review has happened; the questions remain the user's to send.
+
+**Moving figures.** Stories gain a `move` action. It sends a figure to an object's approach point, where it stands or kneels, or home without a target. It is validated like `place`: the figure must be standing in the scene, and the target must be visible on every path. Presentation adds arrival and leaving walks. The kneel is a shader fold of the same silhouette.
+
+**Sound.** All new sound is synthesised in code:
+- birds, a distant sheep bell and the traders' crackle in the 1850s;
+- the work gang and canvas in 1899;
+- voices today;
+- the ewe's bleat.
+
+Voices are a wordless murmur until the people whose languages they represent are consulted. There is no radio and no music.
+
+| Decision | Status |
+|---|---|
+| `move` story action with approach points | Implemented, validated and tested in software |
+| Synthesised scene sounds, with wordless voices | Implemented; not listening-reviewed |
+| C5 and the famine's name | Still gated, on the printed page and on family confirmation |

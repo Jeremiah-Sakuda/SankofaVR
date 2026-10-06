@@ -469,10 +469,10 @@
     "voice": "Kore"
   },
   "q.e2.workers.answer": {
-    "characters": 114,
-    "fingerprint": "d955088d2af00033a4cfd97e58f357b885fcab4bee518c6b0ac7326fcb82f2e7",
+    "characters": 136,
+    "fingerprint": "b2aec538648c1d54f730137686fa52004111bd3635b4ea9f0772d1b322f40e2e",
     "model": "gemini-3.1-flash-tts-preview",
-    "seconds": 14.72,
+    "seconds": 17.4,
     "voice": "Kore"
   },
   "q.today.who.answer": {

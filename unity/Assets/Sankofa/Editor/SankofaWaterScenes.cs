@@ -145,7 +145,7 @@ namespace Sankofa.EditorTools
 
         // ---- before the railway ----
 
-        static readonly Vector3 TradersFireAt = new Vector3(-0.3f, 0, 1.0f);
+        static readonly Vector3 TradersFireAt = new Vector3(-0.5f, 0, 1.05f);
 
         static (StageObject[] Objects, StoryAmbience Sound) BuildWater1850s(Transform root, SankofaArtSet art)
         {
@@ -207,13 +207,23 @@ namespace Sankofa.EditorTools
             var fire = BuildTradersFire(root, art);
             var hide = BuildHide(root, art, tradeRock + Vector3.up * 0.25f);
             var groundAt = BoundaryGround(new Vector3(-0.75f, 0, 1.35f));
-            var wambui = BuildFigure(root, art, "figure.wambui", "story.water.1850s", new Vector3(-0.75f, groundAt, 1.35f), 1.6f, 1801);
-            var naserian = BuildFigure(root, art, "figure.naserian", "story.water.1850s", new Vector3(0.85f, BoundaryGround(new Vector3(0.85f, 0, 1.3f)), 1.3f), 1.66f, 1802);
-            var ewe = BuildEwe(root, art, new Vector3(1.25f, BoundaryGround(new Vector3(1.25f, 0, 1.65f)), 1.65f));
+            var wambui = BuildFigure(root, art, "figure.wambui", "story.water.1850s", new Vector3(-0.75f, groundAt, 1.35f), 1.6f, 1801, FromTheForest);
+            var naserian = BuildFigure(root, art, "figure.naserian", "story.water.1850s", new Vector3(0.85f, BoundaryGround(new Vector3(0.85f, 0, 1.3f)), 1.3f), 1.66f, 1802, FromThePlain);
+            // The ewe waits on the near bank, seen between the two women while they trade.
+            var ewe = BuildEwe(root, art, new Vector3(0.7f, BoundaryGround(new Vector3(0.7f, 0, 1.75f)), 1.75f), EweFromThePlain);
+            // For the trade the visitor and the two women sit around the hide: Wambui across it, Naserian to the right.
+            Approaches(hide, true, new Vector2(0.0f, 1.12f), new Vector2(0.86f, 0.92f));
             var flour = BuildGourd(root, art, "gourd.flour", "story.water.1850s", new Vector3(-0.75f, groundAt + 0.98f, 1.48f), 0.23f, 0.095f, 0.03f, 1f, false);
             var milk = BuildGourd(root, art, "gourd.milk", "story.water.1850s", new Vector3(0.66f, BoundaryGround(new Vector3(0.66f, 0, 1.2f)), 1.2f), 0.34f, 0.075f, 0.026f, 0.55f, false);
             var bead = BuildBead(root, art, "bead", "story.water.1850s", new Vector3(0.84f, 1.36f, 1.25f));
 
+            // The ewe bleats now and then once she has come to the water.
+            var bleat = ewe.gameObject.AddComponent<ObjectSound>();
+            Set(bleat, "subject", ewe);
+            var bleatSource = Source(ewe.gameObject, 0.9f, 1.5f);
+            bleatSource.loop = false;
+            Set(bleat, "source", bleatSource);
+            Set(bleat, "volume", 0.3f);
             var sound = BuildStoryAmbience(root, 71, new (StoryAmbience.Kind, Vector3, float)[]
             {
                 (StoryAmbience.Kind.Stream, new Vector3(0.1f, 0f, 2.4f), 0.2f),
@@ -221,7 +231,9 @@ namespace Sankofa.EditorTools
                 (StoryAmbience.Kind.Crickets, new Vector3(-5f, 0.2f, 4f), 0.1f),
                 (StoryAmbience.Kind.Crickets, new Vector3(6f, 0.2f, -3f), 0.08f),
                 (StoryAmbience.Kind.Wind, new Vector3(8f, 2f, 3f), 0.13f),
-            });
+                (StoryAmbience.Kind.Birds, new Vector3(-5f, 4f, 6f), 0.07f),
+                (StoryAmbience.Kind.Bell, new Vector3(9f, 1f, 12f), 0.07f),
+            }, bleat);
             return (new[] { fire, spill, wambui, flour, naserian, ewe, milk, hide, bead }, sound);
         }
 
@@ -263,6 +275,15 @@ namespace Sankofa.EditorTools
             }
             var coalFilter = Static(fireRoot, "Coals", Combine(coals, "1850s fire coals"), art.Embers);
             SaveMeshes(new[] { coalFilter });
+            // A small cooking fire's crackle, quieter than the hearth's.
+            var crackleAt = Child(fireRoot, "Crackle");
+            crackleAt.localPosition = new Vector3(0, 0.08f, 0);
+            var crackle = crackleAt.gameObject.AddComponent<FireCrackle>();
+            Set(crackle, "roar", Source(crackleAt.gameObject, 0.9f, 0.6f));
+            Set(crackle, "pops", Source(crackleAt.gameObject, 0.9f, 0.6f));
+            Set(crackle, "roarVolume", 0.12f);
+            Set(crackle, "popVolume", 0.25f);
+            Set(crackle, "seed", 19);
             for (var i = 0; i < 2; i++)
             {
                 var layer = Child(fireRoot, "Flame " + i);
@@ -298,25 +319,70 @@ namespace Sankofa.EditorTools
             return o;
         }
 
-        static StageObject BuildFigure(Transform root, SankofaArtSet art, string id, string scene, Vector3 at, float height, int seed)
+        static StageObject BuildFigure(Transform root, SankofaArtSet art, string id, string scene, Vector3 at, float height, int seed, Vector2[] path)
         {
             var figureRoot = Child(root, id);
             figureRoot.localPosition = at;
             figureRoot.localRotation = Quaternion.LookRotation(new Vector3(-at.x, 0, -at.z), Vector3.up);
             var body = Static(figureRoot, "Body", SankofaStoryMeshes.Figure("Figure " + id, seed, height), art.EmberFigure);
             SaveMeshes(new[] { body });
-            return StageLight(figureRoot, id, scene, body.GetComponent<Renderer>(), 0.5f);
+            var o = StageLight(figureRoot, id, scene, body.GetComponent<Renderer>(), 0.5f);
+            Walks(figureRoot, body.GetComponent<Renderer>(), height, path, 0f, 0.016f);
+            return o;
         }
 
-        static StageObject BuildEwe(Transform root, SankofaArtSet art, Vector3 at)
+        static StageObject BuildEwe(Transform root, SankofaArtSet art, Vector3 at, Vector2[] path)
         {
             var eweRoot = Child(root, "figure.ewe");
             eweRoot.localPosition = at;
             eweRoot.localRotation = Quaternion.Euler(0, -105, 0);
             var body = Static(eweRoot, "Body", SankofaStoryMeshes.Ewe("Figure ewe", 1810), art.EmberFigure);
             SaveMeshes(new[] { body });
-            return StageLight(eweRoot, "figure.ewe", "story.water.1850s", body.GetComponent<Renderer>(), 0.35f);
+            var o = StageLight(eweRoot, "figure.ewe", "story.water.1850s", body.GetComponent<Renderer>(), 0.35f);
+            // The ewe follows a little behind Naserian, with a quicker, smaller step.
+            Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.01f);
+            return o;
         }
+
+        /// <summary>
+        /// The figure walks in along a path over the ground (points given on the plan, heights from the terrain) when
+        /// it is revealed, and back along it when it leaves.
+        /// </summary>
+        static void Walks(Transform figure, Renderer body, float height, Vector2[] path, float delay, float bob)
+        {
+            var motion = figure.gameObject.AddComponent<FigureMotion>();
+            var ground = figure.parent.name.EndsWith("today") ? (System.Func<Vector3, float>)RiverGround : BoundaryGround;
+            var points = path.Select(p => new Vector3(p.x, ground(new Vector3(p.x, 0, p.y)), p.y)).ToArray();
+            Set(motion, "body", body);
+            Set(motion, "height", height);
+            Set(motion, "delay", delay);
+            Set(motion, "bob", bob);
+            var so = new SerializedObject(motion);
+            var list = so.FindProperty("entryPath");
+            list.arraySize = points.Length;
+            for (var i = 0; i < points.Length; i++) list.GetArrayElementAtIndex(i).vector3Value = points[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>Places where a figure stands or kneels to use an object, at ground level, in the scene's plan.</summary>
+        static void Approaches(StageObject o, bool kneel, params Vector2[] places)
+        {
+            var points = places.Select((p, i) => Marker(o.transform, "Approach " + i, Vector3.zero)).ToArray();
+            for (var i = 0; i < places.Length; i++)
+            {
+                var flat = new Vector3(places[i].x, 0, places[i].y);
+                points[i].localPosition = Vector3.zero;
+                points[i].position = o.transform.parent.TransformPoint(new Vector3(flat.x, BoundaryGround(flat), flat.z));
+            }
+            SetArray(o, "approachPoints", points.Cast<Object>().ToArray());
+            Set(o, "approachKneels", kneel);
+        }
+
+        // Paths on the plan (x, z): the Kikuyu women come down from the forest on the left along the near bank, the
+        // Maasai women in from the plain on the right; each ends just short of her own place.
+        static readonly Vector2[] FromTheForest = { new Vector2(-6.2f, 1.7f), new Vector2(-4f, 1.55f), new Vector2(-2.2f, 1.45f), new Vector2(-1.3f, 1.38f) };
+        static readonly Vector2[] FromThePlain = { new Vector2(6.4f, 1.9f), new Vector2(4.2f, 1.6f), new Vector2(2.4f, 1.4f), new Vector2(1.4f, 1.32f) };
+        static readonly Vector2[] EweFromThePlain = { new Vector2(6.9f, 2.1f), new Vector2(4.6f, 1.85f), new Vector2(2.8f, 1.75f), new Vector2(1.5f, 1.75f) };
 
         /// <summary>A shape of light fades in where it stands instead of growing; its brightness is its visibility.</summary>
         static StageObject StageLight(Transform root, string id, string scene, Renderer body, float attention)
@@ -454,8 +520,10 @@ namespace Sankofa.EditorTools
             var lantern = BuildLantern(root, art, "lantern.1899", "story.water.1899", CampLanternAt);
             var njeriAt = new Vector3(-0.72f, BoundaryGround(new Vector3(-0.72f, 0, 1.3f)), 1.3f);
             var naisulaAt = new Vector3(0.8f, BoundaryGround(new Vector3(0.8f, 0, 1.32f)), 1.32f);
-            var njeri = BuildFigure(root, art, "figure.njeri", "story.water.1899", njeriAt, 1.58f, 1901);
-            var naisula = BuildFigure(root, art, "figure.naisula", "story.water.1899", naisulaAt, 1.64f, 1902);
+            var njeri = BuildFigure(root, art, "figure.njeri", "story.water.1899", njeriAt, 1.58f, 1901, FromTheForest);
+            var naisula = BuildFigure(root, art, "figure.naisula", "story.water.1899", naisulaAt, 1.64f, 1902, FromThePlain);
+            // Njeri comes to stand at Naisula's side to pour what flour she has into her gourd.
+            Approaches(naisula, false, new Vector2(0.38f, 1.42f));
             var empty = BuildGourd(root, art, "gourd.empty", "story.water.1899", njeriAt + new Vector3(0.18f, 0.12f, -0.08f), 0.24f, 0.1f, 0.03f, 0.9f, false);
             var old = BuildGourd(root, art, "gourd.old", "story.water.1899", naisulaAt + new Vector3(-0.2f, 0.14f, -0.08f), 0.32f, 0.07f, 0.025f, 0.45f, false);
             var seed = BuildSeed(root, art, "seed", "story.water.1899", njeriAt + new Vector3(0.12f, 0.85f, -0.1f));
@@ -466,6 +534,9 @@ namespace Sankofa.EditorTools
                 (StoryAmbience.Kind.Hammers, new Vector3(5f, 1f, 12f), 0.22f),
                 (StoryAmbience.Kind.Hammers, new Vector3(-9f, 1f, 13f), 0.12f),
                 (StoryAmbience.Kind.Wind, new Vector3(-6f, 2f, 2f), 0.17f),
+                // The work gang along the line, and the camp's canvas; no cattle bells in a year without cattle.
+                (StoryAmbience.Kind.MenAtWork, new Vector3(4f, 1.5f, 10f), 0.16f),
+                (StoryAmbience.Kind.Canvas, new Vector3(1f, 1.5f, 6.2f), 0.08f),
             });
             return (new[] { lantern, rails, njeri, empty, naisula, old, seed }, sound);
         }
@@ -584,6 +655,8 @@ namespace Sankofa.EditorTools
                 (StoryAmbience.Kind.Stream, new Vector3(0.2f, 0f, 2.4f), 0.14f),
                 (StoryAmbience.Kind.City, new Vector3(0f, 6f, 40f), 0.3f),
                 (StoryAmbience.Kind.Crickets, new Vector3(-3f, 0.2f, -2f), 0.06f),
+                // People at the stall and along the path; no radio, since music would need a licensed recording.
+                (StoryAmbience.Kind.Voices, new Vector3(-3f, 1.5f, 5f), 0.1f),
             });
             return (new[] { jiko, gate, soil, sprout, bead, seed }, sound);
         }
@@ -694,19 +767,23 @@ namespace Sankofa.EditorTools
 
         // ---- shared pieces ----
 
-        static StoryAmbience BuildStoryAmbience(Transform root, int seed, (StoryAmbience.Kind Kind, Vector3 At, float Volume)[] layers)
+        static StoryAmbience BuildStoryAmbience(Transform root, int seed, (StoryAmbience.Kind Kind, Vector3 At, float Volume)[] layers, params ObjectSound[] voices)
         {
             var ambienceRoot = Child(root, "Ambience");
             var ambience = ambienceRoot.gameObject.AddComponent<StoryAmbience>();
             var so = new SerializedObject(ambience);
             so.FindProperty("seed").intValue = seed;
+            var voiceList = so.FindProperty("voices");
+            voiceList.arraySize = voices.Length;
+            for (var i = 0; i < voices.Length; i++) voiceList.GetArrayElementAtIndex(i).objectReferenceValue = voices[i];
             var list = so.FindProperty("layers");
             list.arraySize = layers.Length;
             for (var i = 0; i < layers.Length; i++)
             {
                 var place = Child(ambienceRoot, layers[i].Kind + " " + i);
                 place.localPosition = layers[i].At;
-                var source = Source(place.gameObject, layers[i].Kind == StoryAmbience.Kind.City ? 0.4f : 0.85f, layers[i].Kind == StoryAmbience.Kind.Stream ? 1f : 4f);
+                var far = layers[i].Kind == StoryAmbience.Kind.City || layers[i].Kind == StoryAmbience.Kind.Bell || layers[i].Kind == StoryAmbience.Kind.MenAtWork;
+                var source = Source(place.gameObject, far ? 0.5f : 0.85f, layers[i].Kind == StoryAmbience.Kind.Stream ? 1f : 4f);
                 var e = list.GetArrayElementAtIndex(i);
                 e.FindPropertyRelative("Kind").enumValueIndex = (int)layers[i].Kind;
                 e.FindPropertyRelative("Source").objectReferenceValue = source;

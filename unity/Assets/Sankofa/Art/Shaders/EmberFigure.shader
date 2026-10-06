@@ -1,6 +1,7 @@
 // People and animals of a story, shown as the griot shows them: shapes of firelight, brightest at their edges,
 // with embers drifting through them. Additive and unlit by the scene, so no face or likeness is ever drawn.
-// Intensity fades them in and out; Highlight brightens one when the story turns to them.
+// Intensity fades them in and out; Highlight brightens one when the story turns to them. Kneel folds a standing
+// body (feet at the origin, facing +Z, Height tall) down onto its knees, leaning a little forward.
 Shader "Sankofa/Ember Figure"
 {
     Properties
@@ -12,6 +13,8 @@ Shader "Sankofa/Ember Figure"
         _Rim ("Edge sharpness", Float) = 2.2
         _Drift ("Ember drift", Float) = 0.25
         _Highlight ("Highlight", Range(0, 1)) = 0
+        _Kneel ("Kneel", Range(0, 1)) = 0
+        _Height ("Standing height (m)", Float) = 1.6
     }
     SubShader
     {
@@ -35,6 +38,8 @@ Shader "Sankofa/Ember Figure"
             half _Rim;
             half _Drift;
             half _Highlight;
+            float _Kneel;
+            float _Height;
 
             struct appdata
             {
@@ -51,12 +56,32 @@ Shader "Sankofa/Ember Figure"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
+            // Below the hip the wrapped legs fold under and spread behind; above it the body drops by the folded
+            // length and leans forward from the hip. A kneeling body is about seven tenths of its standing height.
+            float3 Kneel(float3 p)
+            {
+                float h = max(_Height, 0.01);
+                float hip = 0.48 * h;
+                float fold = 0.6 * _Kneel;
+                float below = 1 - saturate(p.y / hip);
+                float upper = step(hip, p.y);
+                float3 folded = p;
+                folded.y = p.y * (1 - fold);
+                folded.xz *= 1 + 0.3 * _Kneel * below;
+                folded.z -= 0.14 * h * _Kneel * below;
+                float3 raised = p;
+                raised.y = p.y - hip * fold;
+                raised.z += (p.y - hip) * 0.22 * _Kneel;
+                return lerp(folded, raised, upper);
+            }
+
             v2f vert(appdata v)
             {
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                v.vertex.xyz = Kneel(v.vertex.xyz);
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.world = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.normal = UnityObjectToWorldNormal(v.normal);

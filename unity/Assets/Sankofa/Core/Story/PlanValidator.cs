@@ -385,10 +385,11 @@ namespace Sankofa.Core.Story
                     Error("action.offer", path, $"line '{line.Id}' offers '{target.Id}' without a receive invitation for it in the same beat");
                 if (action.At != null)
                 {
-                    if (action.Kind != ActionKind.Place) Error("action.at", path, $"line '{line.Id}' gives a target to {action.Kind.ToString().ToLowerInvariant()}; only place takes one");
-                    else if (!objects.TryGetValue(action.At, out var at)) Error("action.at", path, $"line '{line.Id}' places '{target.Id}' at unknown object '{action.At}'");
-                    else if (at.Id == target.Id) Error("action.at", path, $"line '{line.Id}' places '{target.Id}' on itself");
-                    else if (scene != null && at.Scene != scene) Error("action.at", path, $"line '{line.Id}' places '{target.Id}' at '{at.Id}', which is not staged in scene '{scene}'");
+                    var verb = action.Kind == ActionKind.Move ? "moves" : "places";
+                    if (action.Kind != ActionKind.Place && action.Kind != ActionKind.Move) Error("action.at", path, $"line '{line.Id}' gives a target to {action.Kind.ToString().ToLowerInvariant()}; only place and move take one");
+                    else if (!objects.TryGetValue(action.At, out var at)) Error("action.at", path, $"line '{line.Id}' {verb} '{target.Id}' to unknown object '{action.At}'");
+                    else if (at.Id == target.Id) Error("action.at", path, $"line '{line.Id}' {verb} '{target.Id}' to itself");
+                    else if (scene != null && at.Scene != scene) Error("action.at", path, $"line '{line.Id}' {verb} '{target.Id}' to '{at.Id}', which is not staged in scene '{scene}'");
                 }
             }
 
@@ -482,6 +483,13 @@ namespace Sankofa.Core.Story
                             if (!staging.Visible(action.Object))
                                 Error("staging.withdraw", ap, $"line '{line.Id}' withdraws '{action.Object}', which is not there on some path");
                             staging.Remove(action.Object);
+                            break;
+                        case ActionKind.Move:
+                            // A figure goes somewhere visible; nothing changes hands.
+                            if (!staging.Visible(action.Object) || staging.WithVisitor(action.Object))
+                                Error("staging.move", ap, $"line '{line.Id}' moves '{action.Object}', which is not standing in the scene on some path");
+                            if (action.At != null && !staging.Visible(action.At))
+                                Error("staging.move", ap, $"line '{line.Id}' moves '{action.Object}' to '{action.At}', which is not visible on some path");
                             break;
                     }
                 }

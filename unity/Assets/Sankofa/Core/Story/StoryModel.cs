@@ -16,7 +16,11 @@ namespace Sankofa.Core.Story
     /// The bounded set of things a plan may do with a staged object. Reveal, illuminate, offer, place and withdraw
     /// are story actions on lines; touch is a capability only: the visitor may be invited to touch the object.
     /// </summary>
-    public enum ActionKind { Reveal, Illuminate, Offer, Place, Withdraw, Touch }
+    /// <summary>
+    /// What a line does on the stage. Move sends a figure to stand or kneel where another object is used (or home,
+    /// without a target); it changes what the visitor sees, never what they have.
+    /// </summary>
+    public enum ActionKind { Reveal, Illuminate, Offer, Place, Withdraw, Touch, Move }
 
     /// <summary>
     /// A deliberate physical invitation. Receive: an open palm (or a nearby select) takes the offered object.
@@ -193,7 +197,10 @@ namespace Sankofa.Core.Story
 
         public ActionKind Kind { get; }
         public string Object { get; }
-        /// <summary>For <see cref="ActionKind.Place"/>: the visible object it is set on, or null for beside the visitor.</summary>
+        /// <summary>
+        /// For <see cref="ActionKind.Place"/>: the visible object it is set on, or null for beside the visitor. For
+        /// <see cref="ActionKind.Move"/>: the visible object the figure goes to, or null for its own place.
+        /// </summary>
         public string At { get; }
 
         public override string ToString() => At == null ? Kind + " " + Object : $"{Kind} {Object} at {At}";

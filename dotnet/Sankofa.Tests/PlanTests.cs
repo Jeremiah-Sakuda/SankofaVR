@@ -165,6 +165,58 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void AFigureMovesOnlyWhileStandingInTheSceneAndOnlyToSomethingVisible()
+        {
+            void AddFigure(StoryPlan p, params Line[] lines)
+            {
+                p.Objects = new List<StoryObject>(p.Objects)
+                {
+                    new StoryObject { Id = "potter", Scene = "yard", Capabilities = new[] { ActionKind.Reveal, ActionKind.Move, ActionKind.Withdraw } },
+                };
+                p.Beats[1].Lines = new List<Line>(p.Beats[1].Lines).Concat(lines).ToList();
+            }
+            var moved = Validate(p => AddFigure(p,
+                Line("arrive", 2, null, Do(ActionKind.Reveal, "potter")),
+                Line("kneel", 2, null, Do(ActionKind.Move, "potter", "bowl")),
+                Line("rise", 2, null, Do(ActionKind.Move, "potter"))));
+            Assert.That(moved.IsValid, Is.True, moved.ToString());
+
+            Assert.That(Codes(Validate(p => AddFigure(p, Line("kneel", 2, null, Do(ActionKind.Move, "potter", "bowl"))))),
+                Does.Contain("staging.move"), "the potter was never revealed");
+            Assert.That(Codes(Validate(p =>
+                {
+                    AddFigure(p,
+                        Line("arrive", 2, null, Do(ActionKind.Reveal, "potter")),
+                        Line("kneel", 2, null, Do(ActionKind.Move, "potter", "wheel")));
+                    p.Objects = new List<StoryObject>(p.Objects) { new StoryObject { Id = "wheel", Scene = "yard", Capabilities = new[] { ActionKind.Reveal } } };
+                })),
+                Does.Contain("staging.move"), "the wheel is never revealed");
+            Assert.That(Codes(Validate(p => AddFigure(p,
+                    Line("arrive", 2, null, Do(ActionKind.Reveal, "potter")),
+                    Line("kneel", 2, null, Do(ActionKind.Move, "potter", "potter"))))),
+                Does.Contain("action.at"), "a figure cannot move to itself");
+            Assert.That(Codes(Validate(p => p.Beats[1].Lines = new List<Line>(p.Beats[1].Lines) { Line("x", 2, null, Do(ActionKind.Move, "bowl")) })),
+                Does.Contain("action.capability"), "only objects that can move are moved");
+            Assert.That(Codes(Validate(p => AddFigure(p,
+                    Line("arrive", 2, null, Do(ActionKind.Reveal, "potter")),
+                    Line("kneel", 2, null, Do(ActionKind.Move, "potter", "ember"))))),
+                Does.Contain("action.at"), "the ember is staged at the hearth, not in the yard");
+        }
+
+        [Test]
+        public void AMoveSurvivesWritingAndReading()
+        {
+            var plan = Minimal();
+            plan.Objects = new List<StoryObject>(plan.Objects) { new StoryObject { Id = "potter", Scene = "yard", Capabilities = new[] { ActionKind.Reveal, ActionKind.Move } } };
+            plan.Beats[1].Lines = new List<Line>(plan.Beats[1].Lines) { Line("arrive", 2, null, Do(ActionKind.Reveal, "potter")), Line("kneel", 2, null, Do(ActionKind.Move, "potter", "bowl")) };
+            var json = StoryWriter.PlanJson(plan);
+            Assert.That(json, Does.Contain("\"move\""));
+            var again = StoryReader.ReadPlan(json);
+            var kneel = again.Beats[1].Lines.Single(l => l.Id == "kneel").Actions.Single();
+            Assert.That((kneel.Kind, kneel.Object, kneel.At), Is.EqualTo((ActionKind.Move, "potter", "bowl")));
+        }
+
+        [Test]
         public void TheKeepsakeMustComeHomeOnEveryPath()
         {
             var withdrawn = Validate(p => p.Beats[2].Lines = new List<Line> { Line("h1", 2, null, Do(ActionKind.Withdraw, "ember")) });

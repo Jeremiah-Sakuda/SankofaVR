@@ -73,7 +73,8 @@
       "capabilities": [
         "reveal",
         "illuminate",
-        "withdraw"
+        "withdraw",
+        "move"
       ]
     },
     {
@@ -91,7 +92,8 @@
       "capabilities": [
         "reveal",
         "illuminate",
-        "withdraw"
+        "withdraw",
+        "move"
       ]
     },
     {
@@ -152,7 +154,8 @@
       "capabilities": [
         "reveal",
         "illuminate",
-        "withdraw"
+        "withdraw",
+        "move"
       ]
     },
     {
@@ -169,7 +172,8 @@
       "capabilities": [
         "reveal",
         "illuminate",
-        "withdraw"
+        "withdraw",
+        "move"
       ]
     },
     {
@@ -282,7 +286,8 @@
       "text": "Kikuyu and Maasai traded, raided occasionally and intermarried widely.",
       "sources": [
         "Muriuki, G. (1974) A History of the Kikuyu 1500-1900. Oxford University Press.",
-        "https://soas-repository.worktribe.com/output/402032/a-history-of-the-kikuyu-to-1904"
+        "https://soas-repository.worktribe.com/output/402032/a-history-of-the-kikuyu-to-1904",
+        "Overton, J. (1988) 'The Origins of the Kikuyu Land Problem: Land Alienation and Land Use in Kiambu, Kenya, 1895-1920', African Studies Review 31(2). https://www.cambridge.org/core/journals/african-studies-review/article/origins-of-the-kikuyu-land-problem-land-alienation-and-land-use-in-kiambu-kenya-18951920/01BDC3BCB4D2A9AC40F00F52500F1916"
       ]
     },
     {
@@ -341,7 +346,8 @@
       "text": "Sankofa is an Akan word meaning, literally, 'go back and get it'.",
       "sources": [
         "https://en.wikipedia.org/wiki/Sankofa",
-        "https://nmaahc.si.edu/object/nmaahc_2014.321"
+        "https://nmaahc.si.edu/object/nmaahc_2014.321",
+        "https://www.berea.edu/centers/carter-g-woodson-center-for-interracial-education/the-power-of-sankofa"
       ]
     },
     {
@@ -351,6 +357,15 @@
       "sources": [
         "https://nairobi.go.ke/restoring-nairobis-rivers-in-order-to-improve-quality-of-life",
         "https://www.dreamtown.ngo/newsandstories/2025/12/1/reclaiming-the-nairobi-river-how-youth-led-clean-ups-are-restoring-water-dignity-and-hope"
+      ]
+    },
+    {
+      "id": "C16",
+      "state": "documented",
+      "text": "More than 30,000 labourers were contracted from British India to build the Uganda Railway, and many stayed in East Africa after their contracts ended.",
+      "sources": [
+        "Clayton, A. and Savage, D. C. (1975) Government and Labour in Kenya 1895-1963. Frank Cass (as cited by the Wikipedia article below).",
+        "https://en.wikipedia.org/wiki/Uganda_Railway"
       ]
     },
     {
@@ -885,6 +900,16 @@
             {
               "do": "reveal",
               "object": "hide"
+            },
+            {
+              "do": "move",
+              "object": "figure.wambui",
+              "at": "hide"
+            },
+            {
+              "do": "move",
+              "object": "figure.naserian",
+              "at": "hide"
             }
           ],
           "audio": "enkare-nairobi/e1.hide"
@@ -1171,11 +1196,12 @@
           "lines": [
             {
               "id": "q.e2.workers.answer",
-              "text": "Men brought from India to build the line, a very long way from their own homes. Listen: you can hear them working.",
-              "seconds": 14.72,
+              "text": "Men brought from India to build the line, a very long way from their own homes. Many never went back. Listen: you can hear them working.",
+              "seconds": 17.4,
               "fire": "telling",
               "claims": [
-                "C3"
+                "C3",
+                "C16"
               ],
               "audio": "enkare-nairobi/q.e2.workers.answer"
             }
@@ -1317,6 +1343,11 @@
             {
               "do": "illuminate",
               "object": "gourd.old"
+            },
+            {
+              "do": "move",
+              "object": "figure.njeri",
+              "at": "figure.naisula"
             }
           ],
           "audio": "enkare-nairobi/e2.share"

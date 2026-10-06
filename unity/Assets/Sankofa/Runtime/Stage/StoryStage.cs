@@ -71,7 +71,11 @@ namespace Sankofa.Runtime.Stage
         public void ResetAll()
         {
             keepsake = null;
-            foreach (var o in objects) o.ResetToStart();
+            foreach (var o in objects)
+            {
+                o.ResetToStart();
+                if (o.TryGetComponent<FigureMotion>(out var figure)) figure.ResetState();
+            }
             foreach (var s in scenes)
                 if (s.IsHearth) ShowScene(s.Id);
         }
@@ -119,13 +123,34 @@ namespace Sankofa.Runtime.Stage
                 Debug.LogError($"[Sankofa] No staged object for {action}; content and scene disagree.");
                 return;
             }
+            var figure = o.GetComponent<FigureMotion>();
             switch (action.Kind)
             {
                 case ActionKind.Reveal:
-                    o.Reveal();
-                    break;
                 case ActionKind.Illuminate:
-                    o.Illuminate();
+                    // A person of the story walks in to their place rather than appearing there.
+                    if (!o.Visible && figure != null) figure.Arrive();
+                    if (action.Kind == ActionKind.Reveal) o.Reveal();
+                    else o.Illuminate();
+                    break;
+                case ActionKind.Move when figure == null:
+                    Debug.LogError($"[Sankofa] {action}: '{o.Id}' is not a figure that can move.");
+                    break;
+                case ActionKind.Move when action.At == null:
+                    figure.GoHome();
+                    break;
+                case ActionKind.Move:
+                    var to = Find(action.At);
+                    if (to == null)
+                    {
+                        Debug.LogError($"[Sankofa] No staged object for {action}; content and scene disagree.");
+                        break;
+                    }
+                    var (place, kneel) = to.ApproachFrom(o.HomePosition);
+                    figure.GoTo(place, to.transform.position, kneel);
+                    break;
+                case ActionKind.Withdraw when figure != null:
+                    figure.Leave();
                     break;
                 case ActionKind.Offer:
                     // The fire offers from its flames; a story offers from where the object rests.

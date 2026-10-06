@@ -55,6 +55,8 @@ namespace Sankofa.Tests
             components.AddRange(Object.FindObjectsByType<Runtime.Narration.NarrationPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.Add(Single<CaptionBoard>());
             components.Add(Single<StartScreen>());
+            components.AddRange(Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+            components.AddRange(Object.FindObjectsByType<Runtime.Audio.ObjectSound>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             var pointers = Object.FindObjectsByType<PointerSource>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             Assert.That(pointers.Length, Is.EqualTo(2), "a pointer for each side");
             components.AddRange(pointers);
@@ -96,7 +98,7 @@ namespace Sankofa.Tests
             foreach (var o in package.Objects.Where(o => o.Capabilities.Contains(ActionKind.Touch)))
                 Assert.That(new SerializedObject(staged.Single(s => s.Id == o.Id)).FindProperty("touchPoint").objectReferenceValue, Is.Not.Null, o.Id);
             var targets = package.Beats.SelectMany(b => b.Lines.Concat(b.Invitation?.Accepted ?? new Line[0]).Concat(b.Invitation?.Default ?? new Line[0]))
-                .SelectMany(l => l.Actions).Where(a => a.At != null).Select(a => a.At).Distinct();
+                .SelectMany(l => l.Actions).Where(a => a.Kind == ActionKind.Place && a.At != null).Select(a => a.At).Distinct();
             foreach (var id in targets)
                 Assert.That(new SerializedObject(staged.Single(s => s.Id == id)).FindProperty("placePoint").objectReferenceValue, Is.Not.Null, id);
         }
@@ -131,6 +133,42 @@ namespace Sankofa.Tests
             }
             var so = new SerializedObject(Single<StoryStage>());
             Assert.That(so.FindProperty("offerForward").floatValue, Is.InRange(0.3f, 0.55f), "objects are offered within reach");
+        }
+
+        [Test]
+        public void FiguresWalkInFromBeyondTheSceneAndKeepTheirDistance()
+        {
+            var anchor = Single<WorldAnchor>().transform;
+            var controls = anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == "Controls panel").localPosition;
+            var figures = Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Assert.That(figures.Select(f => f.GetComponent<StageObject>().Id), Is.SupersetOf(new[] { "figure.wambui", "figure.naserian", "figure.ewe", "figure.njeri", "figure.naisula" }));
+            foreach (var f in figures)
+            {
+                var path = new SerializedObject(f).FindProperty("entryPath");
+                Assert.That(path.arraySize, Is.GreaterThanOrEqualTo(2), f.name);
+                var start = path.GetArrayElementAtIndex(0).vector3Value;
+                Assert.That(new Vector2(start.x, start.z).magnitude, Is.GreaterThan(3f), f.name + " comes from beyond the clearing");
+            }
+            // Where people go to stand or kneel stays out of the visitor's lap and clear of the controls.
+            foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var points = new SerializedObject(o).FindProperty("approachPoints");
+                for (var i = 0; i < points.arraySize; i++)
+                {
+                    var local = anchor.InverseTransformPoint(((Transform)points.GetArrayElementAtIndex(i).objectReferenceValue).position);
+                    Assert.That(new Vector2(local.x, local.z).magnitude, Is.GreaterThan(0.75f), o.Id + " approach " + i + " keeps a body's distance from the seat");
+                    Assert.That(Vector2.Distance(new Vector2(local.x, local.z), new Vector2(controls.x, controls.z)), Is.GreaterThan(0.5f), o.Id + " approach " + i + " is clear of the controls");
+                }
+            }
+            // Every figure the package moves has somewhere to go.
+            foreach (var action in package.Beats.SelectMany(b => b.Lines.Concat(b.Invitation?.Accepted ?? new List<Line>()).Concat(b.Invitation?.Default ?? new List<Line>()))
+                         .SelectMany(l => l.Actions).Where(a => a.Kind == ActionKind.Move))
+            {
+                Assert.That(figures.Any(f => f.GetComponent<StageObject>().Id == action.Object), action.ToString());
+                if (action.At == null) continue;
+                var target = Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None).Single(o => o.Id == action.At);
+                Assert.That(new SerializedObject(target).FindProperty("approachPoints").arraySize, Is.GreaterThan(0), action + ": the target has a place to stand or kneel");
+            }
         }
 
         [Test]
