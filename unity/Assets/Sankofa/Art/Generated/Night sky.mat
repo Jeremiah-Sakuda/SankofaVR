@@ -28,10 +28,17 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _GlowHeight: 0.25
+    - _GlowWidth: 0.6
+    - _Overcast: 0
+    - _ShowMoon: 1
     m_Colors:
     - _Band: {r: 0.049999982, g: 0.049999982, b: 0.064999975, a: 1}
     - _BandAxis: {r: 0.35, g: 0.55, b: 0.76, a: 0}
+    - _CloudColor: {r: 0.29999998, g: 0.30999997, b: 0.32999998, a: 1}
+    - _GlowColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GlowDir: {r: 0, g: 0, b: 1, a: 0}
     - _Horizon: {r: 0.03, g: 0.035, b: 0.059999965, a: 1}
     - _Zenith: {r: 0.004, g: 0.006, b: 0.018, a: 1}
   m_BuildTextureStacks: []

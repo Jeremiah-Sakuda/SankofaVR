@@ -356,15 +356,15 @@ namespace Sankofa.EditorTools
         /// <summary>
         /// A woman standing in a cloth wrapped from the shoulders, as one continuous silhouette for the additive
         /// ember-figure shader: body, neck and head are a single surface so nothing overlaps and doubles in brightness,
-        /// flattened front to back like a body rather than a pillar. No face, hands or ornament is modelled, so no
-        /// likeness is ever drawn. The arms hang just clear of the body so their light does not pile onto it.
+        /// flattened front to back like a body rather than a pillar, the wrap flaring a little at the hem. No face,
+        /// hands or ornament is modelled, so no likeness is ever drawn; clothing waits for family review.
         /// </summary>
         public static Mesh Figure(string name, int seed, float height)
         {
             var h = height;
             var body = Lathe(name + " body", new List<Vector2>
             {
-                new Vector2(0, 0), new Vector2(h * 0.105f, h * 0.008f), new Vector2(h * 0.115f, h * 0.2f), new Vector2(h * 0.1f, h * 0.45f),
+                new Vector2(0, 0), new Vector2(h * 0.128f, h * 0.006f), new Vector2(h * 0.118f, h * 0.1f), new Vector2(h * 0.11f, h * 0.25f), new Vector2(h * 0.1f, h * 0.45f),
                 new Vector2(h * 0.105f, h * 0.58f), new Vector2(h * 0.125f, h * 0.7f), new Vector2(h * 0.135f, h * 0.775f),
                 new Vector2(h * 0.105f, h * 0.81f), new Vector2(h * 0.05f, h * 0.83f), new Vector2(h * 0.034f, h * 0.85f),
                 new Vector2(h * 0.036f, h * 0.87f), new Vector2(h * 0.054f, h * 0.895f), new Vector2(h * 0.06f, h * 0.935f),
@@ -387,8 +387,9 @@ namespace Sankofa.EditorTools
                     new Vector2(0, 0), new Vector2(h * 0.016f, h * 0.01f), new Vector2(h * 0.019f, h * 0.12f),
                     new Vector2(h * 0.024f, h * 0.27f), new Vector2(h * 0.02f, h * 0.31f), new Vector2(0, h * 0.32f),
                 }, 10, (a, y) => Color.white, seed + 3);
-                // Hanging from the shoulder, hand a little forward and out from the hip.
-                parts.Add(new CombineInstance { mesh = arm, transform = Matrix4x4.TRS(new Vector3(side * h * 0.163f, h * 0.46f, h * 0.02f), Quaternion.Euler(4, 0, side * 4f), Vector3.one) });
+                // Hanging from the shoulder, which it meets, hand a little forward and clear of the hip. The figure
+                // shader draws only the nearest surface, so where arm and body meet they do not double in light.
+                parts.Add(new CombineInstance { mesh = arm, transform = Matrix4x4.TRS(new Vector3(side * h * 0.15f, h * 0.46f, h * 0.02f), Quaternion.Euler(4, 0, side * 4f), Vector3.one) });
             }
             var mesh = CombineMeshes(parts, name);
             // Vertex colour tells the figure shader which arm a vertex belongs to (red: the arm on −X, green: +X), so it

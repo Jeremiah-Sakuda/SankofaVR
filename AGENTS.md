@@ -31,7 +31,7 @@ Follow [the modular architecture](docs/architecture.md). Keep story rules indepe
 
 ## Current workspace boundaries
 
-The repository contains the first Unity slice (`unity/`) and the engine-free story core with its tests (`dotnet/`). It plays a development placeholder episode; no selected episode, backend or provider integration exists. Deliberate imports from the previous Nafasi workspace are recorded in [workspace provenance](docs/workspace-provenance.md); its other source and tests remain in their original repository. Web Sankofa is a separate AGPL-licensed project; do not import its code or assets without assessing ownership, contributor and dependency terms.
+The repository contains the Unity application (`unity/`) and the engine-free story core with its tests (`dotnet/`). It plays the draft Enkare Nairobi story package with pre-rendered narration and field-recorded sound; no backend or runtime provider integration exists. No Quest headset is available: verification is batch tests, desktop captures and the Meta XR Simulator, and none of it is device evidence. Deliberate imports from the previous Nafasi workspace are recorded in [workspace provenance](docs/workspace-provenance.md); its other source and tests remain in their original repository. Web Sankofa is a separate AGPL-licensed project; do not import its code or assets without assessing ownership, contributor and dependency terms.
 
 Use [workspace provenance](docs/workspace-provenance.md) for the origin of these documents. Do not infer implementation, purchases, provider access or device results from a planning entry. Maintain the PRD/backlog/decision distinctions when work progresses.
 

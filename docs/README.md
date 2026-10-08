@@ -34,5 +34,6 @@ Planning documents state intentions; decisions and the backlog record what has a
 | Document | What it holds |
 |---|---|
 | [Asset register](asset-register.md) | Origin, rights and review status of every asset, including voice and recordings |
+| [Candidate asset sources](asset-sources.md) | Open model, material and animation sources researched but not yet approved |
 | [Workspace provenance](workspace-provenance.md) | Where the planning documents came from |
 | [References](../references/README.md) | Official competition and original web Sankofa sources |

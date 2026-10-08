@@ -13,12 +13,13 @@ namespace Sankofa.Runtime.UI
     public sealed class CaptionBoard : MonoBehaviour
     {
         /// <summary>Font sizes for TextMeshPro in world space, where a size of 1 is a line about 11.5 cm tall.</summary>
-        public static float FontSize(CaptionSize size) => size == CaptionSize.Small ? 0.19f : size == CaptionSize.Large ? 0.31f : 0.24f;
+        /// Medium is a line about 1.4 degrees tall at the caption's distance, comfortably above the 1-degree minimum.
+        public static float FontSize(CaptionSize size) => size == CaptionSize.Small ? 0.25f : size == CaptionSize.Large ? 0.4f : 0.32f;
 
         [SerializeField] TMP_FontAsset font;
         [SerializeField] Material textMaterial;
         [SerializeField] Material backingMaterial;
-        [SerializeField] float width = 0.72f;
+        [SerializeField] float width = 0.95f;
         [SerializeField] float noticeSeconds = 3.5f;
         [SerializeField] float fadeSeconds = 0.18f;
 
@@ -53,8 +54,8 @@ namespace Sankofa.Runtime.UI
         {
             block = new MaterialPropertyBlock();
             caption = Make("Caption", 0f, Color.white, textMaterial);
-            status = Make("Status", -0.115f, new Color(0.78f, 0.74f, 0.66f), null);
-            notice = Make("Notice", 0.115f, new Color(1f, 0.84f, 0.56f), textMaterial);
+            status = Make("Status", -0.15f, new Color(0.82f, 0.78f, 0.7f), textMaterial);
+            notice = Make("Notice", 0.15f, new Color(1f, 0.84f, 0.56f), textMaterial);
 
             var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             Destroy(quad.GetComponent<Collider>());
@@ -88,7 +89,7 @@ namespace Sankofa.Runtime.UI
             if (caption == null) return;
             var s = FontSize(size);
             caption.fontSize = s;
-            status.fontSize = s * 0.62f;
+            status.fontSize = s * 0.68f;
             notice.fontSize = s * 0.75f;
             // Larger type wraps sooner; the line stays within a comfortable reading width.
             caption.rectTransform.sizeDelta = new Vector2(width * (size == CaptionSize.Large ? 1.1f : 1f), 0.2f);
@@ -125,7 +126,7 @@ namespace Sankofa.Runtime.UI
             caption.ForceMeshUpdate();
             var bounds = caption.textBounds;
             backing.transform.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0.004f);
-            backing.transform.localScale = new Vector3(bounds.size.x + 0.05f, bounds.size.y + 0.03f, 1f);
+            backing.transform.localScale = new Vector3(bounds.size.x + 0.07f, bounds.size.y + 0.045f, 1f);
         }
 
         void Update()
@@ -137,7 +138,8 @@ namespace Sankofa.Runtime.UI
             if (backing.enabled)
             {
                 backing.GetPropertyBlock(block);
-                block.SetColor(ColorId, new Color(0.025f, 0.02f, 0.018f, 0.55f * fade));
+                // Dark enough that bright windows or flame behind a line do not read through its letters.
+                block.SetColor(ColorId, new Color(0.025f, 0.02f, 0.018f, 0.72f * fade));
                 backing.SetPropertyBlock(block);
             }
         }

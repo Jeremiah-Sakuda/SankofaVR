@@ -69,6 +69,20 @@ namespace Sankofa.Runtime.UI
 
         public void AddFingertip(Func<Vector3?> fingertip) => fingertips.Add(fingertip);
 
+        /// <summary>Whether a fingertip at this point is at or just in front of one of the buttons, about to press.</summary>
+        public bool Near(Vector3 point)
+        {
+            if (!isActiveAndEnabled) return false;
+            foreach (var b in buttons)
+            {
+                var local = b.Root.transform.InverseTransformPoint(point);
+                var depth = -local.z;
+                if (Mathf.Abs(local.x) <= b.Size.x / 2f && Mathf.Abs(local.y) <= b.Size.y / 2f && depth < hoverDepth && depth > -0.05f)
+                    return true;
+            }
+            return false;
+        }
+
         /// <summary>The nearest button a ray meets from in front, within reach, and how far along the ray.</summary>
         public bool TryHit(Ray ray, float reach, out float distance, out string id)
         {

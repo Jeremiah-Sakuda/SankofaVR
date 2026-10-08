@@ -67,7 +67,7 @@ namespace Sankofa.Tests
                 Assert.That(MissingReferences(sound).Where(m => !m.EndsWith(".subject")), Is.Empty);
             // Panels may use their font's own material.
             var panels = Object.FindObjectsByType<PokePanel>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            Assert.That(panels.Length, Is.EqualTo(3), "controls, questions and settings");
+            Assert.That(panels.Length, Is.EqualTo(4), "controls, choices, questions and settings");
             foreach (var panel in panels)
                 Assert.That(MissingReferences(panel).Where(m => !m.EndsWith(".labelMaterial")), Is.Empty);
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
@@ -117,12 +117,13 @@ namespace Sankofa.Tests
         public void ControlsRestingPlacesAndTouchTargetsAreWithinSeatedReach()
         {
             var anchor = Single<WorldAnchor>().transform;
-            var places = new[] { "Controls panel", "Questions panel", "Settings panel", "Rest point", "Keepsake point", "Carry point" };
+            var places = new[] { "Controls panel", "Choices panel", "Questions panel", "Settings panel", "Rest point", "Keepsake point", "Carry point" };
             foreach (var name in places)
                 WithinReach(anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == name).localPosition, name);
-            // Three rows of controls (the returning visitor's choices) still sit above the lap.
+            // Three rows of choices (the returning visitor's menu) still sit within reach.
             var controls = anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == "Controls panel").localPosition;
-            WithinReach(controls + Vector3.down * 2 * (0.05f + 0.012f), "the third row of controls");
+            var choices = anchor.GetComponentsInChildren<Transform>(true).Single(t => t.name == "Choices panel").localPosition;
+            WithinReach(choices + Vector3.down * 2 * (0.05f + 0.012f), "the third row of choices");
 
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
@@ -133,6 +134,7 @@ namespace Sankofa.Tests
                 // Reaching for a story object never passes through the controls, which are on the visitor's left.
                 Assert.That(local.x, Is.GreaterThan(-0.05f), o.Id + " is reached on the right");
                 Assert.That(Vector3.Distance(local, controls), Is.GreaterThan(0.25f), o.Id + " is clear of the controls");
+                Assert.That(Vector3.Distance(local, choices), Is.GreaterThan(0.25f), o.Id + " is clear of the choices");
             }
             var so = new SerializedObject(Single<StoryStage>());
             Assert.That(so.FindProperty("offerForward").floatValue, Is.InRange(0.3f, 0.55f), "objects are offered within reach");

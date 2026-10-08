@@ -46,7 +46,8 @@ namespace Sankofa.EditorTools
             var near = SankofaMeshes.Fbm(p * 0.9f, 81, 3) * 0.035f;
             var slope = Mathf.Clamp(-p.x * 0.07f, -0.8f, 2.5f) * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(1.5f, 6f, r));
             var rolling = SankofaMeshes.Fbm(p * 0.12f, 83, 4) * 1.1f * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(4f, 14f, r));
-            var hills = (SankofaMeshes.Fbm(p * 0.03f, 87, 3) + 0.45f) * 10f * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(26f, 70f, r));
+            // Low, rolling hills far off; taller ones would rise as hard-edged shapes against the sky beyond the fog.
+            var hills = (SankofaMeshes.Fbm(p * 0.03f, 87, 3) + 0.45f) * 5f * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(26f, 70f, r));
             var channel = -StreamDepth * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.25f, 0.6f, CourseDistance(p))));
             return near + slope + rolling + hills + channel;
         }
@@ -83,7 +84,7 @@ namespace Sankofa.EditorTools
         }
 
         /// <summary>The ground, the stream and the forest and plain around it, shared by both eras at the water.</summary>
-        static (MeshFilter Ground, MeshFilter Water, List<MeshFilter> Static) BuildBoundary(Transform root, SankofaArtSet art, string era, int seed, bool cut, float trampled)
+        static (MeshFilter Ground, MeshFilter Water, List<MeshFilter> Static) BuildBoundary(Transform root, SankofaArtSet art, string era, int seed, bool cut, float trampled, Material sky, int starCount)
         {
             var random = new System.Random(seed);
             float R(float a, float b) => Range(random, a, b);
@@ -136,10 +137,12 @@ namespace Sankofa.EditorTools
             grassMesh.name = era + " grass";
             var grass = Static(root, "Grass", grassMesh, art.Grass);
 
-            Prim(root, "Sky", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 170f, art.Sky);
-            var starMesh = SankofaMeshes.Stars(1500, seed + 7, 75f);
+            Prim(root, "Sky", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 170f, sky);
+            var starMesh = SankofaMeshes.Stars(Mathf.Max(1, starCount), seed + 7, 75f);
             starMesh.name = era + " stars";
             var stars = Static(root, "Stars", starMesh, art.Stars);
+            // An overcast sky has no stars to show.
+            if (starCount <= 0) stars.gameObject.SetActive(false);
             return (ground, water, new List<MeshFilter> { trunkFilter, canopyFilter, stoneFilter, grass, stars });
         }
 
@@ -149,7 +152,7 @@ namespace Sankofa.EditorTools
 
         static (StageObject[] Objects, StoryAmbience Sound) BuildWater1850s(Transform root, SankofaArtSet art)
         {
-            var (ground, water, statics) = BuildBoundary(root, art, "1850s", 111, false, 0f);
+            var (ground, water, statics) = BuildBoundary(root, art, "1850s", 111, false, 0f, art.SkyDusk, 450);
             var trunks = statics[0];
             var canopies = statics[1];
             var stones = statics[2];
@@ -468,13 +471,14 @@ namespace Sankofa.EditorTools
 
         static void ConfigureWater1850s(SerializedProperty e, Transform root)
         {
-            Scene(e, "story.water.1850s", false, root, new Color(0.05f, 0.04f, 0.08f),
-                new Color(0.07f, 0.06f, 0.1f), new Color(0.03f, 0.024f, 0.018f), 9f, 55f);
+            // Dusk: violet sky light, warm afterglow over the plain, the moon rising over the forest.
+            Scene(e, "story.water.1850s", false, root, new Color(0.11f, 0.07f, 0.1f),
+                new Color(0.1f, 0.085f, 0.13f), new Color(0.04f, 0.03f, 0.025f), 9f, 60f);
             e.FindPropertyRelative("TowardMoon").vector3Value = WaterMoon1850s;
-            e.FindPropertyRelative("Moon").colorValue = new Color(0.07f, 0.07f, 0.1f);
-            e.FindPropertyRelative("MistColor").colorValue = new Color(0.08f, 0.06f, 0.09f);
-            e.FindPropertyRelative("Mist").vector4Value = new Vector4(0.55f, 0.0f, 1.2f, 7f);
-            e.FindPropertyRelative("Grade").vector4Value = new Vector4(1.3f, 0.95f, 0.9f, 0.95f);
+            e.FindPropertyRelative("Moon").colorValue = new Color(0.08f, 0.075f, 0.11f);
+            e.FindPropertyRelative("MistColor").colorValue = new Color(0.13f, 0.085f, 0.11f);
+            e.FindPropertyRelative("Mist").vector4Value = new Vector4(0.5f, 0.0f, 1.2f, 7f);
+            e.FindPropertyRelative("Grade").vector4Value = new Vector4(1.25f, 0.95f, 0.7f, 1.0f);
         }
 
         // ---- when the railway came ----
@@ -483,7 +487,7 @@ namespace Sankofa.EditorTools
 
         static (StageObject[] Objects, StoryAmbience Sound) BuildWater1899(Transform root, SankofaArtSet art)
         {
-            var (ground, water, statics) = BuildBoundary(root, art, "1899", 113, true, 1f);
+            var (ground, water, statics) = BuildBoundary(root, art, "1899", 113, true, 1f, art.SkyMorning, 0);
             var trunks = statics[0];
             var canopies = statics[1];
             var stones = statics[2];
@@ -601,13 +605,14 @@ namespace Sankofa.EditorTools
 
         static void ConfigureWater1899(SerializedProperty e, Transform root)
         {
-            Scene(e, "story.water.1899", false, root, new Color(0.05f, 0.052f, 0.06f),
-                new Color(0.06f, 0.062f, 0.07f), new Color(0.04f, 0.035f, 0.03f), 8f, 60f);
+            // A grey dawn under cloud: soft light from above, little colour, the lantern still burning.
+            Scene(e, "story.water.1899", false, root, new Color(0.22f, 0.22f, 0.24f),
+                new Color(0.16f, 0.165f, 0.18f), new Color(0.06f, 0.055f, 0.05f), 10f, 70f);
             e.FindPropertyRelative("TowardMoon").vector3Value = WaterMoon1899;
-            e.FindPropertyRelative("Moon").colorValue = new Color(0.05f, 0.05f, 0.055f);
-            e.FindPropertyRelative("MistColor").colorValue = new Color(0.075f, 0.07f, 0.068f);
-            e.FindPropertyRelative("Mist").vector4Value = new Vector4(0.5f, 0.1f, 1.1f, 6f);
-            e.FindPropertyRelative("Grade").vector4Value = new Vector4(1.25f, 0.72f, 0.7f, 0.35f);
+            e.FindPropertyRelative("Moon").colorValue = new Color(0.1f, 0.1f, 0.105f);
+            e.FindPropertyRelative("MistColor").colorValue = new Color(0.22f, 0.22f, 0.235f);
+            e.FindPropertyRelative("Mist").vector4Value = new Vector4(0.45f, 0.1f, 1.0f, 8f);
+            e.FindPropertyRelative("Grade").vector4Value = new Vector4(1.05f, 0.7f, 0.5f, 0.3f);
         }
 
         // ---- the same water, today ----
@@ -676,7 +681,11 @@ namespace Sankofa.EditorTools
             var weedsMesh = SankofaMeshes.Grass(Vector3.zero, Vector3.zero, 97, 260, 0.9f, 6f, RiverGround, p => CourseDistance(p) > 1.5f);
             weedsMesh.name = "Today weeds";
             var weeds = Static(root, "Weeds", weedsMesh, art.Grass);
-            Prim(root, "Sky", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 420f, art.Sky);
+            Prim(root, "Sky", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 420f, art.SkyCity);
+            // Only the brightest stars show through the city's glow.
+            var cityStars = SankofaMeshes.Stars(160, 977, 190f);
+            cityStars.name = "Today stars";
+            SaveMeshes(new[] { Static(root, "Stars", cityStars, art.Stars) });
 
             Bake(root, new[] { ground, gardenFilter }, JikoAt + Vector3.up * 0.2f);
             SaveMeshes(new[] { ground, river, cityFilter, gardenFilter, weeds });
@@ -789,16 +798,17 @@ namespace Sankofa.EditorTools
 
         static void ConfigureWaterToday(SerializedProperty e, Transform root)
         {
-            Scene(e, "story.water.today", false, root, new Color(0.07f, 0.05f, 0.045f),
-                new Color(0.07f, 0.06f, 0.065f), new Color(0.03f, 0.025f, 0.02f), 14f, 170f);
+            // A city night: sodium haze low all round, the light from below rather than from the moon.
+            Scene(e, "story.water.today", false, root, new Color(0.13f, 0.075f, 0.04f),
+                new Color(0.09f, 0.065f, 0.05f), new Color(0.035f, 0.025f, 0.02f), 18f, 200f);
             e.FindPropertyRelative("TowardMoon").vector3Value = WaterMoonToday;
-            e.FindPropertyRelative("Moon").colorValue = new Color(0.05f, 0.045f, 0.045f);
-            e.FindPropertyRelative("MistColor").colorValue = new Color(0.1f, 0.075f, 0.06f);
-            e.FindPropertyRelative("Mist").vector4Value = new Vector4(0.5f, 0.3f, 0.6f, 10f);
-            e.FindPropertyRelative("Grade").vector4Value = new Vector4(1.3f, 0.9f, 0.8f, 0.9f);
+            e.FindPropertyRelative("Moon").colorValue = new Color(0.05f, 0.04f, 0.03f);
+            e.FindPropertyRelative("MistColor").colorValue = new Color(0.12f, 0.075f, 0.045f);
+            e.FindPropertyRelative("Mist").vector4Value = new Vector4(0.45f, 0.3f, 0.6f, 12f);
+            e.FindPropertyRelative("Grade").vector4Value = new Vector4(1.3f, 0.9f, 0.7f, 1.0f);
         }
 
-        static readonly Vector3 WaterMoon1850s = new Vector3(0.65f, 0.28f, 0.7f);
+        static readonly Vector3 WaterMoon1850s = new Vector3(-0.5f, 0.4f, 0.6f);
         static readonly Vector3 WaterMoon1899 = new Vector3(-0.2f, 0.85f, 0.45f);
         static readonly Vector3 WaterMoonToday = new Vector3(-0.4f, 0.6f, 0.7f);
 

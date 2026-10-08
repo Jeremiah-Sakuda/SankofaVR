@@ -27,9 +27,8 @@ namespace Sankofa.Tests
             while (!condition() && Time.realtimeSinceStartup < end) yield return null;
         }
 
-        static void Capture(Camera eye, string name)
+        static void Capture(Camera eye, string name, int width = 1600, int height = 1200)
         {
-            const int width = 1600, height = 1200;
             var target = new RenderTexture(width, height, 24) { antiAliasing = 4 };
             var previous = eye.targetTexture;
             eye.targetTexture = target;
@@ -44,6 +43,25 @@ namespace Sankofa.Tests
             File.WriteAllBytes(Path.Combine(Folder, name + ".png"), image.EncodeToPNG());
             Object.Destroy(image);
             target.Release();
+        }
+
+        /// <summary>
+        /// A run of frames in real time, looking at one place, so motion (a walk, a kneel, a hand-over) can be
+        /// reviewed as a strip rather than judged from a single still. The story runs at normal speed meanwhile.
+        /// </summary>
+        static IEnumerator Strip(Camera eye, string name, Vector3 look, int frames, float spacing)
+        {
+            var ahead = eye.transform.rotation;
+            var pace = Time.timeScale;
+            Time.timeScale = 1;
+            eye.transform.rotation = Quaternion.LookRotation(look - eye.transform.position, Vector3.up);
+            for (var i = 0; i < frames; i++)
+            {
+                Capture(eye, $"{name}-{i + 1:00}", 800, 600);
+                yield return new WaitForSeconds(spacing);
+            }
+            eye.transform.rotation = ahead;
+            Time.timeScale = pace;
         }
 
         /// <summary>
@@ -152,6 +170,8 @@ namespace Sankofa.Tests
                 WriteMix(Path.Combine(Folder, "water-1850s-sound.wav"), eye.transform.position, 20f);
                 yield return Invited("touch-water");
                 flow.Accept("touch-water");
+                yield return Line("e1.wambui.arrives", 60);
+                yield return Strip(eye, "m1-wambui-arrives", new Vector3(-2.2f, 1.0f, 1.7f), 8, 0.8f);
                 yield return Invited("receive-flour");
                 yield return new WaitForSeconds(2f);
                 CaptureBoth(eye, "06-wambui", people);
@@ -159,12 +179,16 @@ namespace Sankofa.Tests
                 yield return Line("e1.problem");
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "07-naserian", people);
+                yield return Line("e1.hide", 60);
+                yield return Strip(eye, "m2-kneel-at-hide", new Vector3(0.35f, 0.75f, 0.95f), 6, 0.5f);
                 yield return Invited("offer-flour");
                 flow.Accept("offer-flour");
                 yield return Invited("receive-bead");
-                yield return new WaitForSeconds(2f);
+                yield return Strip(eye, "m3-bead-offered", new Vector3(0.45f, 0.95f, 0.75f), 5, 0.4f);
                 CaptureBoth(eye, "08-bead", right);
                 flow.Accept("receive-bead");
+                yield return Line("e1.part", 60);
+                yield return Strip(eye, "m4-parting", new Vector3(0.1f, 1.0f, 1.6f), 8, 0.8f);
                 yield return WaitFor(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null, 120);
                 yield return new WaitForSeconds(2f);
                 CaptureBoth(eye, "09-keepsake");
@@ -196,6 +220,8 @@ namespace Sankofa.Tests
                 yield return Line("e2.nothing", 120);
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "13-granddaughters", people);
+                yield return Line("e2.share", 60);
+                yield return Strip(eye, "m5-pouring", new Vector3(0.0f, 1.0f, 1.4f), 6, 0.6f);
                 yield return Invited("receive-seed");
                 yield return new WaitForSeconds(2f);
                 Capture(eye, "14-seed");

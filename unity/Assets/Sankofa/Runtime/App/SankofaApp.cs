@@ -36,7 +36,10 @@ namespace Sankofa.Runtime.App
         [SerializeField] StoryAmbience[] storyAmbience = new StoryAmbience[0];
         [SerializeField] CaptionBoard captions;
         [SerializeField] StartScreen startScreen;
+        [Tooltip("Pause and return to the fire, at the lap, always within reach but out of the story's way.")]
         [SerializeField] PokePanel controls;
+        [Tooltip("Choices and the nearby alternatives to gestures, raised into view where the visitor will see them.")]
+        [SerializeField] PokePanel choicesPanel;
         [SerializeField] PokePanel questionsPanel;
         [SerializeField] PokePanel settingsPanel;
         [SerializeField] StoryStage stage;
@@ -70,16 +73,23 @@ namespace Sankofa.Runtime.App
 
         void Awake()
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Render the periphery at lower resolution, more so when the frame is heavy.
+            OVRManager.foveatedRenderingLevel = OVRManager.FoveatedRenderingLevel.High;
+            OVRManager.useDynamicFoveatedRendering = true;
+#endif
             settings = ExperienceSettings.Load();
             flow = LoadFlow();
             foreach (var hand in hands)
             {
                 var h = hand;
                 controls.AddFingertip(() => h.Fingertip);
+                choicesPanel.AddFingertip(() => h.Fingertip);
                 questionsPanel.AddFingertip(() => h.Fingertip);
                 settingsPanel.AddFingertip(() => h.Fingertip);
             }
             controls.Pressed += OnControl;
+            choicesPanel.Pressed += OnControl;
             questionsPanel.Pressed += OnQuestion;
             settingsPanel.Pressed += OnSetting;
             narration.Finished += token =>
@@ -146,7 +156,7 @@ namespace Sankofa.Runtime.App
                 // Fail visibly and leave a way out; never improvise a different story.
                 captions.SetCaption("This story could not be opened.");
                 captions.SetStatus(LoadProblem);
-                controls.Show(new List<(string, string)> { (LeaveId, "Leave") });
+                choicesPanel.Show(new List<(string, string)> { (LeaveId, "Leave") });
                 return;
             }
             captions.SetStatus(baseStatus);
@@ -160,7 +170,7 @@ namespace Sankofa.Runtime.App
             if (placed) return;
             placed = true;
             startScreen.Show();
-            controls.Show(new List<(string, string)> { (StartId, "Begin"), (LeaveId, "Leave") });
+            choicesPanel.Show(new List<(string, string)> { (StartId, "Begin"), (LeaveId, "Leave") });
         }
 
         /// <summary>Leaves the start screen and opens the hearth: the fire's welcome, then the choice.</summary>
@@ -250,7 +260,9 @@ namespace Sankofa.Runtime.App
                         transition.Play(t.Token, t.To.Id, t.Continuities);
                         break;
                     case Cue.Controls c:
-                        controls.Show(c.Options.Select(o => (ControlId(o), ControlLabel(o))).ToList());
+                        // Pause and return stay at the lap; every choice comes up into view.
+                        controls.Show(c.Options.Where(IsStoryControl).Select(o => (ControlId(o), ControlLabel(o))).ToList());
+                        choicesPanel.Show(c.Options.Where(o => !IsStoryControl(o)).Select(o => (ControlId(o), ControlLabel(o))).ToList());
                         break;
                     case Cue.Questions q:
                         questionsPanel.Show(q.Available.Select(x => ("q:" + x.Id, x.Label)).ToList());
@@ -311,6 +323,9 @@ namespace Sankofa.Runtime.App
                 default: return "A kept visit could not be read. It has been left as it was.";
             }
         }
+
+        static bool IsStoryControl(ControlOption o) =>
+            o.Kind == ControlKind.Pause || o.Kind == ControlKind.Resume || o.Kind == ControlKind.ReturnToHearth;
 
         static string ControlId(ControlOption o) => o.Target == null ? o.Kind.ToString() : o.Kind + ":" + o.Target;
 

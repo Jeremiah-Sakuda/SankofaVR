@@ -76,11 +76,14 @@ namespace Sankofa.EditorTools
             var seedKept = BuildSeed(hearth, art, "seed.kept", "hearth", keepsakeAt + Vector3.up * 0.01f);
 
             var captions = BuildCaptions(world, art);
+            // Pause and return wait at the lap, out of the story's way. Choices come up into view, below and to the
+            // left of the fire; questions to the right, inside a comfortable view cone. All within a seated reach.
             var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.29f), 2);
-            var questions = BuildPanel(world, art, "Questions", new Vector3(0.4f, 1.0f, 0.3f), 1);
+            var choices = BuildPanel(world, art, "Choices", new Vector3(-0.28f, 0.95f, 0.42f), 2);
+            var questions = BuildPanel(world, art, "Questions", new Vector3(0.33f, 0.98f, 0.42f), 1);
             var settings = BuildPanel(world, art, "Settings", new Vector3(-0.5f, 0.7f, 0.2f), 2);
             var startScreen = BuildStartScreen(world);
-            BuildPointers(rig, art, new[] { controls, questions, settings });
+            BuildPointers(rig, art, new[] { controls, choices, questions, settings });
             var curtain = BuildCurtain(rig.Head, art);
 
             var receiver = new GameObject("Palm receiver").AddComponent<PalmReceiver>();
@@ -116,6 +119,7 @@ namespace Sankofa.EditorTools
             Set(app, "captions", captions);
             Set(app, "startScreen", startScreen);
             Set(app, "controls", controls);
+            Set(app, "choicesPanel", choices);
             Set(app, "questionsPanel", questions);
             Set(app, "settingsPanel", settings);
             Set(app, "stage", stage);

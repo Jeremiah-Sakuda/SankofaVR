@@ -66,9 +66,12 @@ namespace Sankofa.Runtime.Input
             var h = hand != null ? hand.Hand : null;
             if (h != null && hand.Tracked && h.IsPointerPoseValid)
             {
-                // A finger already at a panel is poking it; the ray yields so one gesture is not read twice.
-                foreach (var panel in panels)
-                    if (panel.FingerNear) return Source.None;
+                // This hand's finger already at a panel is poking it; its ray yields so one gesture is not read twice.
+                // The other hand's pointer is unaffected.
+                var tip = hand.Fingertip;
+                if (tip.HasValue)
+                    foreach (var panel in panels)
+                        if (panel.Near(tip.Value)) return Source.None;
                 var pose = h.PointerPose;
                 pointer = new Ray(pose.position, pose.forward);
                 strength = h.GetFingerPinchStrength(OVRHand.HandFinger.Index);

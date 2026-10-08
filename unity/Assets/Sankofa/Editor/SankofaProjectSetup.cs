@@ -45,7 +45,8 @@ namespace Sankofa.EditorTools
         /// Hands reach Sankofa through Meta's OVRPlugin (Meta XR feature). Unity's Microsoft Hand Interaction profile
         /// shares an id with XR Hands' feature but is not a Quest profile, so it stays off.
         /// </summary>
-        static readonly string[] DisabledFeatureTypes = { "MicrosoftHandInteraction" };
+        // SpaceWarp needs motion vectors, which the built-in pipeline does not render; enabled, it would cost without helping.
+        static readonly string[] DisabledFeatureTypes = { "MicrosoftHandInteraction", "SpaceWarpFeature", "MetaXRSpaceWarp" };
 
         [MenuItem("Sankofa/Configure Project for Quest")]
         public static void Configure()
@@ -56,6 +57,7 @@ namespace Sankofa.EditorTools
             ConfigureAudio();
             ConfigureXR();
             ConfigureMetaProjectConfig();
+            ConfigureQuality();
             RunMetaProjectSetupFixes();
             RemoveUnusedPermissions();
             SankofaText.EnsureEssentials();
@@ -177,6 +179,31 @@ namespace Sankofa.EditorTools
             }
         }
 
+        /// <summary>
+        /// Android's default quality level renders with 4x MSAA, so thin flames, grass and type stay smooth in the
+        /// headset rather than depending on a runtime override.
+        /// </summary>
+        static void ConfigureQuality()
+        {
+            var asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/QualitySettings.asset")[0];
+            var so = new SerializedObject(asset);
+            var levels = so.FindProperty("m_QualitySettings");
+            var perPlatform = so.FindProperty("m_PerPlatformDefaultQuality");
+            var android = -1;
+            for (var i = 0; i < perPlatform.arraySize; i++)
+            {
+                var entry = perPlatform.GetArrayElementAtIndex(i);
+                if (entry.FindPropertyRelative("first").stringValue == "Android") android = entry.FindPropertyRelative("second").intValue;
+            }
+            if (android < 0 || android >= levels.arraySize)
+            {
+                Debug.LogWarning("[Sankofa] No Android default quality level found; MSAA not set.");
+                return;
+            }
+            levels.GetArrayElementAtIndex(android).FindPropertyRelative("antiAliasing").intValue = 4;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         static void ConfigureMetaProjectConfig()
         {
             var config = AssetDatabase.LoadAssetAtPath<OVRProjectConfig>("Assets/Oculus/OculusProjectConfig.asset") ?? OVRProjectConfig.CachedProjectConfig;
@@ -186,7 +213,8 @@ namespace Sankofa.EditorTools
                 return;
             }
             config.handTrackingSupport = OVRProjectConfig.HandTrackingSupport.HandsOnly;
-            config.handTrackingFrequency = OVRProjectConfig.HandTrackingFrequency.LOW;
+            // Pokes, pinches and the open palm are the whole interface: track hands at the higher rate.
+            config.handTrackingFrequency = OVRProjectConfig.HandTrackingFrequency.HIGH;
             // Full VR is the baseline. A room-aware hearth is a later, conditional extension.
             config.insightPassthroughSupport = OVRProjectConfig.FeatureSupport.None;
             OVRProjectConfig.CommitProjectConfig(config);

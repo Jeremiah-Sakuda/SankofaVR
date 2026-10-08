@@ -10,7 +10,7 @@ namespace Sankofa.EditorTools
         public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Pointer;
         public Material Workbench, Brass, LanternCore;
         public Material Water, Spill, River, EmberFigure, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
-        public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, Stars, Smoke, Halo, Plaque;
+        public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, SkyDusk, SkyMorning, SkyCity, Stars, Smoke, Halo, Plaque;
     }
 
     public static class SankofaArt
@@ -191,6 +191,49 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Glow", 1.5f);
                 }),
                 Sky = Make("Night sky", "Sankofa/Sky", m => m.SetTexture("_Noise", noise)),
+                // Before the railway: violet dusk, the last of the sun low over the plain.
+                SkyDusk = Make("Dusk sky", "Sankofa/Sky", m =>
+                {
+                    m.SetTexture("_Noise", noise);
+                    m.SetColor("_Zenith", new Color(0.02f, 0.022f, 0.06f));
+                    m.SetColor("_Horizon", new Color(0.13f, 0.08f, 0.12f));
+                    m.SetColor("_Band", new Color(0.015f, 0.015f, 0.025f));
+                    m.SetColor("_GlowColor", new Color(0.5f, 0.2f, 0.07f));
+                    m.SetVector("_GlowDir", new Vector4(0.75f, 0, 0.66f, 0));
+                    m.SetFloat("_GlowWidth", 0.45f);
+                    m.SetFloat("_GlowHeight", 0.16f);
+                    m.SetFloat("_ShowMoon", 1);
+                }),
+                // When the railway came: a grey, overcast dawn.
+                SkyMorning = Make("Morning sky", "Sankofa/Sky", m =>
+                {
+                    m.SetTexture("_Noise", noise);
+                    m.SetColor("_Zenith", new Color(0.14f, 0.15f, 0.18f));
+                    m.SetColor("_Horizon", new Color(0.23f, 0.23f, 0.25f));
+                    m.SetColor("_Band", Color.black);
+                    m.SetColor("_GlowColor", new Color(0.08f, 0.065f, 0.05f));
+                    m.SetVector("_GlowDir", new Vector4(-0.3f, 0, 0.95f, 0));
+                    m.SetFloat("_GlowWidth", 0.8f);
+                    m.SetFloat("_GlowHeight", 0.3f);
+                    m.SetFloat("_Overcast", 0.92f);
+                    m.SetColor("_CloudColor", new Color(0.2f, 0.205f, 0.22f));
+                    m.SetFloat("_ShowMoon", 0);
+                }),
+                // Today: a city night, the sky lit orange from below by sodium streetlights.
+                SkyCity = Make("City sky", "Sankofa/Sky", m =>
+                {
+                    m.SetTexture("_Noise", noise);
+                    m.SetColor("_Zenith", new Color(0.025f, 0.022f, 0.03f));
+                    m.SetColor("_Horizon", new Color(0.16f, 0.09f, 0.045f));
+                    m.SetColor("_Band", Color.black);
+                    m.SetColor("_GlowColor", new Color(0.22f, 0.11f, 0.04f));
+                    m.SetVector("_GlowDir", new Vector4(0, 0, 1, 0));
+                    m.SetFloat("_GlowWidth", 2.5f);
+                    m.SetFloat("_GlowHeight", 0.3f);
+                    m.SetFloat("_Overcast", 0.25f);
+                    m.SetColor("_CloudColor", new Color(0.09f, 0.055f, 0.035f));
+                    m.SetFloat("_ShowMoon", 0);
+                }),
                 Stars = Make("Stars", "Sankofa/Stars", null),
                 Smoke = Make("Smoke", "Sankofa/Smoke", m =>
                 {
