@@ -2,7 +2,7 @@
 
 Version 1.0 · September 30, 2026 · Planning estimates; no implementation or device acceptance implied
 
-The [PRD](Sankofa-PRD.md) defines the product. This plan sequences the fire narrator, personalised story system and competition evidence. The [backlog](docs/backlog.md) is the execution checklist.
+The [PRD](prd.md) defines the product. This plan sequences the fire narrator, personalised story system and competition evidence. The [backlog](../backlog.md) is the execution checklist.
 
 ## 1. Starting point
 
@@ -13,7 +13,7 @@ This fresh SankofaVR repository has no runtime implementation yet. Two external 
 
 The previous Nafasi project uses Unity 6000.3.25f1, Meta XR Core 207.0.0, OpenXR 1.18.0 and the built-in renderer. MRUK and Meta Interaction SDK are not currently declared. New SDKs or a renderer change need an explicit need, compatible versions and a device build. Neither a Unity application, generated-world import nor live narration is implemented here.
 
-The user requested this separate SankofaVR folder and repository after approving the PRD. The previous repository and its music scenes remain intact. Introduce the Sankofa Unity project, scene, content schema and application identifiers here during implementation; record any deliberate imports from the previous workspace. See [workspace provenance](docs/workspace-provenance.md).
+The user requested this separate SankofaVR folder and repository after approving the PRD. The previous repository and its music scenes remain intact. Introduce the Sankofa Unity project, scene, content schema and application identifiers here during implementation; record any deliberate imports from the previous workspace. See [workspace provenance](../workspace-provenance.md).
 
 ## 2. Capacity and delivery gates
 
@@ -68,7 +68,7 @@ The probes can be developed independently. Integration follows once both establi
 
 ## 5. Proposed architecture and responsibilities
 
-The [modular architecture](docs/architecture.md) defines dependency direction, adapter boundaries and replacement tests for these responsibilities. Read the local competition brief through [agent instructions](AGENTS.md) before implementation; it guides prioritisation without becoming a runtime dependency.
+The [modular architecture](../architecture.md) defines dependency direction, adapter boundaries and replacement tests for these responsibilities. Read the local competition brief through [agent instructions](../../AGENTS.md) before implementation; it guides prioritisation without becoming a runtime dependency.
 
 | Component | Responsibility | Boundary |
 |---|---|---|
@@ -117,4 +117,4 @@ Before submission, confirm the supported-device list, actual language/coverage m
 
 At document creation, only repository/source inspection and planning have occurred for this direction. No Sankofa code has been imported, no generation API has been called, no assets purchased, and no new Unity scene or headset test has been performed. Earlier Nafasi tests establish historical software behaviour only.
 
-October 1, 2026: the first presence slice exists in software, with a placeholder story, .NET tests of the core and flow, Unity EditMode and PlayMode tests and a successful Android build (see the [Unity README](unity/README.md) and [decisions](docs/decisions.md)). No generation API has been called, no assets purchased and no headset, simulator-with-hands or participant test performed. The two probes' measured effort should now replace the capacity estimate once device testing begins.
+October 1, 2026: the first presence slice exists in software, with a placeholder story, .NET tests of the core and flow, Unity EditMode and PlayMode tests and a successful Android build (see the [Unity README](../../unity/README.md) and [decisions](../decisions.md)). No generation API has been called, no assets purchased and no headset, simulator-with-hands or participant test performed. The two probes' measured effort should now replace the capacity estimate once device testing begins.

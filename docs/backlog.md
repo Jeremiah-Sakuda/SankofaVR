@@ -1,6 +1,6 @@
 # Sankofa backlog
 
-September 30, 2026 · [PRD v1.0](../Sankofa-PRD.md) · [Delivery plan](../Sankofa-Delivery-Plan.md)
+September 30, 2026 · [PRD v1.0](product/prd.md) · [Delivery plan](product/delivery-plan.md)
 
 A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Some runtime requirements now exist in software with the draft Enkare Nairobi package; none has device, content or participant acceptance. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
 

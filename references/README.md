@@ -14,7 +14,7 @@ The overview and judging pages were checked on September 27, 2026; rules and FAQ
 | Frequently asked questions | [FAQ](https://start-developer-competition-26.devpost.com/details/faqs) |
 | Special awards | [Award descriptions](https://start-developer-competition-26.devpost.com/details/special-awards) |
 
-The current [Sankofa plan](../Sankofa-PRD.md) targets Adapted / Significantly Updated Entertainment, subject to organizer classification; the FAQ explicitly places ports in that division. The deadline is November 18, 2026 at 3:00 p.m. EST. Consult the current rules for eligibility, required access, content restrictions and submission obligations. This index is not a substitute for them.
+The current [Sankofa plan](../docs/product/prd.md) targets Adapted / Significantly Updated Entertainment, subject to organizer classification; the FAQ explicitly places ports in that division. The deadline is November 18, 2026 at 3:00 p.m. EST. Consult the current rules for eligibility, required access, content restrictions and submission obligations. This index is not a substitute for them.
 
 ## Files copied into this local workspace
 
@@ -37,6 +37,6 @@ The October 1 competition stress test is local-only in `references/hackathon/str
 
 - [Original web project and repository](https://github.com/Jeremiah-Sakuda/Sankofa), [submission](https://devpost.com/software/sankofa-y47f9p), and [source licence](https://github.com/Jeremiah-Sakuda/Sankofa/blob/main/LICENSE).
 - [Cinematic intro](https://github.com/Jeremiah-Sakuda/Sankofa/blob/main/frontend/src/components/GriotIntro.tsx) and [timed script](https://github.com/Jeremiah-Sakuda/Sankofa/blob/main/frontend/src/lib/griotBeats.ts).
-- [Current PRD sources and evidence boundaries](../Sankofa-PRD.md#sources-and-evidence-boundaries) cover the narrative, voice, asset and device candidates.
+- [Current PRD sources and evidence boundaries](../docs/product/prd.md#sources-and-evidence-boundaries) cover the narrative, voice, asset and device candidates.
 
 Only summaries and links are versioned. Full copied competition pages and imported chats remain in the ignored reference folders.

@@ -1,6 +1,6 @@
 # Working on SankofaVR
 
-The product is **Sankofa**; the folder and repository are **SankofaVR**. Read [README.md](README.md), [Sankofa-PRD.md](Sankofa-PRD.md), the [delivery plan](Sankofa-Delivery-Plan.md) and relevant [decisions](docs/decisions.md) before implementation.
+The product is **Sankofa**; the folder and repository are **SankofaVR**. Read [README.md](README.md), the [PRD](docs/product/prd.md), the [delivery plan](docs/product/delivery-plan.md) and relevant [decisions](docs/decisions.md) before implementation.
 
 ## Required competition context
 

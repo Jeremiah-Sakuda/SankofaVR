@@ -6,7 +6,7 @@ October 1, 2026 · Adversarial review and proposed experiments; no participant o
 
 The cultural storytelling direction merits a prototype. Neither ancestry-led positioning nor the broader invitation has demonstrated an advantage yet. The most promising differentiator is a culturally specific story whose response to an intentional physical action changes the visitor's understanding of it. The largest current risk is producing attractive scenery around exposition while spending the available time on generation, languages and infrastructure.
 
-This review challenges the PRD and the previous recommendation to broaden the pitch. It does not approve a new scope or change any user constraint. The [PRD](../../Sankofa-PRD.md), [delivery plan](../../Sankofa-Delivery-Plan.md) and [decisions](../decisions.md) remain the current contracts. Competition-specific findings are local under `references/hackathon/stress-test-2026-10-01.md`; the agent entry point remains `HACKATHON.local.md`.
+This review challenges the PRD and the previous recommendation to broaden the pitch. It does not approve a new scope or change any user constraint. The [PRD](../product/prd.md), [delivery plan](../product/delivery-plan.md) and [decisions](../decisions.md) remain the current contracts. Competition-specific findings are local under `references/hackathon/stress-test-2026-10-01.md`; the agent entry point remains `HACKATHON.local.md`.
 
 Evidence used: current repository documents, inspected file inventory and the primary sources linked below. This repository contains planning and a workspace checker; there is no Sankofa runtime to evaluate. This is one adversarial analysis, not an independent judging panel, market study, simulated user trial or winning-probability estimate.
 

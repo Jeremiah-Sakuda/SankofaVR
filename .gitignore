@@ -71,3 +71,8 @@ htmlcov/
 /dotnet/**/bin/
 /dotnet/**/obj/
 /dotnet/**/TestResults/
+
+# Unity editor leftovers: crash-recovery scenes and the test runner's temporary scenes.
+/unity/Assets/_Recovery/
+/unity/Assets/_Recovery.meta
+/unity/Assets/InitTestScene*

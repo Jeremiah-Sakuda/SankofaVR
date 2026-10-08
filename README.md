@@ -2,52 +2,92 @@
 
 **Sankofa — a story that notices what you notice.**
 
-A proposed hands-first spatial storytelling experience for Meta Quest. A living fire welcomes you, listens to your interests, and brings a personalised history into the space around you. The fire is the griot. You enter through its flame and return to the hearth with a keepsake and a thread to follow next time.
+A hands-first storytelling experience for Meta Quest. You sit at a night fire, and the fire is the griot. It welcomes you, asks when you would like to go, and brings a history into the space around you without moving you. You enter through its flame. People appear as shapes of firelight; you carry, receive and touch things, and the story changes with what you did. You return to the hearth with a keepsake and a thread to follow next time.
 
-**SankofaVR** is the repository/workspace name; **Sankofa** is the product name.
+The first story is **Enkare Nairobi**, the cool-water stream that gave Nairobi its name, where Kikuyu and Maasai women traded. It is told across two eras and today:
 
-## Start here
+- before the railway, in the 1850s;
+- when the railway came, in 1899;
+- the same water today, opened by a keepsake from a kept visit.
 
-| Document | Purpose |
+Its facts come from a [source register](docs/content/enkare-nairobi/sources.md). Its people are fictional composites.
+
+**SankofaVR** is the repository name; **Sankofa** is the product.
+
+## Status
+
+The full slice runs in software: a Unity project for Quest and an engine-free story core.
+
+| Piece | State |
 |---|---|
-| [Product requirements](Sankofa-PRD.md) | Vision, scope, journey, 18 user stories, requirements and acceptance criteria |
-| [Delivery plan](Sankofa-Delivery-Plan.md) | Capacity, architecture, staged proofs and release evidence |
-| [Backlog](docs/backlog.md) | Current work in dependency order |
-| [Decisions](docs/decisions.md) | Confirmed direction, planning defaults and outstanding choices |
-| [Development](docs/development.md) | Workspace setup, module layout and checks |
-| [Unity application](unity/README.md) | The Quest project: commands, simulator, headset and what is unverified |
-| [Modular architecture](docs/architecture.md) | Story core, adapters, content and presentation boundaries |
-| [Product stress test](docs/reviews/2026-10-01-product-stress-test.md) | Challenged assumptions and proposed experiments; no validation claimed |
-| [Asset register](docs/asset-register.md) | Provenance and acceptance records |
-| [References](references/README.md) | Official competition and original web Sankofa sources |
-| [Workspace provenance](docs/workspace-provenance.md) | Where the planning documents came from and what was transferred |
+| Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
+| Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
+| Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can be replayed exactly, continued to today or forgotten |
+| Figures | They walk in, kneel, carry their things, hand them over and walk away |
+| Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
 
-## Current status
+Not yet established:
+- **Hardware:** nothing has run on a headset or in the simulator with hand tracking, and no participant has tried it.
+- **Review:** the stories have not been reviewed by family or community, and some claims are held back until verified.
+- **Language:** a second language is not chosen.
 
-The first full slice exists in software: a Unity project for Quest and an engine-free story core with .NET tests. It tells **Enkare Nairobi**, a draft story of the cool-water stream that gave Nairobi its name, across two eras and today. The [content](docs/content/enkare-nairobi/README.md) cites a source register.
+The planned entry is Adapted / Significantly Updated Entertainment. AI-generated music is excluded.
 
-At the hearth the fire welcomes the visitor and offers a choice of when to go. The visitor enters through the flame, without moving, into a scene where people appear as shapes of firelight. Hands carry, offer and touch things, which changes later lines. Questions on a panel by the right hand are answered, and then the story resumes. The griot's pre-rendered voice comes from the original web Sankofa's direction.
+## Try it
 
-A visit can be kept by an explicit choice, replayed exactly, and continued to today. Passive progression, pause, early return and late-result handling are covered by tests.
-
-Nothing has run on a headset, in the simulator with hands, or with a participant. The stories are unreviewed by family or community, and some claims are gated until verified. The second language is not selected. The planned entry is Adapted / Significantly Updated Entertainment. Weekly hours, budget and current headset access remain open. AI-generated music is excluded.
-
-## Check the workspace
-
-Python 3.10 or newer and Git are sufficient for the document check; the story core needs the .NET 10 SDK.
+Run these from the repository root. The Unity commands need Unity 6000.3.25f1 through Unity Hub; full details are in the [Unity README](unity/README.md).
 
 ```sh
-python3 scripts/check_workspace.py
-git diff --check
+# Story core, flow, gestures and storage, with no Unity needed (.NET 10 SDK)
 dotnet test dotnet/Sankofa.Tests
+
+# Play the hearth in the Meta XR Simulator (aim with the mouse and click to choose)
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayHearth
+
+# Documentation links and local-only exclusions
+python3 scripts/check_workspace.py
 ```
 
-The document check covers tracked Markdown links and local-only file protections. The .NET tests cover package and plan validation, the visit flow, kept visits and gesture logic. Neither validates a VR experience; Unity checks are in the [Unity README](unity/README.md).
+## Repository map
+
+```text
+docs/                    Product, engineering, content and provenance documents (start at docs/README.md)
+dotnet/                  .NET build and tests of the engine-free modules (CI runs these)
+scripts/                 Workspace check, narration generation, recording preparation
+unity/                   The Quest application
+  Assets/Sankofa/
+    Core/ Flow/ Interaction/ Storage/   Engine-free story rules, application flow, gestures, kept visits
+    Runtime/             Presentation, input, audio and composition in Unity
+    Editor/              Generated scenes and materials, import settings, build and build guards
+    Content/             The Enkare Nairobi story package, narration manifest and credits
+    Art/                 Shaders, generated assets, scanned materials, field recordings, fonts
+    Resources/Narration/ The griot's pre-rendered voice
+    Tests/               EditMode and PlayMode tests
+references/              Index of official competition and original web Sankofa sources
+AGENTS.md                Working instructions for people and agents
+```
+
+## Documentation
+
+See the [documentation index](docs/README.md). The most used documents are:
+- [product requirements](docs/product/prd.md);
+- [decisions](docs/decisions.md);
+- [backlog](docs/backlog.md);
+- [architecture](docs/architecture.md);
+- [development guide](docs/development.md);
+- [asset register](docs/asset-register.md).
 
 ## Local-only material
 
-Full supplied rules, description, reference provenance and the original chat are copied into ignored `references/hackathon/` and `references/ideation/` folders in the initial workspace. They are not included in GitHub or fresh clones.
+The supplied rules, the description, the reference provenance and the original ideation chat are kept in the ignored `references/hackathon/` and `references/ideation/` folders. They are not included in GitHub or fresh clones.
 
-`HACKATHON.local.md` is the local competition brief. Every working agent must read it through the instructions in [AGENTS.md](AGENTS.md). It is excluded from Git and must remain outside application packaging. Follow [local competition setup](docs/development.md#local-competition-context) in a new checkout; the tracked workspace check can verify its presence with `--competition`.
+`HACKATHON.local.md` is the local competition brief. Every working agent reads it, following [AGENTS.md](AGENTS.md). It is excluded from Git and from any application package. In a new checkout, follow [local competition setup](docs/development.md#local-competition-context); `python3 scripts/check_workspace.py --competition` confirms it is present.
 
-Keep personal input, real recordings, credentials, raw vendor assets and generated builds out of Git. See [working instructions](AGENTS.md). This repository is private; no open-source licence has been selected. Reuse from the separate [web Sankofa project](https://github.com/Jeremiah-Sakuda/Sankofa) requires an explicit code/asset licensing decision.
+Keep these out of Git:
+- personal input;
+- participant recordings;
+- credentials;
+- raw vendor downloads (in `vendor/`);
+- generated builds (in `artifacts/`).
+
+This repository is private, and no open-source licence has been selected. Reusing anything from the separate [web Sankofa project](https://github.com/Jeremiah-Sakuda/Sankofa) requires an explicit code and asset licensing decision.

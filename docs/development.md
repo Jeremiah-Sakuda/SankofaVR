@@ -36,12 +36,21 @@ Keep the brief, copied rules and any local review evidence outside runtime promp
 
 | Folder | Module | Checked by |
 |---|---|---|
-| `unity/Assets/Sankofa/Core` | Story core: episode model, reader, validator, story run, visit journal | .NET tests, EditMode tests |
-| `unity/Assets/Sankofa/Flow` | Application flow: phases, cues, timing, pause, stale-result rejection | .NET tests |
-| `unity/Assets/Sankofa/Interaction` | Engine-free gesture logic | .NET tests |
-| `unity/Assets/Sankofa/Runtime` | Unity presentation, hands and composition | EditMode tests, builds |
-| `unity/Assets/Sankofa/Editor` | Project setup, generated scene, build and build guards | EditMode tests, builds |
-| `unity/Assets/Sankofa/Content` | Bundled episode data | .NET and EditMode tests |
+| `unity/Assets/Sankofa/Core` | Story core: packages, plan composition and validation, story run, visit journal, kept-visit records | .NET tests, EditMode tests |
+| `unity/Assets/Sankofa/Flow` | Application flow: phases, choices, questions, keep/replay/continue/forget, cues, timing, stale-result rejection | .NET tests, PlayMode tests |
+| `unity/Assets/Sankofa/Interaction` | Engine-free gesture logic: poke, open-palm receive, touch, pointer select, head-direction attention | .NET tests |
+| `unity/Assets/Sankofa/Storage` | Kept visits on the device, written atomically | .NET tests |
+| `unity/Assets/Sankofa/Runtime` | Unity presentation, input (hands, pointers, controllers), audio, figures and composition | EditMode and PlayMode tests, builds |
+| `unity/Assets/Sankofa/Editor` | Project setup, generated scenes and materials, import settings, build and build guards | EditMode tests, builds |
+| `unity/Assets/Sankofa/Content` | The story package, narration manifest and credits | .NET and EditMode tests |
+
+## Scripts
+
+| Script | What it does |
+|---|---|
+| `scripts/check_workspace.py` | Checks Markdown links and local-only exclusions; `--competition` also checks that the local brief is present |
+| `scripts/generate_narration.py` | Renders the package's lines with Google Cloud Text-to-Speech into `Resources/Narration`, using the user's gcloud sign-in; unchanged lines are cached |
+| `scripts/prepare_recordings.py` | Edits the approved Freesound downloads in ignored `vendor/freesound/` into the loops and single sounds in `Art/Recorded`, and records their provenance |
 
 The engine-free folders build outside Unity as .NET Standard 2.1 with C# 9, the level Unity 6 accepts, with warnings as errors. With the .NET 10 SDK (for example installed in `~/.dotnet` by Microsoft's [install script](https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script)):
 
@@ -55,4 +64,4 @@ Keep approved runtime assets with source provenance in the [asset register](asse
 
 ## Secrets and external services
 
-Commit only deliberately empty/example configuration. Actual credentials belong in ignored local configuration or the appropriate deployment secret store. Provider access, costs, retention and output rights remain decisions in the [PRD](../Sankofa-PRD.md). Creating this repository does not provision or deploy services.
+Commit only deliberately empty/example configuration. Actual credentials belong in ignored local configuration or the appropriate deployment secret store. Provider access, costs, retention and output rights remain decisions in the [PRD](product/prd.md). Creating this repository does not provision or deploy services.
