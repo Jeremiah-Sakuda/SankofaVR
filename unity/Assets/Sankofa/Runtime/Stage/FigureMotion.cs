@@ -6,8 +6,10 @@ namespace Sankofa.Runtime.Stage
     /// <summary>
     /// How a person or animal of the story moves: walking in along a path when revealed, going to stand or kneel
     /// where something is used, going back to its own place, and walking away when withdrawn. Presentation only: the
-    /// story decides when, through reveal, move and withdraw. The figure's light shader folds the body into a kneel
-    /// from one value, so a single silhouette serves both postures.
+    /// story decides when, through reveal, move and withdraw, and the stage asks for a gesture when something the
+    /// figure holds is offered, set down or shown. The figure's light shader folds the body into a kneel and swings
+    /// each arm from the shoulder, so a single silhouette serves every posture. Things the figure carries hang from
+    /// anchors (hands, neck) that follow the same fold.
     /// </summary>
     [RequireComponent(typeof(StageObject))]
     public sealed class FigureMotion : MonoBehaviour
@@ -22,9 +24,16 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] float stepLength = 0.55f;
         [Tooltip("Seconds to wait after being revealed before setting off, so a companion can follow behind.")]
         [SerializeField] float delay;
+        [Tooltip("Animals have no arms to gesture with.")]
+        [SerializeField] bool hasArms = true;
+        [Tooltip("Points that carried things hang from (hands, neck), placed for standing; they follow the kneel.")]
+        [SerializeField] Transform[] anchors = new Transform[0];
 
         static readonly int KneelId = Shader.PropertyToID("_Kneel");
         static readonly int HeightId = Shader.PropertyToID("_Height");
+        static readonly int ArmNegId = Shader.PropertyToID("_ArmNeg");
+        static readonly int ArmPosId = Shader.PropertyToID("_ArmPos");
+        static readonly int ArmInId = Shader.PropertyToID("_ArmIn");
 
         readonly List<Vector3> route = new List<Vector3>();
         StageObject staged;
@@ -39,9 +48,19 @@ namespace Sankofa.Runtime.Stage
         float travelled;
         float kneel, kneelTarget;
         bool kneelOnArrival;
+        bool presentOnArrival;
+        Vector3[] anchorRest;
+        StageObject[] carried;
+        float armNeg, armPos, armIn;
+        float reachFor, presentFor;
+        float reachSide;
+        Vector3 reachTarget;
+        StageObject offered;
 
         public bool Walking => next < route.Count;
         public float Kneel => kneel;
+        /// <summary>How far each arm is raised forward (0 hanging, 1 held straight out).</summary>
+        public (float Negative, float Positive) Arms => (armNeg, armPos);
 
         void Awake() => Initialise();
 
@@ -54,6 +73,12 @@ namespace Sankofa.Runtime.Stage
             homeLocal = transform.localPosition;
             homeRotation = transform.localRotation;
             basePosition = transform.position;
+            anchorRest = new Vector3[anchors.Length];
+            for (var i = 0; i < anchors.Length; i++) anchorRest[i] = anchors[i] != null ? anchors[i].localPosition : Vector3.zero;
+            var list = new List<StageObject>();
+            foreach (var anchor in anchors)
+                if (anchor != null) list.AddRange(anchor.GetComponentsInChildren<StageObject>(true));
+            carried = list.ToArray();
         }
 
         Vector3 InParent(Vector3 local) => transform.parent != null ? transform.parent.TransformPoint(local) : local;
@@ -68,6 +93,10 @@ namespace Sankofa.Runtime.Stage
             wait = 0;
             kneel = kneelTarget = 0;
             kneelOnArrival = false;
+            presentOnArrival = false;
+            reachFor = presentFor = 0;
+            offered = null;
+            armNeg = armPos = armIn = 0;
             finalRotation = null;
             transform.localPosition = homeLocal;
             transform.localRotation = homeRotation;
@@ -92,8 +121,33 @@ namespace Sankofa.Runtime.Stage
             wait = delay;
         }
 
+        /// <summary>
+        /// Holds out the arm on the side nearer <paramref name="toward"/> for a while: giving, handing over or setting
+        /// something down.
+        /// </summary>
+        public void Reach(Vector3 toward, float seconds = 2.5f, StageObject waitingFor = null)
+        {
+            Initialise();
+            reachSide = Mathf.Sign(transform.InverseTransformPoint(toward).x);
+            if (reachSide == 0) reachSide = 1;
+            reachFor = seconds;
+            reachTarget = toward;
+            offered = waitingFor;
+        }
+
+        /// <summary>Something offered from these hands still waits where it was held out, not yet taken.</summary>
+        bool StillOffering => offered != null && offered.Visible && offered.CarriedBy == null &&
+                              Vector3.Distance(offered.transform.position, reachTarget) < 0.2f;
+
+        /// <summary>Brings both hands forward for a while, showing or pouring what it holds.</summary>
+        public void Present(float seconds = 3f)
+        {
+            Initialise();
+            presentFor = seconds;
+        }
+
         /// <summary>Goes to a place, rising first if kneeling, then stands or kneels there facing what it came to.</summary>
-        public void GoTo(Vector3 place, Vector3 lookAt, bool kneelThere)
+        public void GoTo(Vector3 place, Vector3 lookAt, bool kneelThere, bool presentThere = false)
         {
             Initialise();
             route.Clear();
@@ -102,6 +156,7 @@ namespace Sankofa.Runtime.Stage
             route.Add(place);
             kneelTarget = 0;
             kneelOnArrival = kneelThere;
+            presentOnArrival = presentThere;
             var facing = lookAt - place;
             facing.y = 0;
             finalRotation = facing.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(facing) : HomeRotation;
@@ -134,8 +189,11 @@ namespace Sankofa.Runtime.Stage
                 from = p;
                 route.Add(p);
             }
-            // Mostly gone by the time it reaches the edge of the scene.
-            staged.FadeAway(route.Count == 0 ? 0.2f : 0.9f + length / speed * 0.45f);
+            // Mostly gone by the time it reaches the edge of the scene, with whatever is still in its hands.
+            var fade = route.Count == 0 ? 0.2f : 0.9f + length / speed * 0.45f;
+            staged.FadeAway(fade);
+            foreach (var o in carried)
+                if (o != null && o.Visible && Vector3.Distance(o.transform.position, o.HomePosition) < 0.15f) o.FadeAway(fade);
         }
 
         void Update()
@@ -156,7 +214,12 @@ namespace Sankofa.Runtime.Stage
                     {
                         basePosition = route[next];
                         next++;
-                        if (next >= route.Count) kneelTarget = kneelOnArrival ? 1 : 0;
+                        if (next >= route.Count)
+                        {
+                            kneelTarget = kneelOnArrival ? 1 : 0;
+                            if (presentOnArrival) presentFor = 3.5f;
+                            presentOnArrival = false;
+                        }
                     }
                     else basePosition += to / distance * step;
                     travelled += Mathf.Min(step, distance);
@@ -170,7 +233,79 @@ namespace Sankofa.Runtime.Stage
             kneel = Mathf.MoveTowards(kneel, kneelTarget, dt / 0.9f);
             var lift = walking ? bob * Mathf.Abs(Mathf.Sin(travelled / stepLength * Mathf.PI)) : 0f;
             transform.position = basePosition + Vector3.up * lift;
+            UpdateArms(dt, walking);
+            FollowAnchors();
             Apply();
+        }
+
+        void UpdateArms(float dt, bool walking)
+        {
+            if (!hasArms) return;
+            reachFor = Mathf.Max(0, reachFor - dt);
+            presentFor = Mathf.Max(0, presentFor - dt);
+            float neg, pos, inward;
+            if (!StillOffering && reachFor <= 0) offered = null;
+            if (reachFor > 0 || StillOffering)
+            {
+                neg = reachSide < 0 ? 0.85f : 0.1f;
+                pos = reachSide > 0 ? 0.85f : 0.1f;
+                inward = 0.15f;
+            }
+            else if (presentFor > 0)
+            {
+                neg = pos = 0.55f;
+                inward = 0.7f;
+            }
+            else if (Holding)
+            {
+                neg = pos = 0.3f;
+                inward = 0.75f;
+            }
+            else if (walking)
+            {
+                // A loose swing, opposite arms with each step.
+                var swing = 0.09f * Mathf.Sin(travelled / stepLength * Mathf.PI);
+                neg = swing;
+                pos = -swing;
+                inward = 0;
+            }
+            else neg = pos = inward = 0;
+            var rate = dt / 0.45f;
+            armNeg = Mathf.MoveTowards(armNeg, neg, rate);
+            armPos = Mathf.MoveTowards(armPos, pos, rate);
+            armIn = Mathf.MoveTowards(armIn, inward, rate);
+        }
+
+        /// <summary>Something it carries is in view and still in its hands.</summary>
+        bool Holding
+        {
+            get
+            {
+                foreach (var o in carried)
+                    if (o != null && o.Visible && o.CarriedBy == null && Vector3.Distance(o.transform.position, o.HomePosition) < 0.08f)
+                        return true;
+                return false;
+            }
+        }
+
+        /// <summary>The same fold as the shader's kneel, so what hangs from the hands or the neck stays there.</summary>
+        void FollowAnchors()
+        {
+            var h = Mathf.Max(height, 0.01f);
+            var hip = 0.48f * h;
+            var fold = 0.6f * Mathf.SmoothStep(0f, 1f, kneel);
+            for (var i = 0; i < anchors.Length; i++)
+            {
+                if (anchors[i] == null) continue;
+                var p = anchorRest[i];
+                if (p.y >= hip)
+                {
+                    p.z += (p.y - hip) * 0.22f * Mathf.SmoothStep(0f, 1f, kneel);
+                    p.y -= hip * fold;
+                }
+                else p.y *= 1f - fold;
+                anchors[i].localPosition = p;
+            }
         }
 
         void Apply()
@@ -179,6 +314,9 @@ namespace Sankofa.Runtime.Stage
             body.GetPropertyBlock(block);
             block.SetFloat(KneelId, Mathf.SmoothStep(0f, 1f, kneel));
             block.SetFloat(HeightId, height);
+            block.SetFloat(ArmNegId, armNeg);
+            block.SetFloat(ArmPosId, armPos);
+            block.SetFloat(ArmInId, armIn);
             body.SetPropertyBlock(block);
         }
     }

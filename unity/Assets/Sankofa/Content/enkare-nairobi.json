@@ -706,6 +706,10 @@
             {
               "do": "reveal",
               "object": "figure.wambui"
+            },
+            {
+              "do": "reveal",
+              "object": "gourd.flour"
             }
           ],
           "audio": "enkare-nairobi/e1.wambui.arrives"

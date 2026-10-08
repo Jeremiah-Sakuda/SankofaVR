@@ -26,6 +26,8 @@ namespace Sankofa.Runtime.App
     public sealed class SankofaApp : MonoBehaviour
     {
         [SerializeField] TextAsset packageJson;
+        [Tooltip("Credits for the recordings, textures and typeface, shown from the settings.")]
+        [SerializeField] TextAsset credits;
         [SerializeField] WorldAnchor anchor;
         [SerializeField] HearthFire fire;
         [SerializeField] NarrationPlayer narration;
@@ -407,6 +409,9 @@ namespace Sankofa.Runtime.App
                 case "recenter":
                     anchor.Place();
                     break;
+                case "credits":
+                    if (credits != null) captions.Notice(credits.text, 20);
+                    return;
             }
             settings.Save();
             ApplySettings();
@@ -431,6 +436,7 @@ namespace Sankofa.Runtime.App
                 ("motion", settings.ReducedMotion ? "Motion: reduced" : "Motion: full"),
                 ("ambience", "Ambience: " + settings.AmbienceName),
                 ("recenter", "Recenter"),
+                ("credits", "Credits"),
             };
             if (fireComparison && Debug.isDebugBuild) items.Add(("fire", "Fire: " + settings.FireMode.ToString().ToLowerInvariant()));
             settingsPanel.Show(items);

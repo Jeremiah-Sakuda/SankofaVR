@@ -56,12 +56,15 @@ namespace Sankofa.Tests
             components.Add(Single<CaptionBoard>());
             components.Add(Single<StartScreen>());
             components.AddRange(Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None));
-            components.AddRange(Object.FindObjectsByType<Runtime.Audio.ObjectSound>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+
             var pointers = Object.FindObjectsByType<PointerSource>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             Assert.That(pointers.Length, Is.EqualTo(2), "a pointer for each side");
             components.AddRange(pointers);
             components.Add(Single<Runtime.Audio.NightAmbience>());
             Assert.That(components.SelectMany(MissingReferences), Is.Empty);
+            // An occasional sound without a subject (hammering along the line) plays whenever its scene is shown.
+            foreach (var sound in Object.FindObjectsByType<Runtime.Audio.ObjectSound>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                Assert.That(MissingReferences(sound).Where(m => !m.EndsWith(".subject")), Is.Empty);
             // Panels may use their font's own material.
             var panels = Object.FindObjectsByType<PokePanel>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             Assert.That(panels.Length, Is.EqualTo(3), "controls, questions and settings");
@@ -70,7 +73,7 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
             // A glow, touch point and place point are optional for staged objects; their surfaces are not.
-            var optional = new[] { ".glow", ".touchPoint", ".placePoint" };
+            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".holder" };
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 Assert.That(MissingReferences(o).Where(m => !optional.Any(m.EndsWith)), Is.Empty, o.Id);
@@ -169,6 +172,39 @@ namespace Sankofa.Tests
                 var target = Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None).Single(o => o.Id == action.At);
                 Assert.That(new SerializedObject(target).FindProperty("approachPoints").arraySize, Is.GreaterThan(0), action + ": the target has a place to stand or kneel");
             }
+        }
+
+        static IEnumerable<AudioClip> Clips(Runtime.Audio.ObjectSound sound)
+        {
+            var list = new SerializedObject(sound).FindProperty("clips");
+            for (var i = 0; i < list.arraySize; i++) yield return list.GetArrayElementAtIndex(i).objectReferenceValue as AudioClip;
+        }
+
+        [Test]
+        public void EverySoundIsAListedFieldRecordingUnderAnOpenLicence()
+        {
+            var listed = System.IO.File.ReadAllText(SankofaSceneBuilder.RecordedFolder + "sources.json");
+            var clips = Object.FindObjectsByType<AudioSource>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                // The narrator loads its lines at runtime; an occasional sound's source plays that sound's own clips.
+                .Where(s => s.GetComponent<Runtime.Narration.NarrationPlayer>() == null && s.GetComponent<Runtime.Audio.ObjectSound>() == null)
+                .Select(s => s.clip)
+                .Concat(Object.FindObjectsByType<Runtime.Audio.ObjectSound>(FindObjectsInactive.Include, FindObjectsSortMode.None).SelectMany(Clips))
+                .ToList();
+            Assert.That(clips, Is.Not.Empty);
+            foreach (var clip in clips)
+            {
+                Assert.That(clip, Is.Not.Null, "a source with nothing to play would be silent, or filled in by code");
+                var path = AssetDatabase.GetAssetPath(clip);
+                Assert.That(path, Does.StartWith(SankofaSceneBuilder.RecordedFolder), clip.name + " is a prepared field recording");
+                Assert.That(listed, Does.Contain("\"file\": \"" + System.IO.Path.GetFileName(path) + "\""), clip.name + " is listed with its source");
+            }
+            foreach (var licence in System.Text.RegularExpressions.Regex.Matches(listed, "\"licence\": \"([^\"]+)\"").Cast<System.Text.RegularExpressions.Match>())
+                Assert.That(new[] { "CC0 1.0", "CC BY 3.0", "CC BY 4.0" }, Has.Member(licence.Groups[1].Value));
+            // Recordings that ask for credit are credited in the app.
+            var credits = System.IO.File.ReadAllText("Assets/Sankofa/Content/credits.txt");
+            foreach (var author in new[] { "matucha", "SterckxS", "tim.kahn", "celldroid", "visualasylum" })
+                Assert.That(credits, Does.Contain(author));
+            Assert.That(new SerializedObject(Single<SankofaApp>()).FindProperty("credits").objectReferenceValue, Is.Not.Null, "the settings can show the credits");
         }
 
         [Test]

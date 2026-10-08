@@ -32,6 +32,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Transform[] approachPoints = new Transform[0];
         [Tooltip("Whether someone using it kneels there (a hide on a low stone) or stands.")]
         [SerializeField] bool approachKneels;
+        [Tooltip("The person of the story who carries or gives this, and gestures when it is offered, shown or set down.")]
+        [SerializeField] FigureMotion holder;
 
         static readonly int HighlightId = Shader.PropertyToID("_Highlight");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
@@ -60,6 +62,7 @@ namespace Sankofa.Runtime.Stage
         public float Feedback { get; set; }
         /// <summary>The hand carrying it, if any; carried objects cross into their counterparts in that hand.</summary>
         public HandSource CarriedBy { get; private set; }
+        public FigureMotion Holder => holder;
         public Vector3 TouchPosition => touchPoint != null ? touchPoint.position : transform.position;
         public float TouchRadius => touchRadius;
         public float AttentionRadius => attentionRadius;

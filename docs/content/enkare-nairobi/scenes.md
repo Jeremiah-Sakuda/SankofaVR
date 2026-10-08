@@ -13,7 +13,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
   - **Spike needed:** half a day to a day.
   - **Fallback:** objects and sound only (footsteps, a bleating ewe, a voice described by the griot).
 - **Sound.**
-  - A synthesised or recorded ambience bed for each era, with the narration ducking it, as at the hearth.
+  - A recorded ambience bed for each era, with the narration ducking it, as at the hearth.
   - No AI-generated music. Music only from licensed recordings of real performers, decided later.
   - The griot's voice comes from where the fire stood, ahead of the visitor.
 - **Budget, until device measurements replace it.** About 15 draw calls and 200k triangles for each scene. One transparent effect layer (smoke or the curtain) at a time. Sustained 72 fps target.
@@ -49,7 +49,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 | Wambui | `figure.wambui` | (−0.7, 0, 1.5) | Ember-and-smoke figure. Walks down the forest path on arrival, kneels at the hide for the trade (built: arrival walk, `move` to the hide, leaving walk) |
 | Naserian and the ewe | `figure.naserian`, `figure.ewe` | (0.8, 0, 1.4) | Ember-and-smoke figures that walk in from the plain; Naserian kneels across the hide. The ewe bleats now and then (built); the tether rope is not |
 
-**Sound.** Stream babble (close, right), dusk birds and insects, wind in the dry grass, a distant sheep bell. The fire's crackle, small and close. All built, synthesised in code.
+**Sound.** Stream babble (close, right), dusk birds and insects, wind in the dry grass, a distant sheep bell. The fire's crackle, small and close. All built from field recordings (see the asset register); the bell and the sheep are European recordings, for family review.
 
 **New technology.**
 - Stream and spill water shader.
@@ -82,7 +82,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 **Sound.**
 - Hammers ringing on iron at a distance; a work-gang's voices as a low murmur. The workers' languages are to be checked before any words are recorded.
 - Canvas flapping and a camp kettle. The stream, quieter.
-- Built: hammers, a wordless low murmur (no words, so no language is represented), canvas and the stream. The kettle is not.
+- Built from field recordings: hammering on metal spikes, canvas and the stream. There are no voices until the workers' languages are checked, and no kettle.
 - No birdsong at first, then one bird later.
 - No train whistle until it is confirmed that working trains were running at the depot that week. Paukwa describes hand-propelled trolleys at the railhead.
 
@@ -111,7 +111,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 | Bead and seed (continuing the kept ones) | `bead.today`, `seed.today` | Arrive from the kept versions | Continue `bead.kept` and `seed.kept` |
 | City across the river | (static) | 20–200 m | Procedural blocks with emissive window patterns, kept within the far-field budget |
 
-**Sound.** Traffic, *matatu* horns at a distance, voices and a radio from a stall; any radio music must be a licensed recording of real performers, or it is cut. The river under it all. Built: traffic, horns, a wordless murmur of voices and the river; there is no radio.
+**Sound.** Traffic, *matatu* horns at a distance, voices and a radio from a stall; any radio music must be a licensed recording of real performers, or it is cut. The river under it all. Built: a recorded matatu stage in Nairobi, a far city and the river; there is no radio. The matatu recording has not yet been listened to for incidental music.
 
 **Review checks.** The garden and its sign, how present-day Nairobi is portrayed (neither poverty spectacle nor brochure), and the *jiko*'s form.
 

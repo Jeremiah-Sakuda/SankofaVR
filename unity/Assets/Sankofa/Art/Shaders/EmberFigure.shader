@@ -1,7 +1,9 @@
 // People and animals of a story, shown as the griot shows them: shapes of firelight, brightest at their edges,
 // with embers drifting through them. Additive and unlit by the scene, so no face or likeness is ever drawn.
 // Intensity fades them in and out; Highlight brightens one when the story turns to them. Kneel folds a standing
-// body (feet at the origin, facing +Z, Height tall) down onto its knees, leaning a little forward.
+// body (feet at the origin, facing +Z, Height tall) down onto its knees, leaning a little forward. ArmNeg and ArmPos
+// swing the arm on each side forward from the shoulder (vertex colour red and green mark them); ArmIn brings the
+// hands in toward each other, to hold or present something.
 Shader "Sankofa/Ember Figure"
 {
     Properties
@@ -15,6 +17,9 @@ Shader "Sankofa/Ember Figure"
         _Highlight ("Highlight", Range(0, 1)) = 0
         _Kneel ("Kneel", Range(0, 1)) = 0
         _Height ("Standing height (m)", Float) = 1.6
+        _ArmNeg ("Arm on -X forward", Range(-0.3, 1)) = 0
+        _ArmPos ("Arm on +X forward", Range(-0.3, 1)) = 0
+        _ArmIn ("Hands together", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -40,11 +45,15 @@ Shader "Sankofa/Ember Figure"
             half _Highlight;
             float _Kneel;
             float _Height;
+            float _ArmNeg;
+            float _ArmPos;
+            float _ArmIn;
 
             struct appdata
             {
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
+                fixed4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -75,13 +84,31 @@ Shader "Sankofa/Ember Figure"
                 return lerp(folded, raised, upper);
             }
 
+            // Swings an arm about its shoulder: forward (and up) by raise, and in toward the body's centre by inward.
+            float3 Arm(float3 p, float side, float raise, float inward)
+            {
+                float h = max(_Height, 0.01);
+                float3 pivot = float3(side * 0.14 * h, 0.77 * h, 0.02 * h);
+                float3 d = p - pivot;
+                float a = -raise * 1.35;
+                float ca = cos(a), sa = sin(a);
+                d = float3(d.x, d.y * ca - d.z * sa, d.y * sa + d.z * ca);
+                float b = -side * inward * 0.4;
+                float cb = cos(b), sb = sin(b);
+                d = float3(d.x * cb - d.y * sb, d.x * sb + d.y * cb, d.z);
+                return pivot + d;
+            }
+
             v2f vert(appdata v)
             {
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                v.vertex.xyz = Kneel(v.vertex.xyz);
+                float3 p = v.vertex.xyz;
+                p = lerp(p, Arm(p, -1, _ArmNeg, _ArmIn), v.color.r);
+                p = lerp(p, Arm(p, 1, _ArmPos, _ArmIn), v.color.g);
+                v.vertex.xyz = Kneel(p);
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.world = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.normal = UnityObjectToWorldNormal(v.normal);

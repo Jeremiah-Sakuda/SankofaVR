@@ -106,7 +106,7 @@ namespace Sankofa.Tests
             var degrees = Mathf.Atan2(line, Vector3.Distance(eye, captions.CaptionText.transform.position)) * Mathf.Rad2Deg;
             Assert.That(degrees, Is.GreaterThanOrEqualTo(0.95f), $"caption line is {line * 100:0.0} cm, {degrees:0.00} degrees");
             Assert.That(captions.Status, Does.Contain("not yet reviewed"));
-            // The night is audible: every ambience source has a synthesised loop that is not silent.
+            // The night is audible: every ambience source has a recorded loop that is not silent.
             foreach (var source in Object.FindFirstObjectByType<Sankofa.Runtime.Audio.NightAmbience>().GetComponentsInChildren<AudioSource>())
             {
                 Assert.That(source.clip, Is.Not.Null, source.name);
@@ -132,6 +132,9 @@ namespace Sankofa.Tests
             yield return AwaitInvitation("touch-water");
             Assert.That(app.Flow.Accept("touch-water"), Is.True);
             yield return AwaitInvitation("receive-flour", 60);
+            // Wambui came down carrying the flour and holds it out from her own hands.
+            var giver = stage.Find("figure.wambui").GetComponent<FigureMotion>();
+            yield return WaitFor(() => Mathf.Max(giver.Arms.Negative, giver.Arms.Positive) > 0.6f, 10, "Wambui holding out the flour");
             Assert.That(app.Flow.Accept("receive-flour"), Is.True);
             yield return WaitFor(() => app.Flow.Questions.Any(q => q.Id == "q.e1.friends"), 60, "a question about the traders");
             Assert.That(app.Flow.Ask("q.e1.friends"), Is.True);
@@ -149,6 +152,7 @@ namespace Sankofa.Tests
             Assert.That(Vector3.Distance(wambui.transform.position, stage.Find("hide").ApproachFrom(stage.Find("figure.wambui").HomePosition).Place), Is.LessThan(0.03f));
             Assert.That(Vector3.Distance(wambui.transform.position, naserian.transform.position), Is.GreaterThan(0.4f), "they take a side each");
             yield return AwaitInvitation("receive-bead", 60);
+            yield return WaitFor(() => Mathf.Max(naserian.Arms.Negative, naserian.Arms.Positive) > 0.6f, 10, "Naserian holding out the bead");
             Assert.That(app.Flow.Accept("receive-bead"), Is.True);
             yield return AwaitClosing(90);
             Assert.That(stage.ActiveScene, Is.EqualTo("hearth"));

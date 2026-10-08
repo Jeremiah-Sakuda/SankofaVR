@@ -131,7 +131,12 @@ namespace Sankofa.Runtime.Stage
                     // A person of the story walks in to their place rather than appearing there.
                     if (!o.Visible && figure != null) figure.Arrive();
                     if (action.Kind == ActionKind.Reveal) o.Reveal();
-                    else o.Illuminate();
+                    else
+                    {
+                        o.Illuminate();
+                        // The story turns to something a person holds or owns: they show it.
+                        if (o.Holder != null && Find(o.Holder.GetComponent<StageObject>().Id)?.Visible == true) o.Holder.Present();
+                    }
                     break;
                 case ActionKind.Move when figure == null:
                     Debug.LogError($"[Sankofa] {action}: '{o.Id}' is not a figure that can move.");
@@ -147,7 +152,8 @@ namespace Sankofa.Runtime.Stage
                         break;
                     }
                     var (place, kneel) = to.ApproachFrom(o.HomePosition);
-                    figure.GoTo(place, to.transform.position, kneel);
+                    // Going to another person, a figure that carries something holds it out when it arrives.
+                    figure.GoTo(place, to.transform.position, kneel, to.GetComponent<FigureMotion>() != null);
                     break;
                 case ActionKind.Withdraw when figure != null:
                     figure.Leave();
@@ -156,6 +162,8 @@ namespace Sankofa.Runtime.Stage
                     // The fire offers from its flames; a story offers from where the object rests.
                     if (!o.Visible) o.ShowAt(IsHearth(o.Scene) ? FireTop : o.HomePosition);
                     o.MoveTo(OfferPosition(), 1.4f);
+                    // The person who gives it holds it out toward the visitor.
+                    if (o.Holder != null) o.Holder.Reach(OfferPosition(), 2.5f, o);
                     break;
                 case ActionKind.Place when action.At == null:
                     if (!o.Visible) o.AppearAt(o.HomePosition);
@@ -163,6 +171,9 @@ namespace Sankofa.Runtime.Stage
                     break;
                 case ActionKind.Place:
                     var target = Find(action.At);
+                    // Set down by the person who carries it, if it is still in their hands rather than the visitor's.
+                    if (o.Holder != null && target != null && o.CarriedBy == null && Vector3.Distance(o.transform.position, o.HomePosition) < 0.15f)
+                        o.Holder.Reach(target.PlacePosition, 2f);
                     o.Reveal();
                     o.MoveTo(target != null ? target.PlacePosition : o.HomePosition, 1.3f);
                     break;

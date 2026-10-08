@@ -107,6 +107,7 @@ namespace Sankofa.EditorTools
 
             var app = new GameObject("Sankofa").AddComponent<SankofaApp>();
             Set(app, "packageJson", AssetDatabase.LoadAssetAtPath<TextAsset>(PackagePath));
+            Set(app, "credits", AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Sankofa/Content/credits.txt"));
             Set(app, "anchor", anchor);
             Set(app, "fire", fire);
             Set(app, "narration", narration);
@@ -437,8 +438,10 @@ namespace Sankofa.EditorTools
             var sound = Child(root, "Crackle");
             sound.localPosition = new Vector3(0, 0.15f, 0);
             var crackle = sound.gameObject.AddComponent<FireCrackle>();
-            Set(crackle, "roar", Source(sound.gameObject, 0.9f, 1f));
-            Set(crackle, "pops", Source(sound.gameObject, 0.9f, 1f));
+            var fireSource = Source(sound.gameObject, 0.9f, 1f);
+            fireSource.clip = Recording("hearth-fire");
+            Set(crackle, "sound", fireSource);
+            Set(crackle, "volume", 0.5f);
             Set(fire, "crackle", crackle);
             return fire;
         }
@@ -546,6 +549,7 @@ namespace Sankofa.EditorTools
                     c.localPosition = p;
                     var source = Source(c.gameObject, 1f, 2f);
                     source.maxDistance = 30f;
+                    source.clip = Recording("crickets");
                     return (Object)source;
                 }).ToArray();
             var far = Child(root, "Chorus");
@@ -554,8 +558,12 @@ namespace Sankofa.EditorTools
             wind.localPosition = new Vector3(-9f, 3f, 2f);
             var ambience = root.gameObject.AddComponent<NightAmbience>();
             SetArray(ambience, "crickets", crickets);
-            Set(ambience, "chorus", Source(far.gameObject, 0.35f, 6f));
-            Set(ambience, "wind", Source(wind.gameObject, 0.5f, 6f));
+            var chorus = Source(far.gameObject, 0.35f, 6f);
+            chorus.clip = Recording("maasai-nature");
+            Set(ambience, "chorus", chorus);
+            var windSource = Source(wind.gameObject, 0.5f, 6f);
+            windSource.clip = Recording("wind-grass");
+            Set(ambience, "wind", windSource);
             return ambience;
         }
 
@@ -744,6 +752,16 @@ namespace Sankofa.EditorTools
         }
 
         // ---- helpers ----
+
+        public const string RecordedFolder = "Assets/Sankofa/Art/Recorded/";
+
+        /// <summary>A prepared field recording (see Art/Recorded/sources.json and scripts/prepare_recordings.py).</summary>
+        static AudioClip Recording(string name)
+        {
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(RecordedFolder + name + ".wav");
+            if (clip == null) throw new System.IO.FileNotFoundException("Missing recording; run scripts/prepare_recordings.py", RecordedFolder + name + ".wav");
+            return clip;
+        }
 
         static AudioSource Source(GameObject go, float spatial, float minDistance)
         {

@@ -29,6 +29,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _ArmIn: 0
+    - _ArmNeg: 0
+    - _ArmPos: 0
     - _Drift: 0.25
     - _Height: 1.6
     - _Highlight: 0

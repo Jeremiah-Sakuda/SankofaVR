@@ -216,6 +216,9 @@ namespace Sankofa.EditorTools
             var flour = BuildGourd(root, art, "gourd.flour", "story.water.1850s", new Vector3(-0.75f, groundAt + 0.98f, 1.48f), 0.23f, 0.095f, 0.03f, 1f, false);
             var milk = BuildGourd(root, art, "gourd.milk", "story.water.1850s", new Vector3(0.66f, BoundaryGround(new Vector3(0.66f, 0, 1.2f)), 1.2f), 0.34f, 0.075f, 0.026f, 0.55f, false);
             var bead = BuildBead(root, art, "bead", "story.water.1850s", new Vector3(0.84f, 1.36f, 1.25f));
+            Carries(wambui, flour, "Hands", Vector3.zero);
+            Carries(naserian, bead, "Neck", Vector3.zero);
+            Owns(naserian, milk);
 
             // The ewe bleats now and then once she has come to the water.
             var bleat = ewe.gameObject.AddComponent<ObjectSound>();
@@ -223,16 +226,17 @@ namespace Sankofa.EditorTools
             var bleatSource = Source(ewe.gameObject, 0.9f, 1.5f);
             bleatSource.loop = false;
             Set(bleat, "source", bleatSource);
-            Set(bleat, "volume", 0.3f);
-            var sound = BuildStoryAmbience(root, 71, new (StoryAmbience.Kind, Vector3, float)[]
+            SetArray(bleat, "clips", new Object[] { Recording("bleat-1"), Recording("bleat-2"), Recording("bleat-3"), Recording("bleat-4") });
+            Set(bleat, "volume", 0.35f);
+            var sound = BuildStoryAmbience(root, new (string, Vector3, float, bool)[]
             {
-                (StoryAmbience.Kind.Stream, new Vector3(0.1f, 0f, 2.4f), 0.2f),
-                (StoryAmbience.Kind.Stream, new Vector3(0.3f, 0.5f, 0.32f), 0.08f),
-                (StoryAmbience.Kind.Crickets, new Vector3(-5f, 0.2f, 4f), 0.1f),
-                (StoryAmbience.Kind.Crickets, new Vector3(6f, 0.2f, -3f), 0.08f),
-                (StoryAmbience.Kind.Wind, new Vector3(8f, 2f, 3f), 0.13f),
-                (StoryAmbience.Kind.Birds, new Vector3(-5f, 4f, 6f), 0.07f),
-                (StoryAmbience.Kind.Bell, new Vector3(9f, 1f, 12f), 0.07f),
+                ("brook", new Vector3(0.1f, 0f, 2.4f), 0.22f, false),
+                ("brook", new Vector3(0.3f, 0.5f, 0.32f), 0.06f, false),
+                ("crickets", new Vector3(-5f, 0.2f, 4f), 0.1f, false),
+                ("crickets", new Vector3(6f, 0.2f, -3f), 0.08f, false),
+                ("wind-grass", new Vector3(8f, 2f, 3f), 0.12f, false),
+                ("maasai-nature", new Vector3(-5f, 4f, 6f), 0.12f, true),
+                ("bells", new Vector3(9f, 1f, 12f), 0.1f, true),
             }, bleat);
             return (new[] { fire, spill, wambui, flour, naserian, ewe, milk, hide, bead }, sound);
         }
@@ -279,11 +283,10 @@ namespace Sankofa.EditorTools
             var crackleAt = Child(fireRoot, "Crackle");
             crackleAt.localPosition = new Vector3(0, 0.08f, 0);
             var crackle = crackleAt.gameObject.AddComponent<FireCrackle>();
-            Set(crackle, "roar", Source(crackleAt.gameObject, 0.9f, 0.6f));
-            Set(crackle, "pops", Source(crackleAt.gameObject, 0.9f, 0.6f));
-            Set(crackle, "roarVolume", 0.12f);
-            Set(crackle, "popVolume", 0.25f);
-            Set(crackle, "seed", 19);
+            var crackleSource = Source(crackleAt.gameObject, 0.9f, 0.6f);
+            crackleSource.clip = Recording("small-fire");
+            Set(crackle, "sound", crackleSource);
+            Set(crackle, "volume", 0.35f);
             for (var i = 0; i < 2; i++)
             {
                 var layer = Child(fireRoot, "Flame " + i);
@@ -327,7 +330,10 @@ namespace Sankofa.EditorTools
             var body = Static(figureRoot, "Body", SankofaStoryMeshes.Figure("Figure " + id, seed, height), art.EmberFigure);
             SaveMeshes(new[] { body });
             var o = StageLight(figureRoot, id, scene, body.GetComponent<Renderer>(), 0.5f);
-            Walks(figureRoot, body.GetComponent<Renderer>(), height, path, 0f, 0.016f);
+            // Things she carries hang from her hands, held in front at the waist, or from her neck.
+            var hands = Marker(figureRoot, "Hands", new Vector3(0, 0.53f * height, 0.2f));
+            var neck = Marker(figureRoot, "Neck", new Vector3(0, 0.845f * height, 0.08f));
+            Walks(figureRoot, body.GetComponent<Renderer>(), height, path, 0f, 0.016f, true, hands, neck);
             return o;
         }
 
@@ -340,7 +346,7 @@ namespace Sankofa.EditorTools
             SaveMeshes(new[] { body });
             var o = StageLight(eweRoot, "figure.ewe", "story.water.1850s", body.GetComponent<Renderer>(), 0.35f);
             // The ewe follows a little behind Naserian, with a quicker, smaller step.
-            Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.01f);
+            Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.01f, false);
             return o;
         }
 
@@ -348,7 +354,7 @@ namespace Sankofa.EditorTools
         /// The figure walks in along a path over the ground (points given on the plan, heights from the terrain) when
         /// it is revealed, and back along it when it leaves.
         /// </summary>
-        static void Walks(Transform figure, Renderer body, float height, Vector2[] path, float delay, float bob)
+        static void Walks(Transform figure, Renderer body, float height, Vector2[] path, float delay, float bob, bool arms, params Transform[] anchors)
         {
             var motion = figure.gameObject.AddComponent<FigureMotion>();
             var ground = figure.parent.name.EndsWith("today") ? (System.Func<Vector3, float>)RiverGround : BoundaryGround;
@@ -357,12 +363,28 @@ namespace Sankofa.EditorTools
             Set(motion, "height", height);
             Set(motion, "delay", delay);
             Set(motion, "bob", bob);
+            Set(motion, "hasArms", arms);
+            SetArray(motion, "anchors", anchors.Cast<Object>().ToArray());
             var so = new SerializedObject(motion);
             var list = so.FindProperty("entryPath");
             list.arraySize = points.Length;
             for (var i = 0; i < points.Length; i++) list.GetArrayElementAtIndex(i).vector3Value = points[i];
             so.ApplyModifiedPropertiesWithoutUndo();
         }
+
+        /// <summary>
+        /// Something a person of the story carries: it hangs from one of her anchors, walks with her, and is offered,
+        /// shown or set down from her hands with a gesture.
+        /// </summary>
+        static void Carries(StageObject person, StageObject item, string anchor, Vector3 offset)
+        {
+            item.transform.SetParent(person.transform.Find(anchor), false);
+            item.transform.localPosition = offset;
+            Owns(person, item);
+        }
+
+        /// <summary>Something that belongs to a person of the story without being in her hands: she shows it when the story turns to it.</summary>
+        static void Owns(StageObject person, StageObject item) => Set(item, "holder", person.GetComponent<FigureMotion>());
 
         /// <summary>Places where a figure stands or kneels to use an object, at ground level, in the scene's plan.</summary>
         static void Approaches(StageObject o, bool kneel, params Vector2[] places)
@@ -527,17 +549,32 @@ namespace Sankofa.EditorTools
             var empty = BuildGourd(root, art, "gourd.empty", "story.water.1899", njeriAt + new Vector3(0.18f, 0.12f, -0.08f), 0.24f, 0.1f, 0.03f, 0.9f, false);
             var old = BuildGourd(root, art, "gourd.old", "story.water.1899", naisulaAt + new Vector3(-0.2f, 0.14f, -0.08f), 0.32f, 0.07f, 0.025f, 0.45f, false);
             var seed = BuildSeed(root, art, "seed", "story.water.1899", njeriAt + new Vector3(0.12f, 0.85f, -0.1f));
+            Carries(njeri, empty, "Hands", Vector3.zero);
+            Carries(njeri, seed, "Hands", new Vector3(0.09f, 0.02f, 0.06f));
+            Carries(naisula, old, "Hands", Vector3.zero);
 
-            var sound = BuildStoryAmbience(root, 81, new (StoryAmbience.Kind, Vector3, float)[]
+            // Hammering somewhere along the line, now near, now further off. No recorded voices: the workers'
+            // languages are to be checked before anyone is heard speaking. No cattle bells in a year without cattle.
+            var hammers = new[] { (new Vector3(5f, 1f, 12f), 0.22f, 2f), (new Vector3(-9f, 1f, 13f), 0.12f, 6f) }.Select((h, i) =>
             {
-                (StoryAmbience.Kind.Stream, new Vector3(0.1f, 0f, 2.4f), 0.13f),
-                (StoryAmbience.Kind.Hammers, new Vector3(5f, 1f, 12f), 0.22f),
-                (StoryAmbience.Kind.Hammers, new Vector3(-9f, 1f, 13f), 0.12f),
-                (StoryAmbience.Kind.Wind, new Vector3(-6f, 2f, 2f), 0.17f),
-                // The work gang along the line, and the camp's canvas; no cattle bells in a year without cattle.
-                (StoryAmbience.Kind.MenAtWork, new Vector3(4f, 1.5f, 10f), 0.16f),
-                (StoryAmbience.Kind.Canvas, new Vector3(1f, 1.5f, 6.2f), 0.08f),
-            });
+                var at = Child(root, "Hammering " + i);
+                at.localPosition = h.Item1;
+                var hammer = at.gameObject.AddComponent<ObjectSound>();
+                var hammerSource = Source(at.gameObject, 0.6f, 4f);
+                hammerSource.loop = false;
+                Set(hammer, "source", hammerSource);
+                SetArray(hammer, "clips", new Object[] { Recording("spikes") });
+                Set(hammer, "volume", h.Item2);
+                Set(hammer, "interval", new Vector2(9f, 18f));
+                Set(hammer, "firstAfter", h.Item3);
+                return hammer;
+            }).ToArray();
+            var sound = BuildStoryAmbience(root, new (string, Vector3, float, bool)[]
+            {
+                ("brook", new Vector3(0.1f, 0f, 2.4f), 0.14f, false),
+                ("wind-grass", new Vector3(-6f, 2f, 2f), 0.15f, false),
+                ("tent", new Vector3(1f, 1.5f, 6.2f), 0.1f, false),
+            }, hammers);
             return (new[] { lantern, rails, njeri, empty, naisula, old, seed }, sound);
         }
 
@@ -650,13 +687,13 @@ namespace Sankofa.EditorTools
             var sprout = BuildSprout(root, art);
             var bead = BuildBead(root, art, "bead.today", "story.water.today", new Vector3(0.42f, 1.0f, 0.4f));
             var seed = BuildSeed(root, art, "seed.today", "story.water.today", new Vector3(0.4f, 0.75f, 0.45f));
-            var sound = BuildStoryAmbience(root, 91, new (StoryAmbience.Kind, Vector3, float)[]
+            var sound = BuildStoryAmbience(root, new (string, Vector3, float, bool)[]
             {
-                (StoryAmbience.Kind.Stream, new Vector3(0.2f, 0f, 2.4f), 0.14f),
-                (StoryAmbience.Kind.City, new Vector3(0f, 6f, 40f), 0.3f),
-                (StoryAmbience.Kind.Crickets, new Vector3(-3f, 0.2f, -2f), 0.06f),
-                // People at the stall and along the path; no radio, since music would need a licensed recording.
-                (StoryAmbience.Kind.Voices, new Vector3(-3f, 1.5f, 5f), 0.1f),
+                ("brook", new Vector3(0.2f, 0f, 2.4f), 0.14f, false),
+                ("city-far", new Vector3(0f, 6f, 40f), 0.25f, true),
+                ("crickets", new Vector3(-3f, 0.2f, -2f), 0.05f, false),
+                // A matatu stage in Nairobi, across the river: engines, touts and passengers.
+                ("matatu", new Vector3(-6f, 1.5f, 14f), 0.18f, true),
             });
             return (new[] { jiko, gate, soil, sprout, bead, seed }, sound);
         }
@@ -767,12 +804,11 @@ namespace Sankofa.EditorTools
 
         // ---- shared pieces ----
 
-        static StoryAmbience BuildStoryAmbience(Transform root, int seed, (StoryAmbience.Kind Kind, Vector3 At, float Volume)[] layers, params ObjectSound[] voices)
+        static StoryAmbience BuildStoryAmbience(Transform root, (string Recording, Vector3 At, float Volume, bool Far)[] layers, params ObjectSound[] voices)
         {
             var ambienceRoot = Child(root, "Ambience");
             var ambience = ambienceRoot.gameObject.AddComponent<StoryAmbience>();
             var so = new SerializedObject(ambience);
-            so.FindProperty("seed").intValue = seed;
             var voiceList = so.FindProperty("voices");
             voiceList.arraySize = voices.Length;
             for (var i = 0; i < voices.Length; i++) voiceList.GetArrayElementAtIndex(i).objectReferenceValue = voices[i];
@@ -780,12 +816,11 @@ namespace Sankofa.EditorTools
             list.arraySize = layers.Length;
             for (var i = 0; i < layers.Length; i++)
             {
-                var place = Child(ambienceRoot, layers[i].Kind + " " + i);
+                var place = Child(ambienceRoot, layers[i].Recording + " " + i);
                 place.localPosition = layers[i].At;
-                var far = layers[i].Kind == StoryAmbience.Kind.City || layers[i].Kind == StoryAmbience.Kind.Bell || layers[i].Kind == StoryAmbience.Kind.MenAtWork;
-                var source = Source(place.gameObject, far ? 0.5f : 0.85f, layers[i].Kind == StoryAmbience.Kind.Stream ? 1f : 4f);
+                var source = Source(place.gameObject, layers[i].Far ? 0.5f : 0.85f, layers[i].Recording == "brook" ? 1f : 4f);
+                source.clip = Recording(layers[i].Recording);
                 var e = list.GetArrayElementAtIndex(i);
-                e.FindPropertyRelative("Kind").enumValueIndex = (int)layers[i].Kind;
                 e.FindPropertyRelative("Source").objectReferenceValue = source;
                 e.FindPropertyRelative("Volume").floatValue = layers[i].Volume;
             }

@@ -390,7 +390,16 @@ namespace Sankofa.EditorTools
                 // Hanging from the shoulder, hand a little forward and out from the hip.
                 parts.Add(new CombineInstance { mesh = arm, transform = Matrix4x4.TRS(new Vector3(side * h * 0.163f, h * 0.46f, h * 0.02f), Quaternion.Euler(4, 0, side * 4f), Vector3.one) });
             }
-            return CombineMeshes(parts, name);
+            var mesh = CombineMeshes(parts, name);
+            // Vertex colour tells the figure shader which arm a vertex belongs to (red: the arm on −X, green: +X), so it
+            // can swing each arm from the shoulder to hold, offer or present without a skeleton.
+            var bodyCount = body.vertexCount;
+            var armCount = (mesh.vertexCount - bodyCount) / 2;
+            var colors = new List<Color>(mesh.vertexCount);
+            for (var i = 0; i < mesh.vertexCount; i++)
+                colors.Add(i < bodyCount ? new Color(0, 0, 0, 1) : i < bodyCount + armCount ? new Color(1, 0, 0, 1) : new Color(0, 1, 0, 1));
+            mesh.SetColors(colors);
+            return mesh;
         }
 
         /// <summary>A ewe on its four legs, as a simple rounded silhouette.</summary>
@@ -402,7 +411,10 @@ namespace Sankofa.EditorTools
             parts.Add(new CombineInstance { mesh = Round(seed + 1), transform = Matrix4x4.TRS(new Vector3(0, 0.63f, 0.38f), Quaternion.Euler(30, 0, 0), new Vector3(0.07f, 0.08f, 0.13f)) });
             foreach (var (x, z) in new[] { (-0.1f, 0.22f), (0.1f, 0.22f), (-0.1f, -0.22f), (0.1f, -0.22f) })
                 parts.Add(new CombineInstance { mesh = SankofaMeshes.Log(seed + 5, 0.42f, 0.022f, 0.3f, 0.005f, 6, 2), transform = Matrix4x4.TRS(new Vector3(x, 0.21f, z), Quaternion.identity, Vector3.one) });
-            return CombineMeshes(parts, name);
+            var mesh = CombineMeshes(parts, name);
+            // No arms: black vertex colour leaves the figure shader's arm swing untouched.
+            mesh.SetColors(Fill(mesh.vertexCount, new Color(0, 0, 0, 1)));
+            return mesh;
         }
 
         static List<Vector2> Fill2(int count, Vector2 v)

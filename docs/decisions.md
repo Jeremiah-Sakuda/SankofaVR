@@ -27,7 +27,7 @@ The user requested modular implementation and a Git-ignored hackathon brief on S
 | Runtime technology | Unity/Quest proposed; no project created here yet |
 | Repository visibility/licence | Private; no new source licence selected |
 
-The [PRD](../Sankofa-PRD.md) and [delivery plan](../Sankofa-Delivery-Plan.md) describe planned behaviour, not achieved results. Their acceptance gates remain open. The first proofs are the fire/transition and bounded personalisation, then their integration.
+The [PRD](product/prd.md) and [delivery plan](product/delivery-plan.md) describe planned behaviour, not achieved results. Their acceptance gates remain open. The first proofs are the fire/transition and bounded personalisation, then their integration.
 
 ## Reuse and evidence
 
@@ -148,3 +148,17 @@ Voices are a wordless murmur until the people whose languages they represent are
 | `move` story action with approach points | Implemented, validated and tested in software |
 | Synthesised scene sounds, with wordless voices | Implemented; not listening-reviewed |
 | C5 and the famine's name | Still gated, on the printed page and on family confirmation |
+
+## Field recordings and gestures — October 7, 2026
+
+The user did not want code-generated sound. They chose to replace all of it with public recordings under CC0 or CC BY, and approved downloading twelve Freesound previews, listed by file, source, licence and size. The recordings replace every synthesised sound, and the synthesis code is deleted. The hearth's sparks now follow cracks found in the recorded fire.
+
+The 1899 work-gang murmur is removed rather than replaced: every available crowd recording speaks a real language, which would misrepresent who was there. Today's voices are a recording made at a matatu stage in Nairobi.
+
+The figures now hold and hand over what they carry, through arm swings in the figure shader.
+
+| Decision | Status |
+|---|---|
+| All sound from CC0/CC BY field recordings, credited in the app; no synthesis | Implemented; an EditMode test enforces it; not listening-reviewed |
+| No voices in past scenes until the relevant languages are checked | Adopted |
+| Figure gestures: carry, hold out until taken, set down, present | Implemented in software |
