@@ -12,7 +12,14 @@ namespace Sankofa.Runtime.Input
     public sealed class PalmReceiver : MonoBehaviour
     {
         [SerializeField] HandSource[] hands;
+        [Tooltip("A ring under the offered object showing where to hold an open hand, filling as the palm holds.")]
+        [SerializeField] Renderer guide;
+        [SerializeField] float guideBelow = 0.1f;
 
+        static readonly int FillId = Shader.PropertyToID("_Fill");
+        static readonly int AlphaId = Shader.PropertyToID("_Alpha");
+        MaterialPropertyBlock block;
+        float guideAlpha;
         PalmReceiveGesture[] gestures;
         string invitationId;
         Transform target;
@@ -26,6 +33,8 @@ namespace Sankofa.Runtime.Input
         {
             gestures = new PalmReceiveGesture[hands.Length];
             for (var i = 0; i < hands.Length; i++) gestures[i] = new PalmReceiveGesture();
+            block = new MaterialPropertyBlock();
+            if (guide != null) guide.enabled = false;
         }
 
         public void Listen(string invitation, Transform offered)
@@ -45,6 +54,7 @@ namespace Sankofa.Runtime.Input
 
         void Update()
         {
+            ShowGuide();
             if (invitationId == null || target == null) return;
             var p = target.position;
             var position = new System.Numerics.Vector3(p.x, p.y, p.z);
@@ -61,6 +71,21 @@ namespace Sankofa.Runtime.Input
                 feedback = Mathf.Max(feedback, g.Proximity * 0.6f + g.Progress * 0.4f);
             }
             Feedback = feedback;
+        }
+
+        /// <summary>The ring fades in under what is offered and fills with the palm's hold; it fades out once taken.</summary>
+        void ShowGuide()
+        {
+            if (guide == null) return;
+            var open = invitationId != null && target != null;
+            guideAlpha = Mathf.MoveTowards(guideAlpha, open ? 1f : 0f, Time.unscaledDeltaTime * 2f);
+            guide.enabled = guideAlpha > 0.01f;
+            if (!guide.enabled) return;
+            if (open) guide.transform.SetPositionAndRotation(target.position + Vector3.down * guideBelow, Quaternion.Euler(90f, 0, 0));
+            guide.GetPropertyBlock(block);
+            block.SetFloat(FillId, open ? Feedback : 1f);
+            block.SetFloat(AlphaId, guideAlpha * (0.8f + 0.2f * Mathf.Sin(Time.unscaledTime * 2.4f)));
+            guide.SetPropertyBlock(block);
         }
     }
 }

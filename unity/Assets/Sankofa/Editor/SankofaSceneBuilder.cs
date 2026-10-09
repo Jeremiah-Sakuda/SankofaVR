@@ -75,7 +75,7 @@ namespace Sankofa.EditorTools
             var beadKept = BuildBead(hearth, art, "bead.kept", "hearth", keepsakeAt + Vector3.up * 0.012f);
             var seedKept = BuildSeed(hearth, art, "seed.kept", "hearth", keepsakeAt + Vector3.up * 0.01f);
 
-            var captions = BuildCaptions(world, art);
+            var captions = BuildCaptions(world, art, rig.Head);
             // Pause and return wait at the lap, out of the story's way. Choices come up into view, below and to the
             // left of the fire; questions to the right, inside a comfortable view cone. All within a seated reach.
             var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.29f), 2);
@@ -88,6 +88,9 @@ namespace Sankofa.EditorTools
 
             var receiver = new GameObject("Palm receiver").AddComponent<PalmReceiver>();
             SetArray(receiver, "hands", rig.Hands.Cast<Object>().ToArray());
+            var ring = Prim(receiver.transform, "Palm guide", PrimitiveType.Quad, Vector3.zero, Vector3.one * 0.13f, art.PalmRing);
+            ring.GetComponent<Renderer>().enabled = false;
+            Set(receiver, "guide", ring.GetComponent<Renderer>());
             var toucher = new GameObject("Touch receiver").AddComponent<TouchReceiver>();
             SetArray(toucher, "hands", rig.Hands.Cast<Object>().ToArray());
 
@@ -618,7 +621,7 @@ namespace Sankofa.EditorTools
 
         // ---- captions, controls and transition ----
 
-        static CaptionBoard BuildCaptions(Transform world, SankofaArtSet art)
+        static CaptionBoard BuildCaptions(Transform world, SankofaArtSet art, Transform head)
         {
             var go = Child(world, "Captions");
             go.localPosition = new Vector3(0, 1.5f, 1.55f);
@@ -628,6 +631,10 @@ namespace Sankofa.EditorTools
             Set(board, "font", font);
             Set(board, "textMaterial", SankofaText.CaptionMaterial(font));
             Set(board, "backingMaterial", art.CaptionBacking);
+            // Captions stay readable when the visitor looks at the lap, a figure or the far bank.
+            var follow = go.gameObject.AddComponent<LazyFollow>();
+            Set(follow, "head", head);
+            Set(follow, "pivot", SeatedEye);
             return board;
         }
 

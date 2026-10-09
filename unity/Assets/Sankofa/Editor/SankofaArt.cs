@@ -10,7 +10,7 @@ namespace Sankofa.EditorTools
         public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Pointer;
         public Material Workbench, Brass, LanternCore;
         public Material Water, Spill, River, EmberFigure, EmberFigureDepth, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
-        public Material RailRust, Cladding, Liner, Maize, Headlight, TailLight;
+        public Material RailRust, Cladding, Liner, Maize, Headlight, TailLight, PalmRing;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, SkyDusk, SkyMorning, SkyCity, Stars, Smoke, Halo, Plaque;
     }
 
@@ -82,12 +82,13 @@ namespace Sankofa.EditorTools
                 Spill = Make("Spill water", "Sankofa/Water", m =>
                 {
                     m.SetTexture("_Noise", noise);
-                    m.SetColor("_Deep", new Color(0.05f, 0.07f, 0.07f));
-                    m.SetColor("_Shallow", new Color(0.16f, 0.2f, 0.2f));
-                    m.SetColor("_Sky", new Color(0.2f, 0.22f, 0.28f));
+                    // Thin water over stone: dark and glinting, a little white where it breaks, never a pale sheet.
+                    m.SetColor("_Deep", new Color(0.03f, 0.045f, 0.05f));
+                    m.SetColor("_Shallow", new Color(0.08f, 0.1f, 0.11f));
+                    m.SetColor("_Sky", new Color(0.1f, 0.11f, 0.14f));
                     m.SetFloat("_Flow", 1.6f);
                     m.SetFloat("_Scale", 4f);
-                    m.SetFloat("_Foam", 0.55f);
+                    m.SetFloat("_Foam", 0.35f);
                 }),
                 River = Make("River water", "Sankofa/Water", m =>
                 {
@@ -147,6 +148,7 @@ namespace Sankofa.EditorTools
                 Cladding = Baked("Jiko cladding", new Color(0.58f, 0.58f, 0.6f), detail, "_DETAIL_UV", new Vector2(6f, 3f), 0.25f, 0.35f),
                 Liner = Baked("Jiko liner", new Color(0.62f, 0.36f, 0.22f), detail, "_DETAIL_UV", new Vector2(8f, 2f), 0.5f, 0.45f),
                 Maize = Baked("Roast maize", new Color(0.7f, 0.52f, 0.2f), detail, "_DETAIL_UV", new Vector2(16f, 10f), 1.4f, 0.8f),
+                PalmRing = Make("Palm ring", "Sankofa/Palm Ring", m => { }),
                 Headlight = Make("Headlight", "Sankofa/Glow", m =>
                 {
                     m.SetColor("_Color", new Color(1f, 0.92f, 0.78f));

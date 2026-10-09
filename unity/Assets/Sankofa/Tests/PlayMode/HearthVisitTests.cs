@@ -86,6 +86,53 @@ namespace Sankofa.Tests
             yield return WaitFor(() => app.Flow.Phase == VisitPhase.Welcome || app.Flow.Phase == VisitPhase.Choosing, 10, "the hearth");
         }
 
+        /// <summary>
+        /// A fingertip pressing the panel button with this label: it approaches from in front, then pushes through
+        /// the face. The same path a tracked hand takes, through the panel's own poke detection.
+        /// </summary>
+        static IEnumerator Poke(string label)
+        {
+            PokePanel panel = null;
+            Transform button = null;
+            yield return WaitFor(() =>
+            {
+                foreach (var p in Object.FindObjectsByType<PokePanel>(FindObjectsSortMode.None))
+                    foreach (var t in p.GetComponentsInChildren<TMPro.TextMeshPro>())
+                        if (t.text == label)
+                        {
+                            panel = p;
+                            button = t.transform.parent;
+                            return true;
+                        }
+                return false;
+            }, 20, "a button labelled " + label);
+            var depth = 0.06f;
+            panel.AddFingertip(() => button != null ? button.TransformPoint(new Vector3(0, 0, -depth)) : (Vector3?)null);
+            for (var i = 0; i < 6; i++) yield return null;
+            depth = -0.01f;
+            for (var i = 0; i < 6; i++) yield return null;
+            depth = 0.06f;
+        }
+
+        [UnityTest]
+        public IEnumerator AFingertipBeginsAVisitAndChoosesAnEra()
+        {
+            SceneManager.LoadScene("Hearth");
+            yield return null;
+            app = Object.FindFirstObjectByType<SankofaApp>();
+            Assert.That(app.Flow, Is.Not.Null, app.LoadProblem);
+            yield return WaitFor(() => app.AtStart, 10, "the start screen");
+            // Begin and the era are chosen only by a fingertip on the panels, never by calling the flow.
+            yield return Poke("Begin");
+            yield return WaitFor(() => !app.AtStart, 5, "Begin pressed by a fingertip");
+            Time.timeScale = 8;
+            yield return WaitFor(() => app.Flow.Phase == VisitPhase.Choosing, 60, "the era choice");
+            Time.timeScale = 1;
+            yield return Poke("Before the railway");
+            yield return WaitFor(() => app.Flow.Phase != VisitPhase.Choosing, 5, "an era chosen by a fingertip");
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
         IEnumerator AwaitInvitation(string id, float seconds = 30) =>
             WaitFor(() => app.Flow.OpenInvitation?.Id == id, seconds, "invitation " + id);
 

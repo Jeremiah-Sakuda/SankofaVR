@@ -173,7 +173,7 @@ namespace Sankofa.EditorTools
             var rockFilter = Static(root, "Rocks", Combine(rocks, "1850s rocks"), art.Rock);
 
             // Above the rock's crown, so the water runs over the stone rather than through it.
-            var springTop = springRock.y + 0.32f;
+            var springTop = springRock.y + 0.335f;
             var spillTop = SankofaStoryMeshes.Ribbon("Spring over the rock", new List<Vector3>
             {
                 new Vector3(0.66f, springTop - 0.03f, 0.38f), new Vector3(0.52f, springTop + 0.005f, 0.33f), new Vector3(0.36f, springTop - 0.01f, 0.3f),
