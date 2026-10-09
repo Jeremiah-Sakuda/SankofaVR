@@ -225,8 +225,9 @@ namespace Sankofa.EditorTools
                 if (i > 0) along += Vector3.Distance(path[i - 1], path[i]);
                 vertices.Add(path[i] - side);
                 vertices.Add(path[i] + side);
+                // Metres both ways, so ripples are round rather than stretched across a wide river.
                 uvs.Add(new Vector2(0, along));
-                uvs.Add(new Vector2(1, along));
+                uvs.Add(new Vector2(width, along));
                 if (i == 0) continue;
                 var a = (i - 1) * 2;
                 // Faces toward "up" for a stream, toward the visitor for a falling sheet.

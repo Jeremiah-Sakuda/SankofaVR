@@ -49,6 +49,7 @@ namespace Sankofa.Flow
         StoryRun run;
         IReadOnlyDictionary<string, Outcome> replayOutcomes;
         bool visitActive;
+        bool confirmingLeave;
         bool keptThisVisit;
         bool replayBlocked;
         int visitNumber;
@@ -392,6 +393,7 @@ namespace Sankofa.Flow
             var previous = KeptVisit;
             KeptVisit = visit;
             keptThisVisit = true;
+            confirmingLeave = false;
             replayBlocked = false;
             Emit(new Cue.Kept(visit));
             if (previous != null && previous.Id != visit.Id)
@@ -413,6 +415,7 @@ namespace Sankofa.Flow
         public bool BeginAgain()
         {
             if (Phase != VisitPhase.Closing) return false;
+            confirmingLeave = false;
             StopLine();
             EndVisit();
             Emit(new Cue.ResetStage());
@@ -421,9 +424,40 @@ namespace Sankofa.Flow
             return true;
         }
 
+        /// <summary>
+        /// Leaves Sankofa. At the closing of a finished visit that could still be kept, the visitor is asked first,
+        /// because leaving loses it: <see cref="ConfirmLeave"/>, <see cref="Keep"/> or <see cref="CancelLeave"/>.
+        /// </summary>
         public bool Leave()
         {
             if (Phase == VisitPhase.Ended || Phase == VisitPhase.Idle) return false;
+            if (Phase == VisitPhase.Closing && CanKeep && !confirmingLeave)
+            {
+                confirmingLeave = true;
+                UpdateControls();
+                return true;
+            }
+            return EndHere();
+        }
+
+        /// <summary>Leaves without keeping the finished visit, after being asked.</summary>
+        public bool ConfirmLeave() => confirmingLeave && EndHere();
+
+        /// <summary>Stays at the hearth rather than leaving an unkept visit.</summary>
+        public bool CancelLeave()
+        {
+            if (!confirmingLeave) return false;
+            confirmingLeave = false;
+            UpdateControls();
+            return true;
+        }
+
+        /// <summary>Whether the visitor is being asked before leaving an unkept visit.</summary>
+        public bool ConfirmingLeave => confirmingLeave;
+
+        bool EndHere()
+        {
+            confirmingLeave = false;
             StopLine();
             if (visitActive)
             {
@@ -892,6 +926,11 @@ namespace Sankofa.Flow
                     next.Add(new ControlOption(ControlKind.Resume));
                     if (pausedFrom == VisitPhase.Story) next.Add(new ControlOption(ControlKind.ReturnToHearth));
                     next.Add(new ControlOption(ControlKind.Leave));
+                    break;
+                case VisitPhase.Closing when confirmingLeave:
+                    next.Add(new ControlOption(ControlKind.ConfirmLeave));
+                    if (CanKeep) next.Add(new ControlOption(ControlKind.Keep, KeptVisit?.Id));
+                    next.Add(new ControlOption(ControlKind.CancelLeave));
                     break;
                 case VisitPhase.Closing:
                     // The target names the kept visit this one would replace, so presentation can say so.

@@ -125,6 +125,40 @@ namespace Sankofa.Tests
             });
         }
 
+        [Test]
+        public void LeavingAFinishedVisitThatIsNotKeptAsksFirst()
+        {
+            Begin("makers");
+            PlayToClosing();
+            Assert.That(flow.Leave(), Is.True);
+            view.Pump();
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Closing), "nothing is lost on the first press");
+            Assert.That(ControlKinds, Is.EqualTo(new[] { ControlKind.ConfirmLeave, ControlKind.Keep, ControlKind.CancelLeave }));
+            Assert.That(flow.CancelLeave(), Is.True);
+            Assert.That(ControlKinds, Is.EqualTo(new[] { ControlKind.Keep, ControlKind.BeginAgain, ControlKind.Leave }));
+            Assert.That(flow.ConfirmLeave(), Is.False, "nothing to confirm once the visitor stayed");
+
+            Assert.That(flow.Leave(), Is.True);
+            Assert.That(flow.ConfirmLeave(), Is.True);
+            view.Pump();
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Ended));
+            Assert.That(store.Files, Is.Empty, "leaving without keeping keeps nothing");
+        }
+
+        [Test]
+        public void KeepingWhileAskedKeepsAndThenLeavesWithoutAskingAgain()
+        {
+            Begin("makers");
+            PlayToClosing();
+            flow.Leave();
+            Assert.That(flow.Keep(), Is.True);
+            Assert.That(flow.ConfirmingLeave, Is.False);
+            Assert.That(flow.Leave(), Is.True);
+            view.Pump();
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Ended), "a kept visit is not lost by leaving");
+            Assert.That(store.Files.Count, Is.EqualTo(1));
+        }
+
         /// <summary>A visitor who chose the makers' story, took the ember and the piece of the bowl but did not touch it, and kept the visit.</summary>
         SavedVisit KeepAMakersVisit()
         {

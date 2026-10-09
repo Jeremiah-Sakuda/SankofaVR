@@ -180,3 +180,12 @@ Also changed in this round:
 | Skinned CC0 mannequin driven by our paths and timing, drawn in ember light | Adopted on desktop motion-strip evidence; Quest cost unmeasured |
 | Kikuyu and Maasai family colours across eras | Implemented; family review pending |
 | Procedural ewe | Kept with a better shape; leg motion not yet built |
+
+## Polish round 3: leaving, keepsake, props and the city — October 8, 2026
+
+- **Leaving:** a finished visit that is not kept is no longer lost with one stray press of **Leave**. The flow asks first, offering **Leave without keeping**, **Keep this visit** or **Stay**. .NET tests cover this.
+- **The keepsake:** the bead or seed waiting on the hearth stone from a kept visit is larger and glows more.
+- **Props:** the trading hide drapes over its rock.
+- **Today:** the city's rooflines vary with set-back storeys, water tanks and stair heads. River ripples are no longer stretched across the width.
+
+Desktop captures only.

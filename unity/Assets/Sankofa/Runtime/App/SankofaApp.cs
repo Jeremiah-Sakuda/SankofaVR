@@ -347,6 +347,8 @@ namespace Sankofa.Runtime.App
                 case ControlKind.Keep: return o.Target == null ? "Keep this visit" : "Keep this instead";
                 case ControlKind.BeginAgain: return "Begin again";
                 case ControlKind.Leave: return "Leave";
+                case ControlKind.ConfirmLeave: return "Leave without keeping";
+                case ControlKind.CancelLeave: return "Stay";
                 default: return o.Label ?? "Accept";
             }
         }
@@ -381,7 +383,12 @@ namespace Sankofa.Runtime.App
                     break;
                 case ControlKind.Keep: flow.Keep(); break;
                 case ControlKind.BeginAgain: flow.BeginAgain(); break;
-                case ControlKind.Leave: flow.Leave(); break;
+                case ControlKind.Leave:
+                    flow.Leave();
+                    if (flow.ConfirmingLeave) captions.Notice("This visit is not kept. Keep it to come back to it, or leave without keeping.", 8);
+                    break;
+                case ControlKind.ConfirmLeave: flow.ConfirmLeave(); break;
+                case ControlKind.CancelLeave: flow.CancelLeave(); break;
             }
             Dispatch();
         }

@@ -313,6 +313,18 @@ namespace Sankofa.EditorTools
             hideRoot.localPosition = top;
             var mesh = SankofaMeshes.Stone(1740, 3, 0.12f, 0.2f);
             mesh.name = "Trading hide";
+            // Draped: the edge falls away over the rock's sides, a few centimetres, unevenly.
+            var vertices = mesh.vertices;
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                var v = vertices[i];
+                var r = new Vector2(v.x, v.z).magnitude;
+                var droop = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1.05f, r)) * (1.6f + 0.6f * Mathf.Sin(Mathf.Atan2(v.z, v.x) * 3f));
+                vertices[i] = new Vector3(v.x * 1.05f, v.y - droop, v.z * 1.05f);
+            }
+            mesh.vertices = vertices;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
             mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
             var body = Static(hideRoot, "Body", mesh, art.Hide);
             body.transform.localScale = new Vector3(0.21f, 0.022f, 0.18f);
@@ -457,9 +469,12 @@ namespace Sankofa.EditorTools
             body.transform.localScale = new Vector3(0.013f, 0.011f, 0.013f);
             SaveMeshes(new[] { body });
             var o = Staged(beadRoot.gameObject, id, scene, false, new[] { body.GetComponent<Renderer>() });
-            // A little of the fire's light lingers on what it gives, so a small thing reads at arm's length.
-            Set(o, "glow", GlowCard(beadRoot, art, 0.09f));
-            Set(o, "glowIntensity", 0.4f);
+            // A little of the fire's light lingers on what it gives, so a small thing reads at arm's length; what
+            // waits on the hearth stone from a kept visit glows a little more, so it is found again.
+            var kept = id.EndsWith(".kept");
+            if (kept) body.transform.localScale *= 1.4f;
+            Set(o, "glow", GlowCard(beadRoot, art, kept ? 0.16f : 0.09f));
+            Set(o, "glowIntensity", kept ? 0.85f : 0.4f);
             Set(o, "attentionRadius", 0.05f);
             return o;
         }
@@ -668,7 +683,22 @@ namespace Sankofa.EditorTools
                 var height = tower ? R(40f, 80f) : R(9f, 22f) + distance * R(0f, 0.08f);
                 var size = new Vector3(R(10f, 26f), height, R(10f, 20f));
                 at.y = RiverGround(at) + height * 0.5f - 0.5f;
-                blocks.Add(Part(SankofaStoryMeshes.Box("Block", size), at, Quaternion.Euler(0, R(-25, 25), 0), Vector3.one));
+                var turn = Quaternion.Euler(0, R(-25, 25), 0);
+                blocks.Add(Part(SankofaStoryMeshes.Box("Block", size), at, turn, Vector3.one));
+                // Rooflines: an upper storey set back, a water tank or a stair head, so the skyline is not all flat boxes.
+                var roof = at + Vector3.up * height * 0.5f;
+                var pick = random.NextDouble();
+                if (pick < 0.35)
+                {
+                    var upper = new Vector3(size.x * R(0.45f, 0.7f), R(3f, 7f), size.z * R(0.5f, 0.75f));
+                    blocks.Add(Part(SankofaStoryMeshes.Box("Upper storey", upper), roof + turn * new Vector3(R(-2f, 2f), upper.y * 0.5f, R(-2f, 2f)), turn, Vector3.one));
+                }
+                else if (pick < 0.75)
+                {
+                    var tank = new Vector3(R(1.6f, 2.6f), R(1.4f, 2.2f), R(1.6f, 2.6f));
+                    blocks.Add(Part(SankofaStoryMeshes.Box("Water tank", tank), roof + turn * new Vector3(size.x * R(-0.3f, 0.3f), tank.y * 0.5f + 0.6f, size.z * R(-0.3f, 0.3f)), turn, Vector3.one));
+                    blocks.Add(Part(SankofaStoryMeshes.Box("Stair head", new Vector3(2.4f, 2.6f, 2.4f)), roof + turn * new Vector3(size.x * R(-0.35f, 0.35f), 1.3f, size.z * R(-0.35f, 0.35f)), turn, Vector3.one));
+                }
             }
             var cityFilter = Static(root, "City", Combine(blocks, "Today city"), art.City);
 

@@ -16,6 +16,10 @@ namespace Sankofa.Flow
     {
         Choose, Follow, Replay, NewStory, Back, Forget, ConfirmForget, CancelForget,
         Pause, Resume, ReturnToHearth, Accept, Keep, BeginAgain, Leave,
+        /// <summary>Leaving a finished visit that is not kept, after being asked.</summary>
+        ConfirmLeave,
+        /// <summary>Staying at the hearth instead of leaving an unkept visit.</summary>
+        CancelLeave,
     }
 
     /// <summary>A store operation that failed; the visit itself carries on.</summary>
