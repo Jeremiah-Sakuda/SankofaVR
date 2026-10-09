@@ -162,8 +162,8 @@ namespace Sankofa.Tests
                 CaptureBoth(eye, "03-offer");
                 flow.Accept("receive-ember");
                 yield return WaitFor(() => flow.Phase == VisitPhase.Transitioning, 30);
-                yield return new WaitForSeconds(0.8f);
-                Capture(eye, "04-entering");
+                // The entry through the flame, frame by frame: the burn from the ember, then the stream opening.
+                yield return Strip(eye, "m0-entering", eye.transform.position + eye.transform.forward * 2f - Vector3.up * 0.4f, 9, 0.42f);
                 yield return Line("e1.sides");
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "05-water", right);

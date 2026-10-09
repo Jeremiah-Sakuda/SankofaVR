@@ -7,9 +7,10 @@ using UnityEngine;
 namespace Sankofa.Runtime.Stage
 {
     /// <summary>
-    /// Changes the world around the stationary visitor without moving the camera. Full: the fire rises into a curtain
-    /// of warm light, the scene changes behind it and the light parts. Reduced motion: a short, dim dissolve with no
-    /// rising fire or moving light. Both carry the same continuities (an ember becoming a lantern) and keep orientation.
+    /// Changes the world around the stationary visitor without moving the camera. Full: flame spreads across the view
+    /// outward from the light the visitor carries (the ember, or the fire), the scene changes behind it, and the new
+    /// place opens outward from its own light (the traders' fire, the lantern, the jiko). Reduced motion: a short, dim
+    /// dissolve with no moving light. Both carry the same continuities and keep orientation.
     /// </summary>
     public sealed class StoryTransition : MonoBehaviour
     {
@@ -26,6 +27,12 @@ namespace Sankofa.Runtime.Stage
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
         static readonly int MotionId = Shader.PropertyToID("_Motion");
+        static readonly int SourceId = Shader.PropertyToID("_Source");
+        static readonly int TargetId = Shader.PropertyToID("_Target");
+        static readonly int CoverId = Shader.PropertyToID("_Cover");
+        static readonly int HoleId = Shader.PropertyToID("_Hole");
+        // Past 1 the front has crossed the whole sphere, ragged edge included.
+        const float Across = 1.2f;
 
         MaterialPropertyBlock block;
         Coroutine routine;
@@ -61,33 +68,55 @@ namespace Sankofa.Runtime.Stage
             curtain.GetPropertyBlock(block);
             block.SetColor(ColorId, reduced ? reducedColor : fullColor);
             block.SetFloat(MotionId, reduced ? 0 : 1);
+            block.SetFloat(CoverId, 0);
+            block.SetFloat(HoleId, 0);
+            block.SetVector(SourceId, Toward(continuities.Count > 0 ? continuities[0].From : null));
+            curtain.SetPropertyBlock(block);
 
-            yield return Fade(0, peak, reduced ? reducedIn : fullIn);
-            if (!reduced) yield return new WaitForSeconds(fullHold);
+            if (reduced) yield return Fade(AlphaId, 0, peak, reducedIn);
+            else
+            {
+                yield return Fade(CoverId, 0, Across, fullIn);
+                yield return new WaitForSeconds(fullHold);
+            }
 
             foreach (var c in continuities) stage.Cross(c.From, c.To, toScene);
             stage.ShowScene(toScene);
 
-            yield return Fade(peak, 0, reduced ? reducedOut : fullOut);
+            if (reduced) yield return Fade(AlphaId, peak, 0, reducedOut);
+            else
+            {
+                block.SetVector(TargetId, Toward(continuities.Count > 0 ? continuities[0].To : null));
+                yield return Fade(HoleId, 0, Across, fullOut);
+            }
             curtain.enabled = false;
             routine = null;
             Finished?.Invoke(token);
         }
 
-        IEnumerator Fade(float from, float to, float seconds)
+        /// <summary>From the visitor's head toward a staged light, or toward the fire when there is none.</summary>
+        Vector4 Toward(string objectId)
+        {
+            var o = objectId != null ? stage.Find(objectId) : null;
+            var at = o != null && o.isActiveAndEnabled ? o.transform.position : o != null ? o.HomePosition : stage.FireTop;
+            var d = at - curtain.transform.position;
+            return d.sqrMagnitude > 1e-6f ? (Vector4)d.normalized : (Vector4)Vector3.forward;
+        }
+
+        IEnumerator Fade(int property, float from, float to, float seconds)
         {
             for (var t = 0f; t < seconds; t += Time.deltaTime)
             {
                 var x = Mathf.Clamp01(t / seconds);
-                SetAlpha(Mathf.Lerp(from, to, x * x * (3f - 2f * x)));
+                Set(property, Mathf.Lerp(from, to, x * x * (3f - 2f * x)));
                 yield return null;
             }
-            SetAlpha(to);
+            Set(property, to);
         }
 
-        void SetAlpha(float alpha)
+        void Set(int property, float value)
         {
-            block.SetFloat(AlphaId, alpha);
+            block.SetFloat(property, value);
             curtain.SetPropertyBlock(block);
         }
     }

@@ -161,7 +161,8 @@ namespace Sankofa.EditorTools
             var rocks = new List<CombineInstance>();
             var springRock = new Vector3(0.52f, BoundaryGround(new Vector3(0.52f, 0, 0.3f)) + 0.24f, 0.3f);
             rocks.Add(Part(SankofaMeshes.Stone(1701, 3, 0.16f, 0.25f), springRock, Quaternion.Euler(0, 25, 0), new Vector3(0.3f, 0.34f, 0.26f)));
-            var tradeRock = new Vector3(0.18f, BoundaryGround(new Vector3(0.18f, 0, 0.5f)) + 0.24f, 0.5f);
+            // Far enough out that the women kneeling across it stay a body's length from the visitor.
+            var tradeRock = new Vector3(0.2f, BoundaryGround(new Vector3(0.2f, 0, 0.72f)) + 0.24f, 0.72f);
             rocks.Add(Part(SankofaMeshes.Stone(1702, 3, 0.1f, 0.25f), tradeRock, Quaternion.Euler(0, -15, 0), new Vector3(0.22f, 0.26f, 0.2f)));
             foreach (var (angle, seed) in new[] { (0f, 1703), (120f, 1704), (240f, 1705) })
             {
@@ -171,7 +172,8 @@ namespace Sankofa.EditorTools
             }
             var rockFilter = Static(root, "Rocks", Combine(rocks, "1850s rocks"), art.Rock);
 
-            var springTop = springRock.y + 0.3f;
+            // Above the rock's crown, so the water runs over the stone rather than through it.
+            var springTop = springRock.y + 0.32f;
             var spillTop = SankofaStoryMeshes.Ribbon("Spring over the rock", new List<Vector3>
             {
                 new Vector3(0.66f, springTop - 0.03f, 0.38f), new Vector3(0.52f, springTop + 0.005f, 0.33f), new Vector3(0.36f, springTop - 0.01f, 0.3f),
@@ -213,15 +215,15 @@ namespace Sankofa.EditorTools
             var groundAt = BoundaryGround(new Vector3(-0.75f, 0, 1.6f));
             var wambui = BuildFigure(root, art, "figure.wambui", "story.water.1850s", new Vector3(-0.75f, groundAt, 1.6f), 1.6f, FromTheForest, KikuyuLine);
             var naserian = BuildFigure(root, art, "figure.naserian", "story.water.1850s", new Vector3(0.85f, BoundaryGround(new Vector3(0.85f, 0, 1.3f)), 1.3f), 1.66f, FromThePlain, MaasaiLine);
-            // The ewe waits on the near bank, seen between the two women while they trade.
-            var ewe = BuildEwe(root, art, new Vector3(1.3f, BoundaryGround(new Vector3(1.3f, 0, 1.9f)), 1.9f), EweFromThePlain);
+            // The ewe comes to stand between the two women and behind them while they trade, dimmer than they are.
+            var ewe = BuildEwe(root, art, new Vector3(0.7f, BoundaryGround(new Vector3(0.7f, 0, 2.3f)), 2.3f), EweFromThePlain);
             // For the trade the visitor and the two women sit around the hide: Wambui across it, Naserian to the right.
-            Approaches(hide, true, new Vector2(0.0f, 1.12f), new Vector2(0.86f, 0.92f));
+            Approaches(hide, true, new Vector2(0.05f, 1.35f), new Vector2(0.95f, 1.15f));
             var flour = BuildGourd(root, art, "gourd.flour", "story.water.1850s", new Vector3(-0.75f, groundAt + 0.98f, 1.48f), 0.23f, 0.095f, 0.03f, 1f, false);
             var milk = BuildGourd(root, art, "gourd.milk", "story.water.1850s", new Vector3(0.66f, BoundaryGround(new Vector3(0.66f, 0, 1.2f)), 1.2f), 0.34f, 0.075f, 0.026f, 0.55f, false);
             var bead = BuildBead(root, art, "bead", "story.water.1850s", new Vector3(0.84f, 1.36f, 1.25f));
             Carries(wambui, flour, "Hands", Vector3.zero);
-            Carries(naserian, bead, "Neck", Vector3.zero);
+            Carries(naserian, bead, "Hands", new Vector3(0, -0.01f, 0.03f));
             Owns(naserian, milk);
 
             // The ewe bleats now and then once she has come to the water.
@@ -319,19 +321,23 @@ namespace Sankofa.EditorTools
             {
                 var v = vertices[i];
                 var r = new Vector2(v.x, v.z).magnitude;
-                var droop = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1.05f, r)) * (1.6f + 0.6f * Mathf.Sin(Mathf.Atan2(v.z, v.x) * 3f));
-                vertices[i] = new Vector3(v.x * 1.05f, v.y - droop, v.z * 1.05f);
+                var angle = Mathf.Atan2(v.z, v.x);
+                var droop = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1.05f, r)) * (1.6f + 0.6f * Mathf.Sin(angle * 3f));
+                // An animal's outline, not a disc: legs and neck stretch out, the flanks curve in.
+                var outline = 1.05f * (1f + 0.16f * Mathf.Cos(angle * 4f + 0.4f) + 0.07f * Mathf.Sin(angle * 7f) + SankofaMeshes.Fbm(new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * 2f, 1741, 2) * 0.12f);
+                vertices[i] = new Vector3(v.x * outline, v.y - droop, v.z * outline);
             }
             mesh.vertices = vertices;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
             var body = Static(hideRoot, "Body", mesh, art.Hide);
-            body.transform.localScale = new Vector3(0.21f, 0.022f, 0.18f);
+            body.transform.localScale = new Vector3(0.21f, 0.014f, 0.18f);
             body.transform.localRotation = Quaternion.Euler(0, 20, 0);
             SaveMeshes(new[] { body });
             var o = Staged(hideRoot.gameObject, "hide", "story.water.1850s", true, new[] { body.GetComponent<Renderer>() });
-            Set(o, "touchPoint", Marker(hideRoot, "Touch point", new Vector3(0, 0.03f, -0.02f)));
+            // Touched at its near edge, within reach, while the women kneel at its far side.
+            Set(o, "touchPoint", Marker(hideRoot, "Touch point", new Vector3(0, 0.02f, -0.16f)));
             Set(o, "touchRadius", 0.11f);
             Set(o, "attentionRadius", 0.16f);
             Set(o, "placePoint", Marker(hideRoot, "Place point", new Vector3(0.03f, 0.03f, 0.02f)));
@@ -370,24 +376,27 @@ namespace Sankofa.EditorTools
             eweRoot.localRotation = Quaternion.Euler(0, -105, 0);
             var (bodyMesh, headMesh, legMesh) = SankofaStoryMeshes.EweParts("Figure ewe", 1810);
             var body = Static(eweRoot, "Body", bodyMesh, art.EmberFigure);
+            DrawAsFigure(body.GetComponent<Renderer>(), art);
             var neck = Child(eweRoot, "Neck");
             neck.localPosition = new Vector3(0, 0.58f, 0.26f);
             var head = Static(neck, "Head", headMesh, art.EmberFigure);
+            DrawAsFigure(head.GetComponent<Renderer>(), art);
             var legs = new[] { (-0.1f, 0.22f), (0.1f, 0.22f), (-0.1f, -0.22f), (0.1f, -0.22f) }.Select((p, i) =>
             {
                 var hip = Child(eweRoot, "Leg " + i);
                 hip.localPosition = new Vector3(p.Item1, 0.42f, p.Item2);
-                Static(hip, "Leg", legMesh, art.EmberFigure);
+                DrawAsFigure(Static(hip, "Leg", legMesh, art.EmberFigure).GetComponent<Renderer>(), art);
                 return hip;
             }).ToArray();
             SaveMeshes(new[] { body, head });
             SaveMeshes(new[] { legs[0].GetComponentInChildren<MeshFilter>() });
             var o = StageLight(eweRoot, "figure.ewe", "story.water.1850s", body.GetComponent<Renderer>(), 0.35f);
             // The ewe follows a little behind Naserian, with a quicker, smaller step.
-            var motion = Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.008f, false);
+            var motion = Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.02f, false);
             SetArray(motion, "parts", new Object[] { head.GetComponent<Renderer>() }.Concat(legs.Select(l => (Object)l.GetComponentInChildren<Renderer>())).ToArray());
-            Set(motion, "partSmoke", 0.3f);
-            Set(motion, "tint", MaasaiLine);
+            Set(motion, "partSmoke", 0.6f);
+            Set(motion, "bodySmoke", 0.6f);
+            Set(motion, "tint", new Color(MaasaiLine.r * 0.7f, MaasaiLine.g * 0.7f, MaasaiLine.b * 0.7f, 1f));
             var gait = eweRoot.gameObject.AddComponent<QuadrupedGait>();
             Set(gait, "motion", motion);
             SetArray(gait, "legs", legs.Cast<Object>().ToArray());
@@ -450,7 +459,7 @@ namespace Sankofa.EditorTools
         // Maasai women in from the plain on the right; each ends just short of her own place.
         static readonly Vector2[] FromTheForest = { new Vector2(-6.2f, 1.75f), new Vector2(-4f, 1.7f), new Vector2(-2.2f, 1.62f), new Vector2(-1.4f, 1.58f) };
         static readonly Vector2[] FromThePlain = { new Vector2(6.4f, 1.9f), new Vector2(4.2f, 1.6f), new Vector2(2.4f, 1.4f), new Vector2(1.4f, 1.32f) };
-        static readonly Vector2[] EweFromThePlain = { new Vector2(6.9f, 2.2f), new Vector2(4.6f, 2.0f), new Vector2(2.9f, 1.95f), new Vector2(1.9f, 1.92f) };
+        static readonly Vector2[] EweFromThePlain = { new Vector2(6.9f, 2.6f), new Vector2(4.6f, 2.5f), new Vector2(2.6f, 2.4f), new Vector2(0.7f, 2.3f) };
 
         /// <summary>A shape of light fades in where it stands instead of growing; its brightness is its visibility.</summary>
         static StageObject StageLight(Transform root, string id, string scene, Renderer body, float attention)
@@ -481,13 +490,22 @@ namespace Sankofa.EditorTools
         {
             var beadRoot = Child(root, id);
             beadRoot.localPosition = at;
-            var mesh = SankofaMeshes.Stone(1750, 2, 0.02f, 10f);
-            mesh.name = "Bead " + id;
+            // A faceted glass bead, pierced, on a short loop of cord from the string it came off. Its colour waits for
+            // family review.
+            var mesh = SankofaStoryMeshes.Lathe("Bead " + id, new List<Vector2>
+            {
+                new Vector2(0.003f, -0.007f), new Vector2(0.0065f, -0.007f), new Vector2(0.0095f, -0.0025f), new Vector2(0.0095f, 0.0025f),
+                new Vector2(0.0065f, 0.007f), new Vector2(0.003f, 0.007f), new Vector2(0.003f, -0.007f),
+            }, 8, (a, y) => Color.white, 1750);
             mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
             var body = Static(beadRoot, "Body", mesh, art.Bead);
-            body.transform.localScale = new Vector3(0.013f, 0.011f, 0.013f);
-            SaveMeshes(new[] { body });
-            var o = Staged(beadRoot.gameObject, id, scene, false, new[] { body.GetComponent<Renderer>() });
+            body.transform.localRotation = Quaternion.Euler(0, 0, 90);
+            var cordMesh = SankofaMeshes.Log(1751, 0.07f, 0.0012f, 0f, 0.012f, 5, 6);
+            cordMesh.name = "Bead cord " + id;
+            var cord = Static(beadRoot, "Cord", cordMesh, art.SeatWood);
+            cord.transform.localRotation = Quaternion.Euler(0, 0, 90);
+            SaveMeshes(new[] { body, cord });
+            var o = Staged(beadRoot.gameObject, id, scene, false, new[] { body.GetComponent<Renderer>(), cord.GetComponent<Renderer>() });
             // A little of the fire's light lingers on what it gives, so a small thing reads at arm's length; what
             // waits on the hearth stone from a kept visit glows a little more, so it is found again.
             var kept = id.EndsWith(".kept");
@@ -502,13 +520,22 @@ namespace Sankofa.EditorTools
         {
             var seedRoot = Child(root, id);
             seedRoot.localPosition = at;
-            var mesh = SankofaMeshes.Stone(1760, 2, 0.28f, 0.4f);
-            mesh.name = "Seed bundle " + id;
+            // A pinch of millet folded into a leaf, gathered at the top and tied with a twist of fibre.
+            var mesh = SankofaStoryMeshes.Lathe("Seed bundle " + id, new List<Vector2>
+            {
+                new Vector2(0f, 0f), new Vector2(0.011f, 0.002f), new Vector2(0.017f, 0.01f), new Vector2(0.016f, 0.02f),
+                new Vector2(0.009f, 0.028f), new Vector2(0.004f, 0.032f), new Vector2(0.007f, 0.04f), new Vector2(0f, 0.043f),
+            }, 10, (a, y) => new Color(1f, 1f - 0.25f * Mathf.Abs(Mathf.Sin(a * 2.5f)), 1f, 1f), 1760);
             mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
             var body = Static(seedRoot, "Body", mesh, art.Leaf);
-            body.transform.localScale = new Vector3(0.03f, 0.018f, 0.024f);
-            SaveMeshes(new[] { body });
-            var o = Staged(seedRoot.gameObject, id, scene, false, new[] { body.GetComponent<Renderer>() });
+            var tieMesh = SankofaStoryMeshes.Lathe("Seed tie " + id, new List<Vector2>
+            {
+                new Vector2(0.0045f, 0.029f), new Vector2(0.0062f, 0.03f), new Vector2(0.0062f, 0.0335f), new Vector2(0.0045f, 0.0345f),
+            }, 10, (a, y) => Color.white, 1761);
+            tieMesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), tieMesh.vertexCount).ToList());
+            var tie = Static(seedRoot, "Tie", tieMesh, art.SeatWood);
+            SaveMeshes(new[] { body, tie });
+            var o = Staged(seedRoot.gameObject, id, scene, false, new[] { body.GetComponent<Renderer>(), tie.GetComponent<Renderer>() });
             Set(o, "glow", GlowCard(seedRoot, art, 0.1f));
             Set(o, "glowIntensity", 0.35f);
             Set(o, "attentionRadius", 0.05f);
@@ -541,15 +568,43 @@ namespace Sankofa.EditorTools
             float R(float a, float b) => Range(random, a, b);
 
             // The camp across the stream: bell tents, stores, a cart; the new line on its embankment beyond.
+            // Each tent: sewn panels, a hem muddied by the rains, a dark door facing the stream, guy ropes to pegs
+            // and the pole's cap.
             var canvas = new List<CombineInstance>();
+            var rigging = new List<CombineInstance>();
             foreach (var at in new[] { new Vector3(-2.6f, 0, 5f), new Vector3(0.9f, 0, 6.2f), new Vector3(4.2f, 0, 5.2f), new Vector3(6.6f, 0, 8.4f), new Vector3(-0.8f, 0, 9.5f) })
             {
                 var p = at;
                 p.y = BoundaryGround(at) - 0.02f;
-                var tent = SankofaStoryMeshes.Lathe("Tent", SankofaStoryMeshes.TentProfile(R(1.5f, 1.9f), R(2.6f, 3f)), 28, (a, y) => new Color(1, 1, 1) * R(0.85f, 1f), (int)(at.x * 10));
-                canvas.Add(Part(tent, p, Quaternion.Euler(0, R(0, 360), 0), Vector3.one));
+                var radius = R(1.5f, 1.9f);
+                var height = R(2.6f, 3f);
+                var shade = R(0.85f, 1f);
+                var tent = SankofaStoryMeshes.Lathe("Tent", SankofaStoryMeshes.TentProfile(radius, height), 56, (a, y) =>
+                {
+                    var seam = Mathf.Abs(Mathf.Sin(a * 7f)) > 0.985f ? 0.72f : 1f;
+                    var hem = Mathf.Lerp(0.62f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.05f, 0.45f, y)));
+                    return new Color(shade, shade, shade) * seam * hem;
+                }, (int)(at.x * 10));
+                // The door faces the stream and the visitor across it.
+                var yaw = Mathf.Atan2(-p.x, -p.z) * Mathf.Rad2Deg + R(-25f, 25f);
+                var turn = Quaternion.Euler(0, yaw, 0);
+                canvas.Add(Part(tent, p, turn, Vector3.one));
+                var door = SankofaStoryMeshes.Box("Tent door", new Vector3(0.6f, 1.3f, 0.02f));
+                canvas.Add(Tinted(Part(door, p + turn * new Vector3(0, 0.55f, radius * 0.97f), turn * Quaternion.Euler(-24f, 0, 0), Vector3.one), (q, n) => new Color(0.16f, 0.14f, 0.12f)));
+                for (var k = 0; k < 8; k++)
+                {
+                    var around = Quaternion.Euler(0, yaw + 22.5f + k * 45f, 0);
+                    var from = p + around * new Vector3(0, height * 0.25f, radius * 0.92f);
+                    var peg = p + around * new Vector3(0, 0, radius * 1.8f);
+                    peg.y = BoundaryGround(peg);
+                    var span = peg - from;
+                    rigging.Add(Part(SankofaStoryMeshes.Box("Guy rope", new Vector3(0.012f, 0.012f, span.magnitude)), from + span * 0.5f, Quaternion.LookRotation(span), Vector3.one));
+                    rigging.Add(Part(SankofaStoryMeshes.Box("Peg", new Vector3(0.03f, 0.16f, 0.03f)), peg + Vector3.up * 0.06f, Quaternion.Euler(0, 0, 12f), Vector3.one));
+                }
+                rigging.Add(Part(SankofaStoryMeshes.Box("Pole cap", new Vector3(0.05f, 0.22f, 0.05f)), p + Vector3.up * (height + 0.08f), Quaternion.identity, Vector3.one));
             }
             var tentFilter = Static(root, "Tents", Combine(canvas, "1899 tents"), art.Canvas);
+            var riggingFilter = Static(root, "Tent rigging", Combine(rigging, "1899 tent rigging"), art.SeatWood);
 
             var timber = new List<CombineInstance>();
             for (var i = 0; i < 9; i++)
@@ -559,7 +614,7 @@ namespace Sankofa.EditorTools
                 timber.Add(Part(SankofaStoryMeshes.Box("Crate", new Vector3(R(0.4f, 0.7f), 0.4f, R(0.4f, 0.6f))), at, Quaternion.Euler(0, R(-20, 20), 0), Vector3.one));
             }
             // The rail crib within reach on the right: sleepers laid crosswise to lap height.
-            var crib = new Vector3(0.38f, BoundaryGround(new Vector3(0.38f, 0, 0.5f)), 0.5f);
+            var crib = new Vector3(0.45f, BoundaryGround(new Vector3(0.45f, 0, 0.7f)), 0.7f);
             for (var layer = 0; layer < 4; layer++)
                 for (var k = 0; k < 2; k++)
                 {
@@ -586,17 +641,17 @@ namespace Sankofa.EditorTools
             var stumpFilter = Static(root, "Stumps", Combine(stumps, "1899 stumps"), art.SeatWood);
 
             Bake(root, new[] { ground, trunks, canopies, stones, tentFilter, timberFilter, stumpFilter }, CampLanternAt);
-            SaveMeshes(new[] { ground, water, trunks, canopies, stones, statics[3], statics[4], tentFilter, timberFilter, stumpFilter });
+            SaveMeshes(new[] { ground, water, trunks, canopies, stones, statics[3], statics[4], tentFilter, riggingFilter, timberFilter, stumpFilter });
 
             var rails = BuildRails(root, art, crib + Vector3.up * 0.48f);
             var lantern = BuildLantern(root, art, "lantern.1899", "story.water.1899", CampLanternAt);
             // Njeri stands clear of the camp lantern; Naisula on the right, as their grandmothers did.
             var njeriAt = new Vector3(-0.95f, BoundaryGround(new Vector3(-0.95f, 0, 1.5f)), 1.5f);
-            var naisulaAt = new Vector3(0.8f, BoundaryGround(new Vector3(0.8f, 0, 1.32f)), 1.32f);
+            var naisulaAt = new Vector3(0.98f, BoundaryGround(new Vector3(0.98f, 0, 1.5f)), 1.5f);
             var njeri = BuildFigure(root, art, "figure.njeri", "story.water.1899", njeriAt, 1.58f, FromTheForest, KikuyuLine);
             var naisula = BuildFigure(root, art, "figure.naisula", "story.water.1899", naisulaAt, 1.64f, FromThePlain, MaasaiLine);
             // Njeri comes to stand at Naisula's side to pour what flour she has into her gourd.
-            Approaches(naisula, false, new Vector2(0.17f, 1.45f));
+            Approaches(naisula, false, new Vector2(0.05f, 1.62f));
             var empty = BuildGourd(root, art, "gourd.empty", "story.water.1899", njeriAt + new Vector3(0.18f, 0.12f, -0.08f), 0.24f, 0.1f, 0.03f, 0.9f, false);
             var old = BuildGourd(root, art, "gourd.old", "story.water.1899", naisulaAt + new Vector3(-0.2f, 0.14f, -0.08f), 0.32f, 0.07f, 0.025f, 0.45f, false);
             var seed = BuildSeed(root, art, "seed", "story.water.1899", njeriAt + new Vector3(0.12f, 0.85f, -0.1f));
@@ -633,6 +688,8 @@ namespace Sankofa.EditorTools
         {
             var railRoot = Child(root, "Rails");
             railRoot.localPosition = top;
+            // The rails run away from the visitor, so their sections face the seat and the near end is the one touched.
+            railRoot.localRotation = Quaternion.Euler(0, -90f, 0);
             // Four new flat-bottomed rails side by side, their sections showing at the ends toward the visitor, and a
             // bundle of fishplates with their bolts across the far end, waiting for the joints.
             Color Weathered(Vector3 p, Vector3 n) => Weather(p, n, false);
@@ -640,9 +697,10 @@ namespace Sankofa.EditorTools
             {
                 var w = top + p;
                 var rain = SankofaMeshes.Fbm(w * 7f, 1899, 3) + 0.15f * Mathf.Sin(w.x * 23f);
-                var scale = new Color(0.24f, 0.24f, 0.27f);
+                var scale = new Color(0.2f, 0.2f, 0.23f);
                 var rust = new Color(0.72f, 0.3f, 0.12f);
-                var c = Color.Lerp(scale, rust, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-0.25f, 0.1f, rain)));
+                // Mostly dark mill scale, rust blooming in patches where the rain has stood.
+                var c = Color.Lerp(scale, rust, 0.85f * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.02f, 0.3f, rain)));
                 // The rolled running surface is smoother and catches the light; the sawn ends have rusted first.
                 if (head && n.y > 0.8f && p.y > 0.09f) c = Color.Lerp(c, new Color(0.46f, 0.46f, 0.48f), 0.5f);
                 if (Mathf.Abs(n.x) > 0.9f) c = Color.Lerp(c, new Color(0.5f, 0.27f, 0.15f), 0.7f);
@@ -654,7 +712,7 @@ namespace Sankofa.EditorTools
             {
                 var z = (i - 1.5f) * 0.11f;
                 var at = new Vector3(i % 2 == 0 ? 0.03f : -0.04f, 0f, z);
-                steel.Add(Tinted(Part(SankofaStoryMeshes.Extrude("Rail " + i, section, 1.4f), at, Quaternion.identity, Vector3.one), (p, n) => Weather(p, n, true)));
+                steel.Add(Tinted(Part(SankofaStoryMeshes.Extrude("Rail " + i, section, 1.4f, 24), at, Quaternion.identity, Vector3.one), (p, n) => Weather(p, n, true)));
             }
             // Fishplates stacked crosswise at one end, with the bolts that will join the rails laid on top.
             for (var k = 0; k < 3; k++)
@@ -676,7 +734,7 @@ namespace Sankofa.EditorTools
             var body = Static(railRoot, "Body", Combine(steel, "1899 rails"), art.RailRust);
             SaveMeshes(new[] { body });
             var o = Staged(railRoot.gameObject, "rails", "story.water.1899", true, new[] { body.GetComponent<Renderer>() });
-            Set(o, "touchPoint", Marker(railRoot, "Touch point", new Vector3(-0.08f, 0.1f, -0.1f)));
+            Set(o, "touchPoint", Marker(railRoot, "Touch point", new Vector3(-0.62f, 0.1f, -0.055f)));
             Set(o, "touchRadius", 0.11f);
             Set(o, "attentionRadius", 0.25f);
             return o;
@@ -713,7 +771,9 @@ namespace Sankofa.EditorTools
             float R(float a, float b) => Range(random, a, b);
             var ground = Static(root, "Ground", SankofaStoryMeshes.Ground("Today ground", RiverGround, p =>
             {
-                var c = new Color(0.62f, 0.56f, 0.5f) * (1f + SankofaMeshes.Fbm(p * 0.8f, 95, 3) * 0.35f);
+                // A reclaimed bank: dark, grassed earth near the water, paler trodden ground further off.
+                var near = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(14f, 3f, p.magnitude));
+                var c = Color.Lerp(new Color(0.55f, 0.52f, 0.47f), new Color(0.36f, 0.4f, 0.28f), near) * (1f + SankofaMeshes.Fbm(p * 0.8f, 95, 3) * 0.35f);
                 var bank = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(1.2f, 2.4f, CourseDistance(p)));
                 return Color.Lerp(c, new Color(0.38f, 0.36f, 0.33f), bank);
             }, p => 0f, 5f, 160f), art.Ground);
@@ -741,7 +801,7 @@ namespace Sankofa.EditorTools
                 var at = new Vector3(Mathf.Cos(degrees * Mathf.Deg2Rad), 0, Mathf.Sin(degrees * Mathf.Deg2Rad)) * distance;
                 if (at.z < 38f) continue;
                 var tower = distance > 130f && random.NextDouble() < 0.25;
-                var height = tower ? R(40f, 80f) : R(9f, 22f) + distance * R(0f, 0.08f);
+                var height = tower ? R(40f, 80f) * (random.NextDouble() < 0.15 ? 1.8f : 1f) : R(9f, 22f) + distance * R(0f, 0.08f);
                 // Storeys are 3.4 m, as the shader draws them.
                 height = Mathf.Max(2, Mathf.Round(height / 3.4f)) * 3.4f;
                 var size = new Vector3(R(10f, 26f), height, R(10f, 20f));
@@ -813,8 +873,9 @@ namespace Sankofa.EditorTools
                 var z = R(9f, 30f);
                 var at = new Vector3(x, 0, z + Mathf.Abs(x) * 0.18f);
                 if (Mathf.Abs(at.z - 24f - Mathf.Abs(x) * 0.18f) < 3f) continue;
-                // Keep the view across the river open straight ahead; trees frame it at the sides.
+                // Keep the view across the river open straight ahead; trees frame it at the sides, clear of the lamps.
                 if (Mathf.Abs(Mathf.Atan2(at.x, at.z)) < 0.45f) continue;
+                if (Enumerable.Range(0, 5).Any(k => Vector2.Distance(new Vector2(at.x, at.z), new Vector2(-20f + k * 10f, 6.5f + Mathf.Abs(-20f + k * 10f) * 0.18f)) < 5f)) continue;
                 at.y = RiverGround(at) - 0.05f;
                 Mesh trunk, crown;
                 if (random.NextDouble() < 0.7) SankofaStoryMeshes.Acacia(570 + i, R(6f, 10f), out trunk, out crown);
@@ -853,10 +914,11 @@ namespace Sankofa.EditorTools
                 Prim(root, "Streetlight " + i, PrimitiveType.Cylinder, pole + Vector3.up * 2.5f, new Vector3(0.09f, 2.5f, 0.09f), art.Steel);
                 Prim(root, "Streetlight head " + i, PrimitiveType.Cube, pole + new Vector3(0, 5f, -0.25f), new Vector3(0.18f, 0.08f, 0.55f), art.Steel);
                 var glow = GlowCard(Child(root, "Streetlight glow " + i), art, 0.6f);
-                glow.transform.parent.localPosition = pole + new Vector3(0, 4.92f, -0.4f);
+                // In front of the lamp head, so the head never hides part of its own glow.
+                glow.transform.parent.localPosition = pole + new Vector3(0, 4.9f, -0.62f);
                 Set(glow.transform.parent.gameObject.AddComponent<Billboard>(), "upright", false);
             }
-            var weedsMesh = SankofaMeshes.Grass(Vector3.zero, Vector3.zero, 97, 260, 0.9f, 6f, RiverGround, p => CourseDistance(p) > 1.5f);
+            var weedsMesh = SankofaMeshes.Grass(Vector3.zero, Vector3.zero, 97, 700, 0.9f, 9f, RiverGround, p => CourseDistance(p) > 1.5f);
             weedsMesh.name = "Today weeds";
             var weeds = Static(root, "Weeds", weedsMesh, art.Grass);
             Prim(root, "Sky", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 420f, art.SkyCity);
@@ -1038,7 +1100,7 @@ namespace Sankofa.EditorTools
         {
             var gateRoot = Child(root, "Garden gate");
             gateRoot.localPosition = new Vector3(0.5f, 0, 0.14f);
-            gateRoot.localRotation = Quaternion.Euler(0, -70, 0);
+            gateRoot.localRotation = Quaternion.Euler(0, -58, 0);
             var parts = new List<CombineInstance>
             {
                 Part(SankofaStoryMeshes.Box("Gate post", new Vector3(0.07f, 1.2f, 0.07f)), new Vector3(-0.32f, 0.6f, 0), Quaternion.identity, Vector3.one),
@@ -1049,7 +1111,19 @@ namespace Sankofa.EditorTools
             for (var i = 0; i < 5; i++)
                 parts.Add(Part(SankofaStoryMeshes.Box("Gate slat", new Vector3(0.06f, 0.66f, 0.02f)), new Vector3(-0.22f + i * 0.11f, 0.65f, 0), Quaternion.identity, Vector3.one));
             var body = Static(gateRoot, "Body", Combine(parts, "Garden gate"), art.Paint);
-            SaveMeshes(new[] { body });
+            // The garden's fence runs on from the gate, away from the visitor: rough posts and two rails.
+            var fence = new List<CombineInstance>();
+            var random = new System.Random(1063);
+            for (var k = 1; k <= 5; k++)
+            {
+                var x = 0.32f + k * 0.9f;
+                var lean = Quaternion.Euler(Range(random, -3f, 3f), 0, Range(random, -4f, 4f));
+                fence.Add(Part(SankofaStoryMeshes.Box("Fence post", new Vector3(0.06f, Range(random, 0.95f, 1.1f), 0.06f)), new Vector3(x, 0.5f, Range(random, -0.03f, 0.03f)), lean, Vector3.one));
+            }
+            foreach (var y in new[] { 0.4f, 0.85f })
+                fence.Add(Part(SankofaStoryMeshes.Box("Fence rail", new Vector3(4.5f, 0.04f, 0.025f)), new Vector3(0.32f + 2.25f, y, 0.035f), Quaternion.Euler(0, 0, Range(random, -0.8f, 0.8f)), Vector3.one));
+            var fenceFilter = Static(gateRoot, "Fence", Combine(fence, "Garden fence"), art.SeatWood);
+            SaveMeshes(new[] { body, fenceFilter });
             var o = Staged(gateRoot.gameObject, "gate", "story.water.today", true, new[] { body.GetComponent<Renderer>() });
             Set(o, "touchPoint", Marker(gateRoot, "Touch point", new Vector3(-0.12f, 0.88f, 0.02f)));
             Set(o, "touchRadius", 0.12f);

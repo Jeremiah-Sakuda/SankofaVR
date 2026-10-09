@@ -5,7 +5,7 @@ namespace Sankofa.Runtime.Stage
     /// <summary>
     /// Cars on the far road, seen only as their lights: even-numbered lights come toward the left in their own lane,
     /// odd ones go the other way, each at its own steady pace with a gap behind it, wrapping at the road's ends.
-    /// Ambient only; it never reacts to the story.
+    /// Ambient only: it never reacts to the story, but holds still while the visit is paused.
     /// </summary>
     public sealed class Traffic : MonoBehaviour
     {
@@ -21,6 +21,7 @@ namespace Sankofa.Runtime.Stage
         float[] start;
         float[] pace;
         float length;
+        float clock;
 
         void Awake()
         {
@@ -40,10 +41,11 @@ namespace Sankofa.Runtime.Stage
         void Update()
         {
             if (length <= 0f) return;
+            clock += StageClock.DeltaTime;
             for (var i = 0; i < lights.Length; i++)
             {
                 var toward = i % 2 == 0;
-                var s = Mathf.Repeat(start[i] + Time.time * pace[i], length);
+                var s = Mathf.Repeat(start[i] + clock * pace[i], length);
                 if (toward) s = length - s;
                 lights[i].localPosition = At(s, toward ? -lane : lane);
             }

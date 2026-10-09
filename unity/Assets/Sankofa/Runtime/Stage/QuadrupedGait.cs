@@ -31,7 +31,7 @@ namespace Sankofa.Runtime.Stage
         void Update()
         {
             if (motion == null) return;
-            var dt = Time.deltaTime;
+            var dt = StageClock.DeltaTime;
             var walking = motion.Walking;
             stepWeight = Mathf.MoveTowards(stepWeight, walking ? 1f : 0f, dt / 0.25f);
             var angle = Mathf.Sin(motion.Travelled / stride * Mathf.PI) * swing * stepWeight;

@@ -34,7 +34,7 @@ namespace Sankofa.Runtime.Audio
             if (audible && !wasAudible) countdown = firstAfter;
             wasAudible = audible;
             if (!audible || clips.Length == 0 || source == null) return;
-            countdown -= Time.deltaTime;
+            countdown -= Sankofa.Runtime.Stage.StageClock.DeltaTime;
             if (countdown > 0) return;
             countdown = Random.Range(interval.x, interval.y);
             var clip = clips[Random.Range(0, clips.Length)];

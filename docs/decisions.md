@@ -103,7 +103,7 @@ The three water scenes, ember-and-smoke figures and synthesised story ambience r
 |---|---|
 | Narration: Gemini 3.1 Flash TTS, voice Kore, original griot direction, pre-rendered and bundled | User selected; output terms (including the preview model's) to confirm before release |
 | People as additive ember-and-smoke figures with no face or likeness | Implemented in software; not reviewed by family or on a headset |
-| Story ambience synthesised in code (stream, insects, wind, hammers, city) | Implemented; no recorded or generated audio, and no music |
+| Story ambience synthesised in code (stream, insects, wind, hammers, city) | Superseded on October 7 by field recordings (see below) |
 | The status line shows "Draft story · not yet reviewed by family or community" | Adopted until review |
 
 Not established: pronunciation review, fluent-listener or community review, headset listening, or Quest performance with 85 compressed clips.

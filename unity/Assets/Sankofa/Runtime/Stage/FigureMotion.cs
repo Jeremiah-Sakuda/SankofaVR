@@ -36,7 +36,9 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
         [SerializeField] Renderer[] parts = new Renderer[0];
         [Tooltip("Smoke opacity of those parts; cloth is denser than the body it covers.")]
-        [SerializeField] float partSmoke = 0.62f;
+        [SerializeField] float partSmoke = 0.8f;
+        [Tooltip("Smoke opacity of the body: dense enough that a figure reads as a presence, not glass.")]
+        [SerializeField] float bodySmoke = 0.72f;
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
 
@@ -228,7 +230,8 @@ namespace Sankofa.Runtime.Stage
 
         void Update()
         {
-            var dt = Time.deltaTime;
+            var dt = StageClock.DeltaTime;
+            if (animator != null) animator.speed = StageClock.AnimatorSpeed;
             var walking = false;
             if (wait > 0) wait -= dt;
             else if (next < route.Count)
@@ -365,6 +368,7 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(ProceduralId, animator != null ? 0f : 1f);
             block.SetFloat(GroundId, basePosition.y);
             block.SetColor(ColorId, tint);
+            block.SetFloat(SmokeId, bodySmoke);
             body.SetPropertyBlock(block);
             if (parts.Length == 0) return;
             block.SetFloat(SmokeId, partSmoke);
@@ -374,7 +378,6 @@ namespace Sankofa.Runtime.Stage
                 c.enabled = body.enabled;
                 c.SetPropertyBlock(block);
             }
-            block.SetFloat(SmokeId, 0.3f);
         }
     }
 }

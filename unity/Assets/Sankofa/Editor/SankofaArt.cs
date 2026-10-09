@@ -9,7 +9,7 @@ namespace Sankofa.EditorTools
         public Texture2D Noise, Detail;
         public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Pointer;
         public Material Workbench, Brass, LanternCore;
-        public Material Water, Spill, River, EmberFigure, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
+        public Material Water, Spill, River, EmberFigure, EmberFigureDepth, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
         public Material RailRust, Cladding, Liner, Maize, Headlight, TailLight;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, SkyDusk, SkyMorning, SkyCity, Stars, Smoke, Halo, Plaque;
     }
@@ -101,9 +101,10 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Strength", 0.16f);
                 }),
                 EmberFigure = Make("Ember figure", "Sankofa/Ember Figure", m => m.SetTexture("_Noise", noise)),
+                EmberFigureDepth = Make("Ember figure depth", "Sankofa/Ember Figure Depth", m => { }),
                 City = Make("City", "Sankofa/City", m => { m.SetFloat("_Lit", 0.22f); m.SetFloat("_Glow", 0.9f); }),
                 Gourd = Baked("Gourd", new Color(0.72f, 0.5f, 0.27f), detail, "_DETAIL_UV", new Vector2(3f, 1f), 0.1f, 0.3f),
-                Hide = Baked("Hide", new Color(0.45f, 0.3f, 0.2f), detail, "_DETAIL_TRIPLANAR", new Vector2(6f, 6f), 0.5f, 0.5f),
+                Hide = Baked("Hide", new Color(0.58f, 0.45f, 0.32f), detail, "_DETAIL_TRIPLANAR", new Vector2(6f, 6f), 0.5f, 0.5f),
                 Canvas = Baked("Canvas", new Color(0.78f, 0.72f, 0.6f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.15f, 0.2f),
                 Steel = Make("Rail steel", "Sankofa/Fire Lit", m =>
                 {
@@ -121,8 +122,8 @@ namespace Sankofa.EditorTools
                 Bead = Make("Glass bead", "Sankofa/Fire Lit", m =>
                 {
                     // Colour is a placeholder until family review.
-                    m.SetColor("_Color", new Color(0.12f, 0.25f, 0.55f));
-                    m.SetColor("_Emission", new Color(0.02f, 0.04f, 0.09f));
+                    m.SetColor("_Color", new Color(0.2f, 0.4f, 0.8f));
+                    m.SetColor("_Emission", new Color(0.05f, 0.1f, 0.2f));
                     m.SetFloat("_Rim", 1.6f);
                     m.SetFloat("_Wrap", 0.5f);
                 }),
@@ -134,9 +135,9 @@ namespace Sankofa.EditorTools
                     m.SetColor("_Color", new Color(0.42f, 0.41f, 0.4f));
                     m.SetFloat("_UseBake", 1);
                     m.SetTexture("_Detail", detail);
-                    m.SetVector("_DetailScale", new Vector4(3f, 6f, 0, 0));
-                    m.SetFloat("_DetailStrength", 0.5f);
-                    m.SetFloat("_DetailAlbedo", 0.6f);
+                    m.SetVector("_DetailScale", new Vector4(8f, 8f, 0, 0));
+                    m.SetFloat("_DetailStrength", 0.35f);
+                    m.SetFloat("_DetailAlbedo", 0.25f);
                     m.SetFloat("_Rim", 1.1f);
                     m.SetFloat("_Wrap", 0.2f);
                     m.SetColor("_HighlightColor", new Color(0.55f, 0.7f, 0.9f));

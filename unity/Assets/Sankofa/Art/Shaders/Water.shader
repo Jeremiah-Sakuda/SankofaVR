@@ -105,9 +105,9 @@ Shader "Sankofa/Water"
                 half attenuation = 1 / (1 + d2 * _SankofaLightPos.w);
                 half glint = pow(saturate(dot(n, normalize(l + view))), _Gloss);
                 half3 moonDir = normalize(_SankofaMoonDir.xyz + 1e-5);
-                half moonGlint = pow(saturate(dot(n, normalize(moonDir + view))), _Gloss * 2);
+                half moonGlint = pow(saturate(dot(n, normalize(moonDir + view))), _Gloss);
                 // Water scatters little light: a warm source shows as its glint, with only a trace on the surface.
-                lit += _SankofaLightColor.rgb * (glint * 0.9 + 0.012) * attenuation + _SankofaMoonColor.rgb * moonGlint * 2.5;
+                lit += _SankofaLightColor.rgb * (glint * 0.9 + 0.012) * attenuation + _SankofaMoonColor.rgb * moonGlint * 1.1;
 
                 half foam = _Foam * smoothstep(0.55, 0.9, tex2D(_Noise, i.uv * _Scale * 3 + float2(0, -t * 2.5)).b);
                 lit = lerp(lit, half3(0.5, 0.52, 0.5) * (0.3 + attenuation * _SankofaLightColor.rgb), foam);

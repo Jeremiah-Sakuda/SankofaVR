@@ -88,14 +88,18 @@ Shader "Sankofa/City"
                     // Along the facade, whichever way it faces.
                     float u = dot(i.world.xz, normalize(float2(-n.z, n.x)));
                     half glassWall = step(0.8, style);
-                    float width = _Cell.x * lerp(0.75, 1.4, frac(style * 3.7)) * lerp(1, 0.55, glassWall);
-                    float2 cell = float2(u / width, (i.world.y - baseY) / _Cell.y);
+                    // Punched windows come two to a bay, tall and narrow; glass walls are a finer grid.
+                    float width = _Cell.x * lerp(0.42, 0.65, frac(style * 3.7)) * lerp(1, 1.1, glassWall);
+                    float storey = (i.world.y - baseY) / _Cell.y;
+                    half street = 1 - step(1, storey);
+                    // Shopfronts at street level are wide.
+                    width *= lerp(1, 2.4, street);
+                    float2 cell = float2(u / width, storey);
                     float2 id = floor(cell) + floor(tone * 97);
                     float2 f = frac(cell);
-                    half street = 1 - step(1, cell.y);
                     // Punched windows; a glass wall is nearly all window; shops are wide fronts at street level.
-                    half2 lo = lerp(lerp(half2(0.3, 0.36), half2(0.06, 0.12), glassWall), half2(0.08, 0.1), street);
-                    half2 hi = lerp(lerp(half2(0.7, 0.74), half2(0.94, 0.92), glassWall), half2(0.92, 0.66), street);
+                    half2 lo = lerp(lerp(half2(0.24, 0.24), half2(0.06, 0.12), glassWall), half2(0.08, 0.1), street);
+                    half2 hi = lerp(lerp(half2(0.76, 0.84), half2(0.94, 0.92), glassWall), half2(0.92, 0.66), street);
                     half window = step(lo.x, f.x) * step(f.x, hi.x) * step(lo.y, f.y) * step(f.y, hi.y);
                     half slab = (1 - step(0.06, f.y)) * (1 - glassWall);
                     half share = _Lit * lerp(0.4, 1.8, i.building.b) * lerp(1, 0.6, glassWall);

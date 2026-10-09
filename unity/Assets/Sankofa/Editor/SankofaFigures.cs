@@ -50,6 +50,13 @@ namespace Sankofa.EditorTools
 
     public static partial class SankofaSceneBuilder
     {
+        /// <summary>
+        /// Draws a figure part in ember light, with its depth written first (see EmberFigureDepth.shader) so that
+        /// all a figure's parts together show only their nearest surface. The part must be a single submesh.
+        /// </summary>
+        public static void DrawAsFigure(Renderer renderer, SankofaArtSet art) =>
+            renderer.sharedMaterials = new[] { art.EmberFigure, art.EmberFigureDepth };
+
         /// <summary>A plain cloth lathe at a bone, upright with the figure, flattened front to back like a body.</summary>
         static Renderer Cloth(Transform figureRoot, SankofaArtSet art, Transform bone, string name, List<Vector2> profile)
         {
@@ -61,9 +68,10 @@ namespace Sankofa.EditorTools
             var t = filter.transform;
             t.position = bone.position;
             t.rotation = figureRoot.rotation;
-            t.localScale = new Vector3(1f, 1f, 0.78f);
+            t.localScale = new Vector3(1f, 1f, 0.85f);
             t.SetParent(bone, true);
             var r = filter.GetComponent<Renderer>();
+            DrawAsFigure(r, art);
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             r.receiveShadows = false;
             return r;
@@ -209,12 +217,16 @@ namespace Sankofa.EditorTools
                 Limb("lowerarm" + side, "hand" + side, 0.78f);
                 Limb("clavicle" + side, "upperarm" + side, 0.8f);
                 Limb("thigh" + side, "calf" + side, 0.88f);
+                // The mannequin's hands are modelled as fists; drawn in, they read as a relaxed hand rather than a punch.
+                int lower = Index("lowerarm" + side), hand = Index("hand" + side);
+                if (lower >= 0 && hand >= 0) limbs[hand] = (origins[hand], origins[hand] + (origins[hand] - origins[lower]) * 0.35f, 0.78f);
             }
-            int chest = Index("spine_03"), upperChest = Index("spine_02"), head = Index("Head");
+            int chest = Index("spine_03"), upperChest = Index("spine_02"), head = Index("Head"), neck = Index("neck_01");
             var vertices = mesh.vertices;
             var weights = mesh.boneWeights;
             // The head's ovoid: centred on the vertices that are all head, as wide and deep as they are.
             var headPoints = Enumerable.Range(0, vertices.Length).Where(i => weights[i].boneIndex0 == head && weights[i].weight0 > 0.95f).Select(i => vertices[i]).ToList();
+            if (headPoints.Count == 0) throw new System.InvalidOperationException("The mannequin has no vertices bound only to its Head bone.");
             var headMin = headPoints.Aggregate(Vector3.Min);
             var headMax = headPoints.Aggregate(Vector3.Max);
             var headCentre = (headMin + headMax) * 0.5f;
@@ -241,12 +253,19 @@ namespace Sankofa.EditorTools
                         var target = new Vector3(spineAxis.x + (v.x - spineAxis.x) * 0.86f, v.y, spineAxis.z + (v.z - spineAxis.z) * 0.84f);
                         moved += weight * (target - v);
                     }
-                    else if (bone == head && headPoints.Count > 0)
+                    else if (bone == neck)
+                    {
+                        // The neck drawn in a little; its tendons are smoothed by the welded normals.
+                        var axis = new Vector3(origins[neck].x, v.y, origins[neck].z);
+                        moved += weight * (axis + (v - axis) * 0.88f - v);
+                    }
+                    else if (bone == head)
                     {
                         var d = v - headCentre;
                         var unit = new Vector3(d.x / headRadii.x, d.y / headRadii.y, d.z / headRadii.z);
-                        var onOvoid = headCentre + Vector3.Scale(unit.normalized, headRadii);
-                        moved += weight * (onOvoid - v) * 0.8f;
+                        // A little fuller than the mannequin's, so the head does not read small on its neck.
+                        var onOvoid = headCentre + Vector3.Scale(unit.normalized, headRadii * 1.08f);
+                        moved += weight * (onOvoid - v) * 0.85f;
                     }
                 }
                 Pull(w.boneIndex0, w.weight0);
@@ -256,6 +275,10 @@ namespace Sankofa.EditorTools
                 vertices[i] = v + moved;
             }
             mesh.vertices = vertices;
+            // One submesh, so the figure's depth material covers all of it.
+            var all = Enumerable.Range(0, mesh.subMeshCount).SelectMany(mesh.GetTriangles).ToArray();
+            mesh.subMeshCount = 1;
+            mesh.SetTriangles(all, 0);
             mesh.normals = WeldedNormals(mesh);
             mesh.RecalculateBounds();
             AssetDatabase.DeleteAsset(SlenderBodyPath);
@@ -287,7 +310,7 @@ namespace Sankofa.EditorTools
             var scale = height * 0.89f / Mathf.Max(0.01f, headHeight);
             // Slighter than the mannequin's athletic build, narrowest across the shoulders.
             model.transform.localScale = new Vector3(scale * 0.84f, scale, scale * 0.88f);
-            renderer.sharedMaterials = Enumerable.Repeat(art.EmberFigure, renderer.sharedMaterials.Length).ToArray();
+            DrawAsFigure(renderer, art);
             renderer.updateWhenOffscreen = false;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
@@ -307,8 +330,8 @@ namespace Sankofa.EditorTools
             var shawl = Cloth(figureRoot, art, Bone("spine_03"), "Shawl", new List<Vector2>
             {
                 // Falls from the neck over sloping shoulders and narrows to the waist, rather than squaring them.
-                new Vector2(h * 0.05f, h * 0.12f), new Vector2(h * 0.095f, h * 0.09f), new Vector2(h * 0.128f, h * 0.04f),
-                new Vector2(h * 0.13f, -h * 0.06f), new Vector2(h * 0.12f, -h * 0.18f), new Vector2(h * 0.11f, -h * 0.3f),
+                new Vector2(h * 0.05f, h * 0.13f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
+                new Vector2(h * 0.108f, -h * 0.12f), new Vector2(h * 0.105f, -h * 0.3f),
             });
             return (renderer, animator, Bone("hand_r"), Bone("neck_01"), new[] { wrap, shawl });
         }

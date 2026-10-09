@@ -59,6 +59,9 @@ namespace Sankofa.Runtime.App
 
         VisitFlow flow;
         ExperienceSettings settings;
+        // The settings fold behind one plaque, so the lap holds pause and return and little else.
+        bool settingsOpen;
+        int creditsPage;
         StageObject invited;
         HandSource acceptingHand;
         string baseStatus = "";
@@ -205,6 +208,7 @@ namespace Sankofa.Runtime.App
                 switch (cue)
                 {
                     case Cue.PhaseChanged p:
+                        StageClock.Paused = p.Phase == VisitPhase.Paused;
                         if (p.Phase == VisitPhase.Paused) captions.SetCaption("Paused");
                         else if (captions.Caption == "Paused") captions.Clear();
                         if (p.Phase == VisitPhase.Ended)
@@ -416,6 +420,14 @@ namespace Sankofa.Runtime.App
         {
             switch (id)
             {
+                case "settings":
+                    settingsOpen = true;
+                    ShowSettings();
+                    return;
+                case "done":
+                    settingsOpen = false;
+                    ShowSettings();
+                    return;
                 case "captions":
                     settings.CaptionSize = (CaptionSize)(((int)settings.CaptionSize + 1) % 3);
                     break;
@@ -432,7 +444,11 @@ namespace Sankofa.Runtime.App
                     anchor.Place();
                     break;
                 case "credits":
-                    if (credits != null) captions.Notice(credits.text, 20);
+                    // The credits come a page at a time, one page per press.
+                    if (credits == null) return;
+                    var pages = credits.text.Replace("\r", "").Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    captions.Notice(pages[creditsPage % pages.Length].Trim(), 20);
+                    creditsPage++;
                     return;
             }
             settings.Save();
@@ -452,8 +468,14 @@ namespace Sankofa.Runtime.App
 
         void ShowSettings()
         {
+            if (!settingsOpen)
+            {
+                settingsPanel.Show(new List<(string, string)> { ("settings", "Settings") });
+                return;
+            }
             var items = new List<(string, string)>
             {
+                ("done", "Done"),
                 ("captions", "Text: " + settings.CaptionSize),
                 ("motion", settings.ReducedMotion ? "Motion: reduced" : "Motion: full"),
                 ("ambience", "Ambience: " + settings.AmbienceName),

@@ -381,7 +381,7 @@ namespace Sankofa.EditorTools
         /// A section (z, y), counter-clockwise, extruded along X over the given length and centred on the origin, with
         /// flat sides and capped ends. UVs run in metres along the length and around the section.
         /// </summary>
-        public static Mesh Extrude(string name, IList<Vector2> section, float length)
+        public static Mesh Extrude(string name, IList<Vector2> section, float length, int segments = 1)
         {
             var vertices = new List<Vector3>();
             var uvs = new List<Vector2>();
@@ -401,19 +401,25 @@ namespace Sankofa.EditorTools
                 var q = section[(k + 1) % section.Count];
                 var edge = q - p;
                 var outward = new Vector3(0, -edge.x, edge.y).normalized;
-                var i = vertices.Count;
-                vertices.Add(new Vector3(-half, p.y, p.x));
-                vertices.Add(new Vector3(-half, q.y, q.x));
-                vertices.Add(new Vector3(half, q.y, q.x));
-                vertices.Add(new Vector3(half, p.y, p.x));
                 var next = around + edge.magnitude;
-                uvs.Add(new Vector2(-half, around));
-                uvs.Add(new Vector2(-half, next));
-                uvs.Add(new Vector2(half, next));
-                uvs.Add(new Vector2(half, around));
+                // Divided along the length, so per-vertex weathering can vary down the rail.
+                for (var seg = 0; seg < segments; seg++)
+                {
+                    var x0 = -half + length * seg / segments;
+                    var x1 = -half + length * (seg + 1) / segments;
+                    var i = vertices.Count;
+                    vertices.Add(new Vector3(x0, p.y, p.x));
+                    vertices.Add(new Vector3(x0, q.y, q.x));
+                    vertices.Add(new Vector3(x1, q.y, q.x));
+                    vertices.Add(new Vector3(x1, p.y, p.x));
+                    uvs.Add(new Vector2(x0, around));
+                    uvs.Add(new Vector2(x0, next));
+                    uvs.Add(new Vector2(x1, next));
+                    uvs.Add(new Vector2(x1, around));
+                    Face(i, i + 1, i + 2, outward);
+                    Face(i, i + 2, i + 3, outward);
+                }
                 around = next;
-                Face(i, i + 1, i + 2, outward);
-                Face(i, i + 2, i + 3, outward);
             }
             var cap = EarClip(section);
             foreach (var side in new[] { -1f, 1f })

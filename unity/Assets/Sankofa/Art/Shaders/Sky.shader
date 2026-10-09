@@ -67,6 +67,12 @@ Shader "Sankofa/Sky"
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.pos = UnityObjectToClipPos(v.vertex);
+                // Drawn at the far plane whatever the sphere's size, so it never needs a deeper depth range.
+            #if defined(UNITY_REVERSED_Z)
+                o.pos.z = 1e-6 * o.pos.w;
+            #else
+                o.pos.z = o.pos.w * (1 - 1e-6);
+            #endif
                 o.world = mul(unity_ObjectToWorld, v.vertex).xyz;
                 return o;
             }

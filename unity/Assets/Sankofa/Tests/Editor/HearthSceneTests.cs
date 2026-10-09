@@ -183,7 +183,8 @@ namespace Sankofa.Tests
                 for (var i = 0; i < points.arraySize; i++)
                 {
                     var local = anchor.InverseTransformPoint(((Transform)points.GetArrayElementAtIndex(i).objectReferenceValue).position);
-                    Assert.That(new Vector2(local.x, local.z).magnitude, Is.GreaterThan(0.75f), o.Id + " approach " + i + " keeps a body's distance from the seat");
+                    // Personal space: a person standing or kneeling stays over a metre from the seated visitor.
+                    Assert.That(new Vector2(local.x, local.z).magnitude, Is.GreaterThan(1.1f), o.Id + " approach " + i + " keeps a body's distance from the seat");
                     Assert.That(Vector2.Distance(new Vector2(local.x, local.z), new Vector2(controls.x, controls.z)), Is.GreaterThan(0.5f), o.Id + " approach " + i + " is clear of the controls");
                 }
             }

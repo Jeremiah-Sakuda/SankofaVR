@@ -158,8 +158,9 @@ namespace Sankofa.EditorTools
             var eye = head.GetComponent<Camera>();
             eye.clearFlags = CameraClearFlags.SolidColor;
             eye.backgroundColor = new Color(0.012f, 0.016f, 0.035f);
-            eye.nearClipPlane = 0.02f;
-            // Far enough for the story skies (spheres up to 210 m) and the city's skyline beyond the river.
+            // Depth is spread from 5 cm to 300 m: near enough for a hand at the face, far enough for the city's
+            // skyline beyond the river. The skies draw at the far plane whatever their size.
+            eye.nearClipPlane = 0.05f;
             eye.farClipPlane = 300f;
 
             var hands = new HandSource[2];
@@ -660,7 +661,7 @@ namespace Sankofa.EditorTools
             Set(screen, "title", Line("Title", "Sankofa", SankofaText.LabelFont, 1.15f, 0.16f, 1.4f, new Color(1f, 0.8f, 0.52f), 12f));
             Set(screen, "subtitle", Line("Place", "Enkare Nairobi \u00b7 the cool water", font, 0.42f, 0.02f, 1.4f, new Color(0.96f, 0.86f, 0.72f), 2f));
             Set(screen, "hint", Line("How to choose", "Sit comfortably. To choose, touch a button with a fingertip, or point and pinch. With controllers, point and pull the trigger.",
-                font, 0.27f, -0.1f, 1.05f, new Color(0.86f, 0.8f, 0.72f), 0f));
+                font, 0.36f, -0.14f, 1.25f, new Color(0.9f, 0.84f, 0.76f), 0f));
             return screen;
         }
 
