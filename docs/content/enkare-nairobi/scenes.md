@@ -72,7 +72,7 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 | Element | Object ID | Position | Interaction and notes |
 |---|---|---|---|
 | Camp lantern (the ember's continuation) | `lantern.1899` | (−0.35, 0.95, 0.9) on a pole | Continues `ember`. A period hurricane lantern (lathe and frame) |
-| Stack of rails on sleepers | `rails` | Touch point on the top rail end (0.3, 0.58, 0.45) | **Touch.** Cold steel: a cool highlight and a metallic ring sound. Simple extrusions with a rust and steel material |
+| Stack of rails on sleepers | `rails` | Touch point on the top rail end (0.3, 0.58, 0.45) | **Touch.** Cold steel: a cool highlight and a metallic ring sound. Built: four extruded flat-bottomed rails with mill scale and rust, and fishplates and bolts across the far end |
 | Tents, stores, cart | (static) | 3–8 m across the stream | Procedural canvas tents, crates, a wooden cart |
 | Njeri's gourd | `gourd.empty` | With Njeri's figure | Reveal; a nearly empty gourd |
 | Naisula's gourd | `gourd.old` | With Naisula's figure | Reveal; an old, soot-dark gourd |
@@ -105,11 +105,11 @@ October 4, 2026 · Scoping draft; the three water scenes are built in software (
 
 | Element | Object ID | Position | Interaction and notes |
 |---|---|---|---|
-| *Jiko* (the ember's continuation) | `jiko` | (−0.4, 0.45, 0.85) | Continues `ember`. A metal charcoal stove (lathe with perforations) with a glowing coal |
+| *Jiko* (the ember's continuation) | `jiko` | (−0.4, 0.45, 0.85) | Continues `ember`. Built: a ceramic jiko with waisted galvanised cladding, a clay liner holding the coals, three pot rests, an open ash door, and two cobs of maize roasting on a grill |
 | Garden gate | `gate` | Touch point (0.3, 0.8, 0.45) | **Touch** (bead path). The bead is placed on a nail on the gate |
 | Raised bed | `soil` | Touch point (0.32, 0.56, 0.42) | **Touch** (seed path). The seed is placed in the soil, and a small sprout appears in the passive and accepted endings alike |
 | Bead and seed (continuing the kept ones) | `bead.today`, `seed.today` | Arrive from the kept versions | Continue `bead.kept` and `seed.kept` |
-| City across the river | (static) | 20–200 m | Procedural blocks with emissive window patterns, kept within the far-field budget |
+| City across the river | (static) | 55–240 m | Built: blocks with their own tone, windows, balconies and lit shops; glass towers with aviation lights; the KICC tower and hall on the skyline, at a compressed distance; car lights on the far road and trees on both banks |
 
 **Sound.** Traffic, *matatu* horns at a distance, voices and a radio from a stall; any radio music must be a licensed recording of real performers, or it is cut. The river under it all. Built: a recorded matatu stage in Nairobi, a far city and the river; there is no radio. The matatu recording has not yet been listened to for incidental music.
 

@@ -345,12 +345,128 @@ namespace Sankofa.EditorTools
             new Vector2(radius * 0.5f, height * 0.6f), new Vector2(radius * 0.12f, height * 0.94f), new Vector2(0, height),
         };
 
-        /// <summary>A charcoal stove (jiko): a waisted metal body with a bowl on top for the coals.</summary>
-        public static List<Vector2> JikoProfile(float height, float radius) => new List<Vector2>
+        /// <summary>
+        /// The sheet-metal cladding of a ceramic charcoal stove (jiko), 0.26 m tall: a flared base and ash chamber,
+        /// a pinched waist, the bowl flaring to a rolled lip, and the inside of the lip turning down to meet the liner.
+        /// </summary>
+        public static List<Vector2> JikoCladding() => new List<Vector2>
         {
-            new Vector2(0, 0), new Vector2(radius * 0.8f, 0), new Vector2(radius * 0.7f, height * 0.45f), new Vector2(radius * 0.55f, height * 0.55f),
-            new Vector2(radius, height * 0.95f), new Vector2(radius * 1.02f, height), new Vector2(radius * 0.9f, height), new Vector2(0, height * 0.8f),
+            new Vector2(0, 0.002f), new Vector2(0.104f, 0f), new Vector2(0.114f, 0.012f), new Vector2(0.108f, 0.02f),
+            new Vector2(0.088f, 0.1f), new Vector2(0.084f, 0.118f), new Vector2(0.09f, 0.135f), new Vector2(0.122f, 0.215f),
+            new Vector2(0.134f, 0.243f), new Vector2(0.139f, 0.25f), new Vector2(0.135f, 0.256f), new Vector2(0.126f, 0.252f),
+            new Vector2(0.122f, 0.23f),
         };
+
+        /// <summary>The fired-clay liner that holds the coals: its thick rim stands proud of the metal, its bowl narrows to the grate.</summary>
+        public static List<Vector2> JikoLiner() => new List<Vector2>
+        {
+            new Vector2(0.123f, 0.226f), new Vector2(0.125f, 0.262f), new Vector2(0.118f, 0.27f), new Vector2(0.104f, 0.268f),
+            new Vector2(0.094f, 0.25f), new Vector2(0.074f, 0.215f), new Vector2(0.05f, 0.2f), new Vector2(0f, 0.197f),
+        };
+
+        /// <summary>
+        /// A flat-bottomed rail section of the 1890s, about 0.1 m tall, in the (z, y) plane: foot, web, head and a
+        /// slightly crowned running surface. Counter-clockwise, for <see cref="Extrude"/>.
+        /// </summary>
+        public static List<Vector2> RailSection() => new List<Vector2>
+        {
+            new Vector2(-0.045f, 0f), new Vector2(0.045f, 0f), new Vector2(0.045f, 0.006f), new Vector2(0.013f, 0.019f),
+            new Vector2(0.0075f, 0.03f), new Vector2(0.0075f, 0.064f), new Vector2(0.013f, 0.07f), new Vector2(0.025f, 0.074f),
+            new Vector2(0.025f, 0.091f), new Vector2(0.019f, 0.098f), new Vector2(0f, 0.1f), new Vector2(-0.019f, 0.098f),
+            new Vector2(-0.025f, 0.091f), new Vector2(-0.025f, 0.074f), new Vector2(-0.013f, 0.07f), new Vector2(-0.0075f, 0.064f),
+            new Vector2(-0.0075f, 0.03f), new Vector2(-0.013f, 0.019f), new Vector2(-0.045f, 0.006f),
+        };
+
+        /// <summary>
+        /// A section (z, y), counter-clockwise, extruded along X over the given length and centred on the origin, with
+        /// flat sides and capped ends. UVs run in metres along the length and around the section.
+        /// </summary>
+        public static Mesh Extrude(string name, IList<Vector2> section, float length)
+        {
+            var vertices = new List<Vector3>();
+            var uvs = new List<Vector2>();
+            var triangles = new List<int>();
+            var half = length * 0.5f;
+            void Face(int a, int b, int c, Vector3 outward)
+            {
+                // Unity's front face is the one whose normal is Cross(b - a, c - a).
+                var n = Vector3.Cross(vertices[b] - vertices[a], vertices[c] - vertices[a]);
+                if (Vector3.Dot(n, outward) >= 0) triangles.AddRange(new[] { a, b, c });
+                else triangles.AddRange(new[] { a, c, b });
+            }
+            var around = 0f;
+            for (var k = 0; k < section.Count; k++)
+            {
+                var p = section[k];
+                var q = section[(k + 1) % section.Count];
+                var edge = q - p;
+                var outward = new Vector3(0, -edge.x, edge.y).normalized;
+                var i = vertices.Count;
+                vertices.Add(new Vector3(-half, p.y, p.x));
+                vertices.Add(new Vector3(-half, q.y, q.x));
+                vertices.Add(new Vector3(half, q.y, q.x));
+                vertices.Add(new Vector3(half, p.y, p.x));
+                var next = around + edge.magnitude;
+                uvs.Add(new Vector2(-half, around));
+                uvs.Add(new Vector2(-half, next));
+                uvs.Add(new Vector2(half, next));
+                uvs.Add(new Vector2(half, around));
+                around = next;
+                Face(i, i + 1, i + 2, outward);
+                Face(i, i + 2, i + 3, outward);
+            }
+            var cap = EarClip(section);
+            foreach (var side in new[] { -1f, 1f })
+            {
+                var start = vertices.Count;
+                foreach (var p in section)
+                {
+                    vertices.Add(new Vector3(side * half, p.y, p.x));
+                    uvs.Add(new Vector2(p.x, p.y));
+                }
+                for (var t = 0; t < cap.Count; t += 3)
+                    Face(start + cap[t], start + cap[t + 1], start + cap[t + 2], new Vector3(side, 0, 0));
+            }
+            var mesh = new Mesh();
+            mesh.SetVertices(vertices);
+            mesh.SetUVs(0, uvs);
+            mesh.SetTriangles(triangles, 0);
+            mesh.SetColors(Fill(vertices.Count, Color.white));
+            mesh.SetUVs(1, Fill2(vertices.Count, new Vector2(1, 1)));
+            return Finish(mesh, name);
+        }
+
+        /// <summary>Triangulates a simple counter-clockwise polygon by clipping ears; returns index triples.</summary>
+        static List<int> EarClip(IList<Vector2> polygon)
+        {
+            var remaining = new List<int>();
+            for (var i = 0; i < polygon.Count; i++) remaining.Add(i);
+            var result = new List<int>();
+            float Cross(Vector2 a, Vector2 b, Vector2 c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+            var guard = 0;
+            while (remaining.Count > 3 && guard++ < 10000)
+            {
+                for (var i = 0; i < remaining.Count; i++)
+                {
+                    int ia = remaining[(i + remaining.Count - 1) % remaining.Count], ib = remaining[i], ic = remaining[(i + 1) % remaining.Count];
+                    Vector2 a = polygon[ia], b = polygon[ib], c = polygon[ic];
+                    if (Cross(a, b, c) <= 1e-9f) continue;
+                    var inside = false;
+                    foreach (var j in remaining)
+                    {
+                        if (j == ia || j == ib || j == ic) continue;
+                        var p = polygon[j];
+                        if (Cross(a, b, p) >= 0 && Cross(b, c, p) >= 0 && Cross(c, a, p) >= 0) { inside = true; break; }
+                    }
+                    if (inside) continue;
+                    result.AddRange(new[] { ia, ib, ic });
+                    remaining.RemoveAt(i);
+                    break;
+                }
+            }
+            if (remaining.Count == 3) result.AddRange(remaining);
+            return result;
+        }
 
         // ---- people and animals, as shapes of light ----
 
@@ -404,27 +520,41 @@ namespace Sankofa.EditorTools
             return mesh;
         }
 
-        /// <summary>A ewe on its four legs, as a simple rounded silhouette.</summary>
-        public static Mesh Ewe(string name, int seed)
+        /// <summary>
+        /// A ewe in parts, so she can walk and graze: the body with its fleece and tail; the neck and head with
+        /// drooping ears, built around the point where the neck meets the body; and one leg, built hanging down from
+        /// its top. Black vertex colour leaves the figure shader's arm swing untouched.
+        /// </summary>
+        public static (Mesh Body, Mesh Head, Mesh Leg) EweParts(string name, int seed)
         {
-            var parts = new List<CombineInstance>();
             Mesh Round(int s) => SankofaMeshes.Stone(s, 2, 0.08f, 10f);
-            parts.Add(new CombineInstance { mesh = Round(seed), transform = Matrix4x4.TRS(new Vector3(0, 0.5f, 0), Quaternion.identity, new Vector3(0.2f, 0.17f, 0.36f)) });
-            // A fuller fleece over the back and haunches; the figure shader draws only the nearest surface.
-            parts.Add(new CombineInstance { mesh = Round(seed + 11), transform = Matrix4x4.TRS(new Vector3(0, 0.56f, -0.12f), Quaternion.identity, new Vector3(0.19f, 0.15f, 0.22f)) });
-            parts.Add(new CombineInstance { mesh = Round(seed + 12), transform = Matrix4x4.TRS(new Vector3(0, 0.56f, 0.14f), Quaternion.identity, new Vector3(0.18f, 0.14f, 0.2f)) });
-            // Neck rising forward to a long, narrow head with drooping ears, and a short tail.
-            parts.Add(new CombineInstance { mesh = Round(seed + 13), transform = Matrix4x4.TRS(new Vector3(0, 0.6f, 0.3f), Quaternion.Euler(-35, 0, 0), new Vector3(0.065f, 0.1f, 0.065f)) });
-            parts.Add(new CombineInstance { mesh = Round(seed + 1), transform = Matrix4x4.TRS(new Vector3(0, 0.66f, 0.42f), Quaternion.Euler(35, 0, 0), new Vector3(0.06f, 0.07f, 0.12f)) });
+            Mesh Dark(List<CombineInstance> parts, string part)
+            {
+                var m = CombineMeshes(parts, name + " " + part);
+                m.SetColors(Fill(m.vertexCount, new Color(0, 0, 0, 1)));
+                return m;
+            }
+            var body = new List<CombineInstance>
+            {
+                new CombineInstance { mesh = Round(seed), transform = Matrix4x4.TRS(new Vector3(0, 0.5f, 0), Quaternion.identity, new Vector3(0.2f, 0.17f, 0.36f)) },
+                new CombineInstance { mesh = Round(seed + 11), transform = Matrix4x4.TRS(new Vector3(0, 0.56f, -0.12f), Quaternion.identity, new Vector3(0.19f, 0.15f, 0.22f)) },
+                new CombineInstance { mesh = Round(seed + 12), transform = Matrix4x4.TRS(new Vector3(0, 0.56f, 0.14f), Quaternion.identity, new Vector3(0.18f, 0.14f, 0.2f)) },
+                new CombineInstance { mesh = Round(seed + 15), transform = Matrix4x4.TRS(new Vector3(0, 0.5f, -0.37f), Quaternion.Euler(20, 0, 0), new Vector3(0.035f, 0.06f, 0.035f)) },
+            };
+            // Head parts relative to the neck's root at (0, 0.58, 0.26).
+            var neckRoot = new Vector3(0, 0.58f, 0.26f);
+            var head = new List<CombineInstance>
+            {
+                new CombineInstance { mesh = Round(seed + 13), transform = Matrix4x4.TRS(new Vector3(0, 0.6f, 0.3f) - neckRoot, Quaternion.Euler(-35, 0, 0), new Vector3(0.065f, 0.1f, 0.065f)) },
+                new CombineInstance { mesh = Round(seed + 1), transform = Matrix4x4.TRS(new Vector3(0, 0.66f, 0.42f) - neckRoot, Quaternion.Euler(35, 0, 0), new Vector3(0.06f, 0.07f, 0.12f)) },
+            };
             foreach (var side in new[] { -1f, 1f })
-                parts.Add(new CombineInstance { mesh = Round(seed + 14), transform = Matrix4x4.TRS(new Vector3(side * 0.065f, 0.69f, 0.37f), Quaternion.Euler(0, 0, side * -35f), new Vector3(0.045f, 0.012f, 0.025f)) });
-            parts.Add(new CombineInstance { mesh = Round(seed + 15), transform = Matrix4x4.TRS(new Vector3(0, 0.5f, -0.37f), Quaternion.Euler(20, 0, 0), new Vector3(0.035f, 0.06f, 0.035f)) });
-            foreach (var (x, z) in new[] { (-0.1f, 0.22f), (0.1f, 0.22f), (-0.1f, -0.22f), (0.1f, -0.22f) })
-                parts.Add(new CombineInstance { mesh = SankofaMeshes.Log(seed + 5, 0.42f, 0.022f, 0.3f, 0.005f, 6, 2), transform = Matrix4x4.TRS(new Vector3(x, 0.21f, z), Quaternion.identity, Vector3.one) });
-            var mesh = CombineMeshes(parts, name);
-            // No arms: black vertex colour leaves the figure shader's arm swing untouched.
-            mesh.SetColors(Fill(mesh.vertexCount, new Color(0, 0, 0, 1)));
-            return mesh;
+                head.Add(new CombineInstance { mesh = Round(seed + 14), transform = Matrix4x4.TRS(new Vector3(side * 0.065f, 0.69f, 0.37f) - neckRoot, Quaternion.Euler(0, 0, side * -35f), new Vector3(0.045f, 0.012f, 0.025f)) });
+            var leg = new List<CombineInstance>
+            {
+                new CombineInstance { mesh = SankofaMeshes.Log(seed + 5, 0.42f, 0.022f, 0.3f, 0.005f, 6, 2), transform = Matrix4x4.TRS(new Vector3(0, -0.21f, 0), Quaternion.identity, Vector3.one) },
+            };
+            return (Dark(body, "body"), Dark(head, "head"), Dark(leg, "leg"));
         }
 
         static List<Vector2> Fill2(int count, Vector2 v)

@@ -156,7 +156,112 @@ namespace Sankofa.EditorTools
             return controller;
         }
 
+        /// <summary>Smooth normals that ignore UV seams: vertices at the same place share one normal.</summary>
+        static Vector3[] WeldedNormals(Mesh mesh)
+        {
+            var vertices = mesh.vertices;
+            var sums = new Dictionary<Vector3Int, Vector3>();
+            Vector3Int Key(Vector3 v) => Vector3Int.RoundToInt(v * 10000f);
+            for (var sub = 0; sub < mesh.subMeshCount; sub++)
+            {
+                var triangles = mesh.GetTriangles(sub);
+                for (var t = 0; t < triangles.Length; t += 3)
+                {
+                    Vector3 a = vertices[triangles[t]], b = vertices[triangles[t + 1]], c = vertices[triangles[t + 2]];
+                    var face = Vector3.Cross(b - a, c - a);
+                    foreach (var k in new[] { triangles[t], triangles[t + 1], triangles[t + 2] })
+                    {
+                        var key = Key(vertices[k]);
+                        sums[key] = (sums.TryGetValue(key, out var sum) ? sum : Vector3.zero) + face;
+                    }
+                }
+            }
+            return vertices.Select(v => sums.TryGetValue(Key(v), out var n) && n.sqrMagnitude > 0 ? n.normalized : Vector3.up).ToArray();
+        }
+
         static AnimatorController figureController;
+        static Mesh slenderBody;
+        const string SlenderBodyPath = "Assets/Sankofa/Art/Generated/Figure body.asset";
+
+        /// <summary>
+        /// The mannequin reshaped for our figures, in its bind pose: arms drawn in toward their bones, a narrower,
+        /// flatter chest and slighter shoulders, and the head smoothed to a plain ovoid, so the ember rim never
+        /// picks out a brow or a nose. Skinning is unchanged, so every clip still fits.
+        /// </summary>
+        static Mesh SlenderBody(SkinnedMeshRenderer renderer)
+        {
+            var source = renderer.sharedMesh;
+            var mesh = Object.Instantiate(source);
+            mesh.name = "Figure body";
+            var names = renderer.bones.Select(b => b.name).ToArray();
+            var origins = mesh.bindposes.Select(m => m.inverse.MultiplyPoint3x4(Vector3.zero)).ToArray();
+            int Index(string name) => System.Array.IndexOf(names, name);
+            // Each limb bone runs to the joint of the next.
+            var limbs = new Dictionary<int, (Vector3 From, Vector3 To, float Keep)>();
+            foreach (var side in new[] { "_l", "_r" })
+            {
+                void Limb(string bone, string next, float keep)
+                {
+                    int a = Index(bone), b = Index(next);
+                    if (a >= 0 && b >= 0) limbs[a] = (origins[a], origins[b], keep);
+                }
+                Limb("upperarm" + side, "lowerarm" + side, 0.72f);
+                Limb("lowerarm" + side, "hand" + side, 0.78f);
+                Limb("clavicle" + side, "upperarm" + side, 0.8f);
+                Limb("thigh" + side, "calf" + side, 0.88f);
+            }
+            int chest = Index("spine_03"), upperChest = Index("spine_02"), head = Index("Head");
+            var vertices = mesh.vertices;
+            var weights = mesh.boneWeights;
+            // The head's ovoid: centred on the vertices that are all head, as wide and deep as they are.
+            var headPoints = Enumerable.Range(0, vertices.Length).Where(i => weights[i].boneIndex0 == head && weights[i].weight0 > 0.95f).Select(i => vertices[i]).ToList();
+            var headMin = headPoints.Aggregate(Vector3.Min);
+            var headMax = headPoints.Aggregate(Vector3.Max);
+            var headCentre = (headMin + headMax) * 0.5f;
+            var headRadii = (headMax - headMin) * 0.5f;
+            var spineAxis = chest >= 0 ? origins[chest] : Vector3.zero;
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                var v = vertices[i];
+                var w = weights[i];
+                var moved = Vector3.zero;
+                void Pull(int bone, float weight)
+                {
+                    if (weight <= 0f) return;
+                    if (limbs.TryGetValue(bone, out var limb))
+                    {
+                        var axis = limb.To - limb.From;
+                        var t = Mathf.Clamp01(Vector3.Dot(v - limb.From, axis) / axis.sqrMagnitude);
+                        var onAxis = limb.From + axis * t;
+                        moved += weight * (onAxis + (v - onAxis) * limb.Keep - v);
+                    }
+                    else if (bone == chest || bone == upperChest)
+                    {
+                        // Narrower across and shallower front to back about the spine.
+                        var target = new Vector3(spineAxis.x + (v.x - spineAxis.x) * 0.86f, v.y, spineAxis.z + (v.z - spineAxis.z) * 0.84f);
+                        moved += weight * (target - v);
+                    }
+                    else if (bone == head && headPoints.Count > 0)
+                    {
+                        var d = v - headCentre;
+                        var unit = new Vector3(d.x / headRadii.x, d.y / headRadii.y, d.z / headRadii.z);
+                        var onOvoid = headCentre + Vector3.Scale(unit.normalized, headRadii);
+                        moved += weight * (onOvoid - v) * 0.8f;
+                    }
+                }
+                Pull(w.boneIndex0, w.weight0);
+                Pull(w.boneIndex1, w.weight1);
+                Pull(w.boneIndex2, w.weight2);
+                Pull(w.boneIndex3, w.weight3);
+                vertices[i] = v + moved;
+            }
+            mesh.vertices = vertices;
+            mesh.normals = WeldedNormals(mesh);
+            mesh.RecalculateBounds();
+            AssetDatabase.DeleteAsset(SlenderBodyPath);
+            AssetDatabase.CreateAsset(mesh, SlenderBodyPath);
+            return mesh;
+        }
 
         /// <summary>
         /// A skinned figure body under a figure root: the mannequin, scaled to the figure's height, drawn only by the
@@ -173,13 +278,15 @@ namespace Sankofa.EditorTools
             model.transform.localRotation = Quaternion.Euler(0, 180, 0);
             if (figureController == null) figureController = FigureController(model);
             var renderer = model.GetComponentInChildren<SkinnedMeshRenderer>();
+            if (slenderBody == null) slenderBody = SlenderBody(renderer);
+            renderer.sharedMesh = slenderBody;
             Transform Bone(string name) => model.GetComponentsInChildren<Transform>(true).First(t => t.name == name);
             // Scale to the figure's standing height, measured from the skeleton as imported: the head joint sits at
             // about nine tenths of a standing person's height. (The mesh's own bounds are in the file's units.)
             var headHeight = Bone("Head").position.y - model.transform.position.y;
             var scale = height * 0.89f / Mathf.Max(0.01f, headHeight);
-            // A little slighter than the mannequin's athletic build.
-            model.transform.localScale = new Vector3(scale * 0.9f, scale, scale * 0.9f);
+            // Slighter than the mannequin's athletic build, narrowest across the shoulders.
+            model.transform.localScale = new Vector3(scale * 0.84f, scale, scale * 0.88f);
             renderer.sharedMaterials = Enumerable.Repeat(art.EmberFigure, renderer.sharedMaterials.Length).ToArray();
             renderer.updateWhenOffscreen = false;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -199,8 +306,9 @@ namespace Sankofa.EditorTools
             });
             var shawl = Cloth(figureRoot, art, Bone("spine_03"), "Shawl", new List<Vector2>
             {
-                new Vector2(h * 0.06f, h * 0.12f), new Vector2(h * 0.15f, h * 0.075f), new Vector2(h * 0.19f, h * 0.02f),
-                new Vector2(h * 0.17f, -h * 0.1f), new Vector2(h * 0.145f, -h * 0.22f), new Vector2(h * 0.13f, -h * 0.3f),
+                // Falls from the neck over sloping shoulders and narrows to the waist, rather than squaring them.
+                new Vector2(h * 0.05f, h * 0.12f), new Vector2(h * 0.095f, h * 0.09f), new Vector2(h * 0.128f, h * 0.04f),
+                new Vector2(h * 0.13f, -h * 0.06f), new Vector2(h * 0.12f, -h * 0.18f), new Vector2(h * 0.11f, -h * 0.3f),
             });
             return (renderer, animator, Bone("hand_r"), Bone("neck_01"), new[] { wrap, shawl });
         }

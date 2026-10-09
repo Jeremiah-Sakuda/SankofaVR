@@ -159,7 +159,8 @@ namespace Sankofa.EditorTools
             eye.clearFlags = CameraClearFlags.SolidColor;
             eye.backgroundColor = new Color(0.012f, 0.016f, 0.035f);
             eye.nearClipPlane = 0.02f;
-            eye.farClipPlane = 80f;
+            // Far enough for the story skies (spheres up to 210 m) and the city's skyline beyond the river.
+            eye.farClipPlane = 300f;
 
             var hands = new HandSource[2];
             var sources = new GameObject("Hand sources");

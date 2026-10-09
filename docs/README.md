@@ -8,6 +8,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 |---|---|
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
 | [Delivery plan](product/delivery-plan.md) | Capacity, staged proofs and release evidence |
+| [Adaptation summary](product/adaptation.md) | What the Quest version keeps, adds and defers from the original web Sankofa |
 | [Decisions](decisions.md) | Every product and technical decision, dated, with its status |
 | [Backlog](backlog.md) | Work in dependency order; a tick means the artifact exists, not that it is accepted |
 | [Product stress test](reviews/2026-10-01-product-stress-test.md) | Challenged assumptions and proposed experiments |

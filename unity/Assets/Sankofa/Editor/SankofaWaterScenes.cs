@@ -359,7 +359,7 @@ namespace Sankofa.EditorTools
             Set(motion, "animator", animator);
             SetArray(motion, "anchorBones", new Object[] { hand, neckBone });
             Set(motion, "tint", tint);
-            SetArray(motion, "cloth", cloth.Cast<Object>().ToArray());
+            SetArray(motion, "parts", cloth.Cast<Object>().ToArray());
             return o;
         }
 
@@ -368,11 +368,30 @@ namespace Sankofa.EditorTools
             var eweRoot = Child(root, "figure.ewe");
             eweRoot.localPosition = at;
             eweRoot.localRotation = Quaternion.Euler(0, -105, 0);
-            var body = Static(eweRoot, "Body", SankofaStoryMeshes.Ewe("Figure ewe", 1810), art.EmberFigure);
-            SaveMeshes(new[] { body });
+            var (bodyMesh, headMesh, legMesh) = SankofaStoryMeshes.EweParts("Figure ewe", 1810);
+            var body = Static(eweRoot, "Body", bodyMesh, art.EmberFigure);
+            var neck = Child(eweRoot, "Neck");
+            neck.localPosition = new Vector3(0, 0.58f, 0.26f);
+            var head = Static(neck, "Head", headMesh, art.EmberFigure);
+            var legs = new[] { (-0.1f, 0.22f), (0.1f, 0.22f), (-0.1f, -0.22f), (0.1f, -0.22f) }.Select((p, i) =>
+            {
+                var hip = Child(eweRoot, "Leg " + i);
+                hip.localPosition = new Vector3(p.Item1, 0.42f, p.Item2);
+                Static(hip, "Leg", legMesh, art.EmberFigure);
+                return hip;
+            }).ToArray();
+            SaveMeshes(new[] { body, head });
+            SaveMeshes(new[] { legs[0].GetComponentInChildren<MeshFilter>() });
             var o = StageLight(eweRoot, "figure.ewe", "story.water.1850s", body.GetComponent<Renderer>(), 0.35f);
             // The ewe follows a little behind Naserian, with a quicker, smaller step.
-            Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.01f, false);
+            var motion = Walks(eweRoot, body.GetComponent<Renderer>(), 0.7f, path, 1.2f, 0.008f, false);
+            SetArray(motion, "parts", new Object[] { head.GetComponent<Renderer>() }.Concat(legs.Select(l => (Object)l.GetComponentInChildren<Renderer>())).ToArray());
+            Set(motion, "partSmoke", 0.3f);
+            Set(motion, "tint", MaasaiLine);
+            var gait = eweRoot.gameObject.AddComponent<QuadrupedGait>();
+            Set(gait, "motion", motion);
+            SetArray(gait, "legs", legs.Cast<Object>().ToArray());
+            Set(gait, "head", neck);
             return o;
         }
 
@@ -614,15 +633,47 @@ namespace Sankofa.EditorTools
         {
             var railRoot = Child(root, "Rails");
             railRoot.localPosition = top;
+            // Four new flat-bottomed rails side by side, their sections showing at the ends toward the visitor, and a
+            // bundle of fishplates with their bolts across the far end, waiting for the joints.
+            Color Weathered(Vector3 p, Vector3 n) => Weather(p, n, false);
+            Color Weather(Vector3 p, Vector3 n, bool head)
+            {
+                var w = top + p;
+                var rain = SankofaMeshes.Fbm(w * 7f, 1899, 3) + 0.15f * Mathf.Sin(w.x * 23f);
+                var scale = new Color(0.24f, 0.24f, 0.27f);
+                var rust = new Color(0.72f, 0.3f, 0.12f);
+                var c = Color.Lerp(scale, rust, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-0.25f, 0.1f, rain)));
+                // The rolled running surface is smoother and catches the light; the sawn ends have rusted first.
+                if (head && n.y > 0.8f && p.y > 0.09f) c = Color.Lerp(c, new Color(0.46f, 0.46f, 0.48f), 0.5f);
+                if (Mathf.Abs(n.x) > 0.9f) c = Color.Lerp(c, new Color(0.5f, 0.27f, 0.15f), 0.7f);
+                return c;
+            }
             var steel = new List<CombineInstance>();
+            var section = SankofaStoryMeshes.RailSection();
             for (var i = 0; i < 4; i++)
             {
                 var z = (i - 1.5f) * 0.11f;
-                steel.Add(Part(SankofaStoryMeshes.Box("Rail foot", new Vector3(1.4f, 0.012f, 0.09f)), new Vector3(0, 0.006f, z), Quaternion.identity, Vector3.one));
-                steel.Add(Part(SankofaStoryMeshes.Box("Rail web", new Vector3(1.4f, 0.06f, 0.016f)), new Vector3(0, 0.042f, z), Quaternion.identity, Vector3.one));
-                steel.Add(Part(SankofaStoryMeshes.Box("Rail head", new Vector3(1.4f, 0.022f, 0.05f)), new Vector3(0, 0.08f, z), Quaternion.identity, Vector3.one));
+                var at = new Vector3(i % 2 == 0 ? 0.03f : -0.04f, 0f, z);
+                steel.Add(Tinted(Part(SankofaStoryMeshes.Extrude("Rail " + i, section, 1.4f), at, Quaternion.identity, Vector3.one), (p, n) => Weather(p, n, true)));
             }
-            var body = Static(railRoot, "Body", Combine(steel, "1899 rails"), art.Steel);
+            // Fishplates stacked crosswise at one end, with the bolts that will join the rails laid on top.
+            for (var k = 0; k < 3; k++)
+            {
+                var plate = new Vector3(0.5f + k * 0.012f, 0.1f + 0.007f + k * 0.014f, 0.01f * k);
+                steel.Add(Tinted(Part(SankofaStoryMeshes.Box("Fishplate", new Vector3(0.075f, 0.014f, 0.46f)), plate, Quaternion.Euler(0, 4f * k - 4f, 0), Vector3.one), Weathered));
+            }
+            for (var b = 0; b < 4; b++)
+            {
+                var along = -0.17f + b * 0.11f;
+                var bolt = SankofaStoryMeshes.Lathe("Bolt", new List<Vector2>
+                {
+                    new Vector2(0, 0), new Vector2(0.011f, 0), new Vector2(0.011f, 0.012f), new Vector2(0.006f, 0.012f),
+                    new Vector2(0.006f, 0.07f), new Vector2(0f, 0.07f),
+                }, 6, (a, y) => Color.white, 40 + b);
+                bolt.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), bolt.vertexCount).ToList());
+                steel.Add(Tinted(Part(bolt, new Vector3(0.5f, 0.142f + 0.011f, along), Quaternion.Euler(0, 0, b % 2 == 0 ? 90f : -90f) * Quaternion.Euler(0, 30f * b, 0), Vector3.one), Weathered));
+            }
+            var body = Static(railRoot, "Body", Combine(steel, "1899 rails"), art.RailRust);
             SaveMeshes(new[] { body });
             var o = Staged(railRoot.gameObject, "rails", "story.water.1899", true, new[] { body.GetComponent<Renderer>() });
             Set(o, "touchPoint", Marker(railRoot, "Touch point", new Vector3(-0.08f, 0.1f, -0.1f)));
@@ -670,37 +721,121 @@ namespace Sankofa.EditorTools
             // Wide enough that its edges run under the banks.
             var river = Static(root, "River", SankofaStoryMeshes.Ribbon("Today river", riverPoints, 2.9f, Vector3.up), art.River);
 
-            // The city beyond the river's green strip: low blocks nearer, towers only far off, lit windows, and
-            // streetlights along the far bank.
+            // The city beyond the river's green strip: low blocks nearer with balconies toward the river, towers
+            // only far off, and the KICC tower on the skyline. Each block carries its own tone, window pattern and
+            // occupancy in its vertex colour (see City.shader): r tone, g style (glass above 0.8), b how many
+            // windows are lit, a its base height.
             var blocks = new List<CombineInstance>();
-            for (var i = 0; i < 160 && blocks.Count < 110; i++)
+            var towerTops = new List<Vector3>();
+            void Building(Mesh mesh, Vector3 at, Quaternion turn, float baseY, float tone, float style, float occupancy)
+            {
+                // Alpha 1 marks plain parts with no windows: balconies, tanks, fins and the hall roof.
+                var c = new Color(tone, style, occupancy, baseY > 900f ? 1f : Mathf.InverseLerp(-8f, 32f, baseY) * 0.95f);
+                mesh.SetColors(Enumerable.Repeat(c, mesh.vertexCount).ToList());
+                blocks.Add(Part(mesh, at, turn, Vector3.one));
+            }
+            for (var i = 0; i < 200 && blocks.Count < 170; i++)
             {
                 var degrees = R(-15f, 195f);
-                var distance = R(50f, 230f);
+                var distance = R(55f, 240f);
                 var at = new Vector3(Mathf.Cos(degrees * Mathf.Deg2Rad), 0, Mathf.Sin(degrees * Mathf.Deg2Rad)) * distance;
-                if (at.z < 30f) continue;
+                if (at.z < 38f) continue;
                 var tower = distance > 130f && random.NextDouble() < 0.25;
                 var height = tower ? R(40f, 80f) : R(9f, 22f) + distance * R(0f, 0.08f);
+                // Storeys are 3.4 m, as the shader draws them.
+                height = Mathf.Max(2, Mathf.Round(height / 3.4f)) * 3.4f;
                 var size = new Vector3(R(10f, 26f), height, R(10f, 20f));
-                at.y = RiverGround(at) + height * 0.5f - 0.5f;
+                var baseY = RiverGround(at) - 0.5f;
+                at.y = baseY + height * 0.5f;
                 var turn = Quaternion.Euler(0, R(-25, 25), 0);
-                blocks.Add(Part(SankofaStoryMeshes.Box("Block", size), at, turn, Vector3.one));
-                // Rooflines: an upper storey set back, a water tank or a stair head, so the skyline is not all flat boxes.
+                var tone = R(0f, 1f);
+                var style = tower && random.NextDouble() < 0.6 ? R(0.85f, 1f) : R(0f, 0.75f);
+                Building(SankofaStoryMeshes.Box("Block", size), at, turn, baseY, tone, style, R(0.3f, 1f));
+                if (tower) towerTops.Add(at + Vector3.up * (height * 0.5f + 0.6f));
+                // Balconies on the nearer residential blocks, a slab per storey on the side facing the river.
+                if (!tower && distance < 120f && random.NextDouble() < 0.6)
+                {
+                    var face = turn * new Vector3(0, 0, -size.z * 0.5f - 0.55f);
+                    for (var floor = 1; floor < height / 3.4f; floor++)
+                        Building(SankofaStoryMeshes.Box("Balcony", new Vector3(size.x * 0.82f, 0.18f, 1.1f)), new Vector3(at.x, baseY + floor * 3.4f + 0.09f, at.z) + face, turn, 999f, tone * 0.8f, 0f, 0f);
+                }
+                // Rooflines: an upper storey set back, a water tank or a stair head, so the skyline is not all flat.
                 var roof = at + Vector3.up * height * 0.5f;
                 var pick = random.NextDouble();
                 if (pick < 0.35)
                 {
-                    var upper = new Vector3(size.x * R(0.45f, 0.7f), R(3f, 7f), size.z * R(0.5f, 0.75f));
-                    blocks.Add(Part(SankofaStoryMeshes.Box("Upper storey", upper), roof + turn * new Vector3(R(-2f, 2f), upper.y * 0.5f, R(-2f, 2f)), turn, Vector3.one));
+                    var upper = new Vector3(size.x * R(0.45f, 0.7f), 3.4f, size.z * R(0.5f, 0.75f));
+                    Building(SankofaStoryMeshes.Box("Upper storey", upper), roof + turn * new Vector3(R(-2f, 2f), upper.y * 0.5f, R(-2f, 2f)), turn, baseY, tone, style, R(0.3f, 1f));
                 }
                 else if (pick < 0.75)
                 {
                     var tank = new Vector3(R(1.6f, 2.6f), R(1.4f, 2.2f), R(1.6f, 2.6f));
-                    blocks.Add(Part(SankofaStoryMeshes.Box("Water tank", tank), roof + turn * new Vector3(size.x * R(-0.3f, 0.3f), tank.y * 0.5f + 0.6f, size.z * R(-0.3f, 0.3f)), turn, Vector3.one));
-                    blocks.Add(Part(SankofaStoryMeshes.Box("Stair head", new Vector3(2.4f, 2.6f, 2.4f)), roof + turn * new Vector3(size.x * R(-0.35f, 0.35f), 1.3f, size.z * R(-0.35f, 0.35f)), turn, Vector3.one));
+                    Building(SankofaStoryMeshes.Box("Water tank", tank), roof + turn * new Vector3(size.x * R(-0.3f, 0.3f), tank.y * 0.5f + 0.6f, size.z * R(-0.3f, 0.3f)), turn, 999f, tone, 0f, 0f);
+                    Building(SankofaStoryMeshes.Box("Stair head", new Vector3(2.4f, 2.6f, 2.4f)), roof + turn * new Vector3(size.x * R(-0.35f, 0.35f), 1.3f, size.z * R(-0.35f, 0.35f)), turn, 999f, tone, 0f, 0f);
                 }
             }
+            // The Kenyatta International Convention Centre: the ribbed cylindrical tower with its crown, beside the
+            // cone of its plenary hall, the shape most people know Nairobi's skyline by. Its distance is compressed.
+            var kicc = new Vector3(Mathf.Cos(70f * Mathf.Deg2Rad), 0, Mathf.Sin(70f * Mathf.Deg2Rad)) * 235f;
+            var kiccBase = RiverGround(kicc) - 1f;
+            var kiccTower = SankofaStoryMeshes.Lathe("KICC tower", new List<Vector2>
+            {
+                new Vector2(0, 0), new Vector2(10f, 0), new Vector2(10f, 92f), new Vector2(11.5f, 95f), new Vector2(12.5f, 99f),
+                new Vector2(11f, 101f), new Vector2(6f, 103f), new Vector2(0, 103.5f),
+            }, 28, (a, y) => Color.white, 1974);
+            Building(kiccTower, kicc + Vector3.up * kiccBase, Quaternion.identity, kiccBase, 0.55f, 0.5f, 0.7f);
+            for (var f = 0; f < 28; f++)
+            {
+                var angle = f * Mathf.PI * 2f / 28f;
+                var fin = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+                Building(SankofaStoryMeshes.Box("KICC fin", new Vector3(0.5f, 90f, 1.4f)), kicc + fin * 10.4f + Vector3.up * (kiccBase + 46f), Quaternion.LookRotation(fin), 999f, 0.7f, 0f, 0f);
+            }
+            var hall = SankofaStoryMeshes.Lathe("KICC hall", new List<Vector2>
+            {
+                new Vector2(0, 0), new Vector2(24f, 0), new Vector2(24f, 9f), new Vector2(18f, 16f), new Vector2(4f, 26f), new Vector2(0, 27f),
+            }, 24, (a, y) => Color.white, 1967);
+            Building(hall, kicc + new Vector3(-30f, kiccBase, -12f), Quaternion.identity, 999f, 0.35f, 0f, 0f);
+            towerTops.Add(kicc + Vector3.up * (kiccBase + 104.5f));
             var cityFilter = Static(root, "City", Combine(blocks, "Today city"), art.City);
+            // Red aviation lights on the towers.
+            for (var t = 0; t < towerTops.Count; t++)
+            {
+                var light = Prim(root, "Aviation light " + t, PrimitiveType.Quad, towerTops[t], Vector3.one * 2.2f, art.TailLight);
+                Set(light.AddComponent<Billboard>(), "upright", false);
+            }
+
+            // Trees along both banks, dark against the city's glow, and the road between the river and the blocks.
+            var trunks = new List<CombineInstance>();
+            var crowns = new List<CombineInstance>();
+            for (var i = 0; i < 60 && trunks.Count < 26; i++)
+            {
+                var x = R(-60f, 60f);
+                var z = R(9f, 30f);
+                var at = new Vector3(x, 0, z + Mathf.Abs(x) * 0.18f);
+                if (Mathf.Abs(at.z - 24f - Mathf.Abs(x) * 0.18f) < 3f) continue;
+                // Keep the view across the river open straight ahead; trees frame it at the sides.
+                if (Mathf.Abs(Mathf.Atan2(at.x, at.z)) < 0.45f) continue;
+                at.y = RiverGround(at) - 0.05f;
+                Mesh trunk, crown;
+                if (random.NextDouble() < 0.7) SankofaStoryMeshes.Acacia(570 + i, R(6f, 10f), out trunk, out crown);
+                else SankofaMeshes.Tree(570 + i, R(7f, 12f), out trunk, out crown);
+                var m = Matrix4x4.TRS(at, Quaternion.Euler(0, R(0, 360), 0), Vector3.one);
+                trunks.Add(new CombineInstance { mesh = trunk, transform = m });
+                crowns.Add(new CombineInstance { mesh = crown, transform = m });
+            }
+            for (var i = 0; i < 30 && trunks.Count < 38; i++)
+            {
+                var degrees = R(200f, 340f);
+                var at = new Vector3(Mathf.Cos(degrees * Mathf.Deg2Rad), 0, Mathf.Sin(degrees * Mathf.Deg2Rad)) * R(7f, 22f);
+                at.y = RiverGround(at) - 0.05f;
+                SankofaMeshes.Tree(600 + i, R(6f, 11f), out var trunk, out var crown);
+                var m = Matrix4x4.TRS(at, Quaternion.Euler(0, R(0, 360), 0), Vector3.one);
+                trunks.Add(new CombineInstance { mesh = trunk, transform = m });
+                crowns.Add(new CombineInstance { mesh = crown, transform = m });
+            }
+            var trunkFilter = Static(root, "Tree trunks", Combine(trunks, "Today trunks"), art.TreeBark);
+            var crownFilter = Static(root, "Tree canopies", Combine(crowns, "Today canopies"), art.TreeCanopy);
+            BuildTraffic(root, art);
 
             var garden = new List<CombineInstance>();
             // The raised bed within reach, and the gate of the community garden behind it on the right.
@@ -731,7 +866,7 @@ namespace Sankofa.EditorTools
             SaveMeshes(new[] { Static(root, "Stars", cityStars, art.Stars) });
 
             Bake(root, new[] { ground, gardenFilter }, JikoAt + Vector3.up * 0.2f);
-            SaveMeshes(new[] { ground, river, cityFilter, gardenFilter, weeds });
+            SaveMeshes(new[] { ground, river, cityFilter, gardenFilter, weeds, trunkFilter, crownFilter });
 
             var jiko = BuildJiko(root, art);
             var gate = BuildGate(root, art);
@@ -750,25 +885,145 @@ namespace Sankofa.EditorTools
             return (new[] { jiko, gate, soil, sprout, bead, seed }, sound);
         }
 
+        /// <summary>
+        /// The road across the river, 24 m out between the trees and the blocks: headlights coming one way, tail
+        /// lights going the other, at an unhurried city pace.
+        /// </summary>
+        static void BuildTraffic(Transform root, SankofaArtSet art)
+        {
+            var road = new List<Vector3>();
+            for (var x = -110f; x <= 110f; x += 10f)
+            {
+                var p = new Vector3(x, 0, 24f + Mathf.Abs(x) * 0.18f);
+                p.y = RiverGround(p) + 0.7f;
+                road.Add(p);
+            }
+            var traffic = Child(root, "Traffic").gameObject.AddComponent<Traffic>();
+            var random = new System.Random(2026);
+            var lights = new List<Transform>();
+            for (var i = 0; i < 14; i++)
+            {
+                var toward = i % 2 == 0;
+                var card = Prim(traffic.transform, (toward ? "Headlights " : "Tail lights ") + i, PrimitiveType.Quad, Vector3.zero, new Vector3(1.1f, 0.6f, 1f), toward ? art.Headlight : art.TailLight);
+                Set(card.AddComponent<Billboard>(), "upright", true);
+                lights.Add(card.transform);
+            }
+            var so = new SerializedObject(traffic);
+            var points = so.FindProperty("road");
+            points.arraySize = road.Count;
+            for (var i = 0; i < road.Count; i++) points.GetArrayElementAtIndex(i).vector3Value = road[i];
+            var list = so.FindProperty("lights");
+            list.arraySize = lights.Count;
+            for (var i = 0; i < lights.Count; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = lights[i];
+            so.FindProperty("seed").intValue = random.Next(1000);
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         static StageObject BuildJiko(Transform root, SankofaArtSet art)
         {
             var jikoRoot = Child(root, "Jiko");
             jikoRoot.localPosition = JikoAt;
-            var bodyMesh = SankofaStoryMeshes.Lathe("Jiko body", SankofaStoryMeshes.JikoProfile(0.26f, 0.13f), 24, (a, y) => Color.white, 7);
-            bodyMesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), bodyMesh.vertexCount).ToList());
-            var body = Static(jikoRoot, "Body", bodyMesh, art.Metal);
+            // A ceramic jiko as sold along any Nairobi road: galvanised cladding pinched at the waist, a clay liner
+            // holding the coals, three pot rests, an ash door at the foot, and two cobs of maize roasting over it.
+            Mesh Turned(string name, List<Vector2> profile, int seed, System.Func<float, float, Color> tint)
+            {
+                var mesh = SankofaStoryMeshes.Lathe(name, profile, 32, tint, seed);
+                mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
+                return mesh;
+            }
+            // Soot climbs from the lip; a seam and a few dents darken the sheet.
+            var cladding = Turned("Jiko cladding", SankofaStoryMeshes.JikoCladding(), 7, (a, y) =>
+            {
+                var soot = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.15f, 0.25f, y)) * 0.65f;
+                var seam = Mathf.Abs(Mathf.DeltaAngle(a * Mathf.Rad2Deg, 200f)) < 4f ? 0.25f : 0f;
+                var v = 1f - soot - seam + SankofaMeshes.Fbm(new Vector3(Mathf.Cos(a) * 3f, y * 20f, Mathf.Sin(a) * 3f), 71, 2) * 0.12f;
+                return new Color(v, v, v * 1.02f, 1f);
+            });
+            var liner = Turned("Jiko liner", SankofaStoryMeshes.JikoLiner(), 8, (a, y) =>
+            {
+                // The clay is blackened inside where the coals sit; the rim keeps its fired colour.
+                var burnt = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.255f, 0.215f, y));
+                var v = Mathf.Lerp(1f, 0.25f, burnt);
+                return new Color(v, v, v, 1f);
+            });
+            var bodyFilter = Static(jikoRoot, "Cladding", cladding, art.Cladding);
+            var linerFilter = Static(jikoRoot, "Liner", liner, art.Liner);
+
+            // Pot rests, door, handles and the grill, in plain sheet metal.
+            var toVisitor = new Vector3(-JikoAt.x, 0, -JikoAt.z).normalized;
+            var front = Quaternion.LookRotation(toVisitor);
+            var fittings = new List<CombineInstance>();
+            for (var k = 0; k < 3; k++)
+            {
+                var radial = Quaternion.Euler(0, 60f + k * 120f, 0) * toVisitor;
+                fittings.Add(Part(SankofaStoryMeshes.Box("Pot rest", new Vector3(0.007f, 0.036f, 0.032f)), radial * 0.108f + Vector3.up * 0.282f,
+                    Quaternion.LookRotation(radial) * Quaternion.Euler(-12f, 0, 0), Vector3.one));
+            }
+            // The ash door, swung open on its hinge so the glow of the chamber shows.
+            // The chamber wall leans in by about fourteen degrees; the opening follows it.
+            var doorAt = toVisitor * 0.1015f + Vector3.up * 0.058f;
+            var wall = front * Quaternion.Euler(-14f, 0, 0);
+            var hinge = doorAt + front * new Vector3(0.036f, 0, 0.002f);
+            var swung = front * Quaternion.Euler(0, 70f, 0);
+            fittings.Add(Part(SankofaStoryMeshes.Box("Ash door", new Vector3(0.07f, 0.046f, 0.004f)), hinge + swung * new Vector3(-0.035f, 0, 0), swung, Vector3.one));
+            foreach (var side in new[] { -1f, 1f })
+            {
+                var radial = Quaternion.Euler(0, 90f * side, 0) * toVisitor;
+                var handle = Quaternion.LookRotation(radial);
+                fittings.Add(Part(SankofaStoryMeshes.Box("Handle", new Vector3(0.05f, 0.006f, 0.006f)), radial * 0.122f + Vector3.up * 0.175f, handle, Vector3.one));
+                foreach (var end in new[] { -1f, 1f })
+                    fittings.Add(Part(SankofaStoryMeshes.Box("Handle arm", new Vector3(0.006f, 0.006f, 0.03f)), radial * 0.106f + handle * new Vector3(end * 0.022f, 0, 0) + Vector3.up * 0.175f, handle, Vector3.one));
+            }
+            // A wire grill across the back half of the rests, so the coals still show in front.
+            for (var g = 0; g < 5; g++)
+                fittings.Add(Part(SankofaStoryMeshes.Box("Grill wire", new Vector3(0.24f, 0.004f, 0.004f)), front * new Vector3(0, 0.302f - 0.282f, -0.01f - g * 0.022f) + Vector3.up * 0.282f, front, Vector3.one));
+            foreach (var x in new[] { -0.08f, 0.08f })
+                fittings.Add(Part(SankofaStoryMeshes.Box("Grill rail", new Vector3(0.004f, 0.004f, 0.11f)), front * new Vector3(x, 0.02f, -0.055f) + Vector3.up * 0.282f, front, Vector3.one));
+            var fittingFilter = Static(jikoRoot, "Fittings", Combine(fittings, "Jiko fittings"), art.Metal);
+
+            // Two cobs on the grill, turned now and then by whoever keeps the stall; one is further on than the other.
+            var cobs = new List<CombineInstance>();
+            for (var c = 0; c < 2; c++)
+            {
+                var done = c == 0 ? 0.55f : 0.25f;
+                var cob = Turned("Maize cob", new List<Vector2>
+                {
+                    new Vector2(0, 0), new Vector2(0.012f, 0.004f), new Vector2(0.019f, 0.02f), new Vector2(0.021f, 0.06f),
+                    new Vector2(0.02f, 0.1f), new Vector2(0.015f, 0.13f), new Vector2(0.006f, 0.142f), new Vector2(0, 0.145f),
+                }, 50 + c, (a, y) =>
+                {
+                    var scorch = SankofaMeshes.Fbm(new Vector3(Mathf.Cos(a) * 4f, y * 40f, Mathf.Sin(a) * 4f), 60 + c, 3);
+                    var v = Mathf.Lerp(1f, 0.12f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.15f - done, 0.35f - done, scorch)));
+                    return new Color(v, v * 0.95f, v * 0.9f, 1f);
+                });
+                cobs.Add(Part(cob, front * new Vector3(-0.07f + c * 0.012f, 0.041f, -0.03f - c * 0.045f) + Vector3.up * 0.282f,
+                    front * Quaternion.Euler(0, 0, -90f) * Quaternion.Euler(0, 40f * c, 0), Vector3.one));
+            }
+            var cobFilter = Static(jikoRoot, "Maize", Combine(cobs, "Jiko maize"), art.Maize);
+
+            // The coals, heaped in the liner's bowl, and the dim glow of the ash chamber through the open door.
             var coals = new List<CombineInstance>();
             var random = new System.Random(1960);
-            for (var i = 0; i < 7; i++)
+            for (var i = 0; i < 14; i++)
             {
                 var mesh = SankofaMeshes.Stone(1961 + i, 1, 0.3f, 0.3f);
                 mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, Range(random, 0.9f, 1.4f)), mesh.vertexCount).ToList());
                 var size = Range(random, 0.02f, 0.03f);
-                coals.Add(Part(mesh, new Vector3(Range(random, -0.06f, 0.06f), 0.255f, Range(random, -0.06f, 0.06f)), Quaternion.Euler(Range(random, 0, 360), 0, 0), new Vector3(size * 1.3f, size * 0.7f, size)));
+                var spread = Range(random, 0f, 0.06f);
+                var angle = Range(random, 0f, Mathf.PI * 2f);
+                coals.Add(Part(mesh, new Vector3(Mathf.Cos(angle) * spread, 0.235f + (0.06f - spread) * 0.35f, Mathf.Sin(angle) * spread),
+                    Quaternion.Euler(Range(random, 0, 360), Range(random, 0, 360), 0), new Vector3(size * 1.3f, size * 0.7f, size)));
             }
+            var ash = SankofaStoryMeshes.Box("Ash chamber", new Vector3(0.06f, 0.04f, 0.004f));
+            ash.SetUVs(1, Enumerable.Repeat(new Vector2(1, 0.35f), ash.vertexCount).ToList());
+            coals.Add(Part(ash, doorAt, wall, Vector3.one));
             var coalFilter = Static(jikoRoot, "Coals", Combine(coals, "Jiko coals"), art.Embers);
-            SaveMeshes(new[] { body, coalFilter });
-            var o = Staged(jikoRoot.gameObject, "jiko", "story.water.today", false, new[] { coalFilter.GetComponent<Renderer>(), body.GetComponent<Renderer>() });
+            SaveMeshes(new[] { bodyFilter, linerFilter, fittingFilter, cobFilter, coalFilter });
+            var o = Staged(jikoRoot.gameObject, "jiko", "story.water.today", false, new[]
+            {
+                coalFilter.GetComponent<Renderer>(), bodyFilter.GetComponent<Renderer>(), linerFilter.GetComponent<Renderer>(),
+                fittingFilter.GetComponent<Renderer>(), cobFilter.GetComponent<Renderer>(),
+            });
             var glow = GlowCard(jikoRoot, art, 0.35f);
             glow.transform.localPosition = new Vector3(0, 0.3f, 0);
             Set(o, "glow", glow);

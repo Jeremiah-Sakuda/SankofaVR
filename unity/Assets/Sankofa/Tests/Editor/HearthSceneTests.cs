@@ -74,6 +74,16 @@ namespace Sankofa.Tests
                 var head = figure.GetComponentsInChildren<Transform>(true).First(t => t.name == "Head");
                 Assert.That(head.position.y - figure.transform.position.y, Is.InRange(height * 0.8f, height * 0.97f), figure.name + " head height");
             }
+            // The ewe walks on four legs and lowers her head to graze.
+            var gait = Object.FindObjectsByType<QuadrupedGait>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Assert.That(gait.Length, Is.EqualTo(1), "the ewe's gait");
+            Assert.That(MissingReferences(gait[0]), Is.Empty);
+            Assert.That(new SerializedObject(gait[0]).FindProperty("legs").arraySize, Is.EqualTo(4));
+            // Cars on the far road today: lights and a road to drive.
+            var traffic = Single<Traffic>();
+            Assert.That(MissingReferences(traffic), Is.Empty);
+            Assert.That(new SerializedObject(traffic).FindProperty("road").arraySize, Is.GreaterThan(1));
+            Assert.That(new SerializedObject(traffic).FindProperty("lights").arraySize, Is.GreaterThan(0));
             // An occasional sound without a subject (hammering along the line) plays whenever its scene is shown.
             foreach (var sound in Object.FindObjectsByType<Runtime.Audio.ObjectSound>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 Assert.That(MissingReferences(sound).Where(m => !m.EndsWith(".subject")), Is.Empty);
@@ -239,6 +249,56 @@ namespace Sankofa.Tests
             Assert.That(flow.Choose("era.1850s"), Is.True);
             var cues = flow.DrainCues();
             Assert.That(cues.OfType<Cue.Speak>().Last().Line.Id, Is.EqualTo("e1.gather"));
+        }
+
+        // Imported sound must keep its true length: a clip resampled at import but played or mixed at the wrong rate
+        // sounds sped up. Compared with each source file's own header (WAV) or with the decoded length (narration).
+        [Test]
+        public void RecordingsAndNarrationKeepTheirDuration()
+        {
+            foreach (var path in AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Sankofa/Art/Recorded" }).Select(AssetDatabase.GUIDToAssetPath))
+            {
+                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                var bytes = System.IO.File.ReadAllBytes(path);
+                var rate = System.BitConverter.ToInt32(bytes, 24);
+                var blockAlign = System.BitConverter.ToInt16(bytes, 32);
+                var dataStart = 12;
+                while (System.Text.Encoding.ASCII.GetString(bytes, dataStart, 4) != "data") dataStart += 8 + System.BitConverter.ToInt32(bytes, dataStart + 4);
+                var seconds = System.BitConverter.ToInt32(bytes, dataStart + 4) / (float)(blockAlign * rate);
+                TestContext.WriteLine($"{path}: source {seconds:F2} s at {rate} Hz; clip {clip.length:F2} s, {clip.samples} samples at {clip.frequency} Hz");
+                Assert.That(clip.length, Is.EqualTo(seconds).Within(0.05f), path);
+                Assert.That(clip.samples / (float)clip.frequency, Is.EqualTo(clip.length).Within(0.05f), path + " samples at its frequency");
+            }
+            foreach (var path in AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Sankofa/Resources/Narration" }).Select(AssetDatabase.GUIDToAssetPath))
+            {
+                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                Assert.That(clip.samples / (float)clip.frequency, Is.EqualTo(clip.length).Within(0.05f), path);
+                Assert.That(clip.length, Is.InRange(0.5f, 60f), path);
+            }
+        }
+
+        // Our own geometry budget for one scene on standalone Quest, until a device profile replaces it: the triangles
+        // and renderers (a proxy for draw calls) of each scene's root, which is all that shows besides the panels.
+        const int TriangleBudget = 300000;
+        const int RendererBudget = 175;
+
+        [Test]
+        public void EachSceneStaysWithinItsGeometryBudget()
+        {
+            foreach (var scene in Single<StoryStage>().Scenes)
+            {
+                var renderers = scene.Root.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled).ToList();
+                long triangles = 0;
+                foreach (var r in renderers)
+                {
+                    var mesh = r is SkinnedMeshRenderer skinned ? skinned.sharedMesh : r.TryGetComponent<MeshFilter>(out var filter) ? filter.sharedMesh : null;
+                    if (mesh == null) continue;
+                    for (var sub = 0; sub < mesh.subMeshCount; sub++) triangles += mesh.GetIndexCount(sub) / 3;
+                }
+                TestContext.WriteLine($"{scene.Id}: {triangles} triangles, {renderers.Count} renderers");
+                Assert.That(triangles, Is.LessThanOrEqualTo(TriangleBudget), scene.Id + " triangles");
+                Assert.That(renderers.Count, Is.LessThanOrEqualTo(RendererBudget), scene.Id + " renderers");
+            }
         }
     }
 

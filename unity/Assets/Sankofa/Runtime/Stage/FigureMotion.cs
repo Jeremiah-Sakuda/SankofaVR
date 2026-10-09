@@ -33,8 +33,10 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Transform[] anchorBones = new Transform[0];
         [Tooltip("Drives a skinned body's walk, kneel, give and talk; without one the shader poses the body.")]
         [SerializeField] Animator animator;
-        [Tooltip("Cloth drawn in the same light as the body, which follows its visibility and colour.")]
-        [SerializeField] Renderer[] cloth = new Renderer[0];
+        [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
+        [SerializeField] Renderer[] parts = new Renderer[0];
+        [Tooltip("Smoke opacity of those parts; cloth is denser than the body it covers.")]
+        [SerializeField] float partSmoke = 0.62f;
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
 
@@ -75,7 +77,9 @@ namespace Sankofa.Runtime.Stage
         Vector3 reachTarget;
         StageObject offered;
 
-        public bool Walking => next < route.Count;
+        public bool Walking => next < route.Count && wait <= 0;
+        /// <summary>Metres walked so far, for a gait to keep its steps in time.</summary>
+        public float Travelled => travelled;
         public float Kneel => kneel;
         /// <summary>How far each arm is raised forward (0 hanging, 1 held straight out).</summary>
         public (float Negative, float Positive) Arms => (armNeg, armPos);
@@ -362,10 +366,9 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(GroundId, basePosition.y);
             block.SetColor(ColorId, tint);
             body.SetPropertyBlock(block);
-            if (cloth.Length == 0) return;
-            // Cloth is denser smoke than the body it covers, so the shape beneath reads only faintly.
-            block.SetFloat(SmokeId, 0.62f);
-            foreach (var c in cloth)
+            if (parts.Length == 0) return;
+            block.SetFloat(SmokeId, partSmoke);
+            foreach (var c in parts)
             {
                 if (c == null) continue;
                 c.enabled = body.enabled;

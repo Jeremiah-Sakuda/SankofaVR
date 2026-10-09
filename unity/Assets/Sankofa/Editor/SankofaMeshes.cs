@@ -322,13 +322,18 @@ namespace Sankofa.EditorTools
                 var branch = Log(seed * 10 + b, length, trunkRadius * 0.5f, 0.6f, length * 0.04f, 7, 4);
                 trunkParts.Add(new CombineInstance { mesh = branch, transform = Matrix4x4.TRS(start + rotation * (Vector3.up * length * 0.5f), rotation, Vector3.one) });
                 var tip = start + rotation * (Vector3.up * length);
-                var blobs = 2 + random.Next(3);
-                for (var k = 0; k < blobs; k++)
+                // Many small, rough, flattened clumps in a loose dome over the branch tip, so the crown's edge is
+                // broken against the sky rather than a few smooth masses.
+                var crown = height * R(0.2f, 0.28f);
+                var clumps = 7 + random.Next(4);
+                for (var k = 0; k < clumps; k++)
                 {
-                    var size = height * R(0.14f, 0.22f);
-                    var blob = Stone(seed * 100 + b * 10 + k, 2, 0.3f, 10f);
-                    var at = tip + new Vector3(R(-0.5f, 0.5f), R(-0.2f, 0.6f), R(-0.5f, 0.5f)) * size;
-                    canopyParts.Add(new CombineInstance { mesh = blob, transform = Matrix4x4.TRS(at, Quaternion.Euler(R(0, 360), R(0, 360), 0), new Vector3(size * 1.2f, size * R(0.9f, 1.15f), size * 1.15f)) });
+                    var size = height * R(0.07f, 0.11f);
+                    var clump = Stone(seed * 100 + b * 16 + k, 1, 0.45f, 10f);
+                    var around = R(0f, Mathf.PI * 2f);
+                    var outward = Mathf.Sqrt(R(0f, 1f));
+                    var at = tip + new Vector3(Mathf.Cos(around) * outward * crown, R(-0.15f, 0.45f) * crown * (1.2f - outward), Mathf.Sin(around) * outward * crown);
+                    canopyParts.Add(new CombineInstance { mesh = clump, transform = Matrix4x4.TRS(at, Quaternion.Euler(R(-15, 15), R(0, 360), R(-15, 15)), new Vector3(size * 1.3f, size * R(0.55f, 0.75f), size * 1.2f)) });
                 }
             }
             trunk = Combine(trunkParts, "Tree trunk " + seed);

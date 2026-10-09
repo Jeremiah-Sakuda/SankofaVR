@@ -10,6 +10,7 @@ namespace Sankofa.EditorTools
         public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Pointer;
         public Material Workbench, Brass, LanternCore;
         public Material Water, Spill, River, EmberFigure, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
+        public Material RailRust, Cladding, Liner, Maize, Headlight, TailLight;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, SkyDusk, SkyMorning, SkyCity, Stars, Smoke, Halo, Plaque;
     }
 
@@ -126,6 +127,37 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Wrap", 0.5f);
                 }),
                 Metal = Lit("Jiko metal", new Color(0.3f, 0.27f, 0.24f)),
+                // New rails as they came off the ships: dark mill scale, rusting orange where the rain has been, the
+                // patches painted per vertex. Lit like the camp, with the cool highlight of a touched rail.
+                RailRust = Make("Rail rust", "Sankofa/Fire Lit", m =>
+                {
+                    m.SetColor("_Color", new Color(0.42f, 0.41f, 0.4f));
+                    m.SetFloat("_UseBake", 1);
+                    m.SetTexture("_Detail", detail);
+                    m.SetVector("_DetailScale", new Vector4(3f, 6f, 0, 0));
+                    m.SetFloat("_DetailStrength", 0.5f);
+                    m.SetFloat("_DetailAlbedo", 0.6f);
+                    m.SetFloat("_Rim", 1.1f);
+                    m.SetFloat("_Wrap", 0.2f);
+                    m.SetColor("_HighlightColor", new Color(0.55f, 0.7f, 0.9f));
+                    m.EnableKeyword("_DETAIL_UV");
+                }),
+                // The jiko: galvanised sheet sooted toward the lip, a fired-clay liner, and a cob or two roasting.
+                Cladding = Baked("Jiko cladding", new Color(0.58f, 0.58f, 0.6f), detail, "_DETAIL_UV", new Vector2(6f, 3f), 0.25f, 0.35f),
+                Liner = Baked("Jiko liner", new Color(0.62f, 0.36f, 0.22f), detail, "_DETAIL_UV", new Vector2(8f, 2f), 0.5f, 0.45f),
+                Maize = Baked("Roast maize", new Color(0.7f, 0.52f, 0.2f), detail, "_DETAIL_UV", new Vector2(16f, 10f), 1.4f, 0.8f),
+                Headlight = Make("Headlight", "Sankofa/Glow", m =>
+                {
+                    m.SetColor("_Color", new Color(1f, 0.92f, 0.78f));
+                    m.SetFloat("_Intensity", 1.4f);
+                    m.SetFloat("_Falloff", 2.6f);
+                }),
+                TailLight = Make("Tail light", "Sankofa/Glow", m =>
+                {
+                    m.SetColor("_Color", new Color(1f, 0.16f, 0.08f));
+                    m.SetFloat("_Intensity", 1.3f);
+                    m.SetFloat("_Falloff", 2.6f);
+                }),
                 Paint = Baked("Gate paint", new Color(0.12f, 0.32f, 0.3f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
                 LanternCore = Lit("Lantern flame", new Color(0.3f, 0.2f, 0.1f), new Color(1f, 0.72f, 0.4f)),
 
@@ -254,6 +286,8 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Falloff", 2.8f);
                 }),
             };
+            // The cobs sit above the coals, so the light reaches their tops only by wrapping round them.
+            art.Maize.SetFloat("_Wrap", 1f);
             AssetDatabase.SaveAssets();
             return art;
         }
