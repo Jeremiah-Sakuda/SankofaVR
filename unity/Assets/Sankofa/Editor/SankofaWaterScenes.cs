@@ -172,12 +172,8 @@ namespace Sankofa.EditorTools
             }
             var rockFilter = Static(root, "Rocks", Combine(rocks, "1850s rocks"), art.Rock);
 
-            // Above the rock's crown, so the water runs over the stone rather than through it.
-            var springTop = springRock.y + 0.335f;
-            var spillTop = SankofaStoryMeshes.Ribbon("Spring over the rock", new List<Vector3>
-            {
-                new Vector3(0.66f, springTop - 0.03f, 0.38f), new Vector3(0.52f, springTop + 0.005f, 0.33f), new Vector3(0.36f, springTop - 0.01f, 0.3f),
-            }, 0.07f, Vector3.up);
+            // The spring leaves the rock at its shoulder, where the visitor's hand meets it.
+            var springTop = springRock.y + 0.3f;
             var spillFall = SankofaStoryMeshes.Ribbon("Spring falling", new List<Vector3>
             {
                 new Vector3(0.34f, springTop - 0.015f, 0.3f), new Vector3(0.3f, springTop - 0.2f, 0.31f), new Vector3(0.27f, 0.25f, 0.33f), new Vector3(0.26f, ground.sharedMesh != null ? BoundaryGround(new Vector3(0.26f, 0, 0.34f)) + 0.02f : 0.02f, 0.34f),
@@ -196,15 +192,14 @@ namespace Sankofa.EditorTools
 
             var light = TradersFireAt + new Vector3(0, BoundaryGround(TradersFireAt) + 0.25f, 0);
             Bake(root, new[] { ground, rockFilter, trunks, canopies, stones, woodFilter }, light);
-            var springTopFilter = Static(root, "Spring", spillTop, art.Spill);
             var rivuletFilter = Static(root, "Rivulet", rivulet, art.Water);
-            SaveMeshes(new[] { ground, water, rockFilter, trunks, canopies, stones, woodFilter, springTopFilter, rivuletFilter, statics[3], statics[4] });
+            SaveMeshes(new[] { ground, water, rockFilter, trunks, canopies, stones, woodFilter, rivuletFilter, statics[3], statics[4] });
 
-            // The falling water is the thing the visitor touches.
+            // The spring comes out at the rock's lip and falls; the falling water is the thing the visitor touches.
             var spillRoot = Child(root, "Water spill");
             var fall = Static(spillRoot, "Body", spillFall, art.Spill);
             SaveMeshes(new[] { fall });
-            var spill = Staged(spillRoot.gameObject, "water.spill", "story.water.1850s", true, new[] { fall.GetComponent<Renderer>(), springTopFilter.GetComponent<Renderer>() });
+            var spill = Staged(spillRoot.gameObject, "water.spill", "story.water.1850s", true, new[] { fall.GetComponent<Renderer>() });
             Set(spill, "touchPoint", Marker(spillRoot, "Touch point", new Vector3(0.33f, springTop - 0.03f, 0.29f)));
             Set(spill, "touchRadius", 0.1f);
             Set(spill, "attentionRadius", 0.15f);

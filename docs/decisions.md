@@ -212,3 +212,39 @@ The user asked for sharper designs in four places, then repeated reviews until o
 | Roasting maize on the jiko | Adopted as an everyday stall; part of the *jiko* review check |
 
 Desktop captures only.
+
+## Polish round 5: one silhouette, the flame entry, staging and hands — October 9, 2026
+
+A panel of five judges and a figure reviewer scored round 4 on desktop captures: Innovation 6.5, Experience 6.5, Technical 7.5, Polish 5, figures 5.5 and props 6. The rules reviewer found the content viable but the delivery not yet started. This round acts on their findings.
+
+- **Figures:** every figure part's depth is drawn before any figure's light, so body, wrap and shawl read as one silhouette and no anatomy shows through the cloth. Bodies are denser smoke with a brighter rim, the shawl is narrower, the head a little fuller and the fists slimmer.
+- **Entering a story:** flame now spreads across the view from the ember the visitor carries, and the new place opens out from its own light. Behind the fronts the light settles to a dark ember rather than a flat bright field. Reduced motion keeps the short dim dissolve.
+- **Personal space:** kneeling and standing places are over 1.1 m from the seat, and a test checks it. The trade is pushed back, the ewe stands between the women and dimmer, and the bead is offered from the hand.
+- **Props:**
+  - a faceted bead on a cord, and a leaf-wrapped seed;
+  - an irregular, flatter hide;
+  - tents with seams, doors and guy ropes;
+  - rails turned to run away from the seat, with mill scale and rust patches;
+  - a fenced garden gate;
+  - the spring now falls from its rock's lip.
+- **The city:** tall, narrow windows, wide shopfronts and a few taller towers. Lamp glows sit in front of their heads.
+- **Hands and reading:**
+  - a ring of firelight under an offered object shows where to hold an open palm and fills as it holds;
+  - captions glide to stay within 25° of the visitor's gaze;
+  - the settings fold behind one plaque;
+  - the start text is larger.
+- **Engineering:**
+  - skies draw at the far plane, and the near clip is 5 cm;
+  - pause stills the figures, the ewe, traffic and incidental sounds;
+  - a PlayMode test presses Begin and an era with a simulated fingertip through the panels' own poke detection;
+  - the shader test reads include files;
+  - the head-vertex guard is fixed.
+- **Credits:** complete and paged in the app, with source links for every CC BY recording and the OFL notices.
+
+| Decision | Status |
+|---|---|
+| Kneeling figures at least 1.1 m from the seat | Tested in EditMode |
+| Entry as a directional burn | Adopted on a desktop motion strip; comfort unverified in a headset |
+| Hearth idle aside and "Is this true?" answer | Not built: they need new narration, which needs the user's approval to generate |
+
+Desktop captures only.
