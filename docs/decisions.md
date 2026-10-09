@@ -162,3 +162,21 @@ The figures now hold and hand over what they carry, through arm swings in the fi
 | All sound from CC0/CC BY field recordings, credited in the app; no synthesis | Implemented; an EditMode test enforces it; not listening-reviewed |
 | No voices in past scenes until the relevant languages are checked | Adopted |
 | Figure gestures: carry, hold out until taken, set down, present | Implemented in software |
+
+## Polish round 2: skinned figures — October 8, 2026
+
+The user asked for a reviewer of the figures and animation. It scored them 4/10: hand-overs did not connect, the arms were rods and the kneel read as "sunk to the waist". It recommended a one-day spike with a CC0 rigged mannequin. The user approved downloading Quaternius's free *Universal Animation Library* (CC0, 15 MB) for it.
+
+The spike is adopted. Re-shot motion strips show the change: real steps, a kneel at the hide, reaching and talking gestures, and carried things in the hands. The figures stay faceless and drawn only as ember light, with a plain wrap and shawl; clothing and gestures still need family review.
+
+Also changed in this round:
+- **Lineage:** each family line has its own ember colour.
+- **Opacity:** a smoky core replaces pure additive glass.
+- **Staging:** Wambui's and Njeri's places and the ewe's spot are re-staged, so paths clear the fire and the lantern.
+- **Panels:** choices come up into view, while pause and return stay at the lap.
+
+| Decision | Status |
+|---|---|
+| Skinned CC0 mannequin driven by our paths and timing, drawn in ember light | Adopted on desktop motion-strip evidence; Quest cost unmeasured |
+| Kikuyu and Maasai family colours across eras | Implemented; family review pending |
+| Procedural ewe | Kept with a better shape; leg motion not yet built |

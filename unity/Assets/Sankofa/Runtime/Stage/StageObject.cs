@@ -40,6 +40,7 @@ namespace Sankofa.Runtime.Stage
 
         bool initialised;
         Vector3 startLocalPosition;
+        Transform startParent;
         Quaternion startLocalRotation;
         Vector3 startScale;
         MaterialPropertyBlock block;
@@ -98,7 +99,7 @@ namespace Sankofa.Runtime.Stage
             get
             {
                 Initialise();
-                return transform.parent != null ? transform.parent.TransformPoint(startLocalPosition) : startLocalPosition;
+                return startParent != null ? startParent.TransformPoint(startLocalPosition) : startLocalPosition;
             }
         }
 
@@ -110,6 +111,7 @@ namespace Sankofa.Runtime.Stage
             initialised = true;
             block = new MaterialPropertyBlock();
             startLocalPosition = transform.localPosition;
+            startParent = transform.parent;
             startLocalRotation = transform.localRotation;
             startScale = transform.localScale;
             shown = shownTarget = visibleAtStart ? 1 : 0;
@@ -122,6 +124,7 @@ namespace Sankofa.Runtime.Stage
             Release();
             moveTarget = null;
             velocity = Vector3.zero;
+            if (transform.parent != startParent) transform.SetParent(startParent, false);
             transform.localPosition = startLocalPosition;
             transform.localRotation = startLocalRotation;
             shown = shownTarget = visibleAtStart ? 1 : 0;
@@ -149,6 +152,16 @@ namespace Sankofa.Runtime.Stage
         }
 
         /// <summary>Appears at once at a world position, for an element carried across a transition.</summary>
+        /// <summary>
+        /// Leaves the hand of the person who carried it (its holder's anchor) for the scene itself, keeping where it
+        /// is, so it no longer moves with her once it is offered, set down or taken.
+        /// </summary>
+        void LeaveHolder()
+        {
+            if (holder == null || transform.parent == null || transform.parent == holder.transform.parent) return;
+            transform.SetParent(holder.transform.parent, true);
+        }
+
         public void ShowAt(Vector3 world)
         {
             Initialise();
@@ -187,6 +200,7 @@ namespace Sankofa.Runtime.Stage
 
         public void MoveTo(Vector3 world, float seconds)
         {
+            LeaveHolder();
             Initialise();
             Release();
             moveTarget = world;
@@ -196,6 +210,7 @@ namespace Sankofa.Runtime.Stage
         /// <summary>Carried in a hand: follows its anchor, holding position while the anchor is unavailable.</summary>
         public void Carry(HandSource hand, Func<Vector3?> anchor)
         {
+            LeaveHolder();
             Initialise();
             follow = anchor;
             CarriedBy = hand;

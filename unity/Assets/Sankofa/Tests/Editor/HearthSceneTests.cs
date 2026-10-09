@@ -55,13 +55,25 @@ namespace Sankofa.Tests
             components.AddRange(Object.FindObjectsByType<Runtime.Narration.NarrationPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.Add(Single<CaptionBoard>());
             components.Add(Single<StartScreen>());
-            components.AddRange(Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+
 
             var pointers = Object.FindObjectsByType<PointerSource>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             Assert.That(pointers.Length, Is.EqualTo(2), "a pointer for each side");
             components.AddRange(pointers);
             components.Add(Single<Runtime.Audio.NightAmbience>());
             Assert.That(components.SelectMany(MissingReferences), Is.Empty);
+            // People have an animated skinned body; the ewe is posed by the figure shader, so has no animator.
+            foreach (var figure in Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var isPerson = figure.GetComponent<StageObject>().Id != "figure.ewe";
+                Assert.That(MissingReferences(figure).Where(m => isPerson || !m.EndsWith(".animator")), Is.Empty, figure.name);
+                if (!isPerson) continue;
+                Assert.That(figure.GetComponentInChildren<SkinnedMeshRenderer>(), Is.Not.Null, figure.name + " has a skinned body");
+                // A person's head stands at a person's height, not a giant's or a child's.
+                var height = new SerializedObject(figure).FindProperty("height").floatValue;
+                var head = figure.GetComponentsInChildren<Transform>(true).First(t => t.name == "Head");
+                Assert.That(head.position.y - figure.transform.position.y, Is.InRange(height * 0.8f, height * 0.97f), figure.name + " head height");
+            }
             // An occasional sound without a subject (hammering along the line) plays whenever its scene is shown.
             foreach (var sound in Object.FindObjectsByType<Runtime.Audio.ObjectSound>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 Assert.That(MissingReferences(sound).Where(m => !m.EndsWith(".subject")), Is.Empty);

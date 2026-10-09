@@ -4,7 +4,9 @@
 // body (feet at the origin, facing +Z, Height tall) down onto its knees, leaning a little forward. ArmNeg and ArmPos
 // swing the arm on each side forward from the shoulder (vertex colour red and green mark them); ArmIn brings the
 // hands in toward each other, to hold or present something. A depth-only pass first keeps the nearest surface, so an
-// arm in front of the body or the far side of the figure never doubles its glow; the feet dissolve into smoke.
+// arm in front of the body or the far side of the figure never doubles its glow; the feet dissolve into smoke. A
+// skinned body (Procedural 0) is posed by its animator instead. A thin smoky core dims what is behind a figure, so it
+// reads as a presence rather than glass.
 Shader "Sankofa/Ember Figure"
 {
     Properties
@@ -21,6 +23,9 @@ Shader "Sankofa/Ember Figure"
         _ArmNeg ("Arm on -X forward", Range(-0.3, 1)) = 0
         _ArmPos ("Arm on +X forward", Range(-0.3, 1)) = 0
         _ArmIn ("Hands together", Range(0, 1)) = 0
+        _Procedural ("Posed by this shader", Float) = 1
+        _GroundY ("Ground height (world)", Float) = 0
+        _Smoke ("Smoke opacity", Range(0, 1)) = 0.3
     }
     SubShader
     {
@@ -42,6 +47,9 @@ Shader "Sankofa/Ember Figure"
         float _ArmNeg;
         float _ArmPos;
         float _ArmIn;
+        float _Procedural;
+        float _GroundY;
+        half _Smoke;
 
         struct appdata
         {
@@ -57,16 +65,17 @@ Shader "Sankofa/Ember Figure"
         {
             float h = max(_Height, 0.01);
             float hip = 0.48 * h;
-            float fold = 0.6 * _Kneel;
+            float kneel = _Kneel * _Procedural;
+            float fold = 0.6 * kneel;
             float below = 1 - saturate(p.y / hip);
             float upper = step(hip, p.y);
             float3 folded = p;
             folded.y = p.y * (1 - fold);
-            folded.xz *= 1 + 0.3 * _Kneel * below;
-            folded.z -= 0.14 * h * _Kneel * below;
+            folded.xz *= 1 + 0.3 * kneel * below;
+            folded.z -= 0.14 * h * kneel * below;
             float3 raised = p;
             raised.y = p.y - hip * fold;
-            raised.z += (p.y - hip) * 0.22 * _Kneel;
+            raised.z += (p.y - hip) * 0.22 * kneel;
             return lerp(folded, raised, upper);
         }
 
@@ -84,6 +93,7 @@ Shader "Sankofa/Ember Figure"
         // The posed vertex and its normal: the same rotation turns both, so the rim stays true on a raised arm.
         void Pose(inout float3 p, inout float3 n, fixed4 arms)
         {
+            arms *= _Procedural;
             float h = max(_Height, 0.01);
             float3 pivotNeg = float3(-0.14 * h, 0.77 * h, 0.02 * h);
             float3 pivotPos = float3(0.14 * h, 0.77 * h, 0.02 * h);
@@ -135,7 +145,7 @@ Shader "Sankofa/Ember Figure"
 
         Pass
         {
-            Blend One One
+            Blend One OneMinusSrcAlpha
             ZWrite Off
             ZTest LEqual
             Cull Back
@@ -149,7 +159,6 @@ Shader "Sankofa/Ember Figure"
                 float4 pos : SV_POSITION;
                 float3 world : TEXCOORD0;
                 half3 normal : TEXCOORD1;
-                float rise : TEXCOORD2;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -161,8 +170,6 @@ Shader "Sankofa/Ember Figure"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float3 p = v.vertex.xyz;
                 float3 n = v.normal;
-                // Height up the standing body, before posing: 0 at the feet, 1 at the crown.
-                o.rise = v.vertex.y / max(_Height, 0.01);
                 Pose(p, n, v.color);
                 o.pos = UnityObjectToClipPos(float4(p, 1));
                 o.world = mul(unity_ObjectToWorld, float4(p, 1)).xyz;
@@ -184,11 +191,15 @@ Shader "Sankofa/Ember Figure"
                 // The feet are smoke: a ragged edge that drifts upward, so the figure stands in the scene without
                 // a hard line where it meets the ground.
                 half wisp = tex2D(_Noise, float2(i.world.x * 2.3 + i.world.z * 1.7, i.world.y * 2.0 - _Time.y * 0.35)).g;
-                half feet = saturate((i.rise - 0.015 - wisp * 0.12) / 0.11);
+                // Height above the ground the figure stands on: 0 at the feet, 1 at a standing crown.
+                half rise = (i.world.y - _GroundY) / max(_Height, 0.01);
+                half feet = saturate((rise - 0.015 - wisp * 0.12) / 0.11);
                 // The head carries a little more of the light, where a listener looks.
-                half crown = 1 + 0.25 * smoothstep(0.8, 0.95, i.rise);
-                c *= _Intensity * flicker * (1 + _Highlight * 0.8) * feet * crown;
-                return fixed4(SankofaGrade(c), 1);
+                half crown = 1 + 0.25 * smoothstep(0.8, 0.95, rise);
+                half presence = _Intensity * feet;
+                c *= presence * flicker * (1 + _Highlight * 0.8) * crown;
+                // Premultiplied: the glow adds, the smoky core dims what is behind by its opacity.
+                return fixed4(SankofaGrade(c), saturate(_Smoke * presence));
             }
             ENDCG
         }

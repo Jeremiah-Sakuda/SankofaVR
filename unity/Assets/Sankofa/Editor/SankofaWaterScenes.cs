@@ -209,11 +209,12 @@ namespace Sankofa.EditorTools
 
             var fire = BuildTradersFire(root, art);
             var hide = BuildHide(root, art, tradeRock + Vector3.up * 0.25f);
-            var groundAt = BoundaryGround(new Vector3(-0.75f, 0, 1.35f));
-            var wambui = BuildFigure(root, art, "figure.wambui", "story.water.1850s", new Vector3(-0.75f, groundAt, 1.35f), 1.6f, 1801, FromTheForest);
-            var naserian = BuildFigure(root, art, "figure.naserian", "story.water.1850s", new Vector3(0.85f, BoundaryGround(new Vector3(0.85f, 0, 1.3f)), 1.3f), 1.66f, 1802, FromThePlain);
+            // Wambui waits back from the traders' fire, so her way to the hide does not pass through it.
+            var groundAt = BoundaryGround(new Vector3(-0.75f, 0, 1.6f));
+            var wambui = BuildFigure(root, art, "figure.wambui", "story.water.1850s", new Vector3(-0.75f, groundAt, 1.6f), 1.6f, FromTheForest, KikuyuLine);
+            var naserian = BuildFigure(root, art, "figure.naserian", "story.water.1850s", new Vector3(0.85f, BoundaryGround(new Vector3(0.85f, 0, 1.3f)), 1.3f), 1.66f, FromThePlain, MaasaiLine);
             // The ewe waits on the near bank, seen between the two women while they trade.
-            var ewe = BuildEwe(root, art, new Vector3(0.7f, BoundaryGround(new Vector3(0.7f, 0, 1.75f)), 1.75f), EweFromThePlain);
+            var ewe = BuildEwe(root, art, new Vector3(1.3f, BoundaryGround(new Vector3(1.3f, 0, 1.9f)), 1.9f), EweFromThePlain);
             // For the trade the visitor and the two women sit around the hide: Wambui across it, Naserian to the right.
             Approaches(hide, true, new Vector2(0.0f, 1.12f), new Vector2(0.86f, 0.92f));
             var flour = BuildGourd(root, art, "gourd.flour", "story.water.1850s", new Vector3(-0.75f, groundAt + 0.98f, 1.48f), 0.23f, 0.095f, 0.03f, 1f, false);
@@ -325,18 +326,28 @@ namespace Sankofa.EditorTools
             return o;
         }
 
-        static StageObject BuildFigure(Transform root, SankofaArtSet art, string id, string scene, Vector3 at, float height, int seed, Vector2[] path)
+        // One ember colour per family line, so the granddaughters carry their grandmothers' light across the eras.
+        static readonly Color KikuyuLine = new Color(1f, 0.64f, 0.26f, 1f);
+        static readonly Color MaasaiLine = new Color(1f, 0.42f, 0.2f, 1f);
+
+        /// <summary>
+        /// A person of the story: the faceless skinned mannequin, animated (walk, idle, kneel, give, talk) and drawn
+        /// only as a shape of firelight in her family's colour. What she carries follows her right hand or her neck.
+        /// </summary>
+        static StageObject BuildFigure(Transform root, SankofaArtSet art, string id, string scene, Vector3 at, float height, Vector2[] path, Color tint)
         {
             var figureRoot = Child(root, id);
             figureRoot.localPosition = at;
             figureRoot.localRotation = Quaternion.LookRotation(new Vector3(-at.x, 0, -at.z), Vector3.up);
-            var body = Static(figureRoot, "Body", SankofaStoryMeshes.Figure("Figure " + id, seed, height), art.EmberFigure);
-            SaveMeshes(new[] { body });
-            var o = StageLight(figureRoot, id, scene, body.GetComponent<Renderer>(), 0.5f);
-            // Things she carries hang from her hands, held in front at the waist, or from her neck.
+            var (body, animator, hand, neckBone, cloth) = SkinnedBody(figureRoot, art, height);
+            var o = StageLight(figureRoot, id, scene, body, 0.5f);
             var hands = Marker(figureRoot, "Hands", new Vector3(0, 0.53f * height, 0.2f));
             var neck = Marker(figureRoot, "Neck", new Vector3(0, 0.845f * height, 0.08f));
-            Walks(figureRoot, body.GetComponent<Renderer>(), height, path, 0f, 0.016f, true, hands, neck);
+            var motion = Walks(figureRoot, body, height, path, 0f, 0f, true, hands, neck);
+            Set(motion, "animator", animator);
+            SetArray(motion, "anchorBones", new Object[] { hand, neckBone });
+            Set(motion, "tint", tint);
+            SetArray(motion, "cloth", cloth.Cast<Object>().ToArray());
             return o;
         }
 
@@ -357,7 +368,7 @@ namespace Sankofa.EditorTools
         /// The figure walks in along a path over the ground (points given on the plan, heights from the terrain) when
         /// it is revealed, and back along it when it leaves.
         /// </summary>
-        static void Walks(Transform figure, Renderer body, float height, Vector2[] path, float delay, float bob, bool arms, params Transform[] anchors)
+        static FigureMotion Walks(Transform figure, Renderer body, float height, Vector2[] path, float delay, float bob, bool arms, params Transform[] anchors)
         {
             var motion = figure.gameObject.AddComponent<FigureMotion>();
             var ground = figure.parent.name.EndsWith("today") ? (System.Func<Vector3, float>)RiverGround : BoundaryGround;
@@ -373,6 +384,7 @@ namespace Sankofa.EditorTools
             list.arraySize = points.Length;
             for (var i = 0; i < points.Length; i++) list.GetArrayElementAtIndex(i).vector3Value = points[i];
             so.ApplyModifiedPropertiesWithoutUndo();
+            return motion;
         }
 
         /// <summary>
@@ -405,9 +417,9 @@ namespace Sankofa.EditorTools
 
         // Paths on the plan (x, z): the Kikuyu women come down from the forest on the left along the near bank, the
         // Maasai women in from the plain on the right; each ends just short of her own place.
-        static readonly Vector2[] FromTheForest = { new Vector2(-6.2f, 1.7f), new Vector2(-4f, 1.55f), new Vector2(-2.2f, 1.45f), new Vector2(-1.3f, 1.38f) };
+        static readonly Vector2[] FromTheForest = { new Vector2(-6.2f, 1.75f), new Vector2(-4f, 1.7f), new Vector2(-2.2f, 1.62f), new Vector2(-1.4f, 1.58f) };
         static readonly Vector2[] FromThePlain = { new Vector2(6.4f, 1.9f), new Vector2(4.2f, 1.6f), new Vector2(2.4f, 1.4f), new Vector2(1.4f, 1.32f) };
-        static readonly Vector2[] EweFromThePlain = { new Vector2(6.9f, 2.1f), new Vector2(4.6f, 1.85f), new Vector2(2.8f, 1.75f), new Vector2(1.5f, 1.75f) };
+        static readonly Vector2[] EweFromThePlain = { new Vector2(6.9f, 2.2f), new Vector2(4.6f, 2.0f), new Vector2(2.9f, 1.95f), new Vector2(1.9f, 1.92f) };
 
         /// <summary>A shape of light fades in where it stands instead of growing; its brightness is its visibility.</summary>
         static StageObject StageLight(Transform root, string id, string scene, Renderer body, float attention)
@@ -544,12 +556,13 @@ namespace Sankofa.EditorTools
 
             var rails = BuildRails(root, art, crib + Vector3.up * 0.48f);
             var lantern = BuildLantern(root, art, "lantern.1899", "story.water.1899", CampLanternAt);
-            var njeriAt = new Vector3(-0.72f, BoundaryGround(new Vector3(-0.72f, 0, 1.3f)), 1.3f);
+            // Njeri stands clear of the camp lantern; Naisula on the right, as their grandmothers did.
+            var njeriAt = new Vector3(-0.95f, BoundaryGround(new Vector3(-0.95f, 0, 1.5f)), 1.5f);
             var naisulaAt = new Vector3(0.8f, BoundaryGround(new Vector3(0.8f, 0, 1.32f)), 1.32f);
-            var njeri = BuildFigure(root, art, "figure.njeri", "story.water.1899", njeriAt, 1.58f, 1901, FromTheForest);
-            var naisula = BuildFigure(root, art, "figure.naisula", "story.water.1899", naisulaAt, 1.64f, 1902, FromThePlain);
+            var njeri = BuildFigure(root, art, "figure.njeri", "story.water.1899", njeriAt, 1.58f, FromTheForest, KikuyuLine);
+            var naisula = BuildFigure(root, art, "figure.naisula", "story.water.1899", naisulaAt, 1.64f, FromThePlain, MaasaiLine);
             // Njeri comes to stand at Naisula's side to pour what flour she has into her gourd.
-            Approaches(naisula, false, new Vector2(0.38f, 1.42f));
+            Approaches(naisula, false, new Vector2(0.17f, 1.45f));
             var empty = BuildGourd(root, art, "gourd.empty", "story.water.1899", njeriAt + new Vector3(0.18f, 0.12f, -0.08f), 0.24f, 0.1f, 0.03f, 0.9f, false);
             var old = BuildGourd(root, art, "gourd.old", "story.water.1899", naisulaAt + new Vector3(-0.2f, 0.14f, -0.08f), 0.32f, 0.07f, 0.025f, 0.45f, false);
             var seed = BuildSeed(root, art, "seed", "story.water.1899", njeriAt + new Vector3(0.12f, 0.85f, -0.1f));

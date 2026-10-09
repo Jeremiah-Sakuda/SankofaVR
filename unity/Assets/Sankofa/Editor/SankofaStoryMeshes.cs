@@ -409,7 +409,15 @@ namespace Sankofa.EditorTools
             var parts = new List<CombineInstance>();
             Mesh Round(int s) => SankofaMeshes.Stone(s, 2, 0.08f, 10f);
             parts.Add(new CombineInstance { mesh = Round(seed), transform = Matrix4x4.TRS(new Vector3(0, 0.5f, 0), Quaternion.identity, new Vector3(0.2f, 0.17f, 0.36f)) });
-            parts.Add(new CombineInstance { mesh = Round(seed + 1), transform = Matrix4x4.TRS(new Vector3(0, 0.63f, 0.38f), Quaternion.Euler(30, 0, 0), new Vector3(0.07f, 0.08f, 0.13f)) });
+            // A fuller fleece over the back and haunches; the figure shader draws only the nearest surface.
+            parts.Add(new CombineInstance { mesh = Round(seed + 11), transform = Matrix4x4.TRS(new Vector3(0, 0.56f, -0.12f), Quaternion.identity, new Vector3(0.19f, 0.15f, 0.22f)) });
+            parts.Add(new CombineInstance { mesh = Round(seed + 12), transform = Matrix4x4.TRS(new Vector3(0, 0.56f, 0.14f), Quaternion.identity, new Vector3(0.18f, 0.14f, 0.2f)) });
+            // Neck rising forward to a long, narrow head with drooping ears, and a short tail.
+            parts.Add(new CombineInstance { mesh = Round(seed + 13), transform = Matrix4x4.TRS(new Vector3(0, 0.6f, 0.3f), Quaternion.Euler(-35, 0, 0), new Vector3(0.065f, 0.1f, 0.065f)) });
+            parts.Add(new CombineInstance { mesh = Round(seed + 1), transform = Matrix4x4.TRS(new Vector3(0, 0.66f, 0.42f), Quaternion.Euler(35, 0, 0), new Vector3(0.06f, 0.07f, 0.12f)) });
+            foreach (var side in new[] { -1f, 1f })
+                parts.Add(new CombineInstance { mesh = Round(seed + 14), transform = Matrix4x4.TRS(new Vector3(side * 0.065f, 0.69f, 0.37f), Quaternion.Euler(0, 0, side * -35f), new Vector3(0.045f, 0.012f, 0.025f)) });
+            parts.Add(new CombineInstance { mesh = Round(seed + 15), transform = Matrix4x4.TRS(new Vector3(0, 0.5f, -0.37f), Quaternion.Euler(20, 0, 0), new Vector3(0.035f, 0.06f, 0.035f)) });
             foreach (var (x, z) in new[] { (-0.1f, 0.22f), (0.1f, 0.22f), (-0.1f, -0.22f), (0.1f, -0.22f) })
                 parts.Add(new CombineInstance { mesh = SankofaMeshes.Log(seed + 5, 0.42f, 0.022f, 0.3f, 0.005f, 6, 2), transform = Matrix4x4.TRS(new Vector3(x, 0.21f, z), Quaternion.identity, Vector3.one) });
             var mesh = CombineMeshes(parts, name);

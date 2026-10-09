@@ -7,9 +7,10 @@ namespace Sankofa.Runtime.Stage
     /// How a person or animal of the story moves: walking in along a path when revealed, going to stand or kneel
     /// where something is used, going back to its own place, and walking away when withdrawn. Presentation only: the
     /// story decides when, through reveal, move and withdraw, and the stage asks for a gesture when something the
-    /// figure holds is offered, set down or shown. The figure's light shader folds the body into a kneel and swings
-    /// each arm from the shoulder, so a single silhouette serves every posture. Things the figure carries hang from
-    /// anchors (hands, neck) that follow the same fold.
+    /// figure holds is offered, set down or shown. A figure with an animator (the skinned mannequin) walks, kneels,
+    /// gives and talks through it, and what it carries follows its hand and neck bones; a figure without one (the
+    /// ewe, or the procedural silhouette) is posed by the light shader, which folds the body into a kneel and swings
+    /// each arm from the shoulder, and its carried things follow the same fold.
     /// </summary>
     [RequireComponent(typeof(StageObject))]
     public sealed class FigureMotion : MonoBehaviour
@@ -28,12 +29,29 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] bool hasArms = true;
         [Tooltip("Points that carried things hang from (hands, neck), placed for standing; they follow the kneel.")]
         [SerializeField] Transform[] anchors = new Transform[0];
+        [Tooltip("With an animator, the bones each anchor follows (same order as the anchors).")]
+        [SerializeField] Transform[] anchorBones = new Transform[0];
+        [Tooltip("Drives a skinned body's walk, kneel, give and talk; without one the shader poses the body.")]
+        [SerializeField] Animator animator;
+        [Tooltip("Cloth drawn in the same light as the body, which follows its visibility and colour.")]
+        [SerializeField] Renderer[] cloth = new Renderer[0];
+        [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
+        [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
 
         static readonly int KneelId = Shader.PropertyToID("_Kneel");
         static readonly int HeightId = Shader.PropertyToID("_Height");
         static readonly int ArmNegId = Shader.PropertyToID("_ArmNeg");
         static readonly int ArmPosId = Shader.PropertyToID("_ArmPos");
         static readonly int ArmInId = Shader.PropertyToID("_ArmIn");
+        static readonly int ProceduralId = Shader.PropertyToID("_Procedural");
+        static readonly int GroundId = Shader.PropertyToID("_GroundY");
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+        static readonly int SmokeId = Shader.PropertyToID("_Smoke");
+        static readonly int WalkingId = Animator.StringToHash("Walking");
+        static readonly int KneelingId = Animator.StringToHash("Kneeling");
+        static readonly int TalkingId = Animator.StringToHash("Talking");
+        static readonly int GiveId = Animator.StringToHash("Give");
+        static readonly int PaceId = Animator.StringToHash("Pace");
 
         readonly List<Vector3> route = new List<Vector3>();
         StageObject staged;
@@ -133,6 +151,14 @@ namespace Sankofa.Runtime.Stage
             reachFor = seconds;
             reachTarget = toward;
             offered = waitingFor;
+            // Turn to whoever is being given to, unless still walking somewhere.
+            if (!Walking)
+            {
+                var facing = toward - transform.position;
+                facing.y = 0;
+                if (facing.sqrMagnitude > 1e-4f) finalRotation = Quaternion.LookRotation(facing);
+            }
+            if (animator != null) animator.SetTrigger(GiveId);
         }
 
         /// <summary>Something offered from these hands still waits where it was held out, not yet taken.</summary>
@@ -234,8 +260,23 @@ namespace Sankofa.Runtime.Stage
             var lift = walking ? bob * Mathf.Abs(Mathf.Sin(travelled / stepLength * Mathf.PI)) : 0f;
             transform.position = basePosition + Vector3.up * lift;
             UpdateArms(dt, walking);
-            FollowAnchors();
+            if (animator != null)
+            {
+                animator.SetBool(WalkingId, walking);
+                animator.SetFloat(PaceId, speed / 1.1f);
+                animator.SetBool(KneelingId, kneelTarget > 0 && !walking);
+                animator.SetBool(TalkingId, presentFor > 0);
+            }
+            else FollowAnchors();
             Apply();
+        }
+
+        /// <summary>After the animator has posed the bones this frame, carried things follow the hand and neck.</summary>
+        void LateUpdate()
+        {
+            if (animator == null) return;
+            for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)
+                if (anchors[i] != null && anchorBones[i] != null) anchors[i].position = anchorBones[i].position;
         }
 
         void UpdateArms(float dt, bool walking)
@@ -317,7 +358,20 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(ArmNegId, armNeg);
             block.SetFloat(ArmPosId, armPos);
             block.SetFloat(ArmInId, armIn);
+            block.SetFloat(ProceduralId, animator != null ? 0f : 1f);
+            block.SetFloat(GroundId, basePosition.y);
+            block.SetColor(ColorId, tint);
             body.SetPropertyBlock(block);
+            if (cloth.Length == 0) return;
+            // Cloth is denser smoke than the body it covers, so the shape beneath reads only faintly.
+            block.SetFloat(SmokeId, 0.62f);
+            foreach (var c in cloth)
+            {
+                if (c == null) continue;
+                c.enabled = body.enabled;
+                c.SetPropertyBlock(block);
+            }
+            block.SetFloat(SmokeId, 0.3f);
         }
     }
 }
