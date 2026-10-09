@@ -34,6 +34,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] bool approachKneels;
         [Tooltip("The person of the story who carries or gives this, and gestures when it is offered, shown or set down.")]
         [SerializeField] FigureMotion holder;
+        [Tooltip("Where its holder steps to hand it to the visitor, at the edge of their personal space; empty to offer from where it is.")]
+        [SerializeField] Transform handOver;
 
         static readonly int HighlightId = Shader.PropertyToID("_Highlight");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
@@ -64,6 +66,10 @@ namespace Sankofa.Runtime.Stage
         /// <summary>The hand carrying it, if any; carried objects cross into their counterparts in that hand.</summary>
         public HandSource CarriedBy { get; private set; }
         public FigureMotion Holder => holder;
+        /// <summary>Where its holder stands to hand it over, if it is handed over in person.</summary>
+        public Vector3? HandOverPlace => handOver != null ? handOver.position : (Vector3?)null;
+        /// <summary>Still in its holder's hands, not set down or taken.</summary>
+        public bool InHolderHands => holder != null && CarriedBy == null && transform.IsChildOf(holder.transform);
         public Vector3 TouchPosition => touchPoint != null ? touchPoint.position : transform.position;
         public float TouchRadius => touchRadius;
         public float AttentionRadius => attentionRadius;
@@ -240,7 +246,7 @@ namespace Sankofa.Runtime.Stage
 
         void Update()
         {
-            var dt = Time.deltaTime;
+            var dt = StageClock.DeltaTime;
             if (fadeAfter >= 0 && (fadeAfter -= dt) < 0) shownTarget = 0;
             shown = Mathf.MoveTowards(shown, shownTarget, dt / 0.6f);
             highlight = Mathf.MoveTowards(highlight, highlightTarget, dt / 1.2f);

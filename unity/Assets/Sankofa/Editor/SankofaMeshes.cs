@@ -325,10 +325,10 @@ namespace Sankofa.EditorTools
                 // Many small, rough, flattened clumps in a loose dome over the branch tip, so the crown's edge is
                 // broken against the sky rather than a few smooth masses.
                 var crown = height * R(0.2f, 0.28f);
-                var clumps = 7 + random.Next(4);
+                var clumps = 5 + random.Next(3);
                 for (var k = 0; k < clumps; k++)
                 {
-                    var size = height * R(0.07f, 0.11f);
+                    var size = height * R(0.08f, 0.125f);
                     var clump = Stone(seed * 100 + b * 16 + k, 1, 0.45f, 10f);
                     var around = R(0f, Mathf.PI * 2f);
                     var outward = Mathf.Sqrt(R(0f, 1f));

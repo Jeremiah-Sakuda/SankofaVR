@@ -8,7 +8,7 @@ Shader "Sankofa/Stars"
     }
     SubShader
     {
-        Tags { "Queue"="Background+1" "RenderType"="Background" "IgnoreProjector"="True" }
+        Tags { "Queue"="Geometry+501" "RenderType"="Background" "IgnoreProjector"="True" }
         Blend One One
         ZWrite Off
         Cull Off

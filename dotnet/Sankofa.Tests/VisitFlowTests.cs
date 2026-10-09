@@ -146,6 +146,25 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void LeavingAPausedStoryAsksFirst()
+        {
+            Begin("makers");
+            view.RunUntil(() => flow.Phase == VisitPhase.Story);
+            Assert.That(flow.Pause("visitor"), Is.True);
+            view.Pump();
+            Assert.That(flow.Leave(), Is.True);
+            view.Pump();
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Paused), "one press beside Resume loses nothing");
+            Assert.That(ControlKinds, Is.EqualTo(new[] { ControlKind.ConfirmLeave, ControlKind.CancelLeave }));
+            Assert.That(flow.CancelLeave(), Is.True);
+            Assert.That(ControlKinds, Does.Contain(ControlKind.Resume));
+            Assert.That(flow.Leave(), Is.True);
+            Assert.That(flow.ConfirmLeave(), Is.True);
+            view.Pump();
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Ended));
+        }
+
+        [Test]
         public void KeepingWhileAskedKeepsAndThenLeavesWithoutAskingAgain()
         {
             Begin("makers");

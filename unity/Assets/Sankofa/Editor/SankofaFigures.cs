@@ -62,6 +62,11 @@ namespace Sankofa.EditorTools
         {
             // The lathe builds its surface from the bottom up, so its faces point outward.
             profile = profile.OrderBy(p => p.y).ToList();
+            // The hem and the top edge fold inward, so no open rim catches the light as a bright line.
+            var bottom = profile[0];
+            var top = profile[profile.Count - 1];
+            profile.Insert(0, new Vector2(bottom.x * 0.82f, bottom.y + 0.012f));
+            profile.Add(new Vector2(top.x * 0.82f, top.y - 0.012f));
             var mesh = SankofaStoryMeshes.Lathe(figureRoot.name + " " + name, profile, 28, (a, y) => new Color(0, 0, 0, 1), name.Length);
             var filter = Static(figureRoot, name, mesh, art.EmberFigure);
             SaveMeshes(new[] { filter });

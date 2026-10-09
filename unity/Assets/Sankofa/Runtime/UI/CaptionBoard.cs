@@ -89,7 +89,8 @@ namespace Sankofa.Runtime.UI
             if (caption == null) return;
             var s = FontSize(size);
             caption.fontSize = s;
-            status.fontSize = s * 0.68f;
+            // The status line is the smallest text; at Medium it still subtends a degree from the seat.
+            status.fontSize = s * 0.74f;
             notice.fontSize = s * 0.75f;
             // Larger type wraps sooner; the line stays within a comfortable reading width.
             caption.rectTransform.sizeDelta = new Vector2(width * (size == CaptionSize.Large ? 1.1f : 1f), 0.2f);

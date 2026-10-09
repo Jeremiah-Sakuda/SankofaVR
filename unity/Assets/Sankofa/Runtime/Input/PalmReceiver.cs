@@ -55,7 +55,8 @@ namespace Sankofa.Runtime.Input
         void Update()
         {
             ShowGuide();
-            if (invitationId == null || target == null) return;
+            // While paused nothing is taken: a gesture finished now would be refused and its hand spent.
+            if (invitationId == null || target == null || Sankofa.Runtime.Stage.StageClock.Paused) return;
             var p = target.position;
             var position = new System.Numerics.Vector3(p.x, p.y, p.z);
             var feedback = 0f;
@@ -77,7 +78,7 @@ namespace Sankofa.Runtime.Input
         void ShowGuide()
         {
             if (guide == null) return;
-            var open = invitationId != null && target != null;
+            var open = invitationId != null && target != null && !Sankofa.Runtime.Stage.StageClock.Paused;
             guideAlpha = Mathf.MoveTowards(guideAlpha, open ? 1f : 0f, Time.unscaledDeltaTime * 2f);
             guide.enabled = guideAlpha > 0.01f;
             if (!guide.enabled) return;

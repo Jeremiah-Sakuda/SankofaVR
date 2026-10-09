@@ -31,14 +31,18 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Transform[] anchors = new Transform[0];
         [Tooltip("With an animator, the bones each anchor follows (same order as the anchors).")]
         [SerializeField] Transform[] anchorBones = new Transform[0];
+        [Tooltip("With an animator, the giving arm's upper arm, forearm and hand, reached toward whoever is given to.")]
+        [SerializeField] Transform[] reachArm = new Transform[0];
         [Tooltip("Drives a skinned body's walk, kneel, give and talk; without one the shader poses the body.")]
         [SerializeField] Animator animator;
         [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
         [SerializeField] Renderer[] parts = new Renderer[0];
         [Tooltip("Smoke opacity of those parts; cloth is denser than the body it covers.")]
-        [SerializeField] float partSmoke = 0.8f;
+        [SerializeField] float partSmoke = 0.88f;
         [Tooltip("Smoke opacity of the body: dense enough that a figure reads as a presence, not glass.")]
-        [SerializeField] float bodySmoke = 0.72f;
+        [SerializeField] float bodySmoke = 0.84f;
+        [Tooltip("How much each part shortens toward its bone while kneeling (cloth gathered on the ground).")]
+        [SerializeField] float[] partKneelScale = new float[0];
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
 
@@ -72,12 +76,16 @@ namespace Sankofa.Runtime.Stage
         bool kneelOnArrival;
         bool presentOnArrival;
         Vector3[] anchorRest;
+        Vector3[] partRest;
         StageObject[] carried;
         float armNeg, armPos, armIn;
         float reachFor, presentFor;
         float reachSide;
         Vector3 reachTarget;
         StageObject offered;
+        StageObject handingOver;
+        Vector3 handOverPoint;
+        float reachWeight;
 
         public bool Walking => next < route.Count && wait <= 0;
         /// <summary>Metres walked so far, for a gait to keep its steps in time.</summary>
@@ -97,6 +105,8 @@ namespace Sankofa.Runtime.Stage
             homeLocal = transform.localPosition;
             homeRotation = transform.localRotation;
             basePosition = transform.position;
+            partRest = new Vector3[parts.Length];
+            for (var i = 0; i < parts.Length; i++) partRest[i] = parts[i] != null ? parts[i].transform.localScale : Vector3.one;
             anchorRest = new Vector3[anchors.Length];
             for (var i = 0; i < anchors.Length; i++) anchorRest[i] = anchors[i] != null ? anchors[i].localPosition : Vector3.zero;
             var list = new List<StageObject>();
@@ -120,6 +130,8 @@ namespace Sankofa.Runtime.Stage
             presentOnArrival = false;
             reachFor = presentFor = 0;
             offered = null;
+            handingOver = null;
+            reachWeight = 0;
             armNeg = armPos = armIn = 0;
             finalRotation = null;
             transform.localPosition = homeLocal;
@@ -165,6 +177,18 @@ namespace Sankofa.Runtime.Stage
                 if (facing.sqrMagnitude > 1e-4f) finalRotation = Quaternion.LookRotation(facing);
             }
             if (animator != null) animator.SetTrigger(GiveId);
+        }
+
+        /// <summary>
+        /// Hands something to the visitor in person: walks to a place at the edge of their space, faces them and holds
+        /// it out in her hand toward <paramref name="point"/>, until it is taken or set down.
+        /// </summary>
+        public void HandOver(StageObject item, Vector3 place, Vector3 point)
+        {
+            Initialise();
+            handingOver = item;
+            handOverPoint = point;
+            GoTo(place, point, false);
         }
 
         /// <summary>Something offered from these hands still waits where it was held out, not yet taken.</summary>
@@ -263,6 +287,14 @@ namespace Sankofa.Runtime.Stage
             else if (finalRotation.HasValue)
                 transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation.Value, dt * 3f);
 
+            // Arrived to hand something over: hold it out until it is taken.
+            if (handingOver != null && next >= route.Count && wait <= 0)
+            {
+                Reach(handOverPoint, 4f, handingOver);
+                handingOver = null;
+            }
+            var reaching = reachArm.Length == 3 && offered != null && offered.InHolderHands && (reachFor > 0 || StillOffering);
+            reachWeight = Mathf.MoveTowards(reachWeight, reaching ? 1f : 0f, dt / 0.6f);
             kneel = Mathf.MoveTowards(kneel, kneelTarget, dt / 0.9f);
             var lift = walking ? bob * Mathf.Abs(Mathf.Sin(travelled / stepLength * Mathf.PI)) : 0f;
             transform.position = basePosition + Vector3.up * lift;
@@ -282,8 +314,34 @@ namespace Sankofa.Runtime.Stage
         void LateUpdate()
         {
             if (animator == null) return;
+            if (reachWeight > 0.001f) ReachArm(reachTarget, Mathf.SmoothStep(0f, 1f, reachWeight));
             for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)
                 if (anchors[i] != null && anchorBones[i] != null) anchors[i].position = anchorBones[i].position;
+        }
+
+        /// <summary>
+        /// Two-bone reach over the animated pose: the upper arm and forearm turn so the hand meets the target, or comes
+        /// as near as the arm allows, the elbow keeping the bend it had.
+        /// </summary>
+        void ReachArm(Vector3 target, float weight)
+        {
+            Transform upper = reachArm[0], lower = reachArm[1], hand = reachArm[2];
+            if (upper == null || lower == null || hand == null) return;
+            Vector3 a = upper.position, b = lower.position, c = hand.position;
+            float l1 = Vector3.Distance(a, b), l2 = Vector3.Distance(b, c);
+            if (l1 < 1e-4f || l2 < 1e-4f) return;
+            var toTarget = target - a;
+            var direction = toTarget.sqrMagnitude > 1e-6f ? toTarget.normalized : transform.forward;
+            var d = Mathf.Clamp(toTarget.magnitude, Mathf.Abs(l1 - l2) + 0.01f, (l1 + l2) * 0.995f);
+            var bend = Vector3.ProjectOnPlane(b - a, direction);
+            if (bend.sqrMagnitude < 1e-6f) bend = Vector3.ProjectOnPlane(Vector3.down, direction);
+            bend.Normalize();
+            var cos = Mathf.Clamp((l1 * l1 + d * d - l2 * l2) / (2f * l1 * d), -1f, 1f);
+            var elbow = a + direction * cos * l1 + bend * Mathf.Sqrt(1f - cos * cos) * l1;
+            upper.rotation = Quaternion.Slerp(upper.rotation, Quaternion.FromToRotation(b - a, elbow - a) * upper.rotation, weight);
+            b = lower.position;
+            c = hand.position;
+            lower.rotation = Quaternion.Slerp(lower.rotation, Quaternion.FromToRotation(c - b, a + direction * d - b) * lower.rotation, weight);
         }
 
         void UpdateArms(float dt, bool walking)
@@ -372,11 +430,18 @@ namespace Sankofa.Runtime.Stage
             body.SetPropertyBlock(block);
             if (parts.Length == 0) return;
             block.SetFloat(SmokeId, partSmoke);
-            foreach (var c in parts)
+            var folded = Mathf.SmoothStep(0f, 1f, kneel);
+            for (var i = 0; i < parts.Length; i++)
             {
+                var c = parts[i];
                 if (c == null) continue;
                 c.enabled = body.enabled;
                 c.SetPropertyBlock(block);
+                if (i < partKneelScale.Length && partRest != null && i < partRest.Length)
+                {
+                    var rest = partRest[i];
+                    c.transform.localScale = new Vector3(rest.x, rest.y * Mathf.Lerp(1f, partKneelScale[i], folded), rest.z);
+                }
             }
         }
     }

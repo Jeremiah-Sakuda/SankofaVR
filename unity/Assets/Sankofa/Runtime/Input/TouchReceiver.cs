@@ -41,7 +41,8 @@ namespace Sankofa.Runtime.Input
 
         void Update()
         {
-            if (invitationId == null || target == null) return;
+            // While paused nothing is touched: a gesture finished now would be refused and its hand spent.
+            if (invitationId == null || target == null || StageClock.Paused) return;
             var p = target.TouchPosition;
             var position = new System.Numerics.Vector3(p.x, p.y, p.z);
             var feedback = 0f;

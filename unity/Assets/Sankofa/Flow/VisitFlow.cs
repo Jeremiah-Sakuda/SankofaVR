@@ -431,7 +431,9 @@ namespace Sankofa.Flow
         public bool Leave()
         {
             if (Phase == VisitPhase.Ended || Phase == VisitPhase.Idle) return false;
-            if (Phase == VisitPhase.Closing && CanKeep && !confirmingLeave)
+            // Leaving loses something only from a finished, unkept visit or from a story paused part-way: ask first.
+            var losesVisit = (Phase == VisitPhase.Closing && CanKeep) || (Phase == VisitPhase.Paused && visitActive);
+            if (losesVisit && !confirmingLeave)
             {
                 confirmingLeave = true;
                 UpdateControls();
@@ -921,6 +923,10 @@ namespace Sankofa.Flow
                     break;
                 case VisitPhase.Transitioning:
                     next.Add(new ControlOption(ControlKind.Pause));
+                    break;
+                case VisitPhase.Paused when confirmingLeave:
+                    next.Add(new ControlOption(ControlKind.ConfirmLeave));
+                    next.Add(new ControlOption(ControlKind.CancelLeave));
                     break;
                 case VisitPhase.Paused:
                     next.Add(new ControlOption(ControlKind.Resume));

@@ -52,7 +52,7 @@ Material:
     - _Wind: 0
     - _Wrap: 0.3
     m_Colors:
-    - _Color: {r: 0.12, g: 0.32, b: 0.3, a: 1}
+    - _Color: {r: 0.16, g: 0.27, b: 0.24, a: 1}
     - _DetailScale: {r: 2, g: 2, b: 0, a: 0}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _HighlightColor: {r: 1, g: 0.72, b: 0.37999994, a: 1}

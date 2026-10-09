@@ -20,7 +20,8 @@ Shader "Sankofa/Sky"
     }
     SubShader
     {
-        Tags { "Queue"="Background" "RenderType"="Background" "IgnoreProjector"="True" }
+        // After the opaque scene, at the far plane: only the pixels nothing else covered are shaded.
+        Tags { "Queue"="Geometry+500" "RenderType"="Background" "IgnoreProjector"="True" }
         Cull Front
         ZWrite Off
         Pass

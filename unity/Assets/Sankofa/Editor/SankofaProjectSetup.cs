@@ -71,6 +71,9 @@ namespace Sankofa.EditorTools
             PlayerSettings.productName = ProductName;
             PlayerSettings.bundleVersion = Version;
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, ApplicationId);
+            // No engine logo or splash: the competition rules bar corporate logos, and the hearth is the opening.
+            PlayerSettings.SplashScreen.show = false;
+            PlayerSettings.SplashScreen.showUnityLogo = false;
             PlayerSettings.Android.bundleVersionCode = Math.Max(1, PlayerSettings.Android.bundleVersionCode);
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel32;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);

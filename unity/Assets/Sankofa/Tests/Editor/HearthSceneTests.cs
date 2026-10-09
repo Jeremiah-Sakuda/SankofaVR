@@ -95,7 +95,7 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
             // A glow, touch point and place point are optional for staged objects; their surfaces are not.
-            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".holder" };
+            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".holder", ".handOver" };
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 Assert.That(MissingReferences(o).Where(m => !optional.Any(m.EndsWith)), Is.Empty, o.Id);
@@ -188,6 +188,16 @@ namespace Sankofa.Tests
                     Assert.That(Vector2.Distance(new Vector2(local.x, local.z), new Vector2(controls.x, controls.z)), Is.GreaterThan(0.5f), o.Id + " approach " + i + " is clear of the controls");
                 }
             }
+            // Hand-over places keep the same personal space and stay clear of the controls.
+            foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var place = (Transform)new SerializedObject(o).FindProperty("handOver").objectReferenceValue;
+                if (place == null) continue;
+                var local = anchor.InverseTransformPoint(place.position);
+                Assert.That(new Vector2(local.x, local.z).magnitude, Is.GreaterThan(1.1f), o.Id + " is handed over from a body's distance");
+                Assert.That(Vector2.Distance(new Vector2(local.x, local.z), new Vector2(controls.x, controls.z)), Is.GreaterThan(0.5f), o.Id + " hand-over is clear of the controls");
+                Assert.That(o.Holder, Is.Not.Null, o.Id + " has someone to hand it over");
+            }
             // Every figure the package moves has somewhere to go.
             foreach (var action in package.Beats.SelectMany(b => b.Lines.Concat(b.Invitation?.Accepted ?? new List<Line>()).Concat(b.Invitation?.Default ?? new List<Line>()))
                          .SelectMany(l => l.Actions).Where(a => a.Kind == ActionKind.Move))
@@ -278,6 +288,13 @@ namespace Sankofa.Tests
             }
         }
 
+        [Test]
+        public void TheBuildShowsNoEngineSplashOrLogo()
+        {
+            Assert.That(PlayerSettings.SplashScreen.show, Is.False, "no splash screen");
+            Assert.That(PlayerSettings.SplashScreen.showUnityLogo, Is.False, "no engine logo");
+        }
+
         // Our own geometry budget for one scene on standalone Quest, until a device profile replaces it: the triangles
         // and renderers (a proxy for draw calls) of each scene's root, which is all that shows besides the panels.
         const int TriangleBudget = 300000;
@@ -294,7 +311,10 @@ namespace Sankofa.Tests
                 {
                     var mesh = r is SkinnedMeshRenderer skinned ? skinned.sharedMesh : r.TryGetComponent<MeshFilter>(out var filter) ? filter.sharedMesh : null;
                     if (mesh == null) continue;
-                    for (var sub = 0; sub < mesh.subMeshCount; sub++) triangles += mesh.GetIndexCount(sub) / 3;
+                    // Each material is a pass over the mesh: a figure's depth and light both count.
+                    long meshTriangles = 0;
+                    for (var sub = 0; sub < mesh.subMeshCount; sub++) meshTriangles += mesh.GetIndexCount(sub) / 3;
+                    triangles += meshTriangles * Mathf.Max(1, r.sharedMaterials.Length - mesh.subMeshCount + 1);
                 }
                 TestContext.WriteLine($"{scene.Id}: {triangles} triangles, {renderers.Count} renderers");
                 Assert.That(triangles, Is.LessThanOrEqualTo(TriangleBudget), scene.Id + " triangles");

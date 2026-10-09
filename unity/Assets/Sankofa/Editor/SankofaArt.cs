@@ -50,7 +50,13 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Falloff", 1.6f);
                 }),
                 Curtain = Make("Curtain", "Sankofa/Curtain", m => m.SetTexture("_Noise", noise)),
-                CaptionBacking = Make("Caption backing", "Sprites/Default", m => m.color = new Color(0.025f, 0.02f, 0.018f, 0.55f)),
+                // Captions draw over the scene, so no head, post or tree can cover a line; under the hands.
+                CaptionBacking = Make("Caption backing", "UI/Default", m =>
+                {
+                    m.color = new Color(0.025f, 0.02f, 0.018f, 0.55f);
+                    m.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
+                    m.renderQueue = 3990;
+                }),
                 // The pointing ray and its dot draw over the transition curtain, like the hands.
                 Pointer = Make("Pointer", "Sprites/Default", m =>
                 {
@@ -141,7 +147,8 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_DetailAlbedo", 0.25f);
                     m.SetFloat("_Rim", 1.1f);
                     m.SetFloat("_Wrap", 0.2f);
-                    m.SetColor("_HighlightColor", new Color(0.55f, 0.7f, 0.9f));
+                    // Touched, the steel cools a little; it should not turn to blue plastic.
+                    m.SetColor("_HighlightColor", new Color(0.62f, 0.68f, 0.76f));
                     m.EnableKeyword("_DETAIL_UV");
                 }),
                 // The jiko: galvanised sheet sooted toward the lip, a fired-clay liner, and a cob or two roasting.
@@ -161,7 +168,7 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Intensity", 1.3f);
                     m.SetFloat("_Falloff", 2.6f);
                 }),
-                Paint = Baked("Gate paint", new Color(0.12f, 0.32f, 0.3f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
+                Paint = Baked("Gate paint", new Color(0.16f, 0.27f, 0.24f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
                 LanternCore = Lit("Lantern flame", new Color(0.3f, 0.2f, 0.1f), new Color(1f, 0.72f, 0.4f)),
 
                 // Hearth materials: baked occlusion and fire shadows, generated surface detail.

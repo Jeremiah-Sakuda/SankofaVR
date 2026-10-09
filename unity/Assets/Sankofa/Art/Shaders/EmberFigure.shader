@@ -89,6 +89,8 @@ Shader "Sankofa/Ember Figure"
                 half feet = saturate((rise - 0.01 - wisp * 0.06) / 0.06);
                 // The head carries a little more of the light, where a listener looks.
                 half crown = 1 + 0.25 * smoothstep(0.8, 0.95, rise);
+                // A soft fill in the head, so it reads as a head of light rather than a hollow rim.
+                c += _Color.rgb * 0.22 * smoothstep(0.8, 0.9, rise);
                 half presence = _Intensity * feet;
                 c *= presence * flicker * (1 + _Highlight * 0.8) * crown;
                 // Premultiplied: the glow adds, the smoky core dims what is behind by its opacity.

@@ -161,6 +161,16 @@ namespace Sankofa.Runtime.Stage
                 case ActionKind.Offer:
                     // The fire offers from its flames; a story offers from where the object rests.
                     if (!o.Visible) o.ShowAt(IsHearth(o.Scene) ? FireTop : o.HomePosition);
+                    // Handed over in person: the giver steps to the edge of the visitor's space and holds it out in
+                    // her hand, a little nearer her than the usual offer, so the hand and the thing stay together.
+                    if (o.InHolderHands && o.HandOverPlace.HasValue)
+                    {
+                        var offer = OfferPosition();
+                        var standAt = o.HandOverPlace.Value;
+                        var toward = new Vector3(standAt.x, offer.y, standAt.z);
+                        o.Holder.HandOver(o, standAt, Vector3.MoveTowards(offer, toward, 0.14f));
+                        break;
+                    }
                     o.MoveTo(OfferPosition(), 1.4f);
                     // The person who gives it holds it out toward the visitor.
                     if (o.Holder != null) o.Holder.Reach(OfferPosition(), 2.5f, o);
