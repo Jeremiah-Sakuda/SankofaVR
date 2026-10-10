@@ -61,6 +61,7 @@ namespace Sankofa.Runtime.Stage
         static readonly int GroundId = Shader.PropertyToID("_GroundY");
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int SmokeId = Shader.PropertyToID("_Smoke");
+        static readonly int CrownId = Shader.PropertyToID("_CrownY");
         static readonly int WalkingId = Animator.StringToHash("Walking");
         static readonly int KneelingId = Animator.StringToHash("Kneeling");
         static readonly int TalkingId = Animator.StringToHash("Talking");
@@ -253,7 +254,8 @@ namespace Sankofa.Runtime.Stage
 
         /// <summary>
         /// The seat is at the origin of the figure's parent. A straight way that would pass nearer to it than the
-        /// personal space goes around it instead, on the side it was already passing.
+        /// personal space goes around it instead: from where the way first touches that circle to where it leaves
+        /// it, along an arc a little outside it, on the side the way was passing. No leg comes nearer than the circle.
         /// </summary>
         void AddAroundSeat(Vector3 from, Vector3 to)
         {
@@ -261,16 +263,38 @@ namespace Sankofa.Runtime.Stage
             var a = new Vector2(from.x - seat.x, from.z - seat.z);
             var b = new Vector2(to.x - seat.x, to.z - seat.z);
             var ab = b - a;
-            if (ab.sqrMagnitude < 1e-4f) return;
+            if (ab.sqrMagnitude < 1e-4f || a.magnitude <= personalSpace || b.magnitude <= personalSpace) return;
             var t = Mathf.Clamp01(-Vector2.Dot(a, ab) / ab.sqrMagnitude);
-            if (t <= 0.02f || t >= 0.98f) return;
             var nearest = a + ab * t;
             if (nearest.magnitude >= personalSpace) return;
-            var outward = nearest.sqrMagnitude > 1e-4f ? nearest.normalized : new Vector2(-ab.y, ab.x).normalized;
-            if (outward.y < 0) outward = -outward;
-            var around = outward * (personalSpace + 0.1f);
-            var y = Mathf.Lerp(from.y, to.y, t);
-            route.Add(new Vector3(seat.x + around.x, y, seat.z + around.y));
+            var passing = nearest.sqrMagnitude > 1e-4f ? Mathf.Atan2(nearest.y, nearest.x) : Mathf.Atan2(-ab.x, ab.y);
+            var start = Tangent(a, passing);
+            var sweep = Mathf.DeltaAngle(start * Mathf.Rad2Deg, Tangent(b, passing) * Mathf.Rad2Deg) * Mathf.Deg2Rad;
+            // The arc must pass the side the way was passing; if the short way round does not, go the long way.
+            var toPassing = Mathf.DeltaAngle(start * Mathf.Rad2Deg, passing * Mathf.Rad2Deg) * Mathf.Deg2Rad;
+            if (Mathf.Sign(toPassing) != Mathf.Sign(sweep) || Mathf.Abs(toPassing) > Mathf.Abs(sweep))
+                sweep -= Mathf.Sign(sweep) * Mathf.PI * 2f;
+            // Points 30 degrees apart a tenth of a metre outside the circle: each chord stays outside it.
+            var radius = personalSpace + 0.1f;
+            var steps = Mathf.Max(1, Mathf.CeilToInt(Mathf.Abs(sweep) / (30f * Mathf.Deg2Rad)));
+            for (var k = 0; k <= steps; k++)
+            {
+                var angle = start + sweep * k / steps;
+                var y = Mathf.Lerp(from.y, to.y, (float)k / steps);
+                route.Add(new Vector3(seat.x + Mathf.Cos(angle) * radius, y, seat.z + Mathf.Sin(angle) * radius));
+            }
+        }
+
+        /// <summary>The angle of the point where a line from <paramref name="p"/> touches the personal-space circle,
+        /// on the side nearer <paramref name="toward"/>.</summary>
+        float Tangent(Vector2 p, float toward)
+        {
+            var at = Mathf.Atan2(p.y, p.x);
+            var spread = Mathf.Acos(Mathf.Clamp(personalSpace / p.magnitude, -1f, 1f));
+            var left = at + spread;
+            var right = at - spread;
+            return Mathf.Abs(Mathf.DeltaAngle(left * Mathf.Rad2Deg, toward * Mathf.Rad2Deg)) <
+                   Mathf.Abs(Mathf.DeltaAngle(right * Mathf.Rad2Deg, toward * Mathf.Rad2Deg)) ? left : right;
         }
 
         /// <summary>Back to its own place, standing and facing the visitor as it did.</summary>
@@ -298,6 +322,14 @@ namespace Sankofa.Runtime.Stage
             for (var i = entryPath.Length - 1; i >= 0; i--)
             {
                 var p = InParent(entryPath[i]);
+                // Leaving, too, the way bends around the seat rather than passing in front of the visitor.
+                var before = route.Count;
+                AddAroundSeat(from, p);
+                for (var k = before; k < route.Count; k++)
+                {
+                    length += Vector3.Distance(from, route[k]);
+                    from = route[k];
+                }
                 length += Vector3.Distance(from, p);
                 from = p;
                 route.Add(p);
@@ -381,10 +413,11 @@ namespace Sankofa.Runtime.Stage
         {
             if (animator == null) return;
             if (reachWeight > 0.001f) ReachArm(reachTarget, Mathf.SmoothStep(0f, 1f, reachWeight));
-            if (lookWeight > 0.001f && lookBone != null) Look(lookTarget, Mathf.SmoothStep(0f, 1f, lookWeight));
             // Kneeling, the clip bows the head right down; lifted a little, the crown never faces the visitor like a face.
-            else if (lookBone != null && kneel > 0.01f)
+            // A glance turns the lifted head.
+            if (lookBone != null && kneel > 0.01f)
                 lookBone.rotation = Quaternion.AngleAxis(-kneelLift * Mathf.SmoothStep(0f, 1f, kneel), transform.right) * lookBone.rotation;
+            if (lookWeight > 0.001f && lookBone != null) Look(lookTarget, Mathf.SmoothStep(0f, 1f, lookWeight));
             for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)
                 if (anchors[i] != null && anchorBones[i] != null) anchors[i].position = anchorBones[i].position;
         }
@@ -512,6 +545,8 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(GroundId, basePosition.y);
             block.SetColor(ColorId, tint);
             block.SetFloat(SmokeId, bodySmoke);
+            // Where the head begins this frame, standing or kneeling: a little above the base of the neck.
+            block.SetFloat(CrownId, lookBone != null ? lookBone.position.y + 0.05f * height / 1.6f : 1000f);
             body.SetPropertyBlock(block);
             if (parts.Length == 0) return;
             block.SetFloat(SmokeId, partSmoke);

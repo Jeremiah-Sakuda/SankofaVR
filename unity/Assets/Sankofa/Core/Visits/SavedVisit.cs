@@ -31,6 +31,11 @@ namespace Sankofa.Core.Visits
         public IReadOnlyDictionary<string, Outcome> Outcomes { get; internal set; } = new Dictionary<string, Outcome>();
         public IReadOnlyList<string> Asked { get; internal set; } = Array.Empty<string>();
         public IReadOnlyList<string> Heard { get; internal set; } = Array.Empty<string>();
+        /// <summary>
+        /// Up to three story objects the visitor's head rested on most, so the fire can show them back. Head
+        /// direction only, not eye tracking; no other head or hand data is kept.
+        /// </summary>
+        public IReadOnlyList<string> Lingered { get; internal set; } = Array.Empty<string>();
         /// <summary>The realised plan, or null when it can no longer be read; see <see cref="PlanProblem"/>.</summary>
         public StoryPlan Plan { get; internal set; }
         public string PlanProblem { get; internal set; }
@@ -67,6 +72,7 @@ namespace Sankofa.Core.Visits
                 Outcomes = new Dictionary<string, Outcome>(journal.Outcomes.ToDictionary(p => p.Key, p => p.Value)),
                 Asked = journal.Asked.ToList(),
                 Heard = journal.Heard.ToList(),
+                Lingered = journal.Lingered().ToList(),
                 Plan = plan,
             };
         }
@@ -92,8 +98,9 @@ namespace Sankofa.Core.Visits
             if (visit.Keepsake != null) o.Add("keepsake", visit.Keepsake);
             o.Add("outcomes", outcomes)
                 .Add("asked", visit.Asked.Cast<object>().ToList())
-                .Add("heard", visit.Heard.Cast<object>().ToList())
-                .Add("plan", StoryWriter.Plan(visit.Plan));
+                .Add("heard", visit.Heard.Cast<object>().ToList());
+            if (visit.Lingered.Count > 0) o.Add("lingered", visit.Lingered.Cast<object>().ToList());
+            o.Add("plan", StoryWriter.Plan(visit.Plan));
             return JsonText.Serialize(o);
         }
 
@@ -113,7 +120,7 @@ namespace Sankofa.Core.Visits
                 throw new StoryFormatException("$", e.Message);
             }
             var r = new StoryReader.Fields(root, "$");
-            r.Only("schema", "kind", "id", "saved_at", "package", "version", "locale", "route", "label", "parent", "next", "keepsake", "outcomes", "asked", "heard", "plan");
+            r.Only("schema", "kind", "id", "saved_at", "package", "version", "locale", "route", "label", "parent", "next", "keepsake", "outcomes", "asked", "heard", "lingered", "plan");
             var schema = r.Int("schema");
             if (schema != SavedVisit.CurrentSchema) throw new StoryFormatException("$.schema", $"unsupported kept-visit schema {schema}; expected {SavedVisit.CurrentSchema}");
             if (r.String("kind") != "kept-visit") throw new StoryFormatException("$.kind", "expected a kept visit");
@@ -143,6 +150,7 @@ namespace Sankofa.Core.Visits
                 Outcomes = outcomes,
                 Asked = r.OptionalStrings("asked"),
                 Heard = r.OptionalStrings("heard"),
+                Lingered = r.OptionalStrings("lingered"),
             };
             try
             {

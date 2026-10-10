@@ -573,6 +573,35 @@ namespace Sankofa.Tests
             Assert.That(flow.Notice("waymarker"), Is.False, "not part of this story");
         }
 
+        [Test]
+        public void WhatTheVisitorLingeredOnIsShownBackKeptAndRaisedAgainInTheContinuation()
+        {
+            Begin("makers");
+            view.RunUntil(() => Speaking("yard.bowl.reveal"));
+            Assert.That(flow.Notice("bowl"), Is.True);
+            PlayToClosing("receive-shard");
+            Assert.That(view.Of<Cue.Echo>().Single().ObjectIds, Is.EqualTo(new[] { "bowl" }), "shown back at home");
+            Assert.That(flow.Keep(), Is.True);
+            var kept = flow.KeptVisit;
+            Assert.That(SavedVisitCodec.Read(store.Files[kept.Id]).Lingered, Is.EqualTo(new[] { "bowl" }), "kept with the visit");
+
+            Reopen();
+            AtChoice();
+            Assert.That(view.Of<Cue.Echo>(), Is.Empty, "not at the welcome");
+            Assert.That(flow.Follow(), Is.True);
+            view.RunUntil(() => view.Of<Cue.Transition>().Any() && flow.Phase == VisitPhase.Story);
+            Assert.That(flow.Scene.Kind, Is.Not.EqualTo(SceneKind.Hearth));
+            Assert.That(view.Of<Cue.Echo>().Single().ObjectIds, Is.EqualTo(new[] { "bowl" }), "the continuation opens with it");
+        }
+
+        [Test]
+        public void AVisitWithNothingLingeredOnShowsNothingBack()
+        {
+            Begin("makers");
+            PlayToClosing();
+            Assert.That(view.Of<Cue.Echo>(), Is.Empty);
+        }
+
         // ---- keeping, returning, replaying and forgetting ----
 
         [Test]

@@ -29,16 +29,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Flow: 1.6
-    - _Foam: 0.35
+    - _Flow: 1.8
+    - _Foam: 0.6
     - _Gloss: 60
     - _Highlight: 0
     - _Scale: 4
     - _Strength: 0.35
     m_Colors:
-    - _Deep: {r: 0.03, g: 0.045, b: 0.05, a: 1}
+    - _Deep: {r: 0.1, g: 0.13, b: 0.15, a: 1}
     - _HighlightColor: {r: 0.54999995, g: 0.75, b: 0.9, a: 1}
-    - _Shallow: {r: 0.08, g: 0.1, b: 0.11, a: 1}
-    - _Sky: {r: 0.1, g: 0.11, b: 0.14, a: 1}
+    - _Shallow: {r: 0.22, g: 0.26, b: 0.28, a: 1}
+    - _Sky: {r: 0.24, g: 0.24, b: 0.32, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

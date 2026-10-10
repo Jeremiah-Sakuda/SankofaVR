@@ -36,6 +36,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] FigureMotion holder;
         [Tooltip("Where its holder steps to hand it to the visitor, at the edge of their personal space; empty to offer from where it is.")]
         [SerializeField] Transform handOver;
+        [Tooltip("Its shape in one mesh, in its own space, for the small echo the fire shows of what the visitor lingered on.")]
+        [SerializeField] Mesh echoMesh;
 
         static readonly int HighlightId = Shader.PropertyToID("_Highlight");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
@@ -66,6 +68,7 @@ namespace Sankofa.Runtime.Stage
         /// <summary>The hand carrying it, if any; carried objects cross into their counterparts in that hand.</summary>
         public HandSource CarriedBy { get; private set; }
         public FigureMotion Holder => holder;
+        public Mesh EchoMesh => echoMesh;
         /// <summary>Where its holder stands to hand it over, if it is handed over in person.</summary>
         public Vector3? HandOverPlace => handOver != null ? handOver.position : (Vector3?)null;
         /// <summary>Still in its holder's hands, not set down or taken.</summary>

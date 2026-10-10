@@ -29,7 +29,11 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 
 ![Nine frames of the entry: flame spreads from the ember across the view, and the dusk opens from the traders' fire](docs/media/entry-strip.jpg)
 
-*Entering a story through the flame.*
+*Entering a story through the flame, left to right and top to bottom.*
+
+![Small shapes of firelight, the ewe and a gourd, rising out of the hearth fire](docs/media/echoes.jpg)
+
+*Home again: what the visitor lingered on rises out of the fire.*
 
 ## Status
 

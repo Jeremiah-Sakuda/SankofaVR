@@ -20,17 +20,17 @@ For judges and testers of Sankofa on Meta Quest. A visit takes 10 to 15 minutes,
 | Ask the fire | Press a question on the panel by your right hand. The fire answers, then picks up the story where it left off |
 | Pause, return or leave | Use the plaque by your lap. Taking the headset off also pauses |
 
-With controllers, point and pull the trigger instead of pinching.
+Touch controllers also work: point and pull the trigger instead of pinching. Everything can be done with hands alone.
 
 ## A ten-minute walkthrough
 
 1. **Start.** Press **Begin** on the title card over the fire.
 2. **Welcome.** The fire speaks: "Come. Sit with me." Choose **Before the railway**.
 3. **Entry.** The fire rises across your view and opens onto a stream at dusk in the 1850s. You have not moved.
-4. **Act.** When asked, touch the water. Hold out your palm for Wambui's gourd of flour, then touch the hide to set it down between the two women. Naserian then holds a bead out to you: open your palm to take it.
+4. **Look and act.** Turn your head toward Naserian, the ewe or a gourd and hold it there a moment: the person you face looks back, or follows your look to the thing. (This uses head direction; there is no eye tracking.) When asked, touch the water. Hold out your palm for Wambui's gourd of flour, then touch the hide to set it down between the two women. Naserian then holds a bead out to you: open your palm to take it.
 5. **Ask.** At any point, press *Is this a real place?* or another question.
-6. **Home.** The world folds back into the fire, and the bead rests on the hearth stone. Press **Keep this visit**.
-7. **Return.** Begin again. The fire remembers the bead and offers to follow it to the same water today, a night-time city river. Hang the bead on the garden gate.
+6. **Home.** The world folds back into the fire. Small shapes of light of what you lingered on rise from it, a line under the caption lists what you did by hand, and the bead waits beside **Keep this visit**. Press it.
+7. **Return.** Begin again. The fire remembers the bead and offers to follow it to the same water today, a night-time city river, where what you lingered on rises again from the jiko. Hang the bead on the garden gate.
 
 To see the difference your actions make, play the same era again and do nothing. The story carries on passively, and different lines play: Wambui sets the gourd down herself, and the bead is left beside you. The 1899 era (*When the railway came*) gives a seed instead of a bead, and its continuation plants it.
 
@@ -49,5 +49,15 @@ Captions are always on.
 
 - The people are fictional composites, drawn as faceless figures of firelight. The story is a draft awaiting review by Kikuyu and Maasai families. Each era says so in a small line under the captions.
 - Lines grounded in a source and lines that are reconstruction are kept distinct; see the [source register](../content/enkare-nairobi/sources.md).
-- Kept visits are stored only on the headset, and only when you press **Keep**. **Forget** removes them.
+- Kept visits are stored only on the headset, and only when you press **Keep**: the story's path, what you did by hand, and up to three things you looked toward most (head direction, not eye tracking). No camera, voice or hand data is stored. **Forget** removes them.
 - There is no music. The ambience is field recordings, credited in the app under **Credits**.
+
+## Measuring a run
+
+The application logs its own frame rate and CPU and GPU frame times every ten seconds, with the scene it is in. With the headset connected over USB and developer mode on:
+
+```sh
+adb logcat -s Unity | grep "\[Sankofa\] perf"
+```
+
+Meta's OVR Metrics Tool can show the same live in the headset. Record the device, the scene and whether the transition was playing; these are device evidence, kept apart from desktop captures.

@@ -12,7 +12,7 @@ namespace Sankofa.Runtime.App
     {
         const string Prefix = "sankofa.settings.";
 
-        public CaptionSize CaptionSize = CaptionSize.Medium;
+        public CaptionSize CaptionSize = CaptionSize.Large;
         public bool ReducedMotion;
         /// <summary>Development comparison only: the steady baseline fire against the directed one.</summary>
         public FireMode FireMode = FireMode.Directed;
@@ -24,7 +24,7 @@ namespace Sankofa.Runtime.App
 
         public static ExperienceSettings Load() => new ExperienceSettings
         {
-            CaptionSize = (CaptionSize)Mathf.Clamp(PlayerPrefs.GetInt(Prefix + "captions", (int)CaptionSize.Medium), 0, 2),
+            CaptionSize = (CaptionSize)Mathf.Clamp(PlayerPrefs.GetInt(Prefix + "captions", (int)CaptionSize.Large), 0, 2),
             ReducedMotion = PlayerPrefs.GetInt(Prefix + "reducedMotion", 0) == 1,
             FireMode = PlayerPrefs.GetInt(Prefix + "fireMode", 0) == 1 ? FireMode.Simple : FireMode.Directed,
             Ambience = Mathf.Clamp(PlayerPrefs.GetInt(Prefix + "ambience", 0), 0, 2),

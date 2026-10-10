@@ -47,11 +47,11 @@ Material:
     - _Highlight: 0
     - _Rim: 1.6
     - _ScanNormalStrength: 1
-    - _UseBake: 0
+    - _UseBake: 1
     - _Wind: 0
     - _Wrap: 0.5
     m_Colors:
-    - _Color: {r: 0.2, g: 0.4, b: 0.8, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DetailScale: {r: 1, g: 1, b: 0, a: 0}
     - _Emission: {r: 0.05, g: 0.1, b: 0.2, a: 1}
     - _HighlightColor: {r: 1, g: 0.72, b: 0.37999994, a: 1}

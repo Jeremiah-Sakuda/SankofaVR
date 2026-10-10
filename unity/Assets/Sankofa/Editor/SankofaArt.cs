@@ -87,13 +87,13 @@ namespace Sankofa.EditorTools
                 Spill = Make("Spill water", "Sankofa/Water", m =>
                 {
                     m.SetTexture("_Noise", noise);
-                    // Thin water over stone: dark and glinting, a little white where it breaks, never a pale sheet.
-                    m.SetColor("_Deep", new Color(0.03f, 0.045f, 0.05f));
-                    m.SetColor("_Shallow", new Color(0.08f, 0.1f, 0.11f));
-                    m.SetColor("_Sky", new Color(0.1f, 0.11f, 0.14f));
-                    m.SetFloat("_Flow", 1.6f);
+                    // Falling water: paler than the stream, catching the sky as it turns, and breaking white in streaks.
+                    m.SetColor("_Deep", new Color(0.1f, 0.13f, 0.15f));
+                    m.SetColor("_Shallow", new Color(0.22f, 0.26f, 0.28f));
+                    m.SetColor("_Sky", new Color(0.24f, 0.24f, 0.32f));
+                    m.SetFloat("_Flow", 1.8f);
                     m.SetFloat("_Scale", 4f);
-                    m.SetFloat("_Foam", 0.35f);
+                    m.SetFloat("_Foam", 0.6f);
                 }),
                 River = Make("River water", "Sankofa/Water", m =>
                 {
@@ -124,11 +124,12 @@ namespace Sankofa.EditorTools
                     m.EnableKeyword("_DETAIL_UV");
                 }),
                 Soil = Baked("Garden soil", new Color(0.2f, 0.14f, 0.1f), detail, "_DETAIL_TRIPLANAR", new Vector2(5f, 5f), 0.7f, 0.6f),
-                Leaf = Baked("Leaf", new Color(0.24f, 0.32f, 0.12f), detail, "_DETAIL_TRIPLANAR", new Vector2(8f, 8f), 0.2f, 0.3f),
+                Leaf = Baked("Leaf", new Color(0.46f, 0.44f, 0.22f), detail, "_DETAIL_TRIPLANAR", new Vector2(8f, 8f), 0.2f, 0.3f),
                 Bead = Make("Glass bead", "Sankofa/Fire Lit", m =>
                 {
-                    // Colour is a placeholder until family review.
-                    m.SetColor("_Color", new Color(0.2f, 0.4f, 0.8f));
+                    // The colour and its bands are painted per vertex (see BuildBead): placeholders until family review.
+                    m.SetColor("_Color", Color.white);
+                    m.SetFloat("_UseBake", 1);
                     m.SetColor("_Emission", new Color(0.05f, 0.1f, 0.2f));
                     m.SetFloat("_Rim", 1.6f);
                     m.SetFloat("_Wrap", 0.5f);
@@ -167,7 +168,7 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Intensity", 1.3f);
                     m.SetFloat("_Falloff", 2.6f);
                 }),
-                Paint = Baked("Gate paint", new Color(0.3f, 0.36f, 0.34f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
+                Paint = Baked("Gate paint", new Color(0.22f, 0.27f, 0.25f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
                 LanternCore = Lit("Lantern flame", new Color(0.3f, 0.2f, 0.1f), new Color(1f, 0.72f, 0.4f)),
 
                 // Hearth materials: baked occlusion and fire shadows, generated surface detail.

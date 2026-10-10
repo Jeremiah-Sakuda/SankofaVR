@@ -75,6 +75,8 @@ namespace Sankofa.EditorTools
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, ApplicationId);
             // No engine logo or splash: the competition rules bar corporate logos, and the hearth is the opening.
             PlayerSettings.SplashScreen.show = false;
+            // Frame timings for the "[Sankofa] perf" log, so a headset run measures itself.
+            PlayerSettings.enableFrameTimingStats = true;
             PlayerSettings.SplashScreen.showUnityLogo = false;
             PlayerSettings.Android.bundleVersionCode = Math.Max(1, PlayerSettings.Android.bundleVersionCode);
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel32;
@@ -224,7 +226,8 @@ namespace Sankofa.EditorTools
                 Debug.LogWarning("[Sankofa] OVRProjectConfig not available yet; rerun Configure after import.");
                 return;
             }
-            config.handTrackingSupport = OVRProjectConfig.HandTrackingSupport.HandsOnly;
+            // Hands first, and every step works with them alone; Touch controllers also work for those who pick them up.
+            config.handTrackingSupport = OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
             // Pokes, pinches and the open palm are the whole interface: track hands at the higher rate.
             config.handTrackingFrequency = OVRProjectConfig.HandTrackingFrequency.HIGH;
             // Full VR is the baseline. A room-aware hearth is a later, conditional extension.

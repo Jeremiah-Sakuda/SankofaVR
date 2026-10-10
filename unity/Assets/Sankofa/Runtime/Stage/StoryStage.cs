@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Sankofa.Core.Story;
 using Sankofa.Interaction;
 using Sankofa.Runtime.Fire;
@@ -41,6 +43,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] HearthFire fire;
         [SerializeField] Camera eye;
         [SerializeField] Transform head;
+        [Tooltip("The light people and things of the story are drawn in; echoes of what the visitor lingered on use it too.")]
+        [SerializeField] Material echoMaterial;
         [Tooltip("Beside the visitor: where an object rests when it is set down for them.")]
         [SerializeField] Transform restPoint;
         [Tooltip("On the hearth stone: where the keepsake waits after a visit, and a kept visit's keepsake on return.")]
@@ -109,6 +113,19 @@ namespace Sankofa.Runtime.Stage
         }
 
         /// <summary>In front of and below the visitor's eyes, within a comfortable seated reach.</summary>
+        /// <summary>
+        /// Where a gift handed over in person comes to rest for the visitor: in front of them and within reach, a
+        /// little toward the giver's side and low, so it shows against the ground rather than across her body.
+        /// </summary>
+        public Vector3 GiftPoint(Vector3 giverAt)
+        {
+            var offer = OfferPosition();
+            var right = head.right;
+            right.y = 0;
+            var side = Mathf.Sign(Vector3.Dot(giverAt - head.position, right));
+            return offer + right.normalized * side * 0.1f + Vector3.down * 0.08f;
+        }
+
         public Vector3 OfferPosition()
         {
             var forward = head.forward;
@@ -170,7 +187,7 @@ namespace Sankofa.Runtime.Stage
                         var offer = OfferPosition();
                         var standAt = o.HandOverPlace.Value;
                         var toward = new Vector3(standAt.x, offer.y, standAt.z);
-                        o.Holder.HandOver(o, standAt, Vector3.MoveTowards(offer, toward, 0.14f), offer);
+                        o.Holder.HandOver(o, standAt, Vector3.MoveTowards(offer, toward, 0.14f), GiftPoint(standAt));
                         break;
                     }
                     o.MoveTo(OfferPosition(), 1.4f);
@@ -265,6 +282,77 @@ namespace Sankofa.Runtime.Stage
                 if (d < best) { best = d; nearest = f; }
             }
             if (nearest != null) nearest.Glance(o.transform.position, 2.5f);
+        }
+
+        /// <summary>
+        /// Shows back what the visitor lingered on: a small shape of light for each, rising out of the fire at home,
+        /// or out of the scene's own light as a continuation opens, turning slowly, then fading. Presentation only.
+        /// </summary>
+        public void Echo(IReadOnlyList<string> ids)
+        {
+            if (echoMaterial == null || ids == null) return;
+            var from = FireTop;
+            if (!IsHearth(ActiveScene))
+                foreach (var o in objects)
+                    if (o.Scene == ActiveScene && o.Visible && o.EmitsLight) { from = o.transform.position + Vector3.up * 0.15f; break; }
+            var shown = ids.Select(Find).Where(o => o != null && o.EchoMesh != null).Take(3).ToList();
+            for (var i = 0; i < shown.Count; i++)
+                StartCoroutine(RiseEcho(shown[i], from, (i - (shown.Count - 1) / 2f) * 0.24f, i * 0.9f));
+        }
+
+        IEnumerator RiseEcho(StageObject o, Vector3 from, float aside, float delay)
+        {
+            for (var t = 0f; t < delay; t += StageClock.DeltaTime) yield return null;
+            var go = new GameObject("Echo of " + o.Id);
+            go.transform.SetParent(transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = o.EchoMesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = echoMaterial;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            // A forearm's height of light whatever it was: a woman, a ewe or a gourd.
+            var size = o.EchoMesh.bounds.size;
+            var scale = 0.36f / Mathf.Max(0.01f, Mathf.Max(size.y, size.x * 0.8f, size.z * 0.8f));
+            go.transform.localScale = Vector3.one * scale;
+            var right = head.right;
+            right.y = 0;
+            var start = from + right.normalized * aside;
+            var block = new MaterialPropertyBlock();
+            const float seconds = 4.5f;
+            for (var t = 0f; t < seconds; t += StageClock.DeltaTime)
+            {
+                var x = t / seconds;
+                var at = start + Vector3.up * (0.05f + 0.4f * Mathf.SmoothStep(0f, 1f, x));
+                go.transform.position = at - Vector3.up * o.EchoMesh.bounds.min.y * scale;
+                // Facing the visitor, as the people of the story are built to, turning a little as it rises.
+                var toward = Vector3.ProjectOnPlane(head.position - at, Vector3.up);
+                if (toward.sqrMagnitude < 1e-4f) toward = -Vector3.forward;
+                go.transform.rotation = Quaternion.LookRotation(toward) * Quaternion.Euler(0, -25f + 50f * x, 0);
+                var fade = Mathf.Min(Mathf.Clamp01(t / 0.6f), Mathf.Clamp01((seconds - t) / 1.4f));
+                block.SetFloat("_Intensity", fade * 1.4f);
+                block.SetFloat("_Procedural", 0f);
+                block.SetFloat("_Height", 0.36f);
+                block.SetFloat("_GroundY", at.y - 0.02f);
+                block.SetFloat("_Smoke", 0.3f);
+                block.SetFloat("_CrownY", 1000f);
+                block.SetColor("_Color", new Color(1f, 0.6f, 0.26f, 1f));
+                renderer.SetPropertyBlock(block);
+                yield return null;
+            }
+            Destroy(go);
+        }
+
+        /// <summary>The visitor did what the story asked: the nearest person of it, if any, turns to look at them.</summary>
+        public void AcknowledgeVisitor()
+        {
+            FigureMotion nearest = null;
+            var best = float.MaxValue;
+            foreach (var other in Objects)
+            {
+                if (!other.Visible || other.Scene != ActiveScene || !other.TryGetComponent<FigureMotion>(out var f) || !f.CanGlance) continue;
+                var d = Vector3.Distance(other.transform.position, head.position);
+                if (d < best) { best = d; nearest = f; }
+            }
+            if (nearest != null) nearest.Glance(head.position, 3f);
         }
 
         /// <summary>A kept visit's keepsake goes down to rest on the hearth stone, where it waits for the next visit.</summary>

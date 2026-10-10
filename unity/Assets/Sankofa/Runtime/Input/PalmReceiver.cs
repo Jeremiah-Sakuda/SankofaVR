@@ -20,6 +20,7 @@ namespace Sankofa.Runtime.Input
         static readonly int AlphaId = Shader.PropertyToID("_Alpha");
         MaterialPropertyBlock block;
         float guideAlpha;
+        float guideFill;
         PalmReceiveGesture[] gestures;
         string invitationId;
         Transform target;
@@ -58,6 +59,8 @@ namespace Sankofa.Runtime.Input
             // While paused nothing is taken: a gesture finished now would be refused and its hand spent.
             if (invitationId == null || target == null || Sankofa.Runtime.Stage.StageClock.Paused)
             {
+                // A hold begun before a pause starts again after it, rather than finishing on the first frame back.
+                if (Feedback > 0) foreach (var g in gestures) g.Reset();
                 Feedback = 0;
                 return;
             }
@@ -70,6 +73,7 @@ namespace Sankofa.Runtime.Input
                 if (g.Update(hands[i].Sample, position, Time.deltaTime))
                 {
                     var id = invitationId;
+                    guideFill = 1f;
                     Received?.Invoke(id, hands[i]);
                     return;
                 }
@@ -88,7 +92,9 @@ namespace Sankofa.Runtime.Input
             if (!guide.enabled) return;
             if (open) guide.transform.SetPositionAndRotation(target.position + Vector3.down * guideBelow, Quaternion.Euler(90f, 0, 0));
             guide.GetPropertyBlock(block);
-            block.SetFloat(FillId, open ? Feedback : 1f);
+            // Closing, the ring fades at the fill it had: only a palm that took the gift ever fills it.
+            if (open) guideFill = Feedback;
+            block.SetFloat(FillId, guideFill);
             block.SetFloat(AlphaId, guideAlpha * (0.8f + 0.2f * Mathf.Sin(Time.unscaledTime * 2.4f)));
             guide.SetPropertyBlock(block);
         }

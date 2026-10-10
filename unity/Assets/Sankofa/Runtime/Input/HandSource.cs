@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sankofa.Interaction;
 using UnityEngine;
@@ -26,11 +27,18 @@ namespace Sankofa.Runtime.Input
         public bool IsLeft => left;
         /// <summary>Meta's hand, for its system aim pose and pinch strength.</summary>
         public OVRHand Hand => hand;
-        public bool Tracked { get; private set; }
-        public Vector3? Fingertip => Tracked ? indexTip.position : (Vector3?)null;
-        public Vector3 PalmCenter => Tracked ? (wrist.position + middleProximal.position) * 0.5f : Vector3.zero;
+        /// <summary>
+        /// For tests without a headset: a hand pose in world space, used in place of the tracked hand while set, so the
+        /// gestures run through the same path a tracked hand takes.
+        /// </summary>
+        public Func<HandSample> Simulated { get; set; }
 
-        public HandSample Sample => !Tracked ? new HandSample { IsLeft = left } : new HandSample
+        bool tracked;
+        public bool Tracked => Simulated != null || tracked;
+        public Vector3? Fingertip => Simulated != null ? V(Simulated().IndexTip) : tracked ? indexTip.position : (Vector3?)null;
+        public Vector3 PalmCenter => Simulated != null ? V(HandGeometry.PalmCenter(Simulated())) : tracked ? (wrist.position + middleProximal.position) * 0.5f : Vector3.zero;
+
+        public HandSample Sample => Simulated != null ? WithTracking(Simulated()) : !tracked ? new HandSample { IsLeft = left } : new HandSample
         {
             Tracked = true,
             IsLeft = left,
@@ -44,11 +52,19 @@ namespace Sankofa.Runtime.Input
         };
 
         static Num.Vector3 N(Vector3 v) => new Num.Vector3(v.x, v.y, v.z);
+        static Vector3 V(Num.Vector3 v) => new Vector3(v.X, v.Y, v.Z);
+
+        HandSample WithTracking(HandSample s)
+        {
+            s.Tracked = true;
+            s.IsLeft = left;
+            return s;
+        }
 
         void Update()
         {
             if (indexTip == null) FindBones();
-            Tracked = indexTip != null && hand != null && hand.IsTracked && hand.IsDataHighConfidence && skeleton.IsDataValid;
+            tracked = indexTip != null && hand != null && hand.IsTracked && hand.IsDataHighConfidence && skeleton.IsDataValid;
         }
 
         void LateUpdate()

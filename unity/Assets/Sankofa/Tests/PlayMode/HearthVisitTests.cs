@@ -136,6 +136,55 @@ namespace Sankofa.Tests
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
+        /// <summary>
+        /// A right hand held open and palm up, its palm a little under a point: the pose the receive gesture asks
+        /// for, built from joint positions as the hand skeleton reports them.
+        /// </summary>
+        static Sankofa.Interaction.HandSample OpenPalmUnder(Vector3 point)
+        {
+            System.Numerics.Vector3 N(Vector3 v) => new System.Numerics.Vector3(v.x, v.y, v.z);
+            var c = point + Vector3.down * 0.1f;
+            return new Sankofa.Interaction.HandSample
+            {
+                Wrist = N(c + new Vector3(0, 0, -0.045f)),
+                MiddleProximal = N(c + new Vector3(0, 0, 0.045f)),
+                IndexProximal = N(c + new Vector3(0.025f, 0, 0.04f)),
+                LittleProximal = N(c + new Vector3(-0.03f, 0, 0.035f)),
+                IndexTip = N(c + new Vector3(0.03f, 0, 0.12f)),
+                MiddleTip = N(c + new Vector3(0, 0, 0.13f)),
+                RingTip = N(c + new Vector3(-0.015f, 0, 0.125f)),
+            };
+        }
+
+        [UnityTest]
+        public IEnumerator AnOpenPalmReceivesTheEmberButNotWhilePaused()
+        {
+            yield return Open(4);
+            Assert.That(app.Flow.Choose("era.1850s"), Is.True);
+            yield return AwaitInvitation("receive-ember");
+            Time.timeScale = 1;
+            var ember = stage.Find("ember");
+            yield return new WaitForSeconds(1.5f);
+            Assert.That(ember.Visible, Is.True, "the ember is offered");
+            var right = Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h => !h.IsLeft);
+
+            // Paused, a palm held under the ember takes nothing and shows nothing; the gesture is not spent.
+            Assert.That(app.Flow.Pause(), Is.True);
+            yield return null;
+            right.Simulated = () => OpenPalmUnder(ember.transform.position);
+            yield return new WaitForSeconds(1.5f);
+            Assert.That(app.Flow.Phase, Is.EqualTo(VisitPhase.Paused));
+            Assert.That(app.Flow.OpenInvitation?.Id, Is.EqualTo("receive-ember"), "nothing was taken while paused");
+            Assert.That(ember.Feedback, Is.EqualTo(0f), "no feedback while paused");
+            Assert.That(ember.CarriedBy, Is.Null);
+
+            // Resumed, the same open palm takes it, through the gesture, into that hand.
+            Assert.That(app.Flow.Resume(), Is.True);
+            yield return WaitFor(() => ember.CarriedBy == right, 10, "the ember received by the open palm");
+            right.Simulated = null;
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
         IEnumerator AwaitInvitation(string id, float seconds = 30) =>
             WaitFor(() => app.Flow.OpenInvitation?.Id == id, seconds, "invitation " + id);
 
@@ -204,7 +253,7 @@ namespace Sankofa.Tests
             yield return AwaitInvitation("receive-bead", 60);
             yield return WaitFor(() => Mathf.Max(naserian.Arms.Negative, naserian.Arms.Positive) > 0.6f, 10, "Naserian holding out the bead");
             // She keeps her distance; the bead leaves her hand and drifts to just in front of the visitor, within reach.
-            yield return WaitFor(() => Vector3.Distance(stage.Find("bead").transform.position, stage.OfferPosition()) < 0.05f, 15, "the bead drifting to the visitor");
+            yield return WaitFor(() => Vector3.Distance(stage.Find("bead").transform.position, stage.GiftPoint(stage.Find("bead").HandOverPlace.Value)) < 0.05f, 15, "the bead drifting to the visitor");
             Assert.That(Vector3.Distance(naserian.transform.position, Camera.main.transform.position), Is.GreaterThan(1f), "the giver stays out of the visitor's space");
             Assert.That(app.Flow.Accept("receive-bead"), Is.True);
             yield return AwaitClosing(90);

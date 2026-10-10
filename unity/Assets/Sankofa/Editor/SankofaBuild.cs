@@ -25,6 +25,10 @@ namespace Sankofa.EditorTools
 
             foreach (var deleted in LocalOnlyAssets.DeleteTestRunLeftovers()) Debug.Log("[Sankofa] Deleted test-run leftover before building: " + deleted);
             LocalOnlyAssets.Check(scenes);
+            // The build carries the commit it was made from, logged at start, so an APK is traceable to its source.
+            var version = PlayerSettings.bundleVersion;
+            var commit = Commit(repository);
+            PlayerSettings.bundleVersion = commit != null ? $"{version}+{commit}" : version;
             try
             {
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
@@ -43,7 +47,37 @@ namespace Sankofa.EditorTools
             finally
             {
                 SankofaBuildPrivacy.RestoreEditorSettings();
+                PlayerSettings.bundleVersion = version;
             }
+        }
+
+        /// <summary>The short hash of the checked-out commit, with "-dirty" if the working tree has changes; null without git.</summary>
+        static string Commit(string repository)
+        {
+            string Git(string arguments)
+            {
+                try
+                {
+                    var info = new System.Diagnostics.ProcessStartInfo("git", arguments)
+                    {
+                        WorkingDirectory = repository,
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    };
+                    using var process = System.Diagnostics.Process.Start(info);
+                    var output = process.StandardOutput.ReadToEnd().Trim();
+                    process.WaitForExit();
+                    return process.ExitCode == 0 ? output : null;
+                }
+                catch (System.Exception)
+                {
+                    return null;
+                }
+            }
+            var hash = Git("rev-parse --short HEAD");
+            if (string.IsNullOrEmpty(hash)) return null;
+            return string.IsNullOrEmpty(Git("status --porcelain")) ? hash : hash + "-dirty";
         }
     }
 }

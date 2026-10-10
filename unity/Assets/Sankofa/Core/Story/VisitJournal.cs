@@ -49,6 +49,8 @@ namespace Sankofa.Core.Story
         readonly Dictionary<string, Outcome> outcomes = new Dictionary<string, Outcome>();
         readonly List<string> asked = new List<string>();
         readonly HashSet<string> noticed = new HashSet<string>();
+        readonly List<string> noticedInOrder = new List<string>();
+        readonly Dictionary<string, int> looks = new Dictionary<string, int>();
 
         public VisitJournal(int visitNumber, StoryPlan plan, VisitMode mode, string relatedVisit = null)
         {
@@ -122,10 +124,19 @@ namespace Sankofa.Core.Story
             Add(at, JournalKind.QuestionAsked, questionId, "asked by hand");
         }
 
+        /// <summary>
+        /// The objects the visitor's head rested on most often, most first, then in the order first noticed: what
+        /// they lingered on. Head direction only; the story may show these back, never treat them as a choice.
+        /// </summary>
+        public IReadOnlyList<string> Lingered(int most = 3) =>
+            noticedInOrder.OrderByDescending(id => looks[id]).Take(Math.Max(0, most)).ToList();
+
         /// <summary>Head direction rested on an object. Not eye tracking, and never consent to anything.</summary>
         public bool Noticed(double at, string objectId)
         {
+            looks[objectId] = looks.TryGetValue(objectId, out var n) ? n + 1 : 1;
             if (!noticed.Add(objectId)) return false;
+            noticedInOrder.Add(objectId);
             Add(at, JournalKind.Noticed, objectId, "head direction; not eye tracking");
             return true;
         }

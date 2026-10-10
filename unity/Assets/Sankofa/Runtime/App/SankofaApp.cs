@@ -76,6 +76,7 @@ namespace Sankofa.Runtime.App
 
         void Awake()
         {
+            Debug.Log($"[Sankofa] build {Application.version} on {SystemInfo.deviceModel}");
 #if UNITY_ANDROID && !UNITY_EDITOR
             // Render the periphery at lower resolution, more so when the frame is heavy.
             OVRManager.foveatedRenderingLevel = OVRManager.FoveatedRenderingLevel.High;
@@ -199,6 +200,33 @@ namespace Sankofa.Runtime.App
             attention.Listening = flow.Phase == VisitPhase.Story;
             if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
             NudgeWaitingChoice();
+            LogFrameTimes();
+        }
+
+        readonly FrameTiming[] timings = new FrameTiming[90];
+        float perfAt;
+        int perfFrames;
+
+        /// <summary>
+        /// Every ten seconds, the average CPU and GPU frame times and the frame rate, as "[Sankofa] perf", so the first
+        /// run on a headset measures itself (read with adb logcat -s Unity). GPU time is 0 where the platform does
+        /// not report it.
+        /// </summary>
+        void LogFrameTimes()
+        {
+            FrameTimingManager.CaptureFrameTimings();
+            perfFrames++;
+            if ((perfAt += Time.unscaledDeltaTime) < 10f) return;
+            var n = (int)FrameTimingManager.GetLatestTimings((uint)timings.Length, timings);
+            double cpu = 0, gpu = 0;
+            for (var i = 0; i < n; i++)
+            {
+                cpu += timings[i].cpuFrameTime;
+                gpu += timings[i].gpuFrameTime;
+            }
+            Debug.Log($"[Sankofa] perf {perfFrames / perfAt:0.0} fps, cpu {(n > 0 ? cpu / n : 0):0.00} ms, gpu {(n > 0 ? gpu / n : 0):0.00} ms over {n} frames, scene {stage.ActiveScene}");
+            perfAt = 0;
+            perfFrames = 0;
         }
 
         float choiceWait;
@@ -270,6 +298,8 @@ namespace Sankofa.Runtime.App
                         if (invited == null || o.Replay) break;
                         if (o.Invitation.Kind == InvitationKind.Receive) receiver.Listen(o.Invitation.Id, invited.transform);
                         else toucher.Listen(o.Invitation.Id, invited);
+                        // The questions step aside while the visitor reaches for something, so nothing floats over it.
+                        questionsPanel.Hidden = true;
                         break;
                     case Cue.InvitationClosed c:
                         receiver.Close();
@@ -281,6 +311,9 @@ namespace Sankofa.Runtime.App
                         }
                         acceptingHand = null;
                         invited = null;
+                        questionsPanel.Hidden = false;
+                        // The story notices what the visitor did: the nearest person of it turns to them.
+                        if (c.Outcome == Outcome.Accepted) stage.AcknowledgeVisitor();
                         break;
                     case Cue.Transition t:
                         captions.Clear();
@@ -303,9 +336,13 @@ namespace Sankofa.Runtime.App
                         stage.AnswerLook(n.ObjectId);
                         if (n.QuestionId != null) questionsPanel.Pulse("q:" + n.QuestionId);
                         break;
-                    case Cue.Closed _:
+                    case Cue.Closed c:
                         LogJournal();
                         stage.Settle();
+                        if (c.Completed) captions.Notice(WhatYouDid(), 12);
+                        break;
+                    case Cue.Echo e:
+                        stage.Echo(e.ObjectIds);
                         break;
                     case Cue.Keepsake k:
                         stage.ShowKeepsake(k.ObjectId);
@@ -438,6 +475,19 @@ namespace Sankofa.Runtime.App
             acceptingHand = hand;
             if (!flow.Accept(invitationId)) acceptingHand = null;
             Dispatch();
+        }
+
+        /// <summary>
+        /// What the visitor did by hand in this visit, in the words of the buttons that do the same, so the closing
+        /// shows plainly that their actions were taken up. Nothing is claimed for a path the story took on its own.
+        /// </summary>
+        string WhatYouDid()
+        {
+            var done = flow.Plan.Plan.Beats.Select(b => b.Invitation)
+                .Where(i => i != null && flow.Journal.Outcomes.TryGetValue(i.Id, out var o) && o == Outcome.Accepted && !string.IsNullOrEmpty(i.Alternative))
+                .Select(i => i.Alternative).ToList();
+            var replayed = flow.Journal.Mode == VisitMode.Replayed ? "As it was kept · " : "";
+            return done.Count == 0 ? replayed + "This time the story went on without your hands." : replayed + "By your hand: " + string.Join(" · ", done);
         }
 
         void OnNoticed(string objectId)

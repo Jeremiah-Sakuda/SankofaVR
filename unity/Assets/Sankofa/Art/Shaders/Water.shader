@@ -116,7 +116,8 @@ Shader "Sankofa/Water"
                 // Water scatters little light: a warm source shows as its glint, with only a trace on the surface.
                 lit += _SankofaLightColor.rgb * (glint * 0.7 + 0.02) * attenuation + _SankofaMoonColor.rgb * moonGlint * 0.8;
 
-                half foam = _Foam * smoothstep(0.55, 0.9, tex2D(_Noise, i.uv * _Scale * 3 + float2(0, -t * 2.5)).b);
+                // Foam in streaks drawn out along the flow, as falling water breaks, rather than speckle.
+                half foam = _Foam * smoothstep(0.45, 0.85, tex2D(_Noise, float2(i.uv.x * _Scale * 3, i.uv.y * _Scale * 0.5 - t * 2.5)).b);
                 lit = lerp(lit, half3(0.5, 0.52, 0.5) * (0.3 + attenuation * _SankofaLightColor.rgb), foam);
                 // Touched or invited, the water catches a little more light along its moving surface, not a flat tint.
                 lit += _HighlightColor.rgb * _Highlight * (0.03 + 0.12 * saturate(0.5 + ripple.x * 3) * calm);

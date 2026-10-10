@@ -234,6 +234,17 @@ namespace Sankofa.Flow
             public override string ToString() => "Closed " + (Completed ? "completed" : "returned early");
         }
 
+        /// <summary>
+        /// What the visitor lingered on (by head direction), shown back in the light as small echoes: at home after a
+        /// visit, or as a continuation opens. Presentation only; nothing in the story depends on it.
+        /// </summary>
+        public sealed class Echo : Cue
+        {
+            internal Echo(IReadOnlyList<string> objectIds) => ObjectIds = objectIds;
+            public IReadOnlyList<string> ObjectIds { get; }
+            public override string ToString() => "Echo " + string.Join(", ", ObjectIds);
+        }
+
         /// <summary>The keepsake the visitor brought home, set on the hearth stone.</summary>
         public sealed class Keepsake : Cue
         {

@@ -42,7 +42,7 @@ The web project existed before the entry period, and the Quest adaptation has be
 
 ## What was not reused
 
-No source code or assets from the web repository are in this repository. The Quest application, its story core and its content were written for this competition; see [workspace provenance](../workspace-provenance.md). Under the PRD's rules, any later import of web code would need its AGPL, contributor and dependency terms assessed first.
+No source code, images, audio or music from the web repository are in this repository. Two pieces of the user's own writing carry over: the welcome's opening lines, and the griot's voice direction (voice Kore, delivered as a griot), which the narration script uses with a newer model; see the [asset register](../asset-register.md). The Quest application, its story core and its content were written for this competition; see [workspace provenance](../workspace-provenance.md). Under the PRD's rules, any later import of web code would need its AGPL, contributor and dependency terms assessed first.
 
 ## Deliberately deferred
 

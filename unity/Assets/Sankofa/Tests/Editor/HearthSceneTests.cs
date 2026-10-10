@@ -96,7 +96,7 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
             // A glow, touch point and place point are optional for staged objects; their surfaces are not.
-            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".holder", ".handOver" };
+            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".holder", ".handOver", ".echoMesh" };
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 Assert.That(MissingReferences(o).Where(m => !optional.Any(m.EndsWith)), Is.Empty, o.Id);
@@ -301,6 +301,24 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void EverySankofaShaderCompiles()
+        {
+            var shaders = AssetDatabase.FindAssets("t:Shader", new[] { "Assets/Sankofa/Art/Shaders" })
+                .Select(AssetDatabase.GUIDToAssetPath).Select(AssetDatabase.LoadAssetAtPath<Shader>).ToList();
+            Assert.That(shaders, Is.Not.Empty);
+            foreach (var shader in shaders)
+            {
+                // Compiles the variants for this platform, so an error shows here rather than as magenta in a capture.
+                var material = new Material(shader);
+                ShaderUtil.CompilePass(material, 0, true);
+                Object.DestroyImmediate(material);
+                var errors = ShaderUtil.GetShaderMessages(shader).Where(m => m.severity == UnityEditor.Rendering.ShaderCompilerMessageSeverity.Error).ToList();
+                Assert.That(errors.Select(m => m.message + " (line " + m.line + ")"), Is.Empty, shader.name);
+                Assert.That(ShaderUtil.ShaderHasError(shader), Is.False, shader.name);
+            }
+        }
+
+        [Test]
         public void QuestRenderingSettingsHold()
         {
             var android = UnityEngine.XR.OpenXR.OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android);
@@ -310,6 +328,9 @@ namespace Sankofa.Tests
                 if (SankofaProjectSetup.DisabledFeatures.Contains(feature.GetType().Name))
                     Assert.That(feature.enabled, Is.False, feature.GetType().Name + " stays off: the built-in pipeline renders no motion vectors");
             Assert.That(PlayerSettings.GetGraphicsAPIs(BuildTarget.Android), Is.EqualTo(new[] { UnityEngine.Rendering.GraphicsDeviceType.Vulkan }));
+            Assert.That(PlayerSettings.enableFrameTimingStats, Is.True, "frame timings for the perf log");
+            var manifest = System.IO.File.ReadAllText("Assets/Plugins/Android/AndroidManifest.xml");
+            Assert.That(manifest, Does.Contain("com.oculus.handtracking.frequency\" android:value=\"HIGH"), "hands tracked at the higher rate");
         }
 
         // Our own geometry budget for one scene on standalone Quest, until a device profile replaces it: the triangles

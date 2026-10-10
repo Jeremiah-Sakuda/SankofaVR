@@ -43,6 +43,25 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void WhatWasLingeredOnIsKeptMostFirstAndAtMostThree()
+        {
+            var package = Playable(ReadPlaceholder());
+            var plan = package.Compose("makers");
+            var journal = new VisitJournal(1, plan, VisitMode.Chosen);
+            journal.Noticed(1, "bowl");
+            journal.Noticed(2, "shard");
+            journal.Noticed(3, "shard");
+            journal.Noticed(4, "lantern");
+            journal.Noticed(5, "ember");
+            Assert.That(journal.Lingered(), Is.EqualTo(new[] { "shard", "bowl", "lantern" }), "most looked at first, then in the order first noticed");
+            Assert.That(journal.Entries.Count(e => e.Kind == JournalKind.Noticed), Is.EqualTo(4), "one journal entry per object");
+            var visit = SavedVisitCodec.FromVisit("v2", new DateTimeOffset(2026, 10, 4, 21, 0, 0, TimeSpan.Zero), plan, journal);
+            var json = SavedVisitCodec.Write(visit);
+            Assert.That(SavedVisitCodec.Read(json).Lingered, Is.EqualTo(new[] { "shard", "bowl", "lantern" }));
+            Assert.That(Sankofa.Core.Json.JsonText.ParseObject(json).Keys, Does.Contain("lingered"));
+        }
+
+        [Test]
         public void IdsAreSafeFileNames()
         {
             Assert.That(SavedVisitCodec.IsValidId("v20261004-ab12"), Is.True);

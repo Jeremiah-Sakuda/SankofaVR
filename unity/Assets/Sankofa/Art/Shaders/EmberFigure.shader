@@ -27,6 +27,7 @@ Shader "Sankofa/Ember Figure"
         _Procedural ("Posed by this shader", Float) = 1
         _GroundY ("Ground height (world)", Float) = 0
         _Smoke ("Smoke opacity", Range(0, 1)) = 0.3
+        _CrownY ("Neck height (world); above it the head is calm light", Float) = 1000
     }
     SubShader
     {
@@ -77,29 +78,37 @@ Shader "Sankofa/Ember Figure"
                 half edge = pow(1 - saturate(abs(dot(normalize(i.normal), view))), _Rim);
                 // Embers rise through the figure; a slow flicker keeps it alive while it stands still.
                 float2 p = i.world.xz * 6 + i.world.y * 3;
+                // The head, above the neck wherever it is (standing, bowing or kneeling), is calm, even light: no spark
+                // or flicker ever settles where eyes or a mouth would be.
+                half head = smoothstep(_CrownY, _CrownY + 0.06, i.world.y);
                 // Small sparks rather than patches: finer across and up, and only the brightest of the noise.
                 half embers = tex2D(_Noise, float2(p.x * 0.3, i.world.y * 4.5 - _Time.y * _Drift * 2.5)).b;
-                embers = smoothstep(0.72, 0.97, embers) * 0.8;
+                embers = smoothstep(0.72, 0.97, embers) * 0.8 * (1 - head);
                 half flicker = 0.85 + 0.15 * sin(_Time.y * 3.1 + i.world.y * 4);
                 // The edge burns rather than shines: tongues of light run up the silhouette and break it, so no
                 // smooth contour reads as a modelled surface.
                 half tongues = tex2D(_Noise, float2((i.world.x + i.world.z) * 1.9, i.world.y * 0.9 - _Time.y * 0.55)).r;
-                edge *= 0.45 + 1.1 * smoothstep(0.3, 0.75, tongues);
-                half3 c = _Core.rgb * 0.3 + _Color.rgb * (edge * 2.0 + embers * 0.9);
+                edge *= lerp(0.45 + 1.1 * smoothstep(0.3, 0.75, tongues), 1.0, head);
+                // Flame rising through the body: two layers of noise drifting upward at different rates, leaving
+                // darker smoke between the tongues, so the body reads as fire rather than tinted glass.
+                half f1 = tex2D(_Noise, float2((i.world.x - i.world.z) * 2.2, i.world.y * 1.3 - _Time.y * 0.7)).r;
+                half f2 = tex2D(_Noise, float2((i.world.x + i.world.z) * 4.0, i.world.y * 2.4 - _Time.y * 1.3)).g;
+                half flame = smoothstep(0.5, 0.85, f1 * 0.6 + f2 * 0.5) * (1 - head);
+                half3 c = _Core.rgb * 0.2 + _Color.rgb * (edge * 2.0 + embers * 0.9 + flame * 0.55);
                 // The feet are smoke: a ragged edge that drifts upward, so the figure stands in the scene without
                 // a hard line where it meets the ground.
                 half wisp = tex2D(_Noise, float2(i.world.x * 2.3 + i.world.z * 1.7, i.world.y * 2.0 - _Time.y * 0.35)).g;
                 // Height above the ground the figure stands on: 0 at the feet, 1 at a standing crown.
                 half rise = (i.world.y - _GroundY) / max(_Height, 0.01);
                 half feet = saturate((rise - 0.01 - wisp * 0.06) / 0.06);
-                // The head carries a little more of the light, where a listener looks.
-                half crown = 1 + 0.25 * smoothstep(0.8, 0.95, rise);
-                // A soft fill in the head, so it reads as a head of light rather than a hollow rim.
-                c += _Color.rgb * 0.22 * smoothstep(0.8, 0.9, rise);
+                // A soft, even fill in the head, so it reads as a head of light rather than a hollow rim, and carries a
+                // little more of the light, where a listener looks.
+                c += _Color.rgb * 0.35 * head;
+                half crown = 1 + 0.2 * head;
                 half presence = _Intensity * feet;
-                c *= presence * flicker * (1 + _Highlight * 0.8) * crown;
-                // Premultiplied: the glow adds, the smoky core dims what is behind by its opacity.
-                return fixed4(SankofaGrade(c), saturate(_Smoke * presence));
+                c *= presence * lerp(flicker, 1, head) * (1 + _Highlight * 0.8) * crown;
+                // Premultiplied: the glow adds, the smoke dims what is behind; thinner between the tongues of flame.
+                return fixed4(SankofaGrade(c), saturate(_Smoke * presence * lerp(0.7 + 0.3 * flame, 1, head)));
             }
             ENDCG
         }

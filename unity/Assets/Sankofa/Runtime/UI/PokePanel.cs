@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Sankofa.Interaction;
 using TMPro;
 using UnityEngine;
@@ -69,10 +70,28 @@ namespace Sankofa.Runtime.UI
 
         public void AddFingertip(Func<Vector3?> fingertip) => fingertips.Add(fingertip);
 
+        bool hidden;
+
+        /// <summary>
+        /// Set aside for a while, keeping its buttons: nothing shows and nothing can be pressed. The questions step
+        /// aside while the visitor is asked to touch or receive, so no button floats over what they reach for.
+        /// </summary>
+        public bool Hidden
+        {
+            get => hidden;
+            set
+            {
+                if (hidden == value) return;
+                hidden = value;
+                foreach (var b in buttons) b.Root.SetActive(!value);
+                foreach (var g in buttons.SelectMany(b => b.Gestures.Values)) g.Lost();
+            }
+        }
+
         /// <summary>Whether a fingertip at this point is at or just in front of one of the buttons, about to press.</summary>
         public bool Near(Vector3 point)
         {
-            if (!isActiveAndEnabled) return false;
+            if (!isActiveAndEnabled || hidden) return false;
             foreach (var b in buttons)
             {
                 var local = b.Root.transform.InverseTransformPoint(point);
@@ -88,7 +107,7 @@ namespace Sankofa.Runtime.UI
         {
             distance = float.MaxValue;
             id = null;
-            if (!isActiveAndEnabled) return false;
+            if (!isActiveAndEnabled || hidden) return false;
             foreach (var b in buttons)
             {
                 var face = b.Root.transform;
@@ -114,7 +133,6 @@ namespace Sankofa.Runtime.UI
             pointerPress = id;
         }
 
-        /// <summary>Draws the eye to one button for a moment, as when the fire notices what the visitor looks at.</summary>
         /// <summary>The ids of the buttons shown, in order.</summary>
         public IEnumerable<string> Ids
         {
@@ -124,6 +142,7 @@ namespace Sankofa.Runtime.UI
             }
         }
 
+        /// <summary>Draws the eye to one button for a moment, as when the fire notices what the visitor looks at.</summary>
         public void Pulse(string id)
         {
             foreach (var b in buttons)
@@ -150,6 +169,7 @@ namespace Sankofa.Runtime.UI
                 var x = (col - (columns - 1) / 2f) * (buttonSize.x + gap);
                 var y = -row * (buttonSize.y + gap);
                 buttons.Add(CreateButton(items[i].Id, items[i].Label, new Vector3(x, y, 0)));
+                buttons[buttons.Count - 1].Root.SetActive(!hidden);
             }
         }
 
@@ -166,6 +186,12 @@ namespace Sankofa.Runtime.UI
             face.transform.localScale = new Vector3(buttonSize.x, buttonSize.y, 1f);
             var renderer = face.GetComponent<Renderer>();
             if (buttonMaterial != null) renderer.sharedMaterial = buttonMaterial;
+            // Its resting colour from the first frame it is drawn, not the material's own until the next update.
+            if (block == null) block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block);
+            block.SetColor(ColorId, idle);
+            if (glow > 0) block.SetColor(EmissionId, idle * glow * 0.25f);
+            renderer.SetPropertyBlock(block);
 
             // Signed-distance-field type stays crisp in a headset. One size for every label; a long label wraps
             // to a second line, and only shrinks if even that would not fit.
@@ -190,6 +216,13 @@ namespace Sankofa.Runtime.UI
 
         void Update()
         {
+            if (hidden)
+            {
+                FingerNear = false;
+                pointed = null;
+                pointerPress = null;
+                return;
+            }
             var near = false;
             var now = Time.unscaledTime;
             string pressedId = null;

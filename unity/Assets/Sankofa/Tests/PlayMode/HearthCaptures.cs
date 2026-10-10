@@ -174,23 +174,34 @@ namespace Sankofa.Tests
                 yield return Strip(eye, "m1-wambui-arrives", new Vector3(-2.2f, 1.0f, 1.7f), 8, 0.8f);
                 yield return Invited("receive-flour");
                 // The moment of giving: the gift has left her hand and drifted to the visitor.
-                yield return WaitFor(() => Vector3.Distance(stage.Find("gourd.flour").transform.position, stage.OfferPosition()) < 0.08f, 20);
+                yield return WaitFor(() => Vector3.Distance(stage.Find("gourd.flour").transform.position, stage.GiftPoint(stage.Find("gourd.flour").HandOverPlace.Value)) < 0.08f, 20);
                 CaptureBoth(eye, "06-wambui", people);
                 flow.Accept("receive-flour");
                 yield return Line("e1.problem");
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "07-naserian", people);
+                // The visitor lingers on the ewe and on Naserian's gourd of milk: the story looks with them, and at
+                // home the fire shows them back.
+                flow.Notice("figure.ewe");
+                flow.Notice("figure.ewe");
+                flow.Notice("gourd.milk");
                 yield return Line("e1.hide", 60);
                 yield return Strip(eye, "m2-kneel-at-hide", new Vector3(0.35f, 0.75f, 0.95f), 6, 0.5f);
                 yield return Invited("offer-flour");
                 flow.Accept("offer-flour");
                 yield return Invited("receive-bead");
                 yield return Strip(eye, "m3-bead-offered", new Vector3(0.35f, 0.95f, 0.9f), 8, 0.5f);
-                yield return WaitFor(() => Vector3.Distance(stage.Find("bead").transform.position, stage.OfferPosition()) < 0.08f, 20);
+                yield return WaitFor(() => Vector3.Distance(stage.Find("bead").transform.position, stage.GiftPoint(stage.Find("bead").HandOverPlace.Value)) < 0.08f, 20);
                 CaptureBoth(eye, "08-bead", right);
                 flow.Accept("receive-bead");
                 yield return Line("e1.part", 60);
                 yield return Strip(eye, "m4-parting", new Vector3(0.1f, 1.0f, 1.6f), 8, 0.8f);
+                // Home: what the visitor lingered on rises out of the fire in its light.
+                yield return WaitFor(() => flow.Phase == VisitPhase.Closing, 120);
+                var pace = Time.timeScale;
+                Time.timeScale = 1;
+                yield return Strip(eye, "m6-echoes", stage.FireTop + Vector3.up * 0.15f, 6, 0.7f);
+                Time.timeScale = pace;
                 yield return WaitFor(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null, 120);
                 yield return new WaitForSeconds(2f);
                 CaptureBoth(eye, "09-keepsake");
@@ -225,7 +236,7 @@ namespace Sankofa.Tests
                 yield return Line("e2.share", 60);
                 yield return Strip(eye, "m5-pouring", new Vector3(0.0f, 1.0f, 1.4f), 6, 0.6f);
                 yield return Invited("receive-seed");
-                yield return WaitFor(() => Vector3.Distance(stage.Find("seed").transform.position, stage.OfferPosition()) < 0.08f, 20);
+                yield return WaitFor(() => Vector3.Distance(stage.Find("seed").transform.position, stage.GiftPoint(stage.Find("seed").HandOverPlace.Value)) < 0.08f, 20);
                 Capture(eye, "14-seed");
                 Assert.That(stage.ActiveScene, Is.EqualTo("story.water.1899"));
             }

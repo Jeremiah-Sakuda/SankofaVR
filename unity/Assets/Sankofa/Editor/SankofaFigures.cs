@@ -228,8 +228,9 @@ namespace Sankofa.EditorTools
                     if (a >= 0 && b >= 0) tubes[a] = (origins[a], origins[b], r0, r1);
                 }
                 // Radii as fractions of the forearm's length, so they follow the mannequin's own scale.
-                Tube("upperarm" + side, "lowerarm" + side, 0.2f, 0.16f);
-                Tube("lowerarm" + side, "hand" + side, 0.16f, 0.12f);
+                // Full at the shoulder, so the arm grows out of the body rather than hanging from a ball joint.
+                Tube("upperarm" + side, "lowerarm" + side, 0.27f, 0.19f);
+                Tube("lowerarm" + side, "hand" + side, 0.19f, 0.13f);
                 Limb("clavicle" + side, "upperarm" + side, 0.8f);
                 Limb("thigh" + side, "calf" + side, 0.88f);
                 // The mannequin's hands are modelled as fists; drawn in, they read as a relaxed hand rather than a punch.
@@ -386,7 +387,8 @@ namespace Sankofa.EditorTools
                 // Falls from the neck over sloping shoulders and narrows to the waist, rather than squaring them.
                 // Close about the neck, so no open collar catches the rim when the head bows.
                 new Vector2(h * 0.034f, h * 0.135f), new Vector2(h * 0.07f, h * 0.1f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
-                new Vector2(h * 0.108f, -h * 0.12f), new Vector2(h * 0.105f, -h * 0.3f),
+                // The hem tucks in under the wrap, so no lip of it catches the light across the hip.
+                new Vector2(h * 0.108f, -h * 0.12f), new Vector2(h * 0.104f, -h * 0.27f), new Vector2(h * 0.088f, -h * 0.33f),
             });
             return (renderer, animator, Bone("hand_r"), Bone("neck_01"), new[] { wrap, shawl });
         }

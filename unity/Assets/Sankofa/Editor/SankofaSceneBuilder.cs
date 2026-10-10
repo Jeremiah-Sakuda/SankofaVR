@@ -72,7 +72,7 @@ namespace Sankofa.EditorTools
             var rest = Point(world, "Rest point", restAt);
             var keepsake = Point(world, "Keepsake point", keepsakeAt);
             // While the visitor decides, the keepsake hangs in the firelight beside the choice, in plain view.
-            var keepsakeShown = Point(world, "Keepsake shown point", new Vector3(0.07f, 0.93f, 0.44f));
+            var keepsakeShown = Point(world, "Keepsake shown point", new Vector3(-0.02f, 0.98f, 0.42f));
             var carry = Point(world, "Carry point", new Vector3(0.14f, 0.86f, 0.38f));
             // What a kept visit leaves at the hearth waits on the keepsake stone.
             var beadKept = BuildBead(hearth, art, "bead.kept", "hearth", keepsakeAt + Vector3.up * 0.012f);
@@ -135,6 +135,9 @@ namespace Sankofa.EditorTools
             Set(app, "toucher", toucher);
             Set(app, "attention", attention);
             SetArray(app, "hands", rig.Hands.Cast<Object>().ToArray());
+
+            BuildEchoes();
+            Set(stage, "echoMaterial", art.EmberFigure);
 
             early.gameObject.SetActive(false);
             railway.gameObject.SetActive(false);

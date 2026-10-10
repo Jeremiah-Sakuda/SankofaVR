@@ -34,7 +34,7 @@ namespace Sankofa.Runtime.UI
         float noticeUntil;
         float clearAt = float.PositiveInfinity;
         float shownAt;
-        CaptionSize size = CaptionSize.Medium;
+        CaptionSize size = CaptionSize.Large;
         string captionText = "";
 
         public string Caption => captionText;

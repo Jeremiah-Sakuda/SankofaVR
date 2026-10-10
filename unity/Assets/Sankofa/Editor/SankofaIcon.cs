@@ -46,12 +46,16 @@ namespace Sankofa.EditorTools
             return texture;
         }
 
+        /// <summary>A shader's smoothstep: 0 at <paramref name="a"/>, 1 at <paramref name="b"/>, eased between.
+        /// (Unity's Mathf.SmoothStep interpolates between its first two arguments instead.)</summary>
+        static float Edge(float a, float b, float x) => Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(a, b, x));
+
         static Color Shade(Vector2 p)
         {
             // Night above, warm ground below, lit from the fire at the centre.
             var night = Color.Lerp(new Color(0.03f, 0.035f, 0.07f), new Color(0.09f, 0.07f, 0.1f), Mathf.InverseLerp(1f, -0.2f, p.y));
             var ground = new Color(0.16f, 0.09f, 0.05f);
-            var c = Color.Lerp(night, ground, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-0.2f, -0.35f, p.y)));
+            var c = Color.Lerp(night, ground, Edge(-0.2f, -0.35f, p.y));
             var fireAt = new Vector2(0f, -0.28f);
             var glow = Mathf.Exp(-(p - fireAt).sqrMagnitude * 3.2f);
             c += new Color(0.95f, 0.42f, 0.12f) * glow * 0.75f;
@@ -67,9 +71,9 @@ namespace Sankofa.EditorTools
             if (inside > 0f)
             {
                 var core = Mathf.Clamp01(inside / Mathf.Max(0.001f, halfWidth));
-                var flame = Color.Lerp(new Color(0.85f, 0.2f, 0.05f), new Color(1f, 0.62f, 0.2f), Mathf.SmoothStep(0f, 1f, core * 1.6f));
-                flame = Color.Lerp(flame, new Color(1f, 0.95f, 0.78f), Mathf.SmoothStep(0.55f, 1f, core) * (1f - t));
-                c = Color.Lerp(c, flame, Mathf.SmoothStep(0f, 0.02f, inside));
+                var flame = Color.Lerp(new Color(0.85f, 0.2f, 0.05f), new Color(1f, 0.62f, 0.2f), Edge(0f, 0.6f, core));
+                flame = Color.Lerp(flame, new Color(1f, 0.95f, 0.78f), Edge(0.55f, 1f, core) * (1f - t));
+                c = Color.Lerp(c, flame, Edge(0f, 0.02f, inside));
             }
 
             // Three hearth stones in front of the flame's root, lit on their upper edges.
@@ -80,7 +84,7 @@ namespace Sankofa.EditorTools
                 if (r >= 1f) continue;
                 var lit = Mathf.Clamp01(d.y * 0.8f + 0.5f) * (1f - Mathf.Abs(stone.x));
                 var rock = Color.Lerp(new Color(0.12f, 0.1f, 0.1f), new Color(0.78f, 0.5f, 0.32f), lit);
-                c = Color.Lerp(c, rock, Mathf.SmoothStep(1f, 0.94f, r));
+                c = Color.Lerp(c, rock, 1f - Edge(0.94f, 1f, r));
             }
             c.a = 1f;
             return c;

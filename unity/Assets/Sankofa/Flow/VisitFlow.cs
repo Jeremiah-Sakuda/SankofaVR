@@ -83,6 +83,7 @@ namespace Sankofa.Flow
         SceneDef transitionTarget;
         Continuation afterTransition;
         bool pauseAfterTransition;
+        List<string> echoOnEntry;
         Continuation resumeWith;
 
         /// <param name="store">Where kept visits live; without one, nothing can be kept.</param>
@@ -166,7 +167,11 @@ namespace Sankofa.Flow
         public bool Follow()
         {
             if (!AtChoice(ChoiceMenu.Returning) || !CanFollow) return false;
-            return BeginVisit(package.Compose(KeptVisit.Next, KeptVisit.AsParent()), VisitMode.Continued, KeptVisit.Id, null);
+            var lingered = KeptVisit.Lingered;
+            if (!BeginVisit(package.Compose(KeptVisit.Next, KeptVisit.AsParent()), VisitMode.Continued, KeptVisit.Id, null)) return false;
+            // What the visitor lingered on last time rises from the light when the continuation opens.
+            echoOnEntry = lingered.Take(3).ToList();
+            return true;
         }
 
         /// <summary>Plays the kept visit exactly as it was kept: its own plan and outcomes, nothing regenerated.</summary>
@@ -511,6 +516,11 @@ namespace Sankofa.Flow
             activity = Activity.None;
             Scene = transitionTarget;
             Journal.SceneEntered(Clock, Scene.Id);
+            if (echoOnEntry != null && Scene.Kind != SceneKind.Hearth)
+            {
+                if (echoOnEntry.Count > 0) Emit(new Cue.Echo(echoOnEntry));
+                echoOnEntry = null;
+            }
             var next = afterTransition;
             afterTransition = Continuation.None;
             SetPhase(next == Continuation.EarlyReturn ? VisitPhase.Closing : VisitPhase.Story);
@@ -602,6 +612,7 @@ namespace Sankofa.Flow
 
         bool BeginVisit(StoryPlan candidate, VisitMode mode, string related, IReadOnlyDictionary<string, Outcome> replay)
         {
+            echoOnEntry = null;
             var playable = PlanValidator.Accept(candidate, out var report, inventory);
             if (playable == null)
             {
@@ -859,6 +870,9 @@ namespace Sankofa.Flow
             Emit(new Cue.Fire(FireState.Welcoming));
             var keepsake = plan.Plan.Keepsake;
             if (keepsake != null && staging.WithVisitor(keepsake)) Emit(new Cue.Keepsake(keepsake));
+            // At home, the fire shows back what the visitor lingered on: presentation only, never a choice.
+            var lingered = Journal.Lingered();
+            if (lingered.Count > 0) Emit(new Cue.Echo(lingered));
             Emit(new Cue.Closed(Journal.Completed));
             UpdateControls();
         }
