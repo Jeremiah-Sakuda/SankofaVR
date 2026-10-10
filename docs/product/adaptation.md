@@ -37,12 +37,12 @@ The web project existed before the entry period, and the Quest adaptation has be
 - **Spatial staging.** The visitor sits at a night fire. Each era is staged around them without moving them: the 1850s trading place at dusk, the 1899 railway camp and today's city river. They enter through the flame.
 - **Hands.** The visitor holds out a palm, carries and receives things, touches the rail, the gate or the soil, and points and pinches at panels. Every essential step also progresses passively, and controllers are optional.
 - **People as firelight.** Faceless figures of ember and smoke walk in, kneel, hand things over and leave. Each family line has its own colour.
-- **Consequence and continuity.** The visitor's actions change what the griot says. A kept visit opens the continuation to today, carrying the visitor's own bead or seed, and replays exactly. Saving is explicit.
+- **Consequence and continuity.** The visitor's actions change what the griot says. A kept visit opens the continuation to today, carrying the visitor's own bead or seed, and replays its path and outcomes exactly (questions asked are not replayed). What the visitor lingered on rises back out of the fire at home and again as the continuation opens. Saving is explicit.
 - **Offline by design.** The full story is bundled, with no backend.
 
 ## What was not reused
 
-No source code, images, audio or music from the web repository are in this repository. Two pieces of the user's own writing carry over: the welcome's opening lines, and the griot's voice direction (voice Kore, delivered as a griot), which the narration script uses with a newer model; see the [asset register](../asset-register.md). The Quest application, its story core and its content were written for this competition; see [workspace provenance](../workspace-provenance.md). Under the PRD's rules, any later import of web code would need its AGPL, contributor and dependency terms assessed first.
+No source code, images, audio or music from the web repository are in this repository. Two pieces of the user's own writing carry over: the welcome's opening lines, and the griot's voice direction (voice Kore, delivered as a griot), which the narration script uses with a newer model; see the [asset register](../asset-register.md). Quest tooling and a few small engine-free helpers (a JSON reader, the poke gesture and panel, project setup and build guards) were ported from the user's own earlier Nafasi project; see [workspace provenance](../workspace-provenance.md). The Quest application, its story core and its content were written for this competition; see [workspace provenance](../workspace-provenance.md). Under the PRD's rules, any later import of web code would need its AGPL, contributor and dependency terms assessed first.
 
 ## Deliberately deferred
 

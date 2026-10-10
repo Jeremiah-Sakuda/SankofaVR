@@ -189,6 +189,7 @@ namespace Sankofa.Runtime.App
 
         void Update()
         {
+            LogFrameTimes();
             if (flow == null || !started) return;
             // A hitch or a resumed process must not leap story time; an invitation never expires in one frame.
             // Scaled time, so tests can run a visit faster; the experience itself always runs at a time scale of 1.
@@ -200,33 +201,34 @@ namespace Sankofa.Runtime.App
             attention.Listening = flow.Phase == VisitPhase.Story;
             if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
             NudgeWaitingChoice();
-            LogFrameTimes();
         }
 
-        readonly FrameTiming[] timings = new FrameTiming[90];
+        readonly FrameTiming[] timing = new FrameTiming[1];
         float perfAt;
-        int perfFrames;
+        int perfFrames, perfTimed;
+        double perfCpu, perfGpu;
 
         /// <summary>
-        /// Every ten seconds, the average CPU and GPU frame times and the frame rate, as "[Sankofa] perf", so the first
-        /// run on a headset measures itself (read with adb logcat -s Unity). GPU time is 0 where the platform does
-        /// not report it.
+        /// Every ten seconds, the frame rate and the average CPU and GPU frame times over those ten seconds, as
+        /// "[Sankofa] perf", from the start screen on, so a run on a headset measures itself (adb logcat -s Unity).
+        /// GPU time is 0 where the platform does not report it.
         /// </summary>
         void LogFrameTimes()
         {
             FrameTimingManager.CaptureFrameTimings();
+            if (FrameTimingManager.GetLatestTimings(1, timing) > 0)
+            {
+                perfCpu += timing[0].cpuFrameTime;
+                perfGpu += timing[0].gpuFrameTime;
+                perfTimed++;
+            }
             perfFrames++;
             if ((perfAt += Time.unscaledDeltaTime) < 10f) return;
-            var n = (int)FrameTimingManager.GetLatestTimings((uint)timings.Length, timings);
-            double cpu = 0, gpu = 0;
-            for (var i = 0; i < n; i++)
-            {
-                cpu += timings[i].cpuFrameTime;
-                gpu += timings[i].gpuFrameTime;
-            }
-            Debug.Log($"[Sankofa] perf {perfFrames / perfAt:0.0} fps, cpu {(n > 0 ? cpu / n : 0):0.00} ms, gpu {(n > 0 ? gpu / n : 0):0.00} ms over {n} frames, scene {stage.ActiveScene}");
+            var n = Math.Max(1, perfTimed);
+            Debug.Log($"[Sankofa] perf {perfFrames / perfAt:0.0} fps, cpu {perfCpu / n:0.00} ms, gpu {perfGpu / n:0.00} ms over {perfTimed} frames, scene {(stage != null ? stage.ActiveScene : "none")}");
             perfAt = 0;
-            perfFrames = 0;
+            perfFrames = perfTimed = 0;
+            perfCpu = perfGpu = 0;
         }
 
         float choiceWait;
@@ -275,6 +277,7 @@ namespace Sankofa.Runtime.App
                         captions.SetStatus(baseStatus);
                         break;
                     case Cue.VisitStarted v:
+                        stage.ClearEchoes();
                         var mode = v.Mode == VisitMode.Continued ? "Continuing a kept visit" : v.Mode == VisitMode.Replayed ? "Replay of a kept visit, as it was" : null;
                         captions.SetStatus(string.Join(" · ", new[] { mode, baseStatus }.Where(s => !string.IsNullOrEmpty(s))));
                         break;
@@ -349,10 +352,13 @@ namespace Sankofa.Runtime.App
                         break;
                     case Cue.Shelf s:
                         if (s.ObjectId != null) stage.ShowOnShelf(s.ObjectId);
+                        // What the kept visit lingered on waits beside its keepsake, so keeping it kept them too.
+                        if (s.Visit != null) stage.ShelveEchoes(s.Visit.Lingered);
+                        else stage.ClearEchoes();
                         break;
                     case Cue.Kept _:
                         stage.RestKeepsake();
-                        captions.Notice("Kept on this headset only. You can forget it here at any time.", 6);
+                        captions.Notice("Kept on this headset only: the path, what you did, and the things you looked toward most. You can forget it here at any time.", 7);
                         break;
                     case Cue.Forgotten _:
                         captions.Notice("Forgotten. Nothing of that visit is kept.", 5);
@@ -409,6 +415,7 @@ namespace Sankofa.Runtime.App
                 case ControlKind.ConfirmForget: return "Forget it";
                 case ControlKind.CancelForget: return "Keep it";
                 case ControlKind.Pause: return "Pause";
+                case ControlKind.Resume when flow.ConfirmingReturn: return "Stay in the story";
                 case ControlKind.Resume: return "Resume";
                 case ControlKind.ReturnToHearth: return "Return to the fire";
                 case ControlKind.Keep: return o.Target == null ? "Keep this visit" : "Keep this instead";
@@ -443,7 +450,11 @@ namespace Sankofa.Runtime.App
                 case ControlKind.CancelForget: flow.CancelForget(); break;
                 case ControlKind.Pause: flow.Pause("visitor"); break;
                 case ControlKind.Resume: flow.Resume(); break;
-                case ControlKind.ReturnToHearth: flow.ReturnToHearth(); break;
+                // From a playing story the way home asks first; once asked, or from a pause, it goes.
+                case ControlKind.ReturnToHearth:
+                    if (flow.Phase == VisitPhase.Story) flow.AskToReturn();
+                    else flow.ReturnToHearth();
+                    break;
                 case ControlKind.Accept:
                     acceptingHand = null;
                     flow.Accept(target);
@@ -478,16 +489,36 @@ namespace Sankofa.Runtime.App
         }
 
         /// <summary>
-        /// What the visitor did by hand in this visit, in the words of the buttons that do the same, so the closing
-        /// shows plainly that their actions were taken up. Nothing is claimed for a path the story took on its own.
+        /// What the visitor did by hand in this visit, said back plainly at the closing ("You carried the flour. You
+        /// took the bead."), so their actions are seen to have been taken up. Nothing is claimed for a path the story
+        /// took on its own.
         /// </summary>
         string WhatYouDid()
         {
             var done = flow.Plan.Plan.Beats.Select(b => b.Invitation)
                 .Where(i => i != null && flow.Journal.Outcomes.TryGetValue(i.Id, out var o) && o == Outcome.Accepted && !string.IsNullOrEmpty(i.Alternative))
-                .Select(i => i.Alternative).ToList();
-            var replayed = flow.Journal.Mode == VisitMode.Replayed ? "As it was kept · " : "";
-            return done.Count == 0 ? replayed + "This time the story went on without your hands." : replayed + "By your hand: " + string.Join(" · ", done);
+                .Select(i => "You " + Past(i.Alternative) + ".").ToList();
+            var replayed = flow.Journal.Mode == VisitMode.Replayed ? "As it was kept: " : "";
+            return done.Count == 0 ? replayed + "This time the story went on without your hands." : replayed + string.Join(" ", done);
+        }
+
+        /// <summary>A button's words as something done: "Carry the flour" becomes "carried the flour".</summary>
+        static string Past(string label)
+        {
+            var space = label.IndexOf(' ');
+            var verb = (space < 0 ? label : label.Substring(0, space)).ToLowerInvariant();
+            var rest = space < 0 ? "" : label.Substring(space);
+            switch (verb)
+            {
+                case "take": verb = "took"; break;
+                case "hang": verb = "hung"; break;
+                case "hold": verb = "held"; break;
+                case "give": verb = "gave"; break;
+                case "set": break;
+                case "carry": verb = "carried"; break;
+                default: verb = verb.EndsWith("e") ? verb + "d" : verb + "ed"; break;
+            }
+            return verb + rest;
         }
 
         void OnNoticed(string objectId)
@@ -519,6 +550,10 @@ namespace Sankofa.Runtime.App
                 case "ambience":
                     settings.Ambience = (settings.Ambience + 1) % 3;
                     break;
+                case "height":
+                    // Middle, higher, lower, and round again.
+                    settings.Height = settings.Height == 0 ? 1 : settings.Height == 1 ? -1 : 0;
+                    break;
                 case "recenter":
                     anchor.Place();
                     break;
@@ -543,6 +578,7 @@ namespace Sankofa.Runtime.App
             fire.Mode = settings.FireMode;
             ambience.Level = settings.AmbienceLevel;
             foreach (var a in storyAmbience) a.Level = settings.AmbienceLevel;
+            anchor.HeightOffset = settings.HeightOffset;
         }
 
         void ShowSettings()
@@ -558,6 +594,7 @@ namespace Sankofa.Runtime.App
                 ("captions", "Text: " + settings.CaptionSize),
                 ("motion", settings.ReducedMotion ? "Motion: reduced" : "Motion: full"),
                 ("ambience", "Ambience: " + settings.AmbienceName),
+                ("height", "Height: " + settings.HeightName),
                 ("recenter", "Recenter"),
                 ("credits", "Credits"),
             };

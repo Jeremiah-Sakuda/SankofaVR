@@ -20,7 +20,7 @@ float _ArmIn;
 float _Procedural;
 float _GroundY;
 half _Smoke;
-float _CrownY;
+float4 _HeadSphere;
 
 struct appdata
 {

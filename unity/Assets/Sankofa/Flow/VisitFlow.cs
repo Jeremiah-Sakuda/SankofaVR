@@ -50,6 +50,7 @@ namespace Sankofa.Flow
         IReadOnlyDictionary<string, Outcome> replayOutcomes;
         bool visitActive;
         bool confirmingLeave;
+        bool confirmingReturn;
         bool keptThisVisit;
         bool replayBlocked;
         int visitNumber;
@@ -323,6 +324,7 @@ namespace Sankofa.Flow
         public bool Resume()
         {
             if (Phase != VisitPhase.Paused) return false;
+            confirmingReturn = false;
             SetPhase(pausedFrom);
             if (visitActive) Journal.Resumed(Clock);
             if (resumeWith != Continuation.None)
@@ -355,9 +357,24 @@ namespace Sankofa.Flow
             return true;
         }
 
+        /// <summary>
+        /// The visitor reached for the way home during a story: the story pauses and asks, so a hand that strays near
+        /// the lap does not end it. <see cref="ReturnToHearth"/> confirms; <see cref="Resume"/> stays.
+        /// </summary>
+        public bool AskToReturn()
+        {
+            if (Phase != VisitPhase.Story || !Pause("asked to return")) return false;
+            confirmingReturn = true;
+            UpdateControls();
+            return true;
+        }
+
+        public bool ConfirmingReturn => confirmingReturn;
+
         /// <summary>Leaves the story for the hearth at any point, without pretending the story finished.</summary>
         public bool ReturnToHearth()
         {
+            confirmingReturn = false;
             var inStory = Phase == VisitPhase.Story || (Phase == VisitPhase.Paused && pausedFrom == VisitPhase.Story);
             if (!inStory) return false;
             if (Phase == VisitPhase.Paused)
@@ -937,6 +954,10 @@ namespace Sankofa.Flow
                     break;
                 case VisitPhase.Transitioning:
                     next.Add(new ControlOption(ControlKind.Pause));
+                    break;
+                case VisitPhase.Paused when confirmingReturn:
+                    next.Add(new ControlOption(ControlKind.ReturnToHearth));
+                    next.Add(new ControlOption(ControlKind.Resume));
                     break;
                 case VisitPhase.Paused when confirmingLeave:
                     next.Add(new ControlOption(ControlKind.ConfirmLeave));

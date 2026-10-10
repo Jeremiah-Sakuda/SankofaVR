@@ -73,15 +73,21 @@ namespace Sankofa.Runtime.Stage
             block.SetVector(SourceId, Toward(continuities.Count > 0 ? continuities[0].From : null));
             curtain.SetPropertyBlock(block);
 
-            if (reduced) yield return Fade(AlphaId, 0, peak, reducedIn);
+            if (reduced)
+            {
+                yield return Fade(AlphaId, 0, peak, reducedIn);
+                foreach (var c in continuities) stage.Cross(c.From, c.To, toScene);
+                stage.ShowScene(toScene);
+            }
             else
             {
                 yield return Fade(CoverId, 0, Across, fullIn);
+                // Once the flame has covered the view, the new place is already there behind it, glimmering through
+                // the dark ember while the light holds, before it opens.
+                foreach (var c in continuities) stage.Cross(c.From, c.To, toScene);
+                stage.ShowScene(toScene);
                 yield return new WaitForSeconds(fullHold);
             }
-
-            foreach (var c in continuities) stage.Cross(c.From, c.To, toScene);
-            stage.ShowScene(toScene);
 
             if (reduced) yield return Fade(AlphaId, peak, 0, reducedOut);
             else

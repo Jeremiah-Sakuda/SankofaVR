@@ -67,7 +67,7 @@ namespace Sankofa.Tests
             foreach (var figure in Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 var isPerson = figure.GetComponent<StageObject>().Id != "figure.ewe";
-                Assert.That(MissingReferences(figure).Where(m => isPerson || !(m.EndsWith(".animator") || m.EndsWith(".lookBone"))), Is.Empty, figure.name);
+                Assert.That(MissingReferences(figure).Where(m => isPerson || !(m.EndsWith(".animator") || m.EndsWith(".lookBone") || m.EndsWith(".headBone"))), Is.Empty, figure.name);
                 if (!isPerson) continue;
                 Assert.That(figure.GetComponentInChildren<SkinnedMeshRenderer>(), Is.Not.Null, figure.name + " has a skinned body");
                 // A person's head stands at a person's height, not a giant's or a child's.

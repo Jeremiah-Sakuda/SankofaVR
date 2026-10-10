@@ -18,6 +18,12 @@ namespace Sankofa.Runtime.App
         public FireMode FireMode = FireMode.Directed;
         /// <summary>Night ambience: 0 full, 1 low, 2 off. Some visitors find background sound distracting.</summary>
         public int Ambience;
+        /// <summary>Where the world sits for this visitor's height and reach: -1 lower, 0 as built, 1 higher.</summary>
+        public int Height;
+
+        /// <summary>Metres the whole world moves, so every touch point, gift and panel moves together.</summary>
+        public float HeightOffset => Height * 0.08f;
+        public string HeightName => Height < 0 ? "lower" : Height > 0 ? "higher" : "middle";
 
         public float AmbienceLevel => Ambience == 2 ? 0f : Ambience == 1 ? 0.5f : 1f;
         public string AmbienceName => Ambience == 2 ? "off" : Ambience == 1 ? "low" : "full";
@@ -28,6 +34,7 @@ namespace Sankofa.Runtime.App
             ReducedMotion = PlayerPrefs.GetInt(Prefix + "reducedMotion", 0) == 1,
             FireMode = PlayerPrefs.GetInt(Prefix + "fireMode", 0) == 1 ? FireMode.Simple : FireMode.Directed,
             Ambience = Mathf.Clamp(PlayerPrefs.GetInt(Prefix + "ambience", 0), 0, 2),
+            Height = Mathf.Clamp(PlayerPrefs.GetInt(Prefix + "height", 0), -1, 1),
         };
 
         public void Save()
@@ -36,6 +43,7 @@ namespace Sankofa.Runtime.App
             PlayerPrefs.SetInt(Prefix + "reducedMotion", ReducedMotion ? 1 : 0);
             PlayerPrefs.SetInt(Prefix + "fireMode", FireMode == FireMode.Simple ? 1 : 0);
             PlayerPrefs.SetInt(Prefix + "ambience", Ambience);
+            PlayerPrefs.SetInt(Prefix + "height", Height);
             PlayerPrefs.Save();
         }
     }

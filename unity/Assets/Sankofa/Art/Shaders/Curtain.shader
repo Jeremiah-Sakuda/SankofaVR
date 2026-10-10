@@ -90,9 +90,9 @@ Shader "Sankofa/Curtain"
                 half tongue = smoothstep(0.7, 0.92, tex2D(_Noise, float2(i.uv.x * 9, i.uv.y * 2.5 - _Time.y * 0.45)).r);
                 half3 deep = half3(0.025, 0.007, 0.002) * (0.5 + flicker) + half3(0.9, 0.3, 0.07) * tongue * 0.55;
                 half3 colour = lerp(_Color.rgb * shimmer, deep, behind) + edge * half3(1, 0.78, 0.45) * 1.2;
-                // Behind the fronts the world only glimmers through, a steady reference while the place changes: the fire
-                // flares as it rises, so any more of it would wash the dark ember out to a flat bright haze.
-                return fixed4(colour, saturate(cover * lerp(1, 0.985, behind) + edge * 0.8));
+                // Behind the fronts the place being entered glimmers through the dark ember (it is shown as soon as the
+                // flame covers the view), a steady reference while the place changes, never a flat bright haze.
+                return fixed4(colour, saturate(cover * lerp(1, 0.93, behind) + edge * 0.8));
             }
             ENDCG
         }

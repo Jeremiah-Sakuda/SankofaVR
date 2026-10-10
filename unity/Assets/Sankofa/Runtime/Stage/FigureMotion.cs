@@ -38,17 +38,19 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
         [SerializeField] Renderer[] parts = new Renderer[0];
         [Tooltip("Smoke opacity of those parts; cloth is denser than the body it covers.")]
-        [SerializeField] float partSmoke = 0.88f;
+        [SerializeField] float partSmoke = 0.94f;
         [Tooltip("Smoke opacity of the body: dense enough that a figure reads as a presence, not glass.")]
-        [SerializeField] float bodySmoke = 0.84f;
+        [SerializeField] float bodySmoke = 0.92f;
         [Tooltip("How much each part shortens toward its bone while kneeling (cloth gathered on the ground).")]
         [SerializeField] float[] partKneelScale = new float[0];
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
         [Tooltip("With an animator, the bone that turns the head when the figure glances at something.")]
         [SerializeField] Transform lookBone;
+        [Tooltip("With an animator, the head bone, about which the light of the head is calm.")]
+        [SerializeField] Transform headBone;
         [Tooltip("Degrees the head is lifted from the kneeling clip's bow.")]
-        [SerializeField] float kneelLift = 28f;
+        [SerializeField] float kneelLift = 35f;
         [Tooltip("Paths bend around the seat rather than passing nearer than this (metres, in the plan).")]
         [SerializeField] float personalSpace = 1.15f;
 
@@ -61,7 +63,7 @@ namespace Sankofa.Runtime.Stage
         static readonly int GroundId = Shader.PropertyToID("_GroundY");
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int SmokeId = Shader.PropertyToID("_Smoke");
-        static readonly int CrownId = Shader.PropertyToID("_CrownY");
+        static readonly int HeadId = Shader.PropertyToID("_HeadSphere");
         static readonly int WalkingId = Animator.StringToHash("Walking");
         static readonly int KneelingId = Animator.StringToHash("Kneeling");
         static readonly int TalkingId = Animator.StringToHash("Talking");
@@ -418,6 +420,17 @@ namespace Sankofa.Runtime.Stage
             if (lookBone != null && kneel > 0.01f)
                 lookBone.rotation = Quaternion.AngleAxis(-kneelLift * Mathf.SmoothStep(0f, 1f, kneel), transform.right) * lookBone.rotation;
             if (lookWeight > 0.001f && lookBone != null) Look(lookTarget, Mathf.SmoothStep(0f, 1f, lookWeight));
+            // The head as posed this frame, after the clip, the lift and the glance.
+            if (headBone != null && body != null)
+            {
+                body.GetPropertyBlock(block);
+                // Up the skull from the neck, whatever the rig's bone axes.
+                var up = lookBone != null ? (headBone.position - lookBone.position).normalized : Vector3.up;
+                // The whole head and the top of the neck, from the base of the skull to the crown.
+                var centre = headBone.position + up * 0.1f * height / 1.6f;
+                block.SetVector(HeadId, new Vector4(centre.x, centre.y, centre.z, 0.14f * height / 1.6f));
+                body.SetPropertyBlock(block);
+            }
             for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)
                 if (anchors[i] != null && anchorBones[i] != null) anchors[i].position = anchorBones[i].position;
         }
@@ -545,11 +558,10 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(GroundId, basePosition.y);
             block.SetColor(ColorId, tint);
             block.SetFloat(SmokeId, bodySmoke);
-            // Where the head begins this frame, standing or kneeling: a little above the base of the neck.
-            block.SetFloat(CrownId, lookBone != null ? lookBone.position.y + 0.05f * height / 1.6f : 1000f);
             body.SetPropertyBlock(block);
             if (parts.Length == 0) return;
             block.SetFloat(SmokeId, partSmoke);
+            block.SetVector(HeadId, Vector4.zero);
             var folded = Mathf.SmoothStep(0f, 1f, kneel);
             for (var i = 0; i < parts.Length; i++)
             {

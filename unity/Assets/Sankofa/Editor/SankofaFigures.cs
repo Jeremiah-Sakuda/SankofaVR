@@ -307,7 +307,7 @@ namespace Sankofa.EditorTools
                         var d = v - headCentre;
                         var unit = new Vector3(d.x / headRadii.x, d.y / headRadii.y, d.z / headRadii.z);
                         // A little fuller than the mannequin's, so the head does not read small on its neck.
-                        var onOvoid = headCentre + Vector3.Scale(unit.normalized, headRadii * 1.08f);
+                        var onOvoid = headCentre + Vector3.Scale(unit.normalized, headRadii * 1.15f);
                         moved += weight * (onOvoid - v);
                     }
                 }
@@ -380,7 +380,7 @@ namespace Sankofa.EditorTools
             {
                 new Vector2(h * 0.105f, h * 0.075f), new Vector2(h * 0.125f, h * 0.0f), new Vector2(h * 0.15f, -h * 0.14f),
                 // Flaring to the hem, so a stepping leg stays inside it.
-                new Vector2(h * 0.18f, -h * 0.3f), new Vector2(h * 0.2f, -h * 0.4f),
+                new Vector2(h * 0.172f, -h * 0.3f), new Vector2(h * 0.182f, -h * 0.4f),
             });
             var shawl = Cloth(figureRoot, art, Bone("spine_03"), "Shawl", new List<Vector2>
             {

@@ -146,6 +146,25 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void TheWayHomeFromAStoryAsksFirst()
+        {
+            Begin("makers");
+            view.RunUntil(() => flow.Phase == VisitPhase.Story && flow.CurrentLine != null);
+            Assert.That(flow.AskToReturn(), Is.True);
+            view.Pump();
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Paused), "the story waits while the visitor decides");
+            Assert.That(ControlKinds, Is.EqualTo(new[] { ControlKind.ReturnToHearth, ControlKind.Resume }));
+            Assert.That(flow.Resume(), Is.True, "staying");
+            view.Pump();
+            Assert.That(flow.ConfirmingReturn, Is.False);
+            Assert.That(flow.Journal.ReturnedEarly, Is.False);
+            Assert.That(flow.AskToReturn(), Is.True);
+            Assert.That(flow.ReturnToHearth(), Is.True, "confirmed");
+            view.RunUntil(() => flow.Phase == VisitPhase.Closing && flow.CurrentLine == null);
+            Assert.That(flow.Journal.ReturnedEarly, Is.True);
+        }
+
+        [Test]
         public void LeavingAPausedStoryAsksFirst()
         {
             Begin("makers");

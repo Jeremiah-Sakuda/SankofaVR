@@ -15,6 +15,21 @@ namespace Sankofa.Runtime.App
         float settled;
 
         public bool Placed { get; private set; }
+
+        float heightOffset;
+
+        /// <summary>Raises or lowers the whole world for the visitor's height and reach, keeping where it faces.</summary>
+        public float HeightOffset
+        {
+            get => heightOffset;
+            set
+            {
+                heightOffset = value;
+                if (!Placed) return;
+                var p = transform.position;
+                transform.position = new Vector3(p.x, heightOffset, p.z);
+            }
+        }
         public event Action PlacedEvent;
 
         void OnEnable()
@@ -42,7 +57,7 @@ namespace Sankofa.Runtime.App
             forward.y = 0;
             if (forward.sqrMagnitude < 1e-4f) forward = Vector3.forward;
             var p = head.position;
-            transform.SetPositionAndRotation(new Vector3(p.x, 0, p.z), Quaternion.LookRotation(forward.normalized, Vector3.up));
+            transform.SetPositionAndRotation(new Vector3(p.x, heightOffset, p.z), Quaternion.LookRotation(forward.normalized, Vector3.up));
             var first = !Placed;
             Placed = true;
             if (first) PlacedEvent?.Invoke();

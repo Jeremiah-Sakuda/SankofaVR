@@ -356,6 +356,7 @@ namespace Sankofa.EditorTools
             Set(motion, "animator", animator);
             SetArray(motion, "anchorBones", new Object[] { hand, neckBone });
             Set(motion, "lookBone", neckBone);
+            Set(motion, "headBone", Bone("Head"));
             // An unhurried walk with a shorter stride, so the legs stay inside the wrap.
             Set(motion, "speed", 0.55f);
             Transform Bone(string name) => figureRoot.GetComponentsInChildren<Transform>(true).First(t => t.name == name);
@@ -513,11 +514,12 @@ namespace Sankofa.EditorTools
             {
                 var t = Mathf.Abs(y) / 0.0072f;
                 var c = Color.Lerp(glass * 1.25f, glass, Mathf.SmoothStep(0f, 1f, t * 2f));
-                return Mathf.Abs(t - 0.62f) < 0.09f ? band : new Color(c.r, c.g, c.b, 1f);
+                return Mathf.Abs(t - 0.62f) < 0.05f ? band : new Color(c.r, c.g, c.b, 1f);
             }, 1750);
             mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
             var body = Static(beadRoot, "Body", mesh, art.Bead);
-            body.transform.localRotation = Quaternion.Euler(0, 0, 90);
+            // The hole toward the visitor, so it reads as a bead wherever it is, not as a capsule seen from the side.
+            body.transform.localRotation = Quaternion.Euler(90, 0, 0);
             SaveMeshes(new[] { body });
             var o = Staged(beadRoot.gameObject, id, scene, false, new[] { body.GetComponent<Renderer>() });
             // A little of the fire's light lingers on what it gives, so a small thing reads at arm's length; what
@@ -600,14 +602,15 @@ namespace Sankofa.EditorTools
                 {
                     var seam = Mathf.Abs(Mathf.Sin(a * 7f)) > 0.985f ? 0.72f : 1f;
                     var hem = Mathf.Lerp(0.62f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.05f, 0.45f, y)));
+                    // The door, an opening in the canvas itself on the side facing the stream (+Z), dark inside.
+                    var fromDoor = Mathf.Abs(Mathf.DeltaAngle(a * Mathf.Rad2Deg, 90f));
+                    if (fromDoor < 10f && y < 1.05f) return new Color(0.14f, 0.12f, 0.1f);
                     return new Color(shade, shade, shade) * seam * hem;
                 }, (int)(at.x * 10));
                 // The door faces the stream and the visitor across it.
                 var yaw = Mathf.Atan2(-p.x, -p.z) * Mathf.Rad2Deg + R(-25f, 25f);
                 var turn = Quaternion.Euler(0, yaw, 0);
                 canvas.Add(Part(tent, p, turn, Vector3.one));
-                var door = SankofaStoryMeshes.Box("Tent door", new Vector3(0.55f, 1.0f, 0.02f));
-                canvas.Add(Tinted(Part(door, p + turn * new Vector3(0, 0.45f, radius * 0.985f), turn * Quaternion.Euler(-24f, 0, 0), Vector3.one), (q, n) => new Color(0.16f, 0.14f, 0.12f)));
                 for (var k = 0; k < 8; k++)
                 {
                     var around = Quaternion.Euler(0, yaw + 22.5f + k * 45f, 0);

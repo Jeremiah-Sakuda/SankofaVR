@@ -1,6 +1,6 @@
 # Testing guide
 
-For judges and testers of Sankofa on Meta Quest. A visit takes 10 to 15 minutes, seated. Every step works with hands alone. Touch controllers are optional, and the story also moves on by itself if you do nothing.
+For judges and testers of Sankofa on Meta Quest. A full visit, with the continuation to today, takes 10 to 15 minutes, seated; one era on its own (*Before the railway*, steps 1 to 6 below) is a complete story in about 7 minutes. Every step works with hands alone. Touch controllers are optional, and the story also moves on by itself if you do nothing.
 
 **Status — October 10, 2026:** written from the software build and desktop captures. The install steps below wait for a Competition release channel and an invite link, and the walkthrough has not yet been confirmed on a headset.
 

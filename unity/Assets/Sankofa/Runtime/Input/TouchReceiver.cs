@@ -44,6 +44,8 @@ namespace Sankofa.Runtime.Input
             // While paused nothing is touched: a gesture finished now would be refused and its hand spent.
             if (invitationId == null || target == null || StageClock.Paused)
             {
+                // A touch begun before a pause starts again after it, rather than finishing on the first frame back.
+                if (Feedback > 0) foreach (var g in gestures) g.Reset();
                 Feedback = 0;
                 return;
             }
