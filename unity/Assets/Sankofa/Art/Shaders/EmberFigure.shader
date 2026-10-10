@@ -90,7 +90,7 @@ Shader "Sankofa/Ember Figure"
                 // The edge burns rather than shines: tongues of light run up the silhouette and break it, so no
                 // smooth contour reads as a modelled surface.
                 half tongues = tex2D(_Noise, float2((i.world.x + i.world.z) * 1.9, i.world.y * 0.9 - _Time.y * 0.55)).r;
-                edge *= lerp(0.45 + 1.1 * smoothstep(0.3, 0.75, tongues), 0.5, head);
+                edge *= lerp(0.45 + 1.1 * smoothstep(0.3, 0.75, tongues), 0.9, head);
                 // Height above the ground the figure stands on: 0 at the feet, 1 at a standing crown.
                 half rise = (i.world.y - _GroundY) / max(_Height, 0.01);
                 // Flame rising through the body: tongues drawn out upward, in two layers drifting at different rates,
@@ -110,12 +110,12 @@ Shader "Sankofa/Ember Figure"
                 // little more of the light, where a listener looks.
                 // Brighter where it faces the visitor, so it has the volume of a head rather than a flat plate.
                 half facing = saturate(dot(normalize(i.normal), view));
-                c += _Color.rgb * 0.35 * head * (0.55 + 0.45 * facing);
+                c += _Color.rgb * 0.35 * head * (0.8 + 0.2 * facing);
                 half crown = 1 + 0.2 * head;
                 half presence = _Intensity * feet;
                 c *= presence * lerp(flicker, 1, head) * (1 + _Highlight * 0.8) * crown;
-                // Premultiplied: the glow adds, and the smoke, nearly opaque, hides what is behind.
-                return fixed4(SankofaGrade(c), saturate(_Smoke * presence * lerp(0.95 + 0.05 * flame, 1, head)));
+                // Premultiplied: the glow adds, and the smoke hides what is behind (a figure at full smoke is opaque).
+                return fixed4(SankofaGrade(c), saturate(_Smoke * presence));
             }
             ENDCG
         }

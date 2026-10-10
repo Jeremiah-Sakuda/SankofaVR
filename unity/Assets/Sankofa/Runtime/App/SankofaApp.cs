@@ -360,6 +360,10 @@ namespace Sankofa.Runtime.App
                         break;
                     case Cue.Echo e:
                         stage.Echo(e.ObjectIds);
+                        // Opening a continuation, the people of the kept visit stand again for a moment where they
+                        // stood at the same water, faint over the place it has become.
+                        if (flow.Journal.Mode == VisitMode.Continued && flow.KeptVisit?.Plan != null && !stage.IsHearth(stage.ActiveScene))
+                            stage.RecallPeople(flow.KeptVisit.Plan.Scenes.Where(s => s.Kind == SceneKind.Story).Select(s => s.Id));
                         break;
                     case Cue.Keepsake k:
                         stage.ShowKeepsake(k.ObjectId);

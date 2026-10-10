@@ -533,9 +533,10 @@ namespace Sankofa.Flow
             activity = Activity.None;
             Scene = transitionTarget;
             Journal.SceneEntered(Clock, Scene.Id);
+            // As a continuation opens, always: the presentation recalls the kept visit there, with whatever it lingered on.
             if (echoOnEntry != null && Scene.Kind != SceneKind.Hearth)
             {
-                if (echoOnEntry.Count > 0) Emit(new Cue.Echo(echoOnEntry));
+                Emit(new Cue.Echo(echoOnEntry));
                 echoOnEntry = null;
             }
             var next = afterTransition;

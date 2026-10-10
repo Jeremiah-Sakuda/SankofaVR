@@ -369,6 +369,10 @@ namespace Sankofa.EditorTools
             scales.arraySize = 2;
             scales.GetArrayElementAtIndex(0).floatValue = 0.9f;
             scales.GetArrayElementAtIndex(1).floatValue = 0.8f;
+            var widens = kneelScale.FindProperty("partKneelWiden");
+            widens.arraySize = 2;
+            widens.GetArrayElementAtIndex(0).floatValue = 1.3f;
+            widens.GetArrayElementAtIndex(1).floatValue = 1f;
             kneelScale.ApplyModifiedPropertiesWithoutUndo();
             return o;
         }
@@ -514,7 +518,7 @@ namespace Sankofa.EditorTools
             {
                 var t = Mathf.Abs(y) / 0.0072f;
                 var c = Color.Lerp(glass * 1.25f, glass, Mathf.SmoothStep(0f, 1f, t * 2f));
-                return Mathf.Abs(t - 0.62f) < 0.05f ? band : new Color(c.r, c.g, c.b, 1f);
+                return Mathf.Abs(t - 0.62f) < 0.1f ? band : new Color(c.r, c.g, c.b, 1f);
             }, 1750);
             mesh.SetUVs(1, Enumerable.Repeat(new Vector2(1, 1), mesh.vertexCount).ToList());
             var body = Static(beadRoot, "Body", mesh, art.Bead);
@@ -528,7 +532,7 @@ namespace Sankofa.EditorTools
             // A large trade bead, so it reads in the hand and on the stone: about 3.4 cm across.
             beadRoot.localScale = Vector3.one * 1.8f;
             if (kept) body.transform.localScale *= 1.25f;
-            Set(o, "glow", GlowCard(beadRoot, art, kept ? 0.12f : 0.09f));
+            Set(o, "glow", GlowCard(beadRoot, art, kept ? 0.07f : 0.05f));
             Set(o, "glowIntensity", 1.0f);
             Set(o, "attentionRadius", 0.05f);
             return o;

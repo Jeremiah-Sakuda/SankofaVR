@@ -38,11 +38,13 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
         [SerializeField] Renderer[] parts = new Renderer[0];
         [Tooltip("Smoke opacity of those parts; cloth is denser than the body it covers.")]
-        [SerializeField] float partSmoke = 0.98f;
+        [SerializeField] float partSmoke = 1f;
         [Tooltip("Smoke opacity of the body: dense enough that a figure reads as a presence, not glass.")]
-        [SerializeField] float bodySmoke = 0.97f;
+        [SerializeField] float bodySmoke = 1f;
         [Tooltip("How much each part shortens toward its bone while kneeling (cloth gathered on the ground).")]
         [SerializeField] float[] partKneelScale = new float[0];
+        [Tooltip("How much each part widens while kneeling (the wrap spreading over the folded knees).")]
+        [SerializeField] float[] partKneelWiden = new float[0];
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
         [Tooltip("With an animator, the bone that turns the head when the figure glances at something.")]
@@ -50,7 +52,7 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("With an animator, the head bone, about which the light of the head is calm.")]
         [SerializeField] Transform headBone;
         [Tooltip("Degrees the head is lifted from the kneeling clip's bow.")]
-        [SerializeField] float kneelLift = 50f;
+        [SerializeField] float kneelLift = 30f;
         [Tooltip("Paths bend around the seat rather than passing nearer than this (metres, in the plan).")]
         [SerializeField] float personalSpace = 1.15f;
 
@@ -572,7 +574,8 @@ namespace Sankofa.Runtime.Stage
                 if (i < partKneelScale.Length && partRest != null && i < partRest.Length)
                 {
                     var rest = partRest[i];
-                    c.transform.localScale = new Vector3(rest.x, rest.y * Mathf.Lerp(1f, partKneelScale[i], folded), rest.z);
+                    var widen = i < partKneelWiden.Length ? Mathf.Lerp(1f, partKneelWiden[i], folded) : 1f;
+                    c.transform.localScale = new Vector3(rest.x * widen, rest.y * Mathf.Lerp(1f, partKneelScale[i], folded), rest.z * widen);
                 }
             }
         }

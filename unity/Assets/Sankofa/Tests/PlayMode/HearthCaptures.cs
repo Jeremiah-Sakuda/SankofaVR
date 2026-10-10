@@ -210,6 +210,9 @@ namespace Sankofa.Tests
                 flow.BeginAgain();
                 yield return new WaitForSeconds(1f);
                 flow.Follow();
+                // The continuation opens: the people of the kept visit stand again, faint, where they stood.
+                yield return WaitFor(() => stage.ActiveScene == "story.water.today" && flow.Phase == VisitPhase.Story, 120);
+                yield return Strip(eye, "m7-recalled", new Vector3(0.05f, 1.0f, 1.5f), 6, 1.2f);
                 yield return Line("today.rubbish", 120);
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "10-today", right);

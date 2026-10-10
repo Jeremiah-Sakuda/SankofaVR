@@ -169,8 +169,9 @@ namespace Sankofa.Tests
             var right = Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h => !h.IsLeft);
 
             // A hold begun just before a pause (less than its dwell) does not finish when the story resumes.
+            // Held for most of its 0.35 s dwell, so without the reset the first moments after resuming would finish it.
             right.Simulated = () => OpenPalmUnder(ember.transform.position);
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(0.28f);
             Assert.That(ember.CarriedBy, Is.Null, "not yet held long enough");
             // Paused, a palm held under the ember takes nothing and shows nothing; the gesture is not spent.
             Assert.That(app.Flow.Pause(), Is.True);
@@ -183,7 +184,7 @@ namespace Sankofa.Tests
 
             // Resumed, the same open palm takes it, through the gesture, into that hand, after a whole new hold.
             Assert.That(app.Flow.Resume(), Is.True);
-            yield return new WaitForSeconds(0.12f);
+            yield return new WaitForSeconds(0.15f);
             Assert.That(ember.CarriedBy, Is.Null, "the hold starts again after the pause");
             yield return WaitFor(() => ember.CarriedBy == right, 10, "the ember received by the open palm");
             right.Simulated = null;

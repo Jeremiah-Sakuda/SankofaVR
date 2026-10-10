@@ -118,7 +118,6 @@ namespace Sankofa.Runtime.Stage
             }
         }
 
-        /// <summary>In front of and below the visitor's eyes, within a comfortable seated reach.</summary>
         /// <summary>
         /// Where a gift handed over in person comes to rest for the visitor: in front of the seat and within reach, a
         /// little to whichever side is clear of the people of the story and low, so it shows against the ground and
@@ -320,10 +319,8 @@ namespace Sankofa.Runtime.Stage
             if (!IsHearth(ActiveScene))
                 foreach (var o in objects)
                     if (o.Scene == ActiveScene && o.Visible && o.EmitsLight) { from = o.transform.position + Vector3.up * 0.15f; break; }
-            // To the visitor's right of the light, in a row, clear of the choices on the left and of the flame itself.
-            var right = head.right;
-            right.y = 0;
-            ShowEchoes(ids, from + right.normalized * 0.28f, 0.3f, 0.26f, 0.2f, true);
+            // To the seat's right of the light, in a row, clear of the choices on the left and of the flame itself.
+            ShowEchoes(ids, from + SeatRight * 0.28f, 0.35f, 0.26f, 0.2f, true);
         }
 
         /// <summary>A kept visit's echoes wait small beside its keepsake on the hearth stone while the visitor chooses.</summary>
@@ -339,6 +336,17 @@ namespace Sankofa.Runtime.Stage
 
         /// <summary>Echoes shown now, risen or still rising.</summary>
         public int EchoCount => echoes.Count(e => e != null);
+
+        /// <summary>The seat's right, level: rows and sides are laid out from it, not from where the head is turned.</summary>
+        Vector3 SeatRight
+        {
+            get
+            {
+                var right = seat != null ? seat.right : head.right;
+                right.y = 0;
+                return right.sqrMagnitude > 1e-4f ? right.normalized : Vector3.right;
+            }
+        }
 
         void ShowEchoes(IReadOnlyList<string> ids, Vector3 from, float largest, float spacing, float rise, bool toOneSide)
         {
@@ -367,12 +375,10 @@ namespace Sankofa.Runtime.Stage
             // Sizes kept relative, a woman taller than a ewe and a ewe than a gourd, within a hand's height and a forearm's.
             var size = o.EchoMesh.bounds.size;
             var extent = Mathf.Max(size.y, size.x * 0.8f, size.z * 0.8f);
-            var height = Mathf.Clamp(extent * 0.2f, 0.1f, largest);
+            var height = Mathf.Clamp(extent * 0.25f, 0.08f, largest);
             var scale = height / Mathf.Max(0.01f, extent);
             go.transform.localScale = Vector3.one * scale;
-            var right = head.right;
-            right.y = 0;
-            var start = from + right.normalized * aside;
+            var start = from + SeatRight * aside;
             var block = new MaterialPropertyBlock();
             const float rising = 3.5f;
             // Rises clear of the light it came from, below the captions, then stays, breathing a little.
@@ -388,13 +394,60 @@ namespace Sankofa.Runtime.Stage
                 block.SetFloat("_Intensity", glow);
                 block.SetFloat("_Procedural", 0f);
                 block.SetFloat("_Height", height);
-                block.SetFloat("_GroundY", at.y - 0.02f);
+                // The ground well below, so no part of an echo frays into smoke like a figure's feet.
+                block.SetFloat("_GroundY", at.y - 0.15f);
                 // No smoke: an echo adds light and never darkens the flame behind it.
                 block.SetFloat("_Smoke", 0f);
                 block.SetColor("_Color", new Color(1f, 0.6f, 0.26f, 1f));
                 renderer.SetPropertyBlock(block);
                 yield return null;
             }
+        }
+
+        /// <summary>
+        /// The people of earlier scenes, life-size and faint, where they stood: shown for a few seconds as a
+        /// continuation opens on the same ground, so one place across time is seen as well as told. Presentation only.
+        /// </summary>
+        public void RecallPeople(IEnumerable<string> sceneIds)
+        {
+            if (echoMaterial == null) return;
+            var scenesShown = new HashSet<string>(sceneIds);
+            var showing = echoShowing;
+            var i = 0;
+            foreach (var o in objects)
+                if (scenesShown.Contains(o.Scene) && o.EchoMesh != null && o.TryGetComponent<FigureMotion>(out var f) && f.CanGlance)
+                    StartCoroutine(Recall(o, i++ * 0.6f, showing));
+        }
+
+        IEnumerator Recall(StageObject o, float delay, int showing)
+        {
+            for (var t = 0f; t < delay; t += StageClock.DeltaTime) yield return null;
+            if (showing != echoShowing) yield break;
+            var go = new GameObject("Recalled " + o.Id);
+            go.transform.SetParent(transform, false);
+            echoes.Add(go);
+            go.AddComponent<MeshFilter>().sharedMesh = o.EchoMesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterials = echoDepthMaterial != null ? new[] { echoMaterial, echoDepthMaterial } : new[] { echoMaterial };
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            // Facing the visitor, as they stood to listen and to give.
+            var toward = Vector3.ProjectOnPlane(head.position - o.HomePosition, Vector3.up);
+            go.transform.SetPositionAndRotation(o.HomePosition, toward.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(toward) : Quaternion.identity);
+            var block = new MaterialPropertyBlock();
+            const float seconds = 10f;
+            for (var t = 0f; t < seconds && go != null; t += StageClock.DeltaTime)
+            {
+                var fade = Mathf.Min(Mathf.Clamp01(t / 2.5f), Mathf.Clamp01((seconds - t) / 3f));
+                block.SetFloat("_Intensity", 0.55f * fade);
+                block.SetFloat("_Procedural", 0f);
+                block.SetFloat("_Height", 1.6f);
+                block.SetFloat("_GroundY", o.HomePosition.y);
+                block.SetFloat("_Smoke", 0.35f * fade);
+                block.SetColor("_Color", new Color(1f, 0.6f, 0.26f, 1f));
+                renderer.SetPropertyBlock(block);
+                yield return null;
+            }
+            if (go != null) Destroy(go);
         }
 
         /// <summary>The visitor did what the story asked: the nearest person of it, if any, turns to look at them.</summary>

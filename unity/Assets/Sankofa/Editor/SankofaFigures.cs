@@ -73,7 +73,7 @@ namespace Sankofa.EditorTools
             var t = filter.transform;
             t.position = bone.position;
             t.rotation = figureRoot.rotation;
-            t.localScale = new Vector3(1f, 1f, 0.85f);
+            t.localScale = new Vector3(1f, 1f, 0.75f);
             t.SetParent(bone, true);
             var r = filter.GetComponent<Renderer>();
             DrawAsFigure(r, art);
@@ -229,7 +229,7 @@ namespace Sankofa.EditorTools
                 }
                 // Radii as fractions of the forearm's length, so they follow the mannequin's own scale.
                 // Full at the shoulder, so the arm grows out of the body rather than hanging from a ball joint.
-                Tube("upperarm" + side, "lowerarm" + side, 0.27f, 0.19f);
+                Tube("upperarm" + side, "lowerarm" + side, 0.22f, 0.19f);
                 Tube("lowerarm" + side, "hand" + side, 0.19f, 0.13f);
                 Limb("clavicle" + side, "upperarm" + side, 0.8f);
                 Limb("thigh" + side, "calf" + side, 0.88f);
@@ -386,7 +386,7 @@ namespace Sankofa.EditorTools
             {
                 // Falls from the neck over sloping shoulders and narrows to the waist, rather than squaring them.
                 // Close about the neck, so no open collar catches the rim when the head bows.
-                new Vector2(h * 0.034f, h * 0.135f), new Vector2(h * 0.07f, h * 0.1f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
+                new Vector2(h * 0.034f, h * 0.15f), new Vector2(h * 0.07f, h * 0.1f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
                 // The hem tucks in under the wrap, so no lip of it catches the light across the hip.
                 new Vector2(h * 0.115f, -h * 0.12f), new Vector2(h * 0.112f, -h * 0.27f), new Vector2(h * 0.094f, -h * 0.33f),
             });
