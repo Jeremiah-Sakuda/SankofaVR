@@ -44,6 +44,7 @@ namespace Sankofa.EditorTools
         {
             if (!AssetDatabase.IsValidFolder("Assets/Sankofa/Scenes")) AssetDatabase.CreateFolder("Assets/Sankofa", "Scenes");
             var art = SankofaArt.Ensure();
+            SankofaIcon.Ensure();
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             var rig = CreateRig();
@@ -70,6 +71,8 @@ namespace Sankofa.EditorTools
             var keepsakeAt = keepsakeTop + Vector3.up * 0.015f;
             var rest = Point(world, "Rest point", restAt);
             var keepsake = Point(world, "Keepsake point", keepsakeAt);
+            // While the visitor decides, the keepsake hangs in the firelight beside the choice, in plain view.
+            var keepsakeShown = Point(world, "Keepsake shown point", new Vector3(0.07f, 0.93f, 0.44f));
             var carry = Point(world, "Carry point", new Vector3(0.14f, 0.86f, 0.38f));
             // What a kept visit leaves at the hearth waits on the keepsake stone.
             var beadKept = BuildBead(hearth, art, "bead.kept", "hearth", keepsakeAt + Vector3.up * 0.012f);
@@ -78,7 +81,7 @@ namespace Sankofa.EditorTools
             var captions = BuildCaptions(world, art, rig.Head);
             // Pause and return wait at the lap, out of the story's way. Choices come up into view, below and to the
             // left of the fire; questions to the right, inside a comfortable view cone. All within a seated reach.
-            var controls = BuildPanel(world, art, "Controls", new Vector3(-0.2f, 0.64f, 0.29f), 2);
+            var controls = BuildPanel(world, art, "Controls", new Vector3(-0.08f, 0.66f, 0.27f), 2);
             var choices = BuildPanel(world, art, "Choices", new Vector3(-0.28f, 0.95f, 0.42f), 2);
             var questions = BuildPanel(world, art, "Questions", new Vector3(0.33f, 0.98f, 0.42f), 1);
             var settings = BuildPanel(world, art, "Settings", new Vector3(-0.5f, 0.7f, 0.2f), 2);
@@ -103,6 +106,7 @@ namespace Sankofa.EditorTools
             Set(stage, "head", rig.Head);
             Set(stage, "restPoint", rest);
             Set(stage, "keepsakePoint", keepsake);
+            Set(stage, "keepsakeShownPoint", keepsakeShown);
             Set(stage, "carryPoint", carry);
             var transition = stageObject.AddComponent<StoryTransition>();
             Set(transition, "curtain", curtain);

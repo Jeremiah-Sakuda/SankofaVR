@@ -240,6 +240,47 @@ namespace Sankofa.EditorTools
             return Finish(mesh, name);
         }
 
+        /// <summary>
+        /// A flattened tube along a path: falling water seen from any side, wider across than it is deep, thinning to
+        /// <paramref name="taper"/> of its width where it lands. UVs in metres, V downstream.
+        /// </summary>
+        public static Mesh Tube(string name, IList<Vector3> path, float width, float depth, float taper = 1f)
+        {
+            const int sides = 8;
+            var vertices = new List<Vector3>();
+            var uvs = new List<Vector2>();
+            var triangles = new List<int>();
+            var along = 0f;
+            for (var i = 0; i < path.Count; i++)
+            {
+                var forward = (path[Mathf.Min(i + 1, path.Count - 1)] - path[Mathf.Max(i - 1, 0)]).normalized;
+                var across = Vector3.Cross(Vector3.up, forward);
+                if (across.sqrMagnitude < 1e-4f) across = Vector3.right;
+                across.Normalize();
+                var through = Vector3.Cross(forward, across).normalized;
+                if (i > 0) along += Vector3.Distance(path[i - 1], path[i]);
+                var scale = Mathf.Lerp(1f, taper, path.Count > 1 ? i / (path.Count - 1f) : 0f);
+                for (var k = 0; k <= sides; k++)
+                {
+                    var a = k / (float)sides * Mathf.PI * 2f;
+                    vertices.Add(path[i] + (across * Mathf.Cos(a) * width * 0.5f + through * Mathf.Sin(a) * depth * 0.5f) * scale);
+                    uvs.Add(new Vector2(k / (float)sides * width * 2f, along));
+                }
+                if (i == 0) continue;
+                var row = (i - 1) * (sides + 1);
+                for (var k = 0; k < sides; k++)
+                {
+                    int p = row + k, q = row + k + sides + 1;
+                    triangles.AddRange(new[] { p, p + 1, q, p + 1, q + 1, q });
+                }
+            }
+            var mesh = new Mesh();
+            mesh.SetVertices(vertices);
+            mesh.SetUVs(0, uvs);
+            mesh.SetTriangles(triangles, 0);
+            return Finish(mesh, name);
+        }
+
         /// <summary>Points along a smooth curve through the given points (Catmull-Rom), about <paramref name="spacing"/> apart.</summary>
         public static List<Vector3> Smooth(IList<Vector3> points, float spacing)
         {

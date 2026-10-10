@@ -198,6 +198,28 @@ namespace Sankofa.Runtime.App
             foreach (var a in storyAmbience) a.Duck = narration.Speaking;
             attention.Listening = flow.Phase == VisitPhase.Story;
             if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
+            NudgeWaitingChoice();
+        }
+
+        float choiceWait;
+        int choiceNudge;
+
+        /// <summary>
+        /// While the fire waits at a choice with nothing pressed, the choices glow in turn now and then, so a visitor
+        /// who is unsure what to do sees where to reach without anything being chosen for them.
+        /// </summary>
+        void NudgeWaitingChoice()
+        {
+            if ((flow.Phase != VisitPhase.Choosing && flow.Phase != VisitPhase.Closing) || flow.CurrentLine != null)
+            {
+                choiceWait = 0;
+                return;
+            }
+            choiceWait += Time.deltaTime;
+            if (choiceWait < 7f) return;
+            choiceWait = 0;
+            var ids = choicesPanel.Ids.ToList();
+            if (ids.Count > 0) choicesPanel.Pulse(ids[choiceNudge++ % ids.Count]);
         }
 
         void Dispatch()
@@ -278,6 +300,7 @@ namespace Sankofa.Runtime.App
                         break;
                     case Cue.Noticed n:
                         stage.Find(n.ObjectId)?.Pulse();
+                        stage.AnswerLook(n.ObjectId);
                         if (n.QuestionId != null) questionsPanel.Pulse("q:" + n.QuestionId);
                         break;
                     case Cue.Closed _:
@@ -291,6 +314,7 @@ namespace Sankofa.Runtime.App
                         if (s.ObjectId != null) stage.ShowOnShelf(s.ObjectId);
                         break;
                     case Cue.Kept _:
+                        stage.RestKeepsake();
                         captions.Notice("Kept on this headset only. You can forget it here at any time.", 6);
                         break;
                     case Cue.Forgotten _:

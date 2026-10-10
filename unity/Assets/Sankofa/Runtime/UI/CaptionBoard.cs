@@ -24,6 +24,7 @@ namespace Sankofa.Runtime.UI
         [SerializeField] float fadeSeconds = 0.18f;
 
         static readonly int ColorId = Shader.PropertyToID("_Color");
+        static readonly int ZTestId = Shader.PropertyToID("unity_GUIZTestMode");
 
         TextMeshPro caption;
         TextMeshPro status;
@@ -50,9 +51,23 @@ namespace Sankofa.Runtime.UI
             }
         }
 
+        /// <summary>
+        /// The board's own copy of a material, drawn over the scene. The text and backing shaders take their depth test
+        /// from unity_GUIZTestMode, which they do not declare, so a saved material cannot keep it: it is set here.
+        /// </summary>
+        public static Material OverScene(Material shared)
+        {
+            if (shared == null) return null;
+            var m = new Material(shared) { name = shared.name + " (over scene)" };
+            m.SetInt(ZTestId, (int)UnityEngine.Rendering.CompareFunction.Always);
+            return m;
+        }
+
         void Awake()
         {
             block = new MaterialPropertyBlock();
+            textMaterial = OverScene(textMaterial);
+            backingMaterial = OverScene(backingMaterial);
             caption = Make("Caption", 0f, Color.white, textMaterial);
             status = Make("Status", -0.15f, new Color(0.82f, 0.78f, 0.7f), textMaterial);
             notice = Make("Notice", 0.15f, new Color(1f, 0.84f, 0.56f), textMaterial);

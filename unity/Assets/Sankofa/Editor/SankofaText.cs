@@ -108,8 +108,8 @@ namespace Sankofa.EditorTools
             material.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.14f);
             material.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0f, 0f, 0f, 0.85f));
             material.SetFloat(ShaderUtilities.ID_FaceDilate, 0.05f);
-            // Over the scene and its backing, under the hands (see the caption backing material).
-            material.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
+            // After the scene and its backing, under the hands. The caption board draws it over the scene at run time
+            // (CaptionBoard.OverScene): a saved material cannot keep the depth test.
             material.renderQueue = 3991;
             EditorUtility.SetDirty(material);
             return material;

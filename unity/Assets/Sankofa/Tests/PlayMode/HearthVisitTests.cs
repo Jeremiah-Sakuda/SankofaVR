@@ -130,6 +130,9 @@ namespace Sankofa.Tests
             Time.timeScale = 1;
             yield return Poke("Before the railway");
             yield return WaitFor(() => app.Flow.Phase != VisitPhase.Choosing, 5, "an era chosen by a fingertip");
+            // Captions draw over the scene, so no figure, post or tree can cover a line.
+            var board = Object.FindFirstObjectByType<CaptionBoard>();
+            Assert.That(board.CaptionText.fontSharedMaterial.GetInt("unity_GUIZTestMode"), Is.EqualTo((int)UnityEngine.Rendering.CompareFunction.Always));
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
@@ -200,11 +203,19 @@ namespace Sankofa.Tests
             Assert.That(Vector3.Distance(wambui.transform.position, naserian.transform.position), Is.GreaterThan(0.4f), "they take a side each");
             yield return AwaitInvitation("receive-bead", 60);
             yield return WaitFor(() => Mathf.Max(naserian.Arms.Negative, naserian.Arms.Positive) > 0.6f, 10, "Naserian holding out the bead");
+            // She keeps her distance; the bead leaves her hand and drifts to just in front of the visitor, within reach.
+            yield return WaitFor(() => Vector3.Distance(stage.Find("bead").transform.position, stage.OfferPosition()) < 0.05f, 15, "the bead drifting to the visitor");
+            Assert.That(Vector3.Distance(naserian.transform.position, Camera.main.transform.position), Is.GreaterThan(1f), "the giver stays out of the visitor's space");
             Assert.That(app.Flow.Accept("receive-bead"), Is.True);
             yield return AwaitClosing(90);
             Assert.That(stage.ActiveScene, Is.EqualTo("hearth"));
             yield return new WaitForSeconds(1f);
             Assert.That(stage.Find("bead.kept").Visible, Is.True, "the bead came home");
+            // While the visitor decides whether to keep the visit, the bead waits in plain view beside the choice.
+            var view = Camera.main.transform;
+            var flat = Vector3.ProjectOnPlane(view.forward, Vector3.up).normalized;
+            var toBead = Vector3.ProjectOnPlane(stage.Find("bead.kept").transform.position - view.position, Vector3.up);
+            Assert.That(Vector3.Angle(flat, toBead), Is.LessThan(25f), "the keepsake waits in front of the visitor");
             Assert.That(stage.Find("ember").Visible, Is.False, "the fire took its ember back");
             Assert.That(app.Flow.Journal.Completed, Is.True);
 

@@ -105,10 +105,15 @@ Shader "Sankofa/Charcoal"
                 half moon = saturate(dot(n, normalize(_SankofaMoonDir.xyz + 1e-5))) * i.color.a;
                 half3 lit = albedo * (ambient + _SankofaLightColor.rgb * ndl * attenuation * i.bake.x + _SankofaMoonColor.rgb * moon);
 
-                // Valleys between the char crack open and glow; a slow second sample makes the glow wander.
-                half crack = smoothstep(_CrackThreshold, _CrackThreshold + 0.1, 1 - d.b);
+                // Charcoal splits into a network of fine cracks (a contour of the height field) that glow, with the
+                // deepest valleys opening wider; the underside, over the coals, glows most. A slow second sample makes
+                // the glow wander.
+                half valley = smoothstep(_CrackThreshold, _CrackThreshold + 0.1, 1 - d.b);
+                half ridge = 1 - abs(d.b * 2 - 1);
+                half lines = smoothstep(0.86, 0.97, ridge);
+                half under = saturate(0.5 - n.y * 0.6);
                 half pulse = tex2D(_Detail, i.uv * _DetailScale.xy * 0.31 + float2(_Time.y * 0.021, -_Time.y * 0.043)).b;
-                half glow = i.bake.y * _Glow * _SankofaEmberGlow * (0.12 + crack * 1.7) * (0.45 + 1.1 * pulse);
+                half glow = i.bake.y * _Glow * _SankofaEmberGlow * (0.03 + under * 0.22 + lines * 1.3 * (0.4 + under) + valley * 1.1) * (0.45 + 1.1 * pulse);
                 return fixed4(SankofaGrade(lit + _EmberColor.rgb * glow), 1);
             }
             ENDCG

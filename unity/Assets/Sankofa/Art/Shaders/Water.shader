@@ -1,6 +1,7 @@
 // Moving water for the stream and the spill over the rock: opaque (no transparency cost on Quest), with two layers
-// of scrolling ripples along the flow (UV.y runs downstream), the sky reflected at grazing angles, a glint of the
-// scene's one warm light and the moon, and the shared fog, mist and grade. Highlight answers a touch.
+// of broad scrolling ripples along the flow (UV.y runs downstream) that calm with distance, so they never alias into
+// speckle; a smooth reflection of the sky's gradient, brightest toward the horizon; soft glints of the scene's one
+// warm light and the moon; and the shared fog, mist and grade. Highlight answers a touch.
 Shader "Sankofa/Water"
 {
     Properties
@@ -89,15 +90,21 @@ Shader "Sankofa/Water"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 float t = _Time.y * _Flow;
-                float2 a = tex2D(_Noise, i.uv * _Scale + float2(0.13, -t)).rg * 2 - 1;
-                float2 b = tex2D(_Noise, i.uv * _Scale * 2.3 + float2(-t * 1.7, 0.37)).rg * 2 - 1;
-                half2 ripple = (a + b * 0.6) * _Strength;
+                float distance = length(i.world - _WorldSpaceCameraPos);
+                // The broadest noise only (A and R), so a ripple is a swell rather than grain; calmer far away.
+                float2 a = tex2D(_Noise, i.uv * _Scale * 0.5 + float2(0.13, -t * 0.5)).ar * 2 - 1;
+                float2 b = tex2D(_Noise, i.uv * _Scale * 1.1 + float2(-t * 0.8, 0.37)).ar * 2 - 1;
+                half calm = saturate(1.6 / max(distance, 0.5));
+                half2 ripple = (a + b * 0.5) * _Strength * calm;
                 half3 n = normalize(normalize(i.normal) + normalize(i.tangent) * ripple.x + normalize(i.bitangent) * ripple.y);
 
                 float3 view = normalize(_WorldSpaceCameraPos - i.world);
-                half fresnel = pow(1 - saturate(dot(n, view)), 4);
-                half3 body = lerp(_Deep.rgb, _Shallow.rgb, saturate(0.5 + ripple.x));
-                half3 lit = lerp(body, _Sky.rgb, fresnel * 0.85);
+                half fresnel = pow(1 - saturate(dot(n, view)), 3);
+                half3 body = lerp(_Deep.rgb, _Shallow.rgb, saturate(0.5 + ripple.x * 2));
+                // The sky as the water mirrors it: brighter toward the horizon, darker overhead.
+                half3 reflected = reflect(-view, n);
+                half3 sky = _Sky.rgb * lerp(1.7, 0.6, saturate(reflected.y * 1.6));
+                half3 lit = lerp(body, sky, saturate(0.25 + fresnel * 0.9));
 
                 float3 toLight = _SankofaLightPos.xyz - i.world;
                 float d2 = dot(toLight, toLight);
@@ -105,15 +112,15 @@ Shader "Sankofa/Water"
                 half attenuation = 1 / (1 + d2 * _SankofaLightPos.w);
                 half glint = pow(saturate(dot(n, normalize(l + view))), _Gloss);
                 half3 moonDir = normalize(_SankofaMoonDir.xyz + 1e-5);
-                half moonGlint = pow(saturate(dot(n, normalize(moonDir + view))), _Gloss);
+                half moonGlint = pow(saturate(dot(n, normalize(moonDir + view))), _Gloss * 0.5);
                 // Water scatters little light: a warm source shows as its glint, with only a trace on the surface.
-                lit += _SankofaLightColor.rgb * (glint * 0.9 + 0.012) * attenuation + _SankofaMoonColor.rgb * moonGlint * 1.1;
+                lit += _SankofaLightColor.rgb * (glint * 0.7 + 0.02) * attenuation + _SankofaMoonColor.rgb * moonGlint * 0.8;
 
                 half foam = _Foam * smoothstep(0.55, 0.9, tex2D(_Noise, i.uv * _Scale * 3 + float2(0, -t * 2.5)).b);
                 lit = lerp(lit, half3(0.5, 0.52, 0.5) * (0.3 + attenuation * _SankofaLightColor.rgb), foam);
-                lit += _HighlightColor.rgb * _Highlight * 0.25;
+                // Touched or invited, the water catches a little more light along its moving surface, not a flat tint.
+                lit += _HighlightColor.rgb * _Highlight * (0.03 + 0.12 * saturate(0.5 + ripple.x * 3) * calm);
 
-                float distance = length(i.world - _WorldSpaceCameraPos);
                 lit = lerp(lit, _SankofaFogColor.rgb, saturate((distance - _SankofaFogParams.x) * _SankofaFogParams.y));
                 half mist = _SankofaMist.x * saturate((distance - _SankofaMist.w) * 0.06) * exp(-max(i.world.y - _SankofaMist.y, 0) * _SankofaMist.z);
                 lit = lerp(lit, _SankofaMistColor.rgb, saturate(mist));

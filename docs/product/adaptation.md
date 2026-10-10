@@ -11,6 +11,17 @@ October 8, 2026 · How Sankofa for Quest adapts the original web Sankofa. This s
 - **The welcome:** a skippable 98-second pre-generated voice-over over a dark cinematic overlay, with timed lines, gold particles and a rotating Sankofa bird.
 - **The stack:** Gemini models orchestrated with Google's Agent Development Kit, a FastAPI backend, a Next.js front end and Cloud Run.
 
+## Timeline
+
+| Date | Event | Evidence |
+|---|---|---|
+| March 7, 2026 | Web Sankofa repository created and first commit | GitHub repository metadata and commit history, read October 10, 2026 |
+| April 29, 2026 | Last commit to the web repository's default branch | Same |
+| September 24, 2026 | Competition entry period opens | Official rules |
+| September 30, 2026 | This repository's first commit | `git log` |
+
+The web project existed before the entry period, and the Quest adaptation has been built during it.
+
 ## What carries over
 
 | From the web | In Quest |

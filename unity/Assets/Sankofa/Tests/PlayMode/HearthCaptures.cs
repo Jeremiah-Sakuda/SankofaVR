@@ -173,7 +173,8 @@ namespace Sankofa.Tests
                 yield return Line("e1.wambui.arrives", 60);
                 yield return Strip(eye, "m1-wambui-arrives", new Vector3(-2.2f, 1.0f, 1.7f), 8, 0.8f);
                 yield return Invited("receive-flour");
-                yield return new WaitForSeconds(2f);
+                // The moment of giving: the gift has left her hand and drifted to the visitor.
+                yield return WaitFor(() => Vector3.Distance(stage.Find("gourd.flour").transform.position, stage.OfferPosition()) < 0.08f, 20);
                 CaptureBoth(eye, "06-wambui", people);
                 flow.Accept("receive-flour");
                 yield return Line("e1.problem");
@@ -184,7 +185,8 @@ namespace Sankofa.Tests
                 yield return Invited("offer-flour");
                 flow.Accept("offer-flour");
                 yield return Invited("receive-bead");
-                yield return Strip(eye, "m3-bead-offered", new Vector3(0.45f, 0.95f, 0.75f), 5, 0.4f);
+                yield return Strip(eye, "m3-bead-offered", new Vector3(0.35f, 0.95f, 0.9f), 8, 0.5f);
+                yield return WaitFor(() => Vector3.Distance(stage.Find("bead").transform.position, stage.OfferPosition()) < 0.08f, 20);
                 CaptureBoth(eye, "08-bead", right);
                 flow.Accept("receive-bead");
                 yield return Line("e1.part", 60);
@@ -223,7 +225,7 @@ namespace Sankofa.Tests
                 yield return Line("e2.share", 60);
                 yield return Strip(eye, "m5-pouring", new Vector3(0.0f, 1.0f, 1.4f), 6, 0.6f);
                 yield return Invited("receive-seed");
-                yield return new WaitForSeconds(2f);
+                yield return WaitFor(() => Vector3.Distance(stage.Find("seed").transform.position, stage.OfferPosition()) < 0.08f, 20);
                 Capture(eye, "14-seed");
                 Assert.That(stage.ActiveScene, Is.EqualTo("story.water.1899"));
             }

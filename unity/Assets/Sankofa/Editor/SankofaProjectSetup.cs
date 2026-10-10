@@ -59,6 +59,8 @@ namespace Sankofa.EditorTools
             ConfigureMetaProjectConfig();
             ConfigureQuality();
             RunMetaProjectSetupFixes();
+            // After Meta's fixes, which turn SpaceWarp back on.
+            DisableFeatures();
             RemoveUnusedPermissions();
             SankofaText.EnsureEssentials();
             AssetDatabase.SaveAssets();
@@ -143,17 +145,6 @@ namespace Sankofa.EditorTools
             // Play mode uses the desktop settings; the Meta XR Simulator is an OpenXR runtime there.
             EnableFeatures(BuildTargetGroup.Standalone, StandaloneOpenXRFeatures);
 
-            foreach (var group in new[] { BuildTargetGroup.Android, BuildTargetGroup.Standalone })
-            {
-                var settings = OpenXRSettings.GetSettingsForBuildTargetGroup(group);
-                if (settings == null) continue;
-                foreach (var feature in settings.GetFeatures())
-                    if (Array.IndexOf(DisabledFeatureTypes, feature.GetType().Name) >= 0 && feature.enabled)
-                    {
-                        feature.enabled = false;
-                        EditorUtility.SetDirty(feature);
-                    }
-            }
 
             var android = OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android);
             if (android != null)
@@ -165,6 +156,24 @@ namespace Sankofa.EditorTools
                 EditorUtility.SetDirty(android);
             }
         }
+
+        static void DisableFeatures()
+        {
+            foreach (var group in new[] { BuildTargetGroup.Android, BuildTargetGroup.Standalone })
+            {
+                var settings = OpenXRSettings.GetSettingsForBuildTargetGroup(group);
+                if (settings == null) continue;
+                foreach (var feature in settings.GetFeatures())
+                    if (Array.IndexOf(DisabledFeatureTypes, feature.GetType().Name) >= 0 && feature.enabled)
+                    {
+                        feature.enabled = false;
+                        EditorUtility.SetDirty(feature);
+                    }
+            }
+        }
+
+        /// <summary>Feature types that stay off on every platform.</summary>
+        public static System.Collections.Generic.IReadOnlyList<string> DisabledFeatures => DisabledFeatureTypes;
 
         static void EnableFeatures(BuildTargetGroup group, string[] ids)
         {

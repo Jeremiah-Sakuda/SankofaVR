@@ -62,11 +62,12 @@ namespace Sankofa.Tests
             components.AddRange(pointers);
             components.Add(Single<Runtime.Audio.NightAmbience>());
             Assert.That(components.SelectMany(MissingReferences), Is.Empty);
-            // People have an animated skinned body; the ewe is posed by the figure shader, so has no animator.
+            // People have an animated skinned body and a head bone to glance with; the ewe is posed by the figure
+            // shader, so has neither.
             foreach (var figure in Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 var isPerson = figure.GetComponent<StageObject>().Id != "figure.ewe";
-                Assert.That(MissingReferences(figure).Where(m => isPerson || !m.EndsWith(".animator")), Is.Empty, figure.name);
+                Assert.That(MissingReferences(figure).Where(m => isPerson || !(m.EndsWith(".animator") || m.EndsWith(".lookBone"))), Is.Empty, figure.name);
                 if (!isPerson) continue;
                 Assert.That(figure.GetComponentInChildren<SkinnedMeshRenderer>(), Is.Not.Null, figure.name + " has a skinned body");
                 // A person's head stands at a person's height, not a giant's or a child's.
@@ -289,10 +290,26 @@ namespace Sankofa.Tests
         }
 
         [Test]
-        public void TheBuildShowsNoEngineSplashOrLogo()
+        public void TheBuildShowsNoEngineSplashLogoOrIcon()
         {
             Assert.That(PlayerSettings.SplashScreen.show, Is.False, "no splash screen");
             Assert.That(PlayerSettings.SplashScreen.showUnityLogo, Is.False, "no engine logo");
+            // The launcher shows our own icon, not the engine's default.
+            var icons = PlayerSettings.GetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, IconKind.Any);
+            Assert.That(icons, Is.Not.Empty, "an application icon is set");
+            Assert.That(AssetDatabase.GetAssetPath(icons[0]), Is.EqualTo(SankofaIcon.IconPath), "the project's own icon");
+        }
+
+        [Test]
+        public void QuestRenderingSettingsHold()
+        {
+            var android = UnityEngine.XR.OpenXR.OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android);
+            Assert.That(android, Is.Not.Null, "OpenXR settings for Android");
+            Assert.That(android.renderMode, Is.EqualTo(UnityEngine.XR.OpenXR.OpenXRSettings.RenderMode.SinglePassInstanced), "multiview");
+            foreach (var feature in android.GetFeatures())
+                if (SankofaProjectSetup.DisabledFeatures.Contains(feature.GetType().Name))
+                    Assert.That(feature.enabled, Is.False, feature.GetType().Name + " stays off: the built-in pipeline renders no motion vectors");
+            Assert.That(PlayerSettings.GetGraphicsAPIs(BuildTarget.Android), Is.EqualTo(new[] { UnityEngine.Rendering.GraphicsDeviceType.Vulkan }));
         }
 
         // Our own geometry budget for one scene on standalone Quest, until a device profile replaces it: the triangles

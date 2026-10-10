@@ -113,6 +113,25 @@ Record the original Sankofa revision and capture its existing welcome/interactio
 
 Before submission, confirm the supported-device list, actual language/coverage matrix, credits, failure instructions, installer access and public descriptions. The demo must show real implemented behaviour and identify simulator footage when used. The entry should present the visitor experience first, followed by clear before/after adaptation evidence.
 
+### Freeze checklist
+
+Each item needs its evidence recorded in [decisions](../decisions.md) before the candidate is frozen. Owners: **repo** can be done in this repository; **human** needs the user, a reviewer or a headset.
+
+| Item | Owner | Evidence |
+|---|---|---|
+| All .NET, EditMode and PlayMode tests pass on the frozen commit | repo | Test result files for that commit |
+| Release APK signed with the project's own keystore, not the debug key | human (keystore) | `apksigner verify --print-certs` output |
+| Supported devices and Meta telemetry setting decided and set in the manifest | human (decision) | Manifest diff |
+| Hands-only run of both eras and the continuation on a Quest | human (headset) | Notes and real footage, labelled as device evidence |
+| Matatu and other city recordings listened through in full | human | Note in the [asset register](../asset-register.md) |
+| Gemini preview-model terms checked for the narration voice | human | Link and date in the asset register |
+| Family or community review status stated accurately in the app and documents | human | Review notes, or the draft label retained |
+| Original music source resolved, or the build kept without music | human | Licence record, or no music in the build |
+| Competition release channel created, APK uploaded, invite link tested from a second account | human | Channel name and the date of the test |
+| Testing guide updated with the invite link and checked against the frozen build | repo, after the channel exists | [Testing guide](testing-guide.md) |
+| Frozen commit tagged; the APK and its hash archived outside Git | repo | Tag name and SHA-256 |
+| No changes to the submitted build or its channel after the deadline | human | Channel history |
+
 ## Current evidence
 
 At document creation, only repository/source inspection and planning have occurred for this direction. No Sankofa code has been imported, no generation API has been called, no assets purchased, and no new Unity scene or headset test has been performed. Earlier Nafasi tests establish historical software behaviour only.

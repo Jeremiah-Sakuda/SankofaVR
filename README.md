@@ -14,6 +14,23 @@ Its facts come from a [source register](docs/content/enkare-nairobi/sources.md).
 
 **SankofaVR** is the repository name; **Sankofa** is the product.
 
+## What it looks like
+
+Desktop renders from the seated eye, made by the capture test. They are not headset footage.
+
+| | |
+|---|---|
+| ![The hearth at night: the fire, a log seat and the stars](docs/media/hearth.jpg) | ![The stream at dusk in the 1850s, the forest to the left and the plain beyond](docs/media/dusk-1850s.jpg) |
+| The hearth, where the fire speaks | Before the railway: the stream at dusk |
+| ![Naserian, a figure of firelight, holds a bead out beside the trading hide](docs/media/bead-offered.jpg) | ![Njeri and Naisula among the railway camp's tents, 1899](docs/media/railway-1899.jpg) |
+| The bead is offered | When the railway came: the granddaughters |
+| ![The city at night across the river, a jiko burning in front](docs/media/river-today.jpg) | ![Back at the hearth, the bead waits beside the choice to keep the visit](docs/media/keepsake.jpg) |
+| The same water today | Home, with the keepsake |
+
+![Nine frames of the entry: flame spreads from the ember across the view, and the dusk opens from the traders' fire](docs/media/entry-strip.jpg)
+
+*Entering a story through the flame.*
+
 ## Status
 
 The full slice runs in software: a Unity project for Quest and an engine-free story core.
@@ -23,7 +40,7 @@ The full slice runs in software: a Unity project for Quest and an engine-free st
 | Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
 | Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
 | Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can be replayed exactly, continued to today or forgotten |
-| Figures | They walk in, kneel, carry their things, hand them over and walk away |
+| Figures | They walk in, kneel, carry their things, hand them over and walk away, and look back when you look at them |
 | Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
 
 Not yet established:
@@ -35,7 +52,7 @@ The planned entry is Adapted / Significantly Updated Entertainment. AI-generated
 
 ## Try it
 
-Run these from the repository root. The Unity commands need Unity 6000.3.25f1 through Unity Hub; full details are in the [Unity README](unity/README.md).
+On a headset, follow the [testing guide](docs/product/testing-guide.md): a ten-minute walkthrough with hands. From source, run these from the repository root. The Unity commands need Unity 6000.3.25f1 through Unity Hub; full details are in the [Unity README](unity/README.md).
 
 ```sh
 # Story core, flow, gestures and storage, with no Unity needed (.NET 10 SDK)
@@ -53,7 +70,7 @@ python3 scripts/check_workspace.py
 ```text
 docs/                    Product, engineering, content and provenance documents (start at docs/README.md)
 dotnet/                  .NET build and tests of the engine-free modules (CI runs these)
-scripts/                 Workspace check, narration generation, recording preparation
+scripts/                 Workspace check, narration generation, recording preparation, the README gallery
 unity/                   The Quest application
   Assets/Sankofa/
     Core/ Flow/ Interaction/ Storage/   Engine-free story rules, application flow, gestures, kept visits

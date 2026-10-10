@@ -77,9 +77,14 @@ Shader "Sankofa/Ember Figure"
                 half edge = pow(1 - saturate(abs(dot(normalize(i.normal), view))), _Rim);
                 // Embers rise through the figure; a slow flicker keeps it alive while it stands still.
                 float2 p = i.world.xz * 6 + i.world.y * 3;
-                half embers = tex2D(_Noise, float2(p.x * 0.11, i.world.y * 1.7 - _Time.y * _Drift)).b;
-                embers = smoothstep(0.62, 0.95, embers);
+                // Small sparks rather than patches: finer across and up, and only the brightest of the noise.
+                half embers = tex2D(_Noise, float2(p.x * 0.3, i.world.y * 4.5 - _Time.y * _Drift * 2.5)).b;
+                embers = smoothstep(0.72, 0.97, embers) * 0.8;
                 half flicker = 0.85 + 0.15 * sin(_Time.y * 3.1 + i.world.y * 4);
+                // The edge burns rather than shines: tongues of light run up the silhouette and break it, so no
+                // smooth contour reads as a modelled surface.
+                half tongues = tex2D(_Noise, float2((i.world.x + i.world.z) * 1.9, i.world.y * 0.9 - _Time.y * 0.55)).r;
+                edge *= 0.45 + 1.1 * smoothstep(0.3, 0.75, tongues);
                 half3 c = _Core.rgb * 0.3 + _Color.rgb * (edge * 2.0 + embers * 0.9);
                 // The feet are smoke: a ragged edge that drifts upward, so the figure stands in the scene without
                 // a hard line where it meets the ground.

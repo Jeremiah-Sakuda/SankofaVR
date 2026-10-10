@@ -45,6 +45,12 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] float[] partKneelScale = new float[0];
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
+        [Tooltip("With an animator, the bone that turns the head when the figure glances at something.")]
+        [SerializeField] Transform lookBone;
+        [Tooltip("Degrees the head is lifted from the kneeling clip's bow.")]
+        [SerializeField] float kneelLift = 28f;
+        [Tooltip("Paths bend around the seat rather than passing nearer than this (metres, in the plan).")]
+        [SerializeField] float personalSpace = 1.15f;
 
         static readonly int KneelId = Shader.PropertyToID("_Kneel");
         static readonly int HeightId = Shader.PropertyToID("_Height");
@@ -85,7 +91,13 @@ namespace Sankofa.Runtime.Stage
         StageObject offered;
         StageObject handingOver;
         Vector3 handOverPoint;
+        Vector3 passTo;
+        StageObject passing;
+        float passAfter;
         float reachWeight;
+        Vector3 lookTarget;
+        float lookFor;
+        float lookWeight;
 
         public bool Walking => next < route.Count && wait <= 0;
         /// <summary>Metres walked so far, for a gait to keep its steps in time.</summary>
@@ -131,6 +143,8 @@ namespace Sankofa.Runtime.Stage
             reachFor = presentFor = 0;
             offered = null;
             handingOver = null;
+            passing = null;
+            lookFor = lookWeight = 0;
             reachWeight = 0;
             armNeg = armPos = armIn = 0;
             finalRotation = null;
@@ -176,18 +190,36 @@ namespace Sankofa.Runtime.Stage
                 facing.y = 0;
                 if (facing.sqrMagnitude > 1e-4f) finalRotation = Quaternion.LookRotation(facing);
             }
-            if (animator != null) animator.SetTrigger(GiveId);
+            // The two-bone reach gives with one arm; the clip's own gesture would raise the other.
+            if (animator != null && reachArm.Length != 3) animator.SetTrigger(GiveId);
+        }
+
+        /// <summary>Whether this figure can turn its head: a skinned body with a head bone.</summary>
+        public bool CanGlance => lookBone != null && animator != null;
+
+        /// <summary>
+        /// Turns the head toward a point for a while: someone of the story glancing back at the visitor who looks at
+        /// her, or following the visitor's look to what they are looking at. Presentation only.
+        /// </summary>
+        public void Glance(Vector3 at, float seconds = 2.5f)
+        {
+            Initialise();
+            lookTarget = at;
+            lookFor = seconds;
         }
 
         /// <summary>
         /// Hands something to the visitor in person: walks to a place at the edge of their space, faces them and holds
-        /// it out in her hand toward <paramref name="point"/>, until it is taken or set down.
+        /// it out in her hand toward <paramref name="point"/>. After a moment the gift leaves her hand and drifts on
+        /// the firelight to <paramref name="passTo"/>, in front of the visitor and within easy reach, while she keeps
+        /// her distance.
         /// </summary>
-        public void HandOver(StageObject item, Vector3 place, Vector3 point)
+        public void HandOver(StageObject item, Vector3 place, Vector3 point, Vector3 passTo)
         {
             Initialise();
             handingOver = item;
             handOverPoint = point;
+            this.passTo = passTo;
             GoTo(place, point, false);
         }
 
@@ -209,6 +241,7 @@ namespace Sankofa.Runtime.Stage
             route.Clear();
             next = 0;
             wait = 0;
+            AddAroundSeat(basePosition, place);
             route.Add(place);
             kneelTarget = 0;
             kneelOnArrival = kneelThere;
@@ -216,6 +249,28 @@ namespace Sankofa.Runtime.Stage
             var facing = lookAt - place;
             facing.y = 0;
             finalRotation = facing.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(facing) : HomeRotation;
+        }
+
+        /// <summary>
+        /// The seat is at the origin of the figure's parent. A straight way that would pass nearer to it than the
+        /// personal space goes around it instead, on the side it was already passing.
+        /// </summary>
+        void AddAroundSeat(Vector3 from, Vector3 to)
+        {
+            var seat = transform.parent != null ? transform.parent.position : Vector3.zero;
+            var a = new Vector2(from.x - seat.x, from.z - seat.z);
+            var b = new Vector2(to.x - seat.x, to.z - seat.z);
+            var ab = b - a;
+            if (ab.sqrMagnitude < 1e-4f) return;
+            var t = Mathf.Clamp01(-Vector2.Dot(a, ab) / ab.sqrMagnitude);
+            if (t <= 0.02f || t >= 0.98f) return;
+            var nearest = a + ab * t;
+            if (nearest.magnitude >= personalSpace) return;
+            var outward = nearest.sqrMagnitude > 1e-4f ? nearest.normalized : new Vector2(-ab.y, ab.x).normalized;
+            if (outward.y < 0) outward = -outward;
+            var around = outward * (personalSpace + 0.1f);
+            var y = Mathf.Lerp(from.y, to.y, t);
+            route.Add(new Vector3(seat.x + around.x, y, seat.z + around.y));
         }
 
         /// <summary>Back to its own place, standing and facing the visitor as it did.</summary>
@@ -230,6 +285,8 @@ namespace Sankofa.Runtime.Stage
         public void Leave()
         {
             Initialise();
+            passing = null;
+            handingOver = null;
             route.Clear();
             next = 0;
             wait = 0;
@@ -287,12 +344,21 @@ namespace Sankofa.Runtime.Stage
             else if (finalRotation.HasValue)
                 transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation.Value, dt * 3f);
 
-            // Arrived to hand something over: hold it out until it is taken.
+            // Arrived to hand something over: hold it out, then let it go to the visitor on the firelight.
             if (handingOver != null && next >= route.Count && wait <= 0)
             {
                 Reach(handOverPoint, 4f, handingOver);
+                passing = handingOver;
+                passAfter = 1.6f;
                 handingOver = null;
             }
+            if (passing != null && (passAfter -= dt) <= 0)
+            {
+                if (passing.InHolderHands && passing.Visible) passing.MoveTo(passTo, 2.2f);
+                passing = null;
+            }
+            lookFor = Mathf.Max(0, lookFor - dt);
+            lookWeight = Mathf.MoveTowards(lookWeight, lookFor > 0 && !walking ? 1f : 0f, dt / 0.5f);
             var reaching = reachArm.Length == 3 && offered != null && offered.InHolderHands && (reachFor > 0 || StillOffering);
             reachWeight = Mathf.MoveTowards(reachWeight, reaching ? 1f : 0f, dt / 0.6f);
             kneel = Mathf.MoveTowards(kneel, kneelTarget, dt / 0.9f);
@@ -315,8 +381,27 @@ namespace Sankofa.Runtime.Stage
         {
             if (animator == null) return;
             if (reachWeight > 0.001f) ReachArm(reachTarget, Mathf.SmoothStep(0f, 1f, reachWeight));
+            if (lookWeight > 0.001f && lookBone != null) Look(lookTarget, Mathf.SmoothStep(0f, 1f, lookWeight));
+            // Kneeling, the clip bows the head right down; lifted a little, the crown never faces the visitor like a face.
+            else if (lookBone != null && kneel > 0.01f)
+                lookBone.rotation = Quaternion.AngleAxis(-kneelLift * Mathf.SmoothStep(0f, 1f, kneel), transform.right) * lookBone.rotation;
             for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)
                 if (anchors[i] != null && anchorBones[i] != null) anchors[i].position = anchorBones[i].position;
+        }
+
+        /// <summary>
+        /// Turns the head bone over the animated pose toward a point, within a comfortable turn of the body's facing:
+        /// up to 60 degrees aside and 25 up or down.
+        /// </summary>
+        void Look(Vector3 target, float weight)
+        {
+            var to = target - lookBone.position;
+            if (to.sqrMagnitude < 1e-4f) return;
+            var local = transform.InverseTransformDirection(to.normalized);
+            var yaw = Mathf.Clamp(Mathf.Atan2(local.x, local.z) * Mathf.Rad2Deg, -60f, 60f);
+            var pitch = Mathf.Clamp(-Mathf.Asin(Mathf.Clamp(local.y, -1f, 1f)) * Mathf.Rad2Deg, -25f, 25f);
+            var turn = transform.rotation * Quaternion.Euler(pitch, yaw, 0) * Quaternion.Inverse(transform.rotation);
+            lookBone.rotation = Quaternion.Slerp(Quaternion.identity, turn, weight) * lookBone.rotation;
         }
 
         /// <summary>

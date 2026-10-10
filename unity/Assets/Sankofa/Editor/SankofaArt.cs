@@ -54,7 +54,6 @@ namespace Sankofa.EditorTools
                 CaptionBacking = Make("Caption backing", "UI/Default", m =>
                 {
                     m.color = new Color(0.025f, 0.02f, 0.018f, 0.55f);
-                    m.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
                     m.renderQueue = 3990;
                 }),
                 // The pointing ray and its dot draw over the transition curtain, like the hands.
@@ -154,7 +153,7 @@ namespace Sankofa.EditorTools
                 // The jiko: galvanised sheet sooted toward the lip, a fired-clay liner, and a cob or two roasting.
                 Cladding = Baked("Jiko cladding", new Color(0.58f, 0.58f, 0.6f), detail, "_DETAIL_UV", new Vector2(6f, 3f), 0.25f, 0.35f),
                 Liner = Baked("Jiko liner", new Color(0.62f, 0.36f, 0.22f), detail, "_DETAIL_UV", new Vector2(8f, 2f), 0.5f, 0.45f),
-                Maize = Baked("Roast maize", new Color(0.7f, 0.52f, 0.2f), detail, "_DETAIL_UV", new Vector2(16f, 10f), 1.4f, 0.8f),
+                Maize = Baked("Roast maize", new Color(0.56f, 0.38f, 0.12f), detail, "_DETAIL_UV", new Vector2(16f, 10f), 1.4f, 0.8f),
                 PalmRing = Make("Palm ring", "Sankofa/Palm Ring", m => { }),
                 Headlight = Make("Headlight", "Sankofa/Glow", m =>
                 {
@@ -168,7 +167,7 @@ namespace Sankofa.EditorTools
                     m.SetFloat("_Intensity", 1.3f);
                     m.SetFloat("_Falloff", 2.6f);
                 }),
-                Paint = Baked("Gate paint", new Color(0.16f, 0.27f, 0.24f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
+                Paint = Baked("Gate paint", new Color(0.3f, 0.36f, 0.34f), detail, "_DETAIL_UV", new Vector2(2f, 2f), 0.2f, 0.25f),
                 LanternCore = Lit("Lantern flame", new Color(0.3f, 0.2f, 0.1f), new Color(1f, 0.72f, 0.4f)),
 
                 // Hearth materials: baked occlusion and fire shadows, generated surface detail.

@@ -115,6 +115,15 @@ namespace Sankofa.Runtime.UI
         }
 
         /// <summary>Draws the eye to one button for a moment, as when the fire notices what the visitor looks at.</summary>
+        /// <summary>The ids of the buttons shown, in order.</summary>
+        public IEnumerable<string> Ids
+        {
+            get
+            {
+                foreach (var b in buttons) yield return b.Id;
+            }
+        }
+
         public void Pulse(string id)
         {
             foreach (var b in buttons)

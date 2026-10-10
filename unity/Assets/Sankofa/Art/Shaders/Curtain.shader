@@ -87,11 +87,12 @@ Shader "Sankofa/Curtain"
                 half behind = saturate((_Cover - fromSource) / 0.35) * saturate((fromTarget - _Hole) / 0.35 + step(_Hole, 0.001));
                 half flicker = tex2D(_Noise, float2(i.uv.x * 4 + _Time.y * 0.05, i.uv.y * 2 - _Time.y * 0.3)).b;
                 // Rising tongues of brighter flame through a dark ember (linear colour: these are deep values).
-                half tongue = smoothstep(0.55, 0.9, tex2D(_Noise, float2(i.uv.x * 9, i.uv.y * 2.5 - _Time.y * 0.45)).r);
-                half3 deep = half3(0.07, 0.02, 0.006) * (0.6 + 0.8 * flicker) + half3(0.5, 0.18, 0.05) * tongue * 0.5;
+                half tongue = smoothstep(0.7, 0.92, tex2D(_Noise, float2(i.uv.x * 9, i.uv.y * 2.5 - _Time.y * 0.45)).r);
+                half3 deep = half3(0.025, 0.007, 0.002) * (0.5 + flicker) + half3(0.9, 0.3, 0.07) * tongue * 0.55;
                 half3 colour = lerp(_Color.rgb * shimmer, deep, behind) + edge * half3(1, 0.78, 0.45) * 1.2;
-                // Behind the fronts the world stays faintly visible, a steady reference while the place changes.
-                return fixed4(colour, saturate(cover * lerp(1, 0.86, behind) + edge * 0.8));
+                // Behind the fronts the world only glimmers through, a steady reference while the place changes: the fire
+                // flares as it rises, so any more of it would wash the dark ember out to a flat bright haze.
+                return fixed4(colour, saturate(cover * lerp(1, 0.985, behind) + edge * 0.8));
             }
             ENDCG
         }

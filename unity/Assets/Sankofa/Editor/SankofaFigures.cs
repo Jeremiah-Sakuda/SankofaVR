@@ -211,6 +211,10 @@ namespace Sankofa.EditorTools
             int Index(string name) => System.Array.IndexOf(names, name);
             // Each limb bone runs to the joint of the next.
             var limbs = new Dictionary<int, (Vector3 From, Vector3 To, float Keep)>();
+            // Arms become smooth tapered sleeves of light, start and end radius along each bone, so no ball joint,
+            // wrist ring or knuckle catches the rim. Fingers fold into the hand, which reads as a closed mitten.
+            var tubes = new Dictionary<int, (Vector3 From, Vector3 To, float R0, float R1)>();
+            var fingers = new Dictionary<int, int>();
             foreach (var side in new[] { "_l", "_r" })
             {
                 void Limb(string bone, string next, float keep)
@@ -218,13 +222,35 @@ namespace Sankofa.EditorTools
                     int a = Index(bone), b = Index(next);
                     if (a >= 0 && b >= 0) limbs[a] = (origins[a], origins[b], keep);
                 }
-                Limb("upperarm" + side, "lowerarm" + side, 0.72f);
-                Limb("lowerarm" + side, "hand" + side, 0.78f);
+                void Tube(string bone, string next, float r0, float r1)
+                {
+                    int a = Index(bone), b = Index(next);
+                    if (a >= 0 && b >= 0) tubes[a] = (origins[a], origins[b], r0, r1);
+                }
+                // Radii as fractions of the forearm's length, so they follow the mannequin's own scale.
+                Tube("upperarm" + side, "lowerarm" + side, 0.2f, 0.16f);
+                Tube("lowerarm" + side, "hand" + side, 0.16f, 0.12f);
                 Limb("clavicle" + side, "upperarm" + side, 0.8f);
                 Limb("thigh" + side, "calf" + side, 0.88f);
                 // The mannequin's hands are modelled as fists; drawn in, they read as a relaxed hand rather than a punch.
                 int lower = Index("lowerarm" + side), hand = Index("hand" + side);
-                if (lower >= 0 && hand >= 0) limbs[hand] = (origins[hand], origins[hand] + (origins[hand] - origins[lower]) * 0.35f, 0.78f);
+                if (lower >= 0 && hand >= 0)
+                {
+                    var forearm = origins[hand] - origins[lower];
+                    tubes[hand] = (origins[hand], origins[hand] + forearm * 0.42f, 0.12f, 0.07f);
+                    foreach (var finger in new[] { "thumb", "index", "middle", "ring", "pinky" })
+                        foreach (var joint in new[] { "_01", "_02", "_03", "_04_leaf" })
+                        {
+                            var f = Index(finger + joint + side);
+                            if (f >= 0) fingers[f] = hand;
+                        }
+                }
+            }
+            // Tube radii in mesh units: a fraction of the forearm's length.
+            var forearmLength = 1f;
+            {
+                int lower = Index("lowerarm_r"), hand = Index("hand_r");
+                if (lower >= 0 && hand >= 0) forearmLength = (origins[hand] - origins[lower]).magnitude;
             }
             int chest = Index("spine_03"), upperChest = Index("spine_02"), head = Index("Head"), neck = Index("neck_01");
             var vertices = mesh.vertices;
@@ -245,7 +271,18 @@ namespace Sankofa.EditorTools
                 void Pull(int bone, float weight)
                 {
                     if (weight <= 0f) return;
-                    if (limbs.TryGetValue(bone, out var limb))
+                    if (fingers.TryGetValue(bone, out var palm)) bone = palm;
+                    if (tubes.TryGetValue(bone, out var tube))
+                    {
+                        var axis = tube.To - tube.From;
+                        var t = Mathf.Clamp01(Vector3.Dot(v - tube.From, axis) / axis.sqrMagnitude);
+                        var onAxis = tube.From + axis * t;
+                        var radial = v - onAxis;
+                        var radius = Mathf.Lerp(tube.R0, tube.R1, t) * forearmLength;
+                        var target = radial.sqrMagnitude > 1e-10f ? onAxis + radial.normalized * radius : onAxis;
+                        moved += weight * (target - v);
+                    }
+                    else if (limbs.TryGetValue(bone, out var limb))
                     {
                         var axis = limb.To - limb.From;
                         var t = Mathf.Clamp01(Vector3.Dot(v - limb.From, axis) / axis.sqrMagnitude);
@@ -270,7 +307,7 @@ namespace Sankofa.EditorTools
                         var unit = new Vector3(d.x / headRadii.x, d.y / headRadii.y, d.z / headRadii.z);
                         // A little fuller than the mannequin's, so the head does not read small on its neck.
                         var onOvoid = headCentre + Vector3.Scale(unit.normalized, headRadii * 1.08f);
-                        moved += weight * (onOvoid - v) * 0.85f;
+                        moved += weight * (onOvoid - v);
                     }
                 }
                 Pull(w.boneIndex0, w.weight0);
@@ -280,6 +317,17 @@ namespace Sankofa.EditorTools
                 vertices[i] = v + moved;
             }
             mesh.vertices = vertices;
+            // The fingers are now part of the hand: bind them to it, so a clip's finger poses cannot open the mitten.
+            for (var i = 0; i < weights.Length; i++)
+            {
+                var w = weights[i];
+                if (fingers.TryGetValue(w.boneIndex0, out var h0)) w.boneIndex0 = h0;
+                if (fingers.TryGetValue(w.boneIndex1, out var h1)) w.boneIndex1 = h1;
+                if (fingers.TryGetValue(w.boneIndex2, out var h2)) w.boneIndex2 = h2;
+                if (fingers.TryGetValue(w.boneIndex3, out var h3)) w.boneIndex3 = h3;
+                weights[i] = w;
+            }
+            mesh.boneWeights = weights;
             // One submesh, so the figure's depth material covers all of it.
             var all = Enumerable.Range(0, mesh.subMeshCount).SelectMany(mesh.GetTriangles).ToArray();
             mesh.subMeshCount = 1;
@@ -330,12 +378,14 @@ namespace Sankofa.EditorTools
             var wrap = Cloth(figureRoot, art, Bone("pelvis"), "Wrap", new List<Vector2>
             {
                 new Vector2(h * 0.105f, h * 0.075f), new Vector2(h * 0.125f, h * 0.0f), new Vector2(h * 0.15f, -h * 0.14f),
-                new Vector2(h * 0.165f, -h * 0.3f), new Vector2(h * 0.175f, -h * 0.4f),
+                // Flaring to the hem, so a stepping leg stays inside it.
+                new Vector2(h * 0.18f, -h * 0.3f), new Vector2(h * 0.2f, -h * 0.4f),
             });
             var shawl = Cloth(figureRoot, art, Bone("spine_03"), "Shawl", new List<Vector2>
             {
                 // Falls from the neck over sloping shoulders and narrows to the waist, rather than squaring them.
-                new Vector2(h * 0.05f, h * 0.13f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
+                // Close about the neck, so no open collar catches the rim when the head bows.
+                new Vector2(h * 0.034f, h * 0.135f), new Vector2(h * 0.07f, h * 0.1f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
                 new Vector2(h * 0.108f, -h * 0.12f), new Vector2(h * 0.105f, -h * 0.3f),
             });
             return (renderer, animator, Bone("hand_r"), Bone("neck_01"), new[] { wrap, shawl });

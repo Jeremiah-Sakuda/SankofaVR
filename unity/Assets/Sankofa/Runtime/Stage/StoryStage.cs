@@ -45,6 +45,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Transform restPoint;
         [Tooltip("On the hearth stone: where the keepsake waits after a visit, and a kept visit's keepsake on return.")]
         [SerializeField] Transform keepsakePoint;
+        [Tooltip("Where the keepsake waits in the firelight while the visitor decides whether to keep the visit, beside the choice.")]
+        [SerializeField] Transform keepsakeShownPoint;
         [Tooltip("Just in front of the visitor: where a received object floats when not held in a palm.")]
         [SerializeField] Transform carryPoint;
         [SerializeField] float offerForward = 0.42f;
@@ -168,7 +170,7 @@ namespace Sankofa.Runtime.Stage
                         var offer = OfferPosition();
                         var standAt = o.HandOverPlace.Value;
                         var toward = new Vector3(standAt.x, offer.y, standAt.z);
-                        o.Holder.HandOver(o, standAt, Vector3.MoveTowards(offer, toward, 0.14f));
+                        o.Holder.HandOver(o, standAt, Vector3.MoveTowards(offer, toward, 0.14f), offer);
                         break;
                     }
                     o.MoveTo(OfferPosition(), 1.4f);
@@ -237,7 +239,40 @@ namespace Sankofa.Runtime.Stage
             if (o == null) return;
             keepsake = id;
             o.Reveal();
-            o.MoveTo(keepsakePoint.position, 1.6f);
+            o.Illuminate();
+            o.MoveTo(keepsakeShownPoint != null ? keepsakeShownPoint.position : keepsakePoint.position, 1.6f);
+        }
+
+        /// <summary>
+        /// The story answers the visitor's look: someone looked at glances back at them, and when they look at a
+        /// thing, the nearest person of the story follows their look to it. Presentation only; nothing advances.
+        /// </summary>
+        public void AnswerLook(string id)
+        {
+            var o = Find(id);
+            if (o == null) return;
+            if (o.TryGetComponent<FigureMotion>(out var looked) && looked.CanGlance)
+            {
+                looked.Glance(head.position, 3f);
+                return;
+            }
+            FigureMotion nearest = null;
+            var best = float.MaxValue;
+            foreach (var other in Objects)
+            {
+                if (!other.Visible || other.Scene != ActiveScene || !other.TryGetComponent<FigureMotion>(out var f) || !f.CanGlance) continue;
+                var d = Vector3.Distance(other.transform.position, o.transform.position);
+                if (d < best) { best = d; nearest = f; }
+            }
+            if (nearest != null) nearest.Glance(o.transform.position, 2.5f);
+        }
+
+        /// <summary>A kept visit's keepsake goes down to rest on the hearth stone, where it waits for the next visit.</summary>
+        public void RestKeepsake()
+        {
+            var o = keepsake != null ? Find(keepsake) : null;
+            if (o == null || !o.Visible) return;
+            o.MoveTo(keepsakePoint.position, 1.4f);
         }
 
         /// <summary>The kept visit's keepsake waits on the hearth stone while the visitor chooses.</summary>
