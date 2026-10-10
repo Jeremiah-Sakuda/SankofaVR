@@ -130,7 +130,8 @@ namespace Sankofa.EditorTools
                     // The colour and its bands are painted per vertex (see BuildBead): placeholders until family review.
                     m.SetColor("_Color", Color.white);
                     m.SetFloat("_UseBake", 1);
-                    m.SetColor("_Emission", new Color(0.05f, 0.1f, 0.2f));
+                    // Glass holds a little of the firelight, so a bead reads even with the fire behind it.
+                    m.SetColor("_Emission", new Color(0.1f, 0.18f, 0.4f));
                     m.SetFloat("_Rim", 1.6f);
                     m.SetFloat("_Wrap", 0.5f);
                 }),
@@ -250,15 +251,17 @@ namespace Sankofa.EditorTools
                 SkyMorning = Make("Morning sky", "Sankofa/Sky", m =>
                 {
                     m.SetTexture("_Noise", noise);
-                    m.SetColor("_Zenith", new Color(0.14f, 0.15f, 0.18f));
-                    m.SetColor("_Horizon", new Color(0.23f, 0.23f, 0.25f));
+                    // A grey morning after a cold night: heavy, uneven cloud, darker overhead, and a thin warm dawn low
+                    // in the east where the cloud breaks.
+                    m.SetColor("_Zenith", new Color(0.1f, 0.11f, 0.14f));
+                    m.SetColor("_Horizon", new Color(0.24f, 0.24f, 0.26f));
                     m.SetColor("_Band", Color.black);
-                    m.SetColor("_GlowColor", new Color(0.08f, 0.065f, 0.05f));
+                    m.SetColor("_GlowColor", new Color(0.2f, 0.13f, 0.07f));
                     m.SetVector("_GlowDir", new Vector4(-0.3f, 0, 0.95f, 0));
-                    m.SetFloat("_GlowWidth", 0.8f);
-                    m.SetFloat("_GlowHeight", 0.3f);
-                    m.SetFloat("_Overcast", 0.92f);
-                    m.SetColor("_CloudColor", new Color(0.2f, 0.205f, 0.22f));
+                    m.SetFloat("_GlowWidth", 0.7f);
+                    m.SetFloat("_GlowHeight", 0.18f);
+                    m.SetFloat("_Overcast", 0.78f);
+                    m.SetColor("_CloudColor", new Color(0.3f, 0.3f, 0.32f));
                     m.SetFloat("_ShowMoon", 0);
                 }),
                 // Today: a city night, the sky lit orange from below by sodium streetlights.

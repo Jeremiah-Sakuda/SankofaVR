@@ -388,7 +388,7 @@ namespace Sankofa.EditorTools
                 // Close about the neck, so no open collar catches the rim when the head bows.
                 new Vector2(h * 0.034f, h * 0.135f), new Vector2(h * 0.07f, h * 0.1f), new Vector2(h * 0.085f, h * 0.075f), new Vector2(h * 0.11f, h * 0.0f),
                 // The hem tucks in under the wrap, so no lip of it catches the light across the hip.
-                new Vector2(h * 0.108f, -h * 0.12f), new Vector2(h * 0.104f, -h * 0.27f), new Vector2(h * 0.088f, -h * 0.33f),
+                new Vector2(h * 0.115f, -h * 0.12f), new Vector2(h * 0.112f, -h * 0.27f), new Vector2(h * 0.094f, -h * 0.33f),
             });
             return (renderer, animator, Bone("hand_r"), Bone("neck_01"), new[] { wrap, shawl });
         }

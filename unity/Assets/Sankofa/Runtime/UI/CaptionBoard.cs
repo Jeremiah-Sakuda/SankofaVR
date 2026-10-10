@@ -128,9 +128,17 @@ namespace Sankofa.Runtime.UI
 
         public void SetStatus(string text) => status.text = text ?? "";
 
-        public void Notice(string text, float seconds = -1)
+        public void ClearNotice() => notice.text = "";
+
+        /// <summary>
+        /// A short notice above the caption. A prominent one, such as what the visitor did, is set nearly at caption
+        /// size and a little higher, so it reads as part of the moment rather than a footnote.
+        /// </summary>
+        public void Notice(string text, float seconds = -1, bool prominent = false)
         {
             notice.text = text ?? "";
+            notice.fontSize = FontSize(size) * (prominent ? 0.85f : 0.75f);
+            notice.transform.localPosition = new Vector3(0, prominent ? 0.21f : 0.15f, 0);
             noticeUntil = Time.unscaledTime + (seconds > 0 ? seconds : noticeSeconds);
         }
 

@@ -61,6 +61,7 @@
     {
       "id": "water.spill",
       "scene": "story.water.1850s",
+      "name": "the spring",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -70,6 +71,7 @@
     {
       "id": "figure.wambui",
       "scene": "story.water.1850s",
+      "name": "Wambui",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -80,6 +82,7 @@
     {
       "id": "gourd.flour",
       "scene": "story.water.1850s",
+      "name": "Wambui's gourd of flour",
       "capabilities": [
         "offer",
         "place",
@@ -89,6 +92,7 @@
     {
       "id": "figure.naserian",
       "scene": "story.water.1850s",
+      "name": "Naserian",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -99,6 +103,7 @@
     {
       "id": "figure.ewe",
       "scene": "story.water.1850s",
+      "name": "the ewe",
       "capabilities": [
         "reveal",
         "withdraw"
@@ -107,6 +112,7 @@
     {
       "id": "gourd.milk",
       "scene": "story.water.1850s",
+      "name": "the gourd of milk",
       "capabilities": [
         "reveal",
         "illuminate"
@@ -115,6 +121,7 @@
     {
       "id": "hide",
       "scene": "story.water.1850s",
+      "name": "the trading hide",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -124,6 +131,7 @@
     {
       "id": "bead",
       "scene": "story.water.1850s",
+      "name": "the bead",
       "capabilities": [
         "offer",
         "place"
@@ -133,6 +141,7 @@
     {
       "id": "lantern.1899",
       "scene": "story.water.1899",
+      "name": "the lantern",
       "capabilities": [
         "reveal",
         "illuminate"
@@ -142,6 +151,7 @@
     {
       "id": "rails",
       "scene": "story.water.1899",
+      "name": "the rails",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -151,6 +161,7 @@
     {
       "id": "figure.njeri",
       "scene": "story.water.1899",
+      "name": "Njeri",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -161,6 +172,7 @@
     {
       "id": "gourd.empty",
       "scene": "story.water.1899",
+      "name": "Njeri's gourd",
       "capabilities": [
         "reveal",
         "illuminate"
@@ -169,6 +181,7 @@
     {
       "id": "figure.naisula",
       "scene": "story.water.1899",
+      "name": "Naisula",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -179,6 +192,7 @@
     {
       "id": "gourd.old",
       "scene": "story.water.1899",
+      "name": "Naisula's gourd",
       "capabilities": [
         "reveal",
         "illuminate"
@@ -187,6 +201,7 @@
     {
       "id": "seed",
       "scene": "story.water.1899",
+      "name": "the seed",
       "capabilities": [
         "offer",
         "place"
@@ -196,6 +211,7 @@
     {
       "id": "jiko",
       "scene": "story.water.today",
+      "name": "the jiko",
       "capabilities": [
         "reveal",
         "illuminate"
@@ -205,6 +221,7 @@
     {
       "id": "gate",
       "scene": "story.water.today",
+      "name": "the garden gate",
       "capabilities": [
         "reveal",
         "illuminate",
@@ -214,6 +231,7 @@
     {
       "id": "soil",
       "scene": "story.water.today",
+      "name": "the garden",
       "capabilities": [
         "reveal",
         "illuminate",

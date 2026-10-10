@@ -181,7 +181,7 @@ namespace Sankofa.EditorTools
             {
                 new Vector3(0.35f, c.y + 0.36f, 0.29f), new Vector3(0.24f, c.y + 0.22f, 0.29f), new Vector3(0.19f, c.y + 0.05f, 0.3f),
                 new Vector3(0.19f, c.y - 0.15f, 0.31f), new Vector3(0.2f, BoundaryGround(new Vector3(0.2f, 0, 0.32f)) + 0.01f, 0.32f),
-            }, 0.03f), 0.09f, 0.035f, 0.8f);
+            }, 0.03f), 0.06f, 0.05f, 0.8f);
 
             // A few logs of firewood beside the traders' fire.
             var wood = new List<CombineInstance>();
@@ -363,11 +363,11 @@ namespace Sankofa.EditorTools
             SetArray(motion, "reachArm", new Object[] { Bone("upperarm_r"), Bone("lowerarm_r"), hand });
             Set(motion, "tint", tint);
             SetArray(motion, "parts", cloth.Cast<Object>().ToArray());
-            // Kneeling, the wrap gathers on the ground and the shawl falls shorter.
+            // Kneeling, the wrap gathers a little on the ground, still covering the knees, and the shawl falls shorter.
             var kneelScale = new SerializedObject(motion);
             var scales = kneelScale.FindProperty("partKneelScale");
             scales.arraySize = 2;
-            scales.GetArrayElementAtIndex(0).floatValue = 0.55f;
+            scales.GetArrayElementAtIndex(0).floatValue = 0.9f;
             scales.GetArrayElementAtIndex(1).floatValue = 0.8f;
             kneelScale.ApplyModifiedPropertiesWithoutUndo();
             return o;

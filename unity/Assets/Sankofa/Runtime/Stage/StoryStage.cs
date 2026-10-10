@@ -43,8 +43,12 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] HearthFire fire;
         [SerializeField] Camera eye;
         [SerializeField] Transform head;
+        [Tooltip("The seat the world was placed around; its forward is where the visitor faces when sitting straight.")]
+        [SerializeField] Transform seat;
         [Tooltip("The light people and things of the story are drawn in; echoes of what the visitor lingered on use it too.")]
         [SerializeField] Material echoMaterial;
+        [Tooltip("The depth of that light, drawn first, so an echo reads as one silhouette rather than its overlapping shells.")]
+        [SerializeField] Material echoDepthMaterial;
         [Tooltip("Beside the visitor: where an object rests when it is set down for them.")]
         [SerializeField] Transform restPoint;
         [Tooltip("On the hearth stone: where the keepsake waits after a visit, and a kept visit's keepsake on return.")]
@@ -116,22 +120,36 @@ namespace Sankofa.Runtime.Stage
 
         /// <summary>In front of and below the visitor's eyes, within a comfortable seated reach.</summary>
         /// <summary>
-        /// Where a gift handed over in person comes to rest for the visitor: in front of them and within reach, a
-        /// little to the side away from the giver and low, so it shows against the ground, clear of her body and of
-        /// anything she has set down, and reads as having come to the visitor.
+        /// Where a gift handed over in person comes to rest for the visitor: in front of the seat and within reach, a
+        /// little to whichever side is clear of the people of the story and low, so it shows against the ground and
+        /// reads as having come to the visitor rather than to anyone else.
         /// </summary>
         public Vector3 GiftPoint(Vector3 giverAt)
         {
             var offer = OfferPosition();
-            var right = head.right;
+            var right = seat != null ? seat.right : head.right;
             right.y = 0;
-            var side = -Mathf.Sign(Vector3.Dot(giverAt - head.position, right));
-            return offer + right.normalized * side * 0.12f + Vector3.down * 0.06f;
+            right.Normalize();
+            // Of the two sides, the one farther from every person of the story now in the scene, the giver included.
+            Vector3 Side(float s) => offer + right * s * 0.12f + Vector3.down * 0.06f;
+            float Clearance(Vector3 p)
+            {
+                var nearest = Vector2.Distance(new Vector2(p.x, p.z), new Vector2(giverAt.x, giverAt.z));
+                foreach (var o in objects)
+                    if (o.Visible && o.Scene == ActiveScene && o.GetComponent<FigureMotion>() != null)
+                        nearest = Mathf.Min(nearest, Vector2.Distance(new Vector2(p.x, p.z), new Vector2(o.transform.position.x, o.transform.position.z)));
+                return nearest;
+            }
+            return Clearance(Side(-1f)) >= Clearance(Side(1f)) ? Side(-1f) : Side(1f);
         }
 
+        /// <summary>
+        /// Where something is offered to the visitor: in front of the seat at lap height, within the reach the scene is
+        /// built to, wherever the head happens to be turned at that moment.
+        /// </summary>
         public Vector3 OfferPosition()
         {
-            var forward = head.forward;
+            var forward = seat != null ? seat.forward : head.forward;
             forward.y = 0;
             if (forward.sqrMagnitude < 1e-4f) forward = transform.forward;
             return head.position + forward.normalized * offerForward + Vector3.down * offerDrop;
@@ -288,6 +306,8 @@ namespace Sankofa.Runtime.Stage
         }
 
         readonly List<GameObject> echoes = new List<GameObject>();
+        // Echoes waiting out their delay belong to one showing; a clear or a new showing ends them before they rise.
+        int echoShowing;
 
         /// <summary>
         /// Shows back what the visitor lingered on: a small shape of light for each, rising out of the fire at home,
@@ -300,41 +320,55 @@ namespace Sankofa.Runtime.Stage
             if (!IsHearth(ActiveScene))
                 foreach (var o in objects)
                     if (o.Scene == ActiveScene && o.Visible && o.EmitsLight) { from = o.transform.position + Vector3.up * 0.15f; break; }
-            ShowEchoes(ids, from, 0.36f, 0.24f, 0.22f);
+            // To the visitor's right of the light, in a row, clear of the choices on the left and of the flame itself.
+            var right = head.right;
+            right.y = 0;
+            ShowEchoes(ids, from + right.normalized * 0.28f, 0.3f, 0.26f, 0.2f, true);
         }
 
         /// <summary>A kept visit's echoes wait small beside its keepsake on the hearth stone while the visitor chooses.</summary>
         public void ShelveEchoes(IReadOnlyList<string> ids) =>
-            ShowEchoes(ids, keepsakePoint.position + Vector3.up * 0.02f, 0.12f, 0.1f, 0.03f);
+            ShowEchoes(ids, keepsakePoint.position + Vector3.up * 0.02f, 0.12f, 0.1f, 0.03f, false);
 
         public void ClearEchoes()
         {
+            echoShowing++;
             foreach (var e in echoes) if (e != null) Destroy(e);
             echoes.Clear();
         }
 
-        void ShowEchoes(IReadOnlyList<string> ids, Vector3 from, float height, float spacing, float rise)
+        /// <summary>Echoes shown now, risen or still rising.</summary>
+        public int EchoCount => echoes.Count(e => e != null);
+
+        void ShowEchoes(IReadOnlyList<string> ids, Vector3 from, float largest, float spacing, float rise, bool toOneSide)
         {
             if (echoMaterial == null || ids == null) return;
             ClearEchoes();
+            var showing = echoShowing;
             var shown = ids.Select(Find).Where(o => o != null && o.EchoMesh != null).Take(3).ToList();
             for (var i = 0; i < shown.Count; i++)
-                StartCoroutine(RiseEcho(shown[i], from, (i - (shown.Count - 1) / 2f) * spacing, i * 0.9f, height, rise));
+            {
+                var aside = toOneSide ? i * spacing : (i - (shown.Count - 1) / 2f) * spacing;
+                StartCoroutine(RiseEcho(shown[i], from, aside, i * 0.9f, largest, rise, showing));
+            }
         }
 
-        IEnumerator RiseEcho(StageObject o, Vector3 from, float aside, float delay, float height, float rise)
+        IEnumerator RiseEcho(StageObject o, Vector3 from, float aside, float delay, float largest, float rise, int showing)
         {
             for (var t = 0f; t < delay; t += StageClock.DeltaTime) yield return null;
+            if (showing != echoShowing) yield break;
             var go = new GameObject("Echo of " + o.Id);
             go.transform.SetParent(transform, false);
             echoes.Add(go);
             go.AddComponent<MeshFilter>().sharedMesh = o.EchoMesh;
             var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = echoMaterial;
+            renderer.sharedMaterials = echoDepthMaterial != null ? new[] { echoMaterial, echoDepthMaterial } : new[] { echoMaterial };
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            // The same size of light whatever it was: a woman, a ewe or a gourd.
+            // Sizes kept relative, a woman taller than a ewe and a ewe than a gourd, within a hand's height and a forearm's.
             var size = o.EchoMesh.bounds.size;
-            var scale = height / Mathf.Max(0.01f, Mathf.Max(size.y, size.x * 0.8f, size.z * 0.8f));
+            var extent = Mathf.Max(size.y, size.x * 0.8f, size.z * 0.8f);
+            var height = Mathf.Clamp(extent * 0.2f, 0.1f, largest);
+            var scale = height / Mathf.Max(0.01f, extent);
             go.transform.localScale = Vector3.one * scale;
             var right = head.right;
             right.y = 0;
@@ -355,7 +389,8 @@ namespace Sankofa.Runtime.Stage
                 block.SetFloat("_Procedural", 0f);
                 block.SetFloat("_Height", height);
                 block.SetFloat("_GroundY", at.y - 0.02f);
-                block.SetFloat("_Smoke", 0.3f);
+                // No smoke: an echo adds light and never darkens the flame behind it.
+                block.SetFloat("_Smoke", 0f);
                 block.SetColor("_Color", new Color(1f, 0.6f, 0.26f, 1f));
                 renderer.SetPropertyBlock(block);
                 yield return null;

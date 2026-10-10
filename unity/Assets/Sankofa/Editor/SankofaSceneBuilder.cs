@@ -71,9 +71,10 @@ namespace Sankofa.EditorTools
             var keepsakeAt = keepsakeTop + Vector3.up * 0.015f;
             var rest = Point(world, "Rest point", restAt);
             var keepsake = Point(world, "Keepsake point", keepsakeAt);
-            // While the visitor decides, the keepsake hangs in the firelight beside the choice, in plain view.
-            var keepsakeShown = Point(world, "Keepsake shown point", new Vector3(-0.02f, 0.98f, 0.42f));
-            var carry = Point(world, "Carry point", new Vector3(0.14f, 0.86f, 0.38f));
+            // While the visitor decides, the keepsake hangs just above the choice to keep the visit, clear of the fire.
+            var keepsakeShown = Point(world, "Keepsake shown point", new Vector3(-0.16f, 1.11f, 0.45f));
+            // Low and to the right of the view, so what the visitor carries without a tracked hand never hides the story.
+            var carry = Point(world, "Carry point", new Vector3(0.22f, 0.74f, 0.34f));
             // What a kept visit leaves at the hearth waits on the keepsake stone.
             var beadKept = BuildBead(hearth, art, "bead.kept", "hearth", keepsakeAt + Vector3.up * 0.012f);
             var seedKept = BuildSeed(hearth, art, "seed.kept", "hearth", keepsakeAt + Vector3.up * 0.01f);
@@ -138,6 +139,8 @@ namespace Sankofa.EditorTools
 
             BuildEchoes();
             Set(stage, "echoMaterial", art.EmberFigure);
+            Set(stage, "echoDepthMaterial", art.EmberFigureDepth);
+            Set(stage, "seat", anchor.transform);
 
             early.gameObject.SetActive(false);
             railway.gameObject.SetActive(false);

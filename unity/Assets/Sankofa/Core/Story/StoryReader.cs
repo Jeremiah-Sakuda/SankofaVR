@@ -106,7 +106,7 @@ namespace Sankofa.Core.Story
 
         static StoryObject ReadObject(Fields f)
         {
-            f.Only("id", "scene", "capabilities", "continues");
+            f.Only("id", "scene", "name", "capabilities", "continues");
             var capabilities = new List<ActionKind>();
             var raw = f.Strings("capabilities");
             for (var i = 0; i < raw.Count; i++) capabilities.Add(Parse(raw[i], $"{f.Path}.capabilities[{i}]", ActionKinds));
@@ -116,6 +116,7 @@ namespace Sankofa.Core.Story
                 Scene = f.String("scene"),
                 Capabilities = capabilities,
                 Continues = f.OptionalString("continues"),
+                Name = f.OptionalString("name"),
             };
         }
 

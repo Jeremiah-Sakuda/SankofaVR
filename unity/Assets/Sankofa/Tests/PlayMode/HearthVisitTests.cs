@@ -168,20 +168,42 @@ namespace Sankofa.Tests
             Assert.That(ember.Visible, Is.True, "the ember is offered");
             var right = Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h => !h.IsLeft);
 
+            // A hold begun just before a pause (less than its dwell) does not finish when the story resumes.
+            right.Simulated = () => OpenPalmUnder(ember.transform.position);
+            yield return new WaitForSeconds(0.15f);
+            Assert.That(ember.CarriedBy, Is.Null, "not yet held long enough");
             // Paused, a palm held under the ember takes nothing and shows nothing; the gesture is not spent.
             Assert.That(app.Flow.Pause(), Is.True);
             yield return null;
-            right.Simulated = () => OpenPalmUnder(ember.transform.position);
             yield return new WaitForSeconds(1.5f);
             Assert.That(app.Flow.Phase, Is.EqualTo(VisitPhase.Paused));
             Assert.That(app.Flow.OpenInvitation?.Id, Is.EqualTo("receive-ember"), "nothing was taken while paused");
             Assert.That(ember.Feedback, Is.EqualTo(0f), "no feedback while paused");
             Assert.That(ember.CarriedBy, Is.Null);
 
-            // Resumed, the same open palm takes it, through the gesture, into that hand.
+            // Resumed, the same open palm takes it, through the gesture, into that hand, after a whole new hold.
             Assert.That(app.Flow.Resume(), Is.True);
+            yield return new WaitForSeconds(0.12f);
+            Assert.That(ember.CarriedBy, Is.Null, "the hold starts again after the pause");
             yield return WaitFor(() => ember.CarriedBy == right, 10, "the ember received by the open palm");
             right.Simulated = null;
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
+        [UnityTest]
+        public IEnumerator EchoesClearedBeforeTheyRiseNeverAppear()
+        {
+            yield return Open(1);
+            // Shown, they rise one after another.
+            stage.Echo(new[] { "figure.ewe", "gourd.milk", "water.spill" });
+            yield return new WaitForSeconds(2.2f);
+            Assert.That(stage.EchoCount, Is.EqualTo(3), "each echo rises in turn");
+            // Cleared while the later ones still wait, none of them comes back.
+            stage.Echo(new[] { "figure.ewe", "gourd.milk", "water.spill" });
+            yield return null;
+            stage.ClearEchoes();
+            yield return new WaitForSeconds(2.5f);
+            Assert.That(stage.EchoCount, Is.EqualTo(0), "a cleared showing stays cleared");
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 

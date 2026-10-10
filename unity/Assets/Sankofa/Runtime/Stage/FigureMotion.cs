@@ -38,9 +38,9 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
         [SerializeField] Renderer[] parts = new Renderer[0];
         [Tooltip("Smoke opacity of those parts; cloth is denser than the body it covers.")]
-        [SerializeField] float partSmoke = 0.94f;
+        [SerializeField] float partSmoke = 0.98f;
         [Tooltip("Smoke opacity of the body: dense enough that a figure reads as a presence, not glass.")]
-        [SerializeField] float bodySmoke = 0.92f;
+        [SerializeField] float bodySmoke = 0.97f;
         [Tooltip("How much each part shortens toward its bone while kneeling (cloth gathered on the ground).")]
         [SerializeField] float[] partKneelScale = new float[0];
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
@@ -50,7 +50,7 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("With an animator, the head bone, about which the light of the head is calm.")]
         [SerializeField] Transform headBone;
         [Tooltip("Degrees the head is lifted from the kneeling clip's bow.")]
-        [SerializeField] float kneelLift = 35f;
+        [SerializeField] float kneelLift = 50f;
         [Tooltip("Paths bend around the seat rather than passing nearer than this (metres, in the plan).")]
         [SerializeField] float personalSpace = 1.15f;
 
@@ -428,7 +428,7 @@ namespace Sankofa.Runtime.Stage
                 var up = lookBone != null ? (headBone.position - lookBone.position).normalized : Vector3.up;
                 // The whole head and the top of the neck, from the base of the skull to the crown.
                 var centre = headBone.position + up * 0.1f * height / 1.6f;
-                block.SetVector(HeadId, new Vector4(centre.x, centre.y, centre.z, 0.14f * height / 1.6f));
+                block.SetVector(HeadId, new Vector4(centre.x, centre.y, centre.z, 0.12f * height / 1.6f));
                 body.SetPropertyBlock(block);
             }
             for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)

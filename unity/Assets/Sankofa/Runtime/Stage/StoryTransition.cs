@@ -31,6 +31,7 @@ namespace Sankofa.Runtime.Stage
         static readonly int TargetId = Shader.PropertyToID("_Target");
         static readonly int CoverId = Shader.PropertyToID("_Cover");
         static readonly int HoleId = Shader.PropertyToID("_Hole");
+        static readonly int SeeThroughId = Shader.PropertyToID("_SeeThrough");
         // Past 1 the front has crossed the whole sphere, ragged edge included.
         const float Across = 1.2f;
 
@@ -70,6 +71,7 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(MotionId, reduced ? 0 : 1);
             block.SetFloat(CoverId, 0);
             block.SetFloat(HoleId, 0);
+            block.SetFloat(SeeThroughId, 0);
             block.SetVector(SourceId, Toward(continuities.Count > 0 ? continuities[0].From : null));
             curtain.SetPropertyBlock(block);
 
@@ -86,6 +88,7 @@ namespace Sankofa.Runtime.Stage
                 // the dark ember while the light holds, before it opens.
                 foreach (var c in continuities) stage.Cross(c.From, c.To, toScene);
                 stage.ShowScene(toScene);
+                Set(SeeThroughId, 1);
                 yield return new WaitForSeconds(fullHold);
             }
 

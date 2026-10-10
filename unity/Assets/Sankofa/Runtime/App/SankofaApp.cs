@@ -207,6 +207,8 @@ namespace Sankofa.Runtime.App
         float perfAt;
         int perfFrames, perfTimed;
         double perfCpu, perfGpu;
+        float perfWorst;
+        int perfLate;
 
         /// <summary>
         /// Every ten seconds, the frame rate and the average CPU and GPU frame times over those ten seconds, as
@@ -223,14 +225,20 @@ namespace Sankofa.Runtime.App
                 perfTimed++;
             }
             perfFrames++;
+            // The slowest frame, and the frames that missed a 72 Hz display (about 13.9 ms).
+            perfWorst = Mathf.Max(perfWorst, Time.unscaledDeltaTime * 1000f);
+            if (Time.unscaledDeltaTime > 1f / 72f * 1.05f) perfLate++;
             if ((perfAt += Time.unscaledDeltaTime) < 10f) return;
             var n = Math.Max(1, perfTimed);
-            Debug.Log($"[Sankofa] perf {perfFrames / perfAt:0.0} fps, cpu {perfCpu / n:0.00} ms, gpu {perfGpu / n:0.00} ms over {perfTimed} frames, scene {(stage != null ? stage.ActiveScene : "none")}");
+            Debug.Log($"[Sankofa] perf {perfFrames / perfAt:0.0} fps, cpu {perfCpu / n:0.00} ms, gpu {perfGpu / n:0.00} ms over {perfTimed} frames, worst {perfWorst:0.0} ms, {perfLate} late, scene {(stage != null ? stage.ActiveScene : "none")}");
             perfAt = 0;
             perfFrames = perfTimed = 0;
             perfCpu = perfGpu = 0;
+            perfWorst = 0;
+            perfLate = 0;
         }
 
+        bool askedReturn;
         float choiceWait;
         int choiceNudge;
 
@@ -262,6 +270,12 @@ namespace Sankofa.Runtime.App
                     case Cue.PhaseChanged p:
                         StageClock.Paused = p.Phase == VisitPhase.Paused;
                         if (p.Phase == VisitPhase.Paused) captions.SetCaption("Paused");
+                        // The question about returning goes once the visitor has answered it, either way.
+                        else if (askedReturn)
+                        {
+                            askedReturn = false;
+                            captions.ClearNotice();
+                        }
                         else if (captions.Caption == "Paused") captions.Clear();
                         if (p.Phase == VisitPhase.Ended)
                         {
@@ -342,7 +356,7 @@ namespace Sankofa.Runtime.App
                     case Cue.Closed c:
                         LogJournal();
                         stage.Settle();
-                        if (c.Completed) captions.Notice(WhatYouDid(), 12);
+                        if (c.Completed) captions.Notice(WhatYouDid(), 14, true);
                         break;
                     case Cue.Echo e:
                         stage.Echo(e.ObjectIds);
@@ -452,7 +466,14 @@ namespace Sankofa.Runtime.App
                 case ControlKind.Resume: flow.Resume(); break;
                 // From a playing story the way home asks first; once asked, or from a pause, it goes.
                 case ControlKind.ReturnToHearth:
-                    if (flow.Phase == VisitPhase.Story) flow.AskToReturn();
+                    if (flow.Phase == VisitPhase.Story)
+                    {
+                        if (flow.AskToReturn())
+                        {
+                            askedReturn = true;
+                            captions.Notice("Return to the fire? The story stops here, and a visit left early cannot be kept.", 30, true);
+                        }
+                    }
                     else flow.ReturnToHearth();
                     break;
                 case ControlKind.Accept:
@@ -499,7 +520,11 @@ namespace Sankofa.Runtime.App
                 .Where(i => i != null && flow.Journal.Outcomes.TryGetValue(i.Id, out var o) && o == Outcome.Accepted && !string.IsNullOrEmpty(i.Alternative))
                 .Select(i => "You " + Past(i.Alternative) + ".").ToList();
             var replayed = flow.Journal.Mode == VisitMode.Replayed ? "As it was kept: " : "";
-            return done.Count == 0 ? replayed + "This time the story went on without your hands." : replayed + string.Join(" ", done);
+            var said = done.Count == 0 ? "This time the story went on without your hands." : string.Join(" ", done);
+            // And what they looked toward longest, by the name the story gives it (head direction, not eyes).
+            var longest = flow.Journal.Lingered(1).Select(id => flow.Plan.Plan.Objects.FirstOrDefault(o => o.Id == id)?.Name).FirstOrDefault(n => n != null);
+            if (longest != null) said += " You looked longest at " + longest + ".";
+            return replayed + said;
         }
 
         /// <summary>A button's words as something done: "Carry the flour" becomes "carried the flour".</summary>

@@ -40,8 +40,9 @@ namespace Sankofa.Core.Story
         {
             var o = new JsonObject()
                 .Add("id", s.Id)
-                .Add("scene", s.Scene)
-                .Add("capabilities", Items(s.Capabilities.Select(c => StoryReader.Name(c, StoryReader.ActionKinds))));
+                .Add("scene", s.Scene);
+            Optional(o, "name", s.Name);
+            o.Add("capabilities", Items(s.Capabilities.Select(c => StoryReader.Name(c, StoryReader.ActionKinds))));
             Optional(o, "continues", s.Continues);
             return o;
         }

@@ -129,6 +129,8 @@ namespace Sankofa.Core.Story
         public string Scene { get; internal set; }
         public IReadOnlyList<ActionKind> Capabilities { get; internal set; } = Array.Empty<ActionKind>();
         public string Continues { get; internal set; }
+        /// <summary>How the story names it to the visitor ("the ewe", "Naserian"), or null.</summary>
+        public string Name { get; internal set; }
     }
 
     public sealed class Claim

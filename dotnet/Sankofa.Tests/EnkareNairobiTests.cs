@@ -28,6 +28,19 @@ namespace Sankofa.Tests
             Assert.That(p.Claims.Select(c => c.Id).Where(id => !cited.Contains(id)), Is.Empty, "every claim in the package is used by a line");
         }
 
+        [Test]
+        public void EverythingTheVisitorCanNoticeHasANameAndItSurvivesAKeptPlan()
+        {
+            var p = ReadEnkareNairobi();
+            var named = p.Objects.Where(o => o.Name != null).ToList();
+            Assert.That(named.Select(o => o.Id), Does.Contain("figure.ewe").And.Contain("water.spill").And.Contain("figure.naserian"));
+            Assert.That(p.Objects.Single(o => o.Id == "figure.ewe").Name, Is.EqualTo("the ewe"));
+            // A kept plan embeds its objects; their names come back as written.
+            var plan = Playable(p).Compose("era.1850s");
+            var read = StoryReader.ReadPlan(Sankofa.Core.Json.JsonText.ParseObject(StoryWriter.PlanJson(plan)));
+            Assert.That(read.Objects.Single(o => o.Id == "figure.ewe").Name, Is.EqualTo("the ewe"));
+        }
+
         static IEnumerable<Line> AllLines(Beat b) =>
             b.Lines.Concat(b.Invitation?.Accepted ?? new Line[0]).Concat(b.Invitation?.Default ?? new Line[0]).Concat(b.Questions.SelectMany(q => q.Lines));
 
