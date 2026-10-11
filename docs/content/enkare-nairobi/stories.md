@@ -1,5 +1,265 @@
 # Enkare Nairobi: the stories
 
+## Current illustrated episode: What We Carry
+
+October 11, 2026 · Package v0.2.0 · **Draft for Maasai and Kikuyu family/community review.** The [playable package](../../../unity/Assets/Sankofa/Content/illustrated-theatre-mvp.json) is the runtime source of truth. The baseline 3D script remains below as a comparison record. This pass revises the first illustrated chapter and its contemporary continuation; it does not convert the 1899 chapter.
+
+**The story:** Wambui arrives with less flour than she promised. Naserian has brought the sheep they agreed to exchange and has needs of her own. Wambui admits the shortfall. Naserian remembers a previous occasion when Wambui waited for her. They agree to leave part of the exchange unfinished and meet again. The bead brings the memory of that encounter home with the visitor.
+
+**The visitor's role:** a guest who can help, ask, receive or watch. The women's agreement is theirs on every path. An action changes their address to the visitor and the later recollection; it does not make an outsider the source of their trust. Silence is never described as choosing, refusing or failing.
+
+**Cultural grounding:** the regional history of trade and intermarriage gives the episode its setting. These individuals, their bargain, prior waiting, dialogue and bead gift are invented. The spoken disclosure precedes entry, including when the welcome is skipped by choosing early. No fixed traditional price, general debt custom, sacred bead meaning, inferred ancestry or present-day descendants are asserted. Maa naming, material details and the Akan origin of the title have distinct source notes in the [register](sources.md#illustrated-theatre-story-pass--october-11-2026). The modern garden is explicitly imagined.
+
+| Moment | If the visitor acts | If the visitor waits | Later response |
+|---|---|---|---|
+| Wambui offers the flour | Receives the gourd and her thanks | She sets it beside the visitor | The trade prompt correctly describes carrying it or having it beside them |
+| Set the flour between the women | Moves the gourd onto the hide; both illustrations respond | Wambui sets it down; passive illustration response | Naserian addresses the helper or quiet guest; the hearth and saved continuation recall the actual outcome |
+| Naserian offers the bead | Receives it | It rests beside the visitor | Distinct home and next-visit lines, with no invented acceptance |
+| Look towards an object or person | A relevant available question is highlighted; asking is explicit | Story continues | Head direction cannot resolve a hand invitation; existing attention memories remain |
+| At the modern garden gate | Leaves the bead on the gate | Bead stays beside the visitor | Different placement and final words; the fire never hangs it on their behalf |
+
+**Pacing:** about seven minutes for the first visit before optional questions and response time; the fully passive path is longer because invitations wait. Actual recorded durations are in the package. A held silence precedes the agreement; questions about the decision become available only after its reveal. This is an authored, recorded episode, not live AI dialogue.
+
+### What to ask reviewers
+
+For family/community reviewers: do the names, words, exchange, household motives and gift feel plausible for these particular fictional women? What feels flattened, sentimental, out of period or wrong? Would another crop, vessel or small gift be more fitting? Check the inherited narrator's delivery and name pronunciations separately from the written story. The illustration/dress concerns remain open for the later art pass.
+
+For someone unfamiliar with the setting, after one uninterrupted visit: who wanted what; why was the meeting difficult; what changed Naserian's response; what did your hand action actually change; which elements were invented; what did the bead mean? Ask without giving the intended answers. Watch for confusion between holding an object and choosing a cultural or moral position.
+
+No participant or cultural acceptance is claimed. Sources constrain assertions; they cannot establish that the episode feels right to the people it depicts.
+
+### Current recorded script
+
+The lines below are taken from package v0.2.0. Conditions describe real hand outcomes, not inferred emotions. Optional questions speak through the fire and resume the interrupted telling.
+
+#### Welcome
+> Come. Sit with me.
+
+> Tonight, two women meet by the water. One has brought less than she promised.
+
+> Come as a guest. You can lend a hand, or simply listen.
+
+> We are going to what is now Kenya, before Nairobi became a city.
+
+> The story is waiting. Reach out when you are ready.
+
+#### Before the railway
+
+**gather.1850s**
+
+> Kikuyu and Maasai people traded across this region. Wambui and Naserian, their words and their gifts, are imagined for this story.
+
+**offer**
+
+> Every story I tell begins with a little of my light.
+
+> Hold out your open hand, palm up, and I will give you an ember to carry.
+
+*Invitation: Take the ember. Passive path after 14 seconds.*
+
+**Acts:** It is yours to carry now. Keep it close.
+
+**Waits:** I will set it beside you, then. It will follow us.
+
+**e1.water**
+
+> Listen. That is the water.
+
+> You can reach towards the spring, or stay with its sound.
+
+*Invitation: Touch the water. Passive path after 12 seconds.*
+
+**Acts:** Your hand passes over the water. Nairobi takes its name from Maa, the Maasai language: cool water.
+
+**Waits:** The stream runs beside you. Nairobi takes its name from Maa, the Maasai language: cool water.
+
+**Optional — Is this a real place?** The Nairobi River is real. Trade between Kikuyu and Maasai people is documented. These two women, this bargain and the bead are invented. We are imagining one meeting, not retelling a family memory.
+
+**e1.wambui**
+
+> Here is Wambui, a Kikuyu trader. She has walked since morning with flour for Naserian.
+
+> Banana flour: dried green bananas, pounded. Wambui has kept some food at home. Now she must explain why this load is short.
+
+> 'Will you hold this while I speak?' Wambui asks. You can hold out an open hand.
+
+*Invitation: Carry the flour. Passive path after 12 seconds.*
+
+**Acts:** The gourd rests in your hand. 'Thank you. I nearly turned back,' Wambui says.
+
+**Waits:** Wambui rests the gourd beside you. 'I nearly turned back,' she says.
+
+**Optional — Why banana flour?** An account published by Louis Leakey describes Kikuyu traders exchanging banana flour with Maasai traders for sheep. It informs this scene. The amount Wambui promised is invented.
+
+**e1.naserian**
+
+> Naserian, a Maasai trader, has brought the sheep she agreed to exchange for the flour, and a gourd of milk.
+
+> She needs the flour for her household. She also needs a promise she can count on.
+
+> Wambui speaks first. 'It is less than I promised. I have no more to bring today.'
+
+> 'And I walked here counting on it,' Naserian answers. For a moment, neither woman speaks.
+
+**Optional — Are they friends?** In this story they have traded before, and each has had to wait for the other. The particular friendship is imagined. Their communities have histories of trade and intermarriage.
+
+**Optional — What is in the gourd?** Milk. The National Museums of Kenya describes a Maasai gourd smoked with wood called oloirien. That material detail informs this prop; this particular vessel and its owner are imagined.
+
+**e1.offer**
+
+> A hide lies on the stone between them. There is room for the flour.
+
+*This visit: receive-flour:accepted*
+
+> Wambui asks you to set down the gourd you are carrying. Touch the hide to offer the flour, or let her take it from here.
+
+*This visit: receive-flour:default*
+
+> The gourd is beside you. Touch the hide to help offer it, or let Wambui set it down.
+
+*Invitation: Offer the flour. Passive path after 12 seconds.*
+
+**Acts:** You bring the flour between them. Naserian pauses over the gourd.
+
+**Waits:** Wambui sets the flour between them. Naserian pauses over the gourd.
+
+**e1.turn**
+
+> 'I did not want you waiting for me with no word,' Wambui says.
+
+> Naserian answers, 'Last time, you waited for me.'
+
+> 'Take the sheep. Bring the rest when you can.'
+
+> Wambui says, 'I will come myself.' They have a reason to meet again.
+
+**e1.after**
+
+*This visit: offer-flour:accepted*
+
+> Naserian speaks to you. 'You have helped us set it down. Stay a little. We have time.'
+
+*This visit: offer-flour:default*
+
+> Naserian speaks to you. 'Stay a little. We have time.'
+
+**Optional — Why trust her?** Because Naserian remembers being the one who needed time. Today she chooses to wait for Wambui. That choice belongs to these fictional women; it is not a rule about either community.
+
+**Optional — What does Wambui owe?** The flour she could not bring today, and another journey to meet Naserian. Neither woman has forgotten what her household needs. They have agreed to leave part of the exchange unfinished.
+
+**e1.gift**
+
+> 'For the road,' Naserian says. She offers you a bead to remember this meeting. Hold out a hand, if you would like it.
+
+*Invitation: Take the bead. Passive path after 12 seconds.*
+
+**Acts:** The bead rests in your hand. Something small to carry home. The women linger a moment before leaving. You can stay with the bead, or ask about it.
+
+**Waits:** Naserian sets it beside you, within reach. 'For whenever you go.' The women linger a moment before leaving. You can stay with the bead, or ask about it.
+
+**Optional — What does the bead mean?** Here, it marks this meeting. We have invented the gift for the story. We are not giving its colour a traditional meaning or presenting it as a Maasai ceremony.
+
+**e1.dusk**
+
+> They leave by the paths that brought them. There is still flour to bring another day. Neither is leaving with an empty promise.
+
+**home.back**
+
+> We are back at the fire. The light that went with us returns to the embers.
+
+**home.1850s**
+
+*This visit: offer-flour:accepted*
+
+> You helped bring the flour between them. What happened next was their agreement to make.
+
+*This visit: offer-flour:default*
+
+> You were there while they worked it out. Their meeting had room for a quiet guest.
+
+*This visit: receive-bead:accepted*
+
+> The bead you received carries that meeting home with you.
+
+*This visit: receive-bead:default*
+
+> The bead Naserian left beside you has come back with the story.
+
+> Wambui arrived worried about what she owed. Naserian remembered what they had already given each other.
+
+> Keep this visit if you want to return. The same water has another story, in the city that stands there now.
+
+#### The same water, today
+
+**again.bead**
+
+*Kept visit: receive-bead:accepted*
+
+> Last time, you received the bead Naserian offered.
+
+*Kept visit: receive-bead:default*
+
+> Last time, Naserian set the bead beside you.
+
+*Kept visit: offer-flour:accepted*
+
+> You helped bring the flour between the women. They made their agreement, and included you in the meeting.
+
+*Kept visit: offer-flour:default*
+
+> Wambui set down the flour herself. You were there to hear the agreement that followed.
+
+> Bring it. We are going back to the water.
+
+**offer** — shared ember invitation as above.
+
+**today.enter**
+
+> The same river, in the city of today. Listen for the water beneath the traffic.
+
+> The city that grew here took its name from it: Nairobi.
+
+**today.river**
+
+> Picture a small garden beside the Nairobi River. This garden is imagined, like the meeting you witnessed. Someone has made a place for things to grow.
+
+**Optional — Who planted this garden?** This particular garden and its gardeners are imagined. It lets us ask what a memory from the earlier story might mean in a place people share today.
+
+**today.bead**
+
+> There is a place on the gate for the bead. Touch it to leave a reminder of the meeting here. You can also let the bead stay beside you.
+
+*Invitation: Hang the bead. Passive path after 12 seconds.*
+
+**Acts:** You leave it where another visitor might notice it. They will have their own questions.
+
+**Waits:** The bead stays beside you. You can carry a memory without leaving it behind.
+
+**today.sankofa**
+
+> I borrow a word from the Akan people of Ghana: Sankofa. Go back and get it.
+
+*This visit: hang-bead:accepted*
+
+> You brought a memory to this place. What might the next person carry onward?
+
+*This visit: hang-bead:default*
+
+> The memory is still with you. Where it goes from here is open.
+
+**home.today**
+
+> We are home. This time, the ember stays with you. Our telling ends here. What stays with you can go further.
+
+---
+
+## Baseline 3D script (October 4 comparison record)
+
+The text below belongs to the earlier baseline. Its superseded assertions are not the revised illustrated episode.
+
+<!-- BASELINE SCRIPT -->
+# Enkare Nairobi: the stories
+
 October 4, 2026 · Draft 1 for family and cultural review · Narration is a working draft for pacing and voice. Bracketed IDs such as [C4] refer to the [source register](sources.md). A line without an ID is reconstruction or the griot's own voice. **Gated** lines wait for a medium-confidence claim to be confirmed. Character names are working names for the family to replace.
 
 ## The shape of it

@@ -4,7 +4,7 @@
 
 A hands-first storytelling experience for Meta Quest. You sit at a night fire, and the fire is the griot. It welcomes you, asks when you would like to go, and brings a history into the space around you without moving you. You enter through its flame. People emerge in firelight; you carry, receive and touch things, and the story changes with what you did. You return to the hearth with a keepsake and a thread to follow next time.
 
-The first story is **Enkare Nairobi**, the cool-water stream that gave Nairobi its name, where Kikuyu and Maasai women traded. It is told across two eras and today:
+The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. Fictional encounters draw on the regional history of Kikuyu–Maasai trade. The baseline package visits two eras and today:
 
 - before the railway, in the 1850s;
 - when the railway came, in 1899;
@@ -18,11 +18,13 @@ Its facts come from a [source register](docs/content/enkare-nairobi/sources.md).
 
 The latest prototype tests a spatial illustrated theatre using the existing Unity foundation. Three painted scenic layers unfold at different depths. Wambui's physical gourd leaves her illustrated palm and comes within reach; receiving it changes her painted pose. Offering it to the trading hide changes both women using the same three-pose vocabulary. The fire, narration, tangible objects, hand input, passive path and opt-in keepsake/replay flow remain part of the experience.
 
+The current story pass, **What We Carry** (package v0.2.0), follows an imagined meeting: Wambui brings less flour than promised, and Naserian remembers a time Wambui waited for her. The visitor can help or watch; their later address and remembered visit follow what actually happened. The modern coda lets the bead remain beside a passive visitor instead of placing it on a gate automatically. Read the [current script, response map and review questions](docs/content/enkare-nairobi/stories.md#current-illustrated-episode-what-we-carry). Historical context and invented encounters are distinguished in the telling; family/community review is still pending.
+
 ![The painted trading scene after the visitor offers the gourd](docs/media/illustrated-trade.jpg)
 
 [Watch the gourd cross from the illustration into reachable space](docs/media/illustrated-handover.mp4).
 
-This is a silent desktop runtime capture at a fixed 12 fps, with the flow driven by a test. It does not show actual hands or establish headset depth, comfort or performance. The cast and scenery are draft generated art; [full prompts and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/sources.json) are recorded. Cultural review is pending. The prototype covers the first historical chapter and its existing continuation; it has no runtime story generation or live conversation.
+This is a silent desktop runtime capture from the visual MVP before the v0.2.0 script revision, at a fixed 12 fps, with the flow driven by a test. It does not show actual hands or establish headset depth, comfort or performance. The cast and scenery are draft generated art; [full prompts and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/sources.json) are recorded. Cultural review is pending. The prototype covers the first historical chapter and its continuation; it has no runtime story generation or live conversation.
 
 Open `unity/Assets/Sankofa/Scenes/IllustratedTheatre.unity`, or use the scene, simulator and APK commands in the [Unity guide](unity/README.md#commands). Spatial composition and response mappings live in [the theatre layout](unity/Assets/Sankofa/Content/illustrated-theatre-layout.json). The original `Hearth` scene is retained for comparison.
 

@@ -139,6 +139,48 @@ namespace Sankofa.Tests
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
+        [UnityTest]
+        public IEnumerator QuietGuestHearsRecordedStoryAndCanKeepTheBeadThroughTheContinuation()
+        {
+            yield return Open(); Time.timeScale = 10; app.Begin();
+            yield return Until(() => app.Flow.Phase == VisitPhase.Choosing);
+            app.Flow.Choose("era.1850s");
+            var narrator = Object.FindFirstObjectByType<Runtime.Narration.NarrationPlayer>();
+            for (var visit = 0; visit < 2; visit++)
+            {
+                var deadline = Time.realtimeSinceStartup + 160;
+                var gateObserved = false;
+                while (app.Flow.Phase != VisitPhase.Closing || app.Flow.CurrentLine != null)
+                {
+                    Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                    if (narrator.Speaking)
+                        Assert.That(narrator.CaptionOnly, Is.False, "revised words have recorded narration");
+                    if (visit == 1 && app.Flow.CurrentLine?.Id == "today.bead.no")
+                    {
+                        gateObserved = true;
+                        Assert.That(Vector3.Distance(stage.Find("bead.today").transform.position,
+                            stage.Find("gate").PlacePosition), Is.GreaterThan(0.15f), "silence does not hang the bead");
+                    }
+                    yield return null;
+                }
+                Assert.That(app.Flow.Journal.Outcomes.Values, Is.All.EqualTo(Outcome.Default));
+                if (visit == 0)
+                {
+                    Assert.That(app.Flow.Journal.Heard, Does.Contain("home.trade.quiet").And.Contain("home.bead.beside"));
+                    Assert.That(app.Flow.Keep(), Is.True);
+                    Assert.That(app.Flow.BeginAgain(), Is.True);
+                    yield return null;
+                    Assert.That(app.Flow.Follow(), Is.True);
+                }
+                else
+                {
+                    Assert.That(gateObserved, Is.True);
+                    Assert.That(app.Flow.Journal.Heard, Does.Contain("again.trade.quiet").And.Contain("today.brought.carried"));
+                }
+            }
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
         static void Capture(Camera eye, string name)
         {
             var directory = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "artifacts", "illustrated-theatre"));

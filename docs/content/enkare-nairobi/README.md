@@ -2,7 +2,7 @@
 
 The selected first setting for Sankofa: one place, the cool-water stream that gave Nairobi its name, visited across time. The user chose it on October 4, 2026, because their family is Maasai and Kikuyu: the two peoples who traded, intermarried and sometimes raided across the boundary at this water.
 
-**Status:** draft. Not yet reviewed by family or community.
+**Status:** draft. Not yet reviewed by family or community. The illustrated theatre now uses the v0.2.0 **What We Carry** story pass: a fictional agreement, outcome-aware address and keepsake recall, and an optional contemporary coda. Read the current script first; the earlier 3D draft is retained below it as a comparison record.
 
 | Document | Contents |
 |---|---|

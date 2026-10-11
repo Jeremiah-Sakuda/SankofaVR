@@ -82,6 +82,8 @@ python3 scripts/generate_narration.py unity/Assets/Sankofa/Content/enkare-nairob
 
 The script renders each line with Gemini 3.1 Flash TTS (voice Kore, the original griot direction). It writes `Resources/Narration/enkare-nairobi/<line>.mp3` and records each line's clip and length in the package. Unchanged lines are skipped by fingerprint. A line the provider refuses is reported, and the script exits non-zero. Rerun it to retry. Regenerate the scenes afterwards so the stage matches the package.
 
+The illustrated story revision uses a separate clip namespace, `enkare-nairobi.illustrated-v2`, and shares unchanged baseline clips. For later revisions, choose a **new** namespace with `--clip-namespace` so kept plans retain the speech they reference; `--only` selects changed line IDs. Each new manifest records the provider, model, voice, direction, exact text and fingerprint. Failed or implausibly long renders are rejected and cannot silently reuse speech for different words. These checks do not establish pronunciation or listening quality. The offline pipeline tests are `python3 -m unittest discover -s scripts -p 'test_generate_narration.py'` from the repository root. The current script and response map are in [the story document](../docs/content/enkare-nairobi/stories.md#current-illustrated-episode-what-we-carry).
+
 ## Tests
 
 The EditMode tests check that every component is wired, that the staged objects and scenes match the bundled package, that controls and resting places are within seated reach, that hands draw over the transition curtain, that the build guards work and that the engine-free core runs under Unity's runtime.

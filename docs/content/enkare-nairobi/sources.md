@@ -65,3 +65,23 @@ The fire tells the visitor that this is how the story is told: the place, the tr
 5. **Greeting.** Which greetings should the griot use at the hearth, in Gĩkũyũ and in Maa, and how are they pronounced?
 6. **Absences.** Is there anything in these stories you would not want shown or said?
 7. **Review.** Who could listen to the narration and check the words and the tone?
+
+
+## Illustrated theatre story pass — October 11, 2026
+
+The illustrated package v0.2.0 narrows the first chapter to **one imagined agreement between two individuals**. The older baseline narration remains a comparison record, not the current illustrated script. This pass is desk research and editorial work; it is not family, community or pronunciation approval.
+
+Sources inspected for this pass:
+
+- **C1:** [Nairobi City County Assembly, provision of free clean drinking water](https://nairobiassembly.go.ke/motion/provision-of-free-clean-drinking-water-in-hotels-and-other-public-areas/) repeats the Maa etymology and translation in the search-index extract retrieved this pass; a direct page request timed out. This supports the short naming explanation. It does not settle spelling, pronunciation, the precise historical meeting site or water temperature.
+- **C6:** [Overton, 1988, extract](https://www.cambridge.org/core/journals/african-studies-review/article/abs/origins-of-the-kikuyu-land-problem-land-alienation-and-land-use-in-kiambu-kenya-18951920/01BDC3BCB4D2A9AC40F00F52500F1916) describes overlapping settlement/economic activity and trade and intermarriage in the Kiambu transition area. It supports regional context, not two separate, timeless cultural territories, this friendship, or a universal credit custom.
+- **C7:** [National Museums of Kenya, container 14](https://artsandculture.google.com/story/_gUx7TIiep4KKA) describes a Maasai milk/blood gourd smoked with oloirien wood. The revised optional answer attributes that material detail; it does not add an unverified preservation claim or treat a modern museum specimen as proof of every 1850s vessel.
+- **C14:** [Berea College, The Power of Sankofa](https://www.berea.edu/centers/carter-g-woodson-center-for-interracial-education/the-power-of-sankofa) identifies the Akan/Ghanaian origin and learning-from-the-past meaning. The continuation names that origin. The product name and fire narrator do not establish a Kikuyu or Maasai storytelling tradition.
+
+**C4 remains limited:** the printed Leakey page has not been obtained in this pass. The optional flour answer explicitly attributes the published account. The main scene identifies its particular load and agreed exchange as fiction; it drops the universal price and exclusive-use claims. Family review may replace the crop, vessel, exchange and gift. Do not mark C4 newly verified.
+
+**R1 is expanded:** the characters, household needs, prior waiting, incomplete payment, dialogue, hospitality and bead are authored fiction. No source establishes the deferred payment as a custom, or the visitor as necessary to relations between communities. The women make the same agreement on active and passive paths.
+
+**R2 is explicit:** the contemporary garden, gate and any future finder are imagined. The MVP no longer asserts that a particular restoration programme created this garden, that the visitor's bead is a historical artefact, or that modern Nairobi residents descend from these fictional women. C15 remains in the wider register for future research but is not narrated by this MVP.
+
+Review priorities: names and pronunciation; plausibility of the two women's exchange and words; banana flour and the gourd; bead as an individual gift; anything that compresses either living community into a stereotype. The Akan title, inherited voice direction and Kenyan setting must be evaluated separately. A source check cannot substitute for that conversation.
