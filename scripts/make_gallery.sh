@@ -16,6 +16,11 @@ still 09-keepsake keepsake
 still figure-study-standing figure-standing
 still figure-study-kneeling figure-kneeling
 still figure-study-sharing-03 figure-sharing
+# A fixed-step motion study after the complete actor pose; review cadence is not a device frame-rate claim.
+if [[ -f "$captures/performance-0263.png" ]]; then
+  ffmpeg -loglevel error -y -framerate 12 -i "$captures/performance-%04d.png" -frames:v 264 -c:v libx264 -crf 21 -pix_fmt yuv420p -movflags +faststart "$out/exchange-performance.mp4"
+  still performance-0090 exchange-performance
+fi
 still 14-seed figures-after
 # Optional baseline copied before changing the scene. Both panels use the same journey framing.
 baseline=artifacts/polish-round12-baseline/14-seed.png

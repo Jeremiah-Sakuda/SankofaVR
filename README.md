@@ -47,6 +47,14 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 
 *Close-up pose studies from the runtime, staged for inspection with captions hidden. These are presentation studies, not proof of visitor hand tracking or historical dress.*
 
+## Animation revision
+
+[Watch the approach, pour, acknowledgment and return](docs/media/exchange-performance.mp4).
+
+![The two figures attending to the gourds during the pour](docs/media/exchange-performance.jpg)
+
+*A silent 22-second runtime study, captured at a fixed 12 frames per second with the story controls hidden. This shows calibrated walking pace, stance-foot correction and coordinated handling after both figures animate. It is staged presentation evidence, not headset footage or a performance benchmark. Kneeling now holds a resting pose rather than repeating the library's repair action. Dedicated turn steps, expressive faces and bespoke acting remain unfinished.*
+
 ## Environment revision
 
 ![The same hearth view before and after the environment pass](docs/media/environment-hearth-comparison.jpg)
@@ -68,7 +76,7 @@ The full slice runs in software: a Unity project for Quest and an engine-free st
 | Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
 | Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
 | Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can replay the same path and outcomes, continue to today or be forgotten; questions and interruption timing are not replayed |
-| Figures | Complete skinned tops and wraps, walk/kneel/give performances, directed gourd sharing, held-object finger poses, blinks, and a glance when your attention rests on them |
+| Figures | Complete skinned tops and wraps, calibrated walking with stance-foot correction, kneeling rest, coordinated gourd sharing, held-object finger poses, blinks, and a glance when your attention rests on them |
 | Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
 
 Not yet established:
