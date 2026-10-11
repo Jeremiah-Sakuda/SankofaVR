@@ -43,7 +43,7 @@ The full slice runs in software: a Unity project for Quest and an engine-free st
 |---|---|
 | Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
 | Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
-| Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can be replayed exactly, continued to today or forgotten |
+| Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can replay the same path and outcomes, continue to today or be forgotten; questions and interruption timing are not replayed |
 | Figures | They walk in, kneel, carry their things, hand them over and walk away, and look back when you look at them |
 | Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
 

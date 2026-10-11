@@ -55,7 +55,7 @@ namespace Sankofa.Runtime.Input
             if (target != null) target.PointAt(id);
             // Keyed by panel as well as button, so a pinch begun on one panel cannot land on another's button.
             var key = target == null ? null : target.GetInstanceID() + "/" + id;
-            if (select.Update(source != Source.None, strength, key) != null) target.PressFromPointer(id);
+            if (select.Update(source != Source.None, strength, key, (int)source) != null) target.PressFromPointer(id);
             Draw(pointer, target != null ? distance : 0f);
         }
 

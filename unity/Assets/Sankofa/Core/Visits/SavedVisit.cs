@@ -190,6 +190,8 @@ namespace Sankofa.Core.Visits
     {
         VisitStoreContents Load();
         void Save(SavedVisit visit);
+        /// <summary>Atomically replaces the one active kept visit. Obsolete records must never reappear after forgetting.</summary>
+        void Replace(SavedVisit visit);
         void Delete(string id);
     }
 }

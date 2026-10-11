@@ -527,7 +527,7 @@ namespace Sankofa.Runtime.App
             var said = done.Count == 0 ? "This time the story went on without your hands." : string.Join(" ", done);
             // And what they looked toward longest, by the name the story gives it (head direction, not eyes).
             var longest = flow.Journal.Lingered(1).Select(id => flow.Plan.Plan.Objects.FirstOrDefault(o => o.Id == id)?.Name).FirstOrDefault(n => n != null);
-            if (longest != null) said += " You looked longest at " + longest + ".";
+            if (longest != null) said += " You returned your attention to " + longest + ".";
             return replayed + said;
         }
 

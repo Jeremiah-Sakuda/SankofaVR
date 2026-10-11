@@ -235,6 +235,29 @@ namespace Sankofa.Tests
     public class PointerSelectTests
     {
         [Test]
+        public void AReacquiredHeldPinchNeedsNeutralBeforeAnotherPress()
+        {
+            var s = new PointerSelect();
+            s.Update(true, 1, "keep");
+            s.Update(false, 1, "keep");
+            Assert.That(s.Update(true, 1, "keep"), Is.Null);
+            Assert.That(s.Update(true, 0, "keep"), Is.Null);
+            s.Update(true, 1, "keep");
+            Assert.That(s.Update(true, 0, "keep"), Is.EqualTo("keep"));
+        }
+
+        [Test]
+        public void ASwitchFromHandToControllerCannotFinishAPinch()
+        {
+            var s = new PointerSelect();
+            s.Update(true, 1, "keep", 1);
+            Assert.That(s.Update(true, 1, "keep", 2), Is.Null);
+            Assert.That(s.Update(true, 0, "keep", 2), Is.Null);
+            s.Update(true, 1, "keep", 2);
+            Assert.That(s.Update(true, 0, "keep", 2), Is.EqualTo("keep"));
+        }
+
+        [Test]
         public void APinchBegunAndReleasedOverOneButtonPressesItOnRelease()
         {
             var s = new PointerSelect();

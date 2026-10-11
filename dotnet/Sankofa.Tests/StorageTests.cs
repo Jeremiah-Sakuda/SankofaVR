@@ -117,9 +117,34 @@ namespace Sankofa.Tests
             Assert.That(contents.Visits[0].Plan.Route, Is.EqualTo("travellers"));
 
             store.Delete("v-newer");
-            Assert.That(store.Load().Visits.Select(v => v.Id), Is.EqualTo(new[] { "v-older" }));
+            Assert.That(store.Load().Visits, Is.Empty, "forgetting the active legacy shelf cannot expose an older visit");
             Assert.DoesNotThrow(() => store.Delete("v-newer"), "forgetting twice is harmless");
-            Assert.That(Directory.GetFiles(folder).Select(Path.GetFileName), Is.EqualTo(new[] { "v-older.json" }), "no temporary files remain");
+            Assert.That(Directory.GetFiles(folder).Select(Path.GetFileName), Is.EqualTo(new[] { "current.visit" }), "the durable empty shelf remains, without temporary or legacy files");
+        }
+
+        [Test]
+        public void ReplacementAndForgetCannotResurrectAnObsoleteLegacyVisit()
+        {
+            var store = new FileVisitStore(folder);
+            store.Save(SavedVisitTests.Visit("v-old", 1));
+            store.Replace(SavedVisitTests.Visit("v-new", 2));
+            // Simulate a process ending before the previous JSON was cleaned up.
+            Assert.That(File.Exists(Path.Combine(folder, "v-old.json")), Is.True);
+            Assert.That(new FileVisitStore(folder).Load().Visits.Select(v => v.Id), Is.EqualTo(new[] { "v-new" }));
+            store.Delete("v-new");
+            // Even an obsolete record left by interrupted cleanup is hidden by the durable empty shelf.
+            File.WriteAllText(Path.Combine(folder, "v-old.json"), SavedVisitCodec.Write(SavedVisitTests.Visit("v-old", 1)));
+            Assert.That(new FileVisitStore(folder).Load().Visits, Is.Empty);
+        }
+
+        [Test]
+        public void AFailedReplacementLeavesTheActiveVisitIntact()
+        {
+            var store = new FileVisitStore(folder);
+            store.Replace(SavedVisitTests.Visit("v-old", 1));
+            Directory.CreateDirectory(Path.Combine(folder, "current.visit.tmp"));
+            Assert.Throws<VisitStoreException>(() => store.Replace(SavedVisitTests.Visit("v-new", 2)));
+            Assert.That(store.Load().Visits.Single().Id, Is.EqualTo("v-old"));
         }
 
         [Test]

@@ -13,6 +13,8 @@ namespace Sankofa.Interaction
         readonly double press;
         readonly double release;
         string armed;
+        bool needsNeutral;
+        int? source;
 
         public PointerSelect(double press = 0.85, double release = 0.5)
         {
@@ -28,10 +30,20 @@ namespace Sankofa.Interaction
         /// Updates with whether the pointer is tracked, its select strength (0..1) and the button it points at, if
         /// any. Returns the button pressed on this frame, or null.
         /// </summary>
-        public string Update(bool tracked, double strength, string hovered)
+        public string Update(bool tracked, double strength, string hovered, int sourceId = 0)
         {
+            if (source.HasValue && source.Value != sourceId) needsNeutral = true;
+            source = sourceId;
+            if (needsNeutral)
+            {
+                Held = false;
+                armed = null;
+                if (tracked && strength <= release) needsNeutral = false;
+                return null;
+            }
             if (!tracked)
             {
+                needsNeutral = true;
                 Held = false;
                 armed = null;
                 return null;

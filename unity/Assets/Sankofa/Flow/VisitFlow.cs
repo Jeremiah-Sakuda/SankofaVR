@@ -22,7 +22,7 @@ namespace Sankofa.Flow
     /// <summary>
     /// The application flow at the hearth: welcome → choice → story → hearth, again and again. It owns accepted state
     /// changes, timing and the permitted controls: which stories can be chosen, which questions asked, whether a
-    /// visit can be kept, replayed exactly, continued or forgotten. Presentation renders its <see cref="Cue"/>s and
+    /// visit can be kept, replayed by path and outcomes, continued or forgotten. Presentation renders its <see cref="Cue"/>s and
     /// reports completion by token; a completion with a stale token (after a pause, question, interruption or scene
     /// change) changes nothing. Time advances only through <see cref="Tick"/>, excluding pauses, so it is
     /// deterministic under test.
@@ -175,7 +175,7 @@ namespace Sankofa.Flow
             return true;
         }
 
-        /// <summary>Plays the kept visit exactly as it was kept: its own plan and outcomes, nothing regenerated.</summary>
+        /// <summary>Plays the kept plan and outcomes without regeneration. Interrupted questions and timing are not replayed.</summary>
         public bool Replay()
         {
             if (!AtChoice(ChoiceMenu.Returning) || !CanReplay) return false;
@@ -405,7 +405,7 @@ namespace Sankofa.Flow
             var visit = SavedVisitCodec.FromVisit(newVisitId(), now(), plan.Plan, Journal);
             try
             {
-                store.Save(visit);
+                store.Replace(visit);
             }
             catch (VisitStoreException e)
             {

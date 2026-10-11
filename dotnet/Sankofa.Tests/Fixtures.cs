@@ -152,6 +152,13 @@ namespace Sankofa.Tests
             Files[visit.Id] = SavedVisitCodec.Write(visit);
         }
 
+        public void Replace(SavedVisit visit)
+        {
+            if (FailSaves) throw new VisitStoreException("The visit could not be kept: test storage is full");
+            Files.Clear();
+            Files[visit.Id] = SavedVisitCodec.Write(visit);
+        }
+
         public void Delete(string id)
         {
             if (FailDeletes) throw new VisitStoreException("The visit could not be forgotten: test storage is locked");
