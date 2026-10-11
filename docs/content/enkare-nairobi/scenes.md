@@ -143,3 +143,9 @@ Order, roughly 6 weeks:
 4. **Build "today":** river, garden, city, *jiko*, and both continuation routes.
 5. **Polish:** comfort, captions, accessibility, failure paths. Capture footage on the device.
 6. **Freeze, then submit:** freeze the candidate, run an external install test, write the description and credits, submit.
+
+## Environment dressing implemented October 11, 2026
+
+`SankofaEnvironment` generates presentation assets independently of story rules. The hearth now has clustered low shrubs, fallen limbs, leaf litter and rock outcrops at the edge of its clearing. The two historical scenes share the watercourse and ecological ground mask: damp organic cover replaces the dry scan near the water and beneath woodland, while the railway camp keeps a trampled central area. Sedge-like blades follow the stream outside the exchange corridor. The camp adds slatted stores, a simple awning, canvas sacks and hooped wooden barrels; today adds planted timber beds on the far bank. These are generic authored reconstructions, not reviewed period objects, botanical species or a surveyed garden layout.
+
+Dressing stays out of the visitor's seat, near hand targets and the central performer routes. Static pieces are combined by material, receive the existing vertex lighting bake, and move with the stage. Foliage cards retain real three-dimensional placement and depth writes; their rectangular bounds do not become opaque bake occluders. The sky's existing cloud deck has stronger broad variation. Sound, narration and story consequences are unchanged. Desktop captures and the geometry proxy do not establish Quest appearance, comfortable visibility or sustained frame rate.

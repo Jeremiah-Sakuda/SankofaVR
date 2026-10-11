@@ -39,13 +39,25 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 
 ![The same 1899 journey view before and after the character and lighting revision](docs/media/figures-comparison.jpg)
 
-*Left: polish round 12 (`e3788de`). Right: the current character and foliage revision. Both are actual desktop journey captures with the same camera framing.*
+*Left: polish round 12 (`e3788de`). Right: the current scene, including the character, foliage and environment revisions. Both are actual desktop journey captures with the same camera framing.*
 
 | Standing | Kneeling | Sharing |
 |---|---|---|
 | ![The new skinned figure standing in lantern light](docs/media/figure-standing.jpg) | ![The skinned wrap covering the kneeling pose](docs/media/figure-kneeling.jpg) | ![Two women settling and pouring between their gourds](docs/media/figure-sharing.jpg) |
 
 *Close-up pose studies from the runtime, staged for inspection with captions hidden. These are presentation studies, not proof of visitor hand tracking or historical dress.*
+
+## Environment revision
+
+![The same hearth view before and after the environment pass](docs/media/environment-hearth-comparison.jpg)
+
+![The same early-stream view before and after the environment pass](docs/media/environment-stream-comparison.jpg)
+
+*Left: round 13 (`a52337a`). Right: the current environment pass. Both panels use actual desktop journey captures with the same seated camera framing. Shrubs, fallen limbs, leaf litter and outcrops frame the clearing; organic ground cover and bank vegetation replace the uniformly parched river edge. The camp gains stores and today gains planted beds. These are authored reconstructions awaiting context and device review.*
+
+![Camp stores beneath a simple awning beside the tents](docs/media/camp-stores.jpg)
+
+*A seated view toward the camp's stores, staged in the runtime with story objects and captions hidden for environment inspection. This is a presentation study, not visitor or device evidence.*
 
 ## Status
 
