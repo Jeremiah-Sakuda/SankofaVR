@@ -36,6 +36,19 @@ The engine-free folders are also compiled and tested outside Unity by [../dotnet
 
 ## Commands
 
+The illustrated-theatre MVP is a separate scene and build. It reuses the first historical story and its continuation, with a separate local saved-visit shelf. Open **Sankofa > Build Illustrated Theatre MVP**, then Play, or use **Sankofa > Play Illustrated Theatre in XR Simulator**. **Sankofa > Build Illustrated Theatre APK** writes `artifacts/Sankofa-IllustratedTheatre.apk`. The baseline `Hearth` scene remains available for comparison.
+
+Both APKs use `com.sankofa.quest`, so installing one replaces the other application build. Their saved-visit folders are separate.
+
+Its content is `Content/illustrated-theatre-mvp.json`; spatial layouts, cast pose sheets and accepted/passive illustration responses are configured in `Content/illustrated-theatre-layout.json`. `IllustratedFigure` renders pose dissolves and the physical handover. `IllustratedTheatre` unfolds scenery and consumes resolved invitations. The core and input flow still decide every outcome; head-direction feedback cannot select a pose as an accepted action. Reduced motion reveals the scenic composition together, and pause freezes the reveal and pose clocks. Both generated atlases preserve alpha, use depth writes and ASTC compression on Android, and are drafts awaiting cultural/device review.
+
+```sh
+UNITY="/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity"
+"$UNITY" -batchmode -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildIllustratedTheatre
+"$UNITY" -batchmode -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildIllustratedTheatre
+SANKOFA_CAPTURE=1 "$UNITY" -batchmode -projectPath "$PWD/unity" -buildTarget Android -runTests -testPlatform PlayMode -testFilter Sankofa.Tests.IllustratedTheatreTests -testResults "$PWD/artifacts/logs/illustrated-playmode.xml"
+```
+
 From the repository root, with the editor installed through Unity Hub and a signed-in, licensed Unity account:
 
 ```sh
@@ -52,7 +65,7 @@ The same actions are in the editor's **Sankofa** menu. The APK is written to the
 "$UNITY" -batchmode -quit -projectPath "$PWD/unity" -importPackage "$PWD/unity/Library/PackageCache/$(ls unity/Library/PackageCache | grep com.unity.ugui@)/Package Resources/TMP Essential Resources.unitypackage"
 ```
 
-A build includes only the hearth scene; the local competition brief and references live outside `Assets`.
+Each build includes only its selected scene: `Hearth` for the baseline APK, or `IllustratedTheatre` for the MVP APK. The local competition brief and references live outside `Assets`.
 
 Every player build, from any menu or script, fails if it would ship anything from `Assets/LocalOnly`, files in `Assets/StreamingAssets`, or stale run files that Unity's performance-test package can leave in `Assets/Resources` after batch test runs; the build command deletes those first. After the build, the APK is scanned to confirm Meta's development credentials were removed.
 

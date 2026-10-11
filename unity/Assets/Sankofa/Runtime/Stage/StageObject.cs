@@ -36,6 +36,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] bool approachKneels;
         [Tooltip("The person of the story who carries or gives this, and gestures when it is offered, shown or set down.")]
         [SerializeField] FigureMotion holder;
+        [Tooltip("Illustrated holder in the theatre presentation; no humanoid rig is needed.")]
+        [SerializeField] IllustratedFigure illustratedHolder;
         [Tooltip("Where its holder steps to hand it to the visitor, at the edge of their personal space; empty to offer from where it is.")]
         [SerializeField] Transform handOver;
         [Tooltip("Its shape in one mesh, in its own space, for the small echo the fire shows of what the visitor lingered on.")]
@@ -73,6 +75,7 @@ namespace Sankofa.Runtime.Stage
         /// <summary>The hand carrying it, if any; carried objects cross into their counterparts in that hand.</summary>
         public HandSource CarriedBy { get; private set; }
         public FigureMotion Holder => holder;
+        public IllustratedFigure IllustratedHolder => illustratedHolder;
         public Mesh EchoMesh => echoMesh;
         /// <summary>Where its holder stands to hand it over, if it is handed over in person.</summary>
         public Vector3? HandOverPlace => handOver != null ? handOver.position : (Vector3?)null;
@@ -127,7 +130,7 @@ namespace Sankofa.Runtime.Stage
             block = new MaterialPropertyBlock();
             startLocalPosition = transform.localPosition;
             startParent = transform.parent;
-            stageFrame = holder != null ? holder.transform.parent : startParent;
+            stageFrame = holder != null ? holder.transform.parent : illustratedHolder != null ? illustratedHolder.transform.parent : startParent;
             lastStageFrame = stageFrame != null ? stageFrame.localToWorldMatrix : Matrix4x4.identity;
             startLocalRotation = transform.localRotation;
             startScale = transform.localScale;
@@ -175,8 +178,9 @@ namespace Sankofa.Runtime.Stage
         /// </summary>
         void LeaveHolder()
         {
-            if (holder == null || transform.parent == null || transform.parent == holder.transform.parent) return;
-            transform.SetParent(holder.transform.parent, true);
+            var owner = holder != null ? holder.transform : illustratedHolder != null ? illustratedHolder.transform : null;
+            if (owner == null || transform.parent == null || transform.parent == owner.parent) return;
+            transform.SetParent(owner.parent, true);
         }
 
         public void ShowAt(Vector3 world)

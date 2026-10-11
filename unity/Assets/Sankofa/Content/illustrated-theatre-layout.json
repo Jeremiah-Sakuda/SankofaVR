@@ -1,0 +1,27 @@
+{
+  "scene": "story.water.1850s",
+  "castAtlas": "Assets/Sankofa/Art/IllustratedTheatre/cast-atlas.png",
+  "sceneryAtlas": "Assets/Sankofa/Art/IllustratedTheatre/scenery-atlas.png",
+  "figures": [
+    { "id": "figure.wambui", "column": 0, "x": -0.82, "z": 1.8, "width": 1.85, "height": 1.85,
+      "handX": 0.27, "handY": 0.71, "offerX": 0.51, "offerY": 1.14,
+      "items": ["gourd.flour"] },
+    { "id": "figure.naserian", "column": 1, "x": 1.25, "z": 2.25, "width": 1.88, "height": 1.88,
+      "handX": -0.16, "handY": 0.76, "offerX": -0.78, "offerY": 1.06,
+      "items": ["bead"] }
+  ],
+  "layers": [
+    { "name": "Painted far shore", "u": 0, "v": 0.615, "w": 1, "h": 0.385,
+      "x": 0, "y": 0.55, "z": 5.6, "width": 13.5, "height": 4.7 },
+    { "name": "Painted water bank", "u": 0, "v": 0.375, "w": 1, "h": 0.24,
+      "x": 0.1, "y": -0.04, "z": 3.4, "width": 9.2, "height": 2.2 },
+    { "name": "Painted near reeds", "u": 0, "v": 0.035, "w": 1, "h": 0.335,
+      "x": 0, "y": -0.05, "z": 1.15, "width": 4.7, "height": 1.14 }
+  ],
+  "responses": [
+    { "objectId": "water.spill", "figures": [], "acceptedPose": 2, "passivePose": 0, "layer": 1 },
+    { "objectId": "gourd.flour", "figures": ["figure.wambui"], "acceptedPose": 2, "passivePose": 0, "layer": 0 },
+    { "objectId": "hide", "figures": ["figure.wambui", "figure.naserian"], "acceptedPose": 2, "passivePose": 1, "layer": 1 },
+    { "objectId": "bead", "figures": ["figure.naserian"], "acceptedPose": 2, "passivePose": 0, "layer": 2 }
+  ]
+}

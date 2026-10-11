@@ -18,10 +18,21 @@ namespace Sankofa.EditorTools
         [MenuItem("Sankofa/Build APK")]
         public static void BuildMain()
         {
+            Build(SankofaSceneBuilder.HearthScene, OutputName);
+        }
+
+        [MenuItem("Sankofa/Build Illustrated Theatre APK")]
+        public static void BuildIllustratedTheatre()
+        {
+            Build(SankofaSceneBuilder.TheatreScene, "Sankofa-IllustratedTheatre.apk");
+        }
+
+        static void Build(string scene, string outputName)
+        {
             var repository = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
-            var output = Path.Combine(repository, "artifacts", OutputName);
+            var output = Path.Combine(repository, "artifacts", outputName);
             Directory.CreateDirectory(Path.GetDirectoryName(output));
-            var scenes = new[] { SankofaSceneBuilder.HearthScene };
+            var scenes = new[] { scene };
 
             foreach (var deleted in LocalOnlyAssets.DeleteTestRunLeftovers()) Debug.Log("[Sankofa] Deleted test-run leftover before building: " + deleted);
             LocalOnlyAssets.Check(scenes);

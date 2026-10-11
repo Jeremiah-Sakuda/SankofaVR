@@ -1,0 +1,188 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Sankofa.Runtime.App;
+using Sankofa.Runtime.Stage;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
+
+namespace Sankofa.EditorTools
+{
+    public static partial class SankofaSceneBuilder
+    {
+        public const string TheatreScene = "Assets/Sankofa/Scenes/IllustratedTheatre.unity";
+        const string TheatreLayout = "Assets/Sankofa/Content/illustrated-theatre-layout.json";
+        const string TheatreFolder = "Assets/Sankofa/Art/Generated/Theatre";
+
+        [Serializable] sealed class TheatreLayoutData
+        {
+            public string scene, castAtlas, sceneryAtlas;
+            public FigureLayout[] figures;
+            public LayerLayout[] layers;
+            public ResponseLayout[] responses;
+        }
+        [Serializable] sealed class FigureLayout
+        {
+            public string id;
+            public int column;
+            public float x, z, width, height, handX, handY, offerX, offerY;
+            public string[] items;
+        }
+        [Serializable] sealed class LayerLayout
+        {
+            public string name;
+            public float u, v, w, h, x, y, z, width, height;
+        }
+        [Serializable] sealed class ResponseLayout
+        {
+            public string objectId;
+            public string[] figures;
+            public int acceptedPose, passivePose, layer;
+        }
+
+        [MenuItem("Sankofa/Build Illustrated Theatre MVP")]
+        public static void BuildIllustratedTheatre()
+        {
+            if (!File.Exists(HearthScene)) BuildScenes();
+            else EditorSceneManager.OpenScene(HearthScene, OpenSceneMode.Single);
+            var layout = JsonUtility.FromJson<TheatreLayoutData>(File.ReadAllText(TheatreLayout));
+            var stage = Object.FindFirstObjectByType<StoryStage>();
+            var root = stage.Scenes.Single(s => s.Id == layout.scene).Root.transform;
+            if (!AssetDatabase.IsValidFolder(TheatreFolder)) AssetDatabase.CreateFolder(SankofaArt.Folder, "Theatre");
+            var cast = ImportAtlas(layout.castAtlas);
+            var scenery = ImportAtlas(layout.sceneryAtlas);
+            var castMaterial = IllustrationMaterial("Cast", cast, new Vector4(0, 2f / 3, 0.5f, 1f / 3));
+            var figures = new Dictionary<string, IllustratedFigure>();
+            foreach (var f in layout.figures)
+            {
+                var item = stage.Find(f.id);
+                // Keep the stable story object and its carrying anchors, replace only its presentation.
+                foreach (var child in item.transform.Cast<Transform>().ToArray())
+                    if (child.name != "Hands" && child.name != "Neck") Object.DestroyImmediate(child.gameObject);
+                // Remove dependants first: Unity refuses to remove their required FigureMotion otherwise.
+                foreach (var component in item.GetComponents<MonoBehaviour>())
+                    if (component is FigurePresence || component is FigureExchange || component is FigureGrounding)
+                        Object.DestroyImmediate(component);
+                Object.DestroyImmediate(item.GetComponent<FigureMotion>());
+                item.transform.localPosition = new Vector3(f.x, BoundaryGround(new Vector3(f.x, 0, f.z)), f.z);
+                item.transform.localRotation = Quaternion.identity;
+                var body = IllustrationCard(item.transform, f.id + " painted", f.width, f.height, castMaterial);
+                body.transform.localPosition = new Vector3(-0.18f, -0.07f, 0);
+                SetArray(item, "surfaces", new Object[] { body });
+                Set(item, "echoMesh", body.GetComponent<MeshFilter>().sharedMesh);
+                Set(item, "scaleWithVisibility", false);
+                Set(item, "holder", null);
+                var actor = item.gameObject.AddComponent<IllustratedFigure>();
+                Set(actor, "surface", body);
+                var hand = item.transform.Find("Hands");
+                Set(actor, "giftOrigin", hand);
+                Set(actor, "waitingHand", new Vector3(f.handX, f.handY, -0.03f));
+                Set(actor, "offeringHand", new Vector3(f.offerX, f.offerY, -0.03f));
+                hand.localPosition = new Vector3(f.handX, f.handY, -0.03f);
+                var so = new SerializedObject(actor);
+                var frames = so.FindProperty("frames"); frames.arraySize = 3;
+                for (var row = 0; row < 3; row++) frames.GetArrayElementAtIndex(row).vector4Value = new Vector4(f.column * 0.5f, (2 - row) / 3f, 0.5f, 1f / 3);
+                so.ApplyModifiedPropertiesWithoutUndo();
+                foreach (var id in f.items)
+                {
+                    var prop = stage.Find(id);
+                    prop.transform.SetParent(hand, false);
+                    prop.transform.localPosition = new Vector3(0, -0.12f, -0.04f);
+                    Set(prop, "holder", null);
+                    Set(prop, "illustratedHolder", actor);
+                    Set(prop, "handOver", null);
+                }
+                figures.Add(f.id, actor);
+            }
+
+            // Let painted scenery supply the first scene's composition; keep tangible ground, water, fire and props.
+            foreach (var renderer in root.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var name = renderer.name.ToLowerInvariant();
+                if (name.Contains("canop") || name.Contains("trunk") || name.Contains("shrubs") ||
+                    name.Contains("sedges") || name.Contains("leaf litter") || name.Contains("grass") ||
+                    name.Contains("fallen limbs") || name.Contains("edge outcrops"))
+                    renderer.enabled = false;
+            }
+            var layers = new List<Renderer>();
+            foreach (var l in layout.layers)
+            {
+                var mat = IllustrationMaterial(l.name, scenery, new Vector4(l.u, l.v, l.w, l.h));
+                var layer = IllustrationCard(root, l.name, l.width, l.height, mat);
+                layer.transform.localPosition = new Vector3(l.x, l.y, l.z);
+                layers.Add(layer);
+            }
+            var theatre = root.gameObject.AddComponent<IllustratedTheatre>();
+            SetArray(theatre, "layers", layers.Cast<Object>().ToArray());
+            Set(theatre, "transition", stage.GetComponent<StoryTransition>());
+            var data = new SerializedObject(theatre);
+            var responses = data.FindProperty("responses"); responses.arraySize = layout.responses.Length;
+            for (var i = 0; i < layout.responses.Length; i++)
+            {
+                var value = layout.responses[i]; var response = responses.GetArrayElementAtIndex(i);
+                response.FindPropertyRelative("Object").stringValue = value.objectId;
+                response.FindPropertyRelative("AcceptedPose").intValue = value.acceptedPose;
+                response.FindPropertyRelative("PassivePose").intValue = value.passivePose;
+                response.FindPropertyRelative("Layer").intValue = value.layer;
+                var castRefs = response.FindPropertyRelative("Figures"); castRefs.arraySize = value.figures.Length;
+                for (var j = 0; j < value.figures.Length; j++) castRefs.GetArrayElementAtIndex(j).objectReferenceValue = figures[value.figures[j]];
+            }
+            data.ApplyModifiedPropertiesWithoutUndo();
+            var app = Object.FindFirstObjectByType<SankofaApp>();
+            Set(app, "packageJson", AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Sankofa/Content/illustrated-theatre-mvp.json"));
+            Set(app, "storeNamespace", "illustrated-theatre-mvp");
+            Set(stage, "offerDrop", 0.2f);
+            root.parent.Find("Carry point").localPosition = new Vector3(0.14f, 1.02f, 0.58f);
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>().transform.localPosition += Vector3.up * 0.12f;
+            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), TheatreScene);
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(TheatreScene, true), new EditorBuildSettingsScene(HearthScene, true) };
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Sankofa] Illustrated theatre MVP built: " + TheatreScene);
+        }
+
+        static Texture2D ImportAtlas(string path)
+        {
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType = TextureImporterType.Default;
+            importer.alphaSource = TextureImporterAlphaSource.FromInput;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = true;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Trilinear;
+            importer.maxTextureSize = 2048;
+            importer.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+            { name = "Android", overridden = true, maxTextureSize = 2048, format = TextureImporterFormat.ASTC_6x6, compressionQuality = 75 });
+            importer.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
+
+        static Material IllustrationMaterial(string name, Texture2D atlas, Vector4 frame)
+        {
+            var path = TheatreFolder + "/" + name + ".mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null) { material = new Material(Shader.Find("Sankofa/Illustration")); AssetDatabase.CreateAsset(material, path); }
+            material.SetTexture("_MainTex", atlas);
+            material.SetVector("_FrameA", frame); material.SetVector("_FrameB", frame);
+            material.SetFloat("_PoseBlend", 1);
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+
+        static Renderer IllustrationCard(Transform parent, string name, float width, float height, Material material)
+        {
+            var mesh = new Mesh { name = name };
+            mesh.vertices = new[] { new Vector3(-width / 2, 0, 0), new Vector3(width / 2, 0, 0), new Vector3(-width / 2, height, 0), new Vector3(width / 2, height, 0) };
+            mesh.uv = new[] { Vector2.zero, Vector2.right, Vector2.up, Vector2.one };
+            mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 }; mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            var path = TheatreFolder + "/" + name + ".asset";
+            if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null) AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(mesh, path);
+            return Static(parent, name, mesh, material).GetComponent<Renderer>();
+        }
+    }
+}

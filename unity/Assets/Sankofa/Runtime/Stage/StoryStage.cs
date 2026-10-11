@@ -85,7 +85,10 @@ namespace Sankofa.Runtime.Stage
             {
                 o.ResetToStart();
                 if (o.TryGetComponent<FigureMotion>(out var figure)) figure.ResetState();
+                if (o.TryGetComponent<IllustratedFigure>(out var illustration)) illustration.ResetState();
             }
+            foreach (var s in scenes)
+                if (s.Root.TryGetComponent<IllustratedTheatre>(out var theatre)) theatre.ResetState();
             foreach (var s in scenes)
                 if (s.IsHearth) ShowScene(s.Id);
         }
@@ -163,6 +166,16 @@ namespace Sankofa.Runtime.Stage
                 return;
             }
             var figure = o.GetComponent<FigureMotion>();
+            if (o.TryGetComponent<IllustratedFigure>(out var illustration))
+            {
+                illustration.Perform(action, o);
+                return;
+            }
+            if (action.Kind == ActionKind.Offer && o.IllustratedHolder != null)
+            {
+                o.IllustratedHolder.Offer(o, this);
+                return;
+            }
             switch (action.Kind)
             {
                 case ActionKind.Reveal:
@@ -251,6 +264,13 @@ namespace Sankofa.Runtime.Stage
                 var cradled = HandGeometry.Openness(sample) >= 1.3f && System.Numerics.Vector3.Dot(HandGeometry.PalmNormal(sample), System.Numerics.Vector3.UnitY) >= 0.3f;
                 return cradled ? hand.PalmCenter + Vector3.up * 0.06f : carryPoint.position;
             });
+        }
+
+        /// <summary>Both live and replayed outcomes select the same illustration. Looking never commits a choice.</summary>
+        public void ResolveIllustration(StageObject item, bool accepted)
+        {
+            var scene = Array.Find(scenes, s => s.Id == ActiveScene);
+            if (scene != null && scene.Root.TryGetComponent<IllustratedTheatre>(out var theatre)) theatre.Resolve(item, accepted);
         }
 
         /// <summary>
@@ -371,7 +391,9 @@ namespace Sankofa.Runtime.Stage
             echoes.Add(go);
             go.AddComponent<MeshFilter>().sharedMesh = o.EchoMesh;
             var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterials = echoDepthMaterial != null ? new[] { echoMaterial, echoDepthMaterial } : new[] { echoMaterial };
+            var illustration = o.GetComponent<IllustratedFigure>();
+            renderer.sharedMaterials = illustration != null ? illustration.Surface.sharedMaterials :
+                echoDepthMaterial != null ? new[] { echoMaterial, echoDepthMaterial } : new[] { echoMaterial };
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             // Sizes kept relative, a woman taller than a ewe and a ewe than a gourd, within a hand's height and a forearm's.
             var size = o.EchoMesh.bounds.size;
@@ -391,7 +413,7 @@ namespace Sankofa.Runtime.Stage
                 var at = transform.TransformPoint(local);
                 var toward = Vector3.ProjectOnPlane(head.position - at, Vector3.up);
                 if (toward.sqrMagnitude < 1e-4f) toward = -Vector3.forward;
-                go.transform.rotation = Quaternion.LookRotation(toward) * Quaternion.Euler(0, 20f * Mathf.Sin(t * 0.4f + aside * 5f), 0);
+                go.transform.rotation = Quaternion.LookRotation(illustration != null ? -toward : toward) * Quaternion.Euler(0, 20f * Mathf.Sin(t * 0.4f + aside * 5f), 0);
                 var glow = Mathf.Lerp(1.4f, 0.8f, Mathf.Clamp01((t - rising) / 2f)) * Mathf.Clamp01(t / 0.6f);
                 block.SetFloat("_Intensity", glow);
                 block.SetFloat("_Procedural", 0f);
@@ -402,7 +424,8 @@ namespace Sankofa.Runtime.Stage
                 // No smoke: an echo adds light and never darkens the flame behind it.
                 block.SetFloat("_Smoke", 0f);
                 block.SetColor("_Color", new Color(1f, 0.6f, 0.26f, 1f));
-                renderer.SetPropertyBlock(block);
+                if (illustration != null) illustration.PaintMemory(renderer, block, Mathf.Clamp01(t / 0.6f) * 0.8f);
+                else renderer.SetPropertyBlock(block);
                 yield return null;
             }
         }
@@ -418,7 +441,8 @@ namespace Sankofa.Runtime.Stage
             var showing = echoShowing;
             var i = 0;
             foreach (var o in objects)
-                if (scenesShown.Contains(o.Scene) && o.EchoMesh != null && o.TryGetComponent<FigureMotion>(out var f) && f.CanGlance)
+                if (scenesShown.Contains(o.Scene) && o.EchoMesh != null &&
+                    (o.GetComponent<IllustratedFigure>() != null || o.TryGetComponent<FigureMotion>(out var f) && f.CanGlance))
                     StartCoroutine(Recall(o, i++ * 0.6f, showing));
         }
 
@@ -431,11 +455,13 @@ namespace Sankofa.Runtime.Stage
             echoes.Add(go);
             go.AddComponent<MeshFilter>().sharedMesh = o.EchoMesh;
             var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterials = echoDepthMaterial != null ? new[] { echoMaterial, echoDepthMaterial } : new[] { echoMaterial };
+            var illustration = o.GetComponent<IllustratedFigure>();
+            renderer.sharedMaterials = illustration != null ? illustration.Surface.sharedMaterials :
+                echoDepthMaterial != null ? new[] { echoMaterial, echoDepthMaterial } : new[] { echoMaterial };
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             // Facing the visitor, as they stood to listen and to give.
             var toward = Vector3.ProjectOnPlane(head.position - o.HomePosition, Vector3.up);
-            go.transform.SetPositionAndRotation(o.HomePosition, toward.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(toward) : Quaternion.identity);
+            go.transform.SetPositionAndRotation(o.HomePosition, toward.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(illustration != null ? -toward : toward) : Quaternion.identity);
             var block = new MaterialPropertyBlock();
             const float seconds = 10f;
             for (var t = 0f; t < seconds && go != null; t += StageClock.DeltaTime)
@@ -448,7 +474,8 @@ namespace Sankofa.Runtime.Stage
                 block.SetFloat("_GroundY", o.HomePosition.y);
                 block.SetFloat("_Smoke", 0.35f * fade);
                 block.SetColor("_Color", new Color(1f, 0.6f, 0.26f, 1f));
-                renderer.SetPropertyBlock(block);
+                if (illustration != null) illustration.PaintMemory(renderer, block, fade * 0.55f);
+                else renderer.SetPropertyBlock(block);
                 yield return null;
             }
             if (go != null) Destroy(go);

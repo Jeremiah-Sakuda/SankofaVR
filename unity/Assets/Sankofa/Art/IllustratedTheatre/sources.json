@@ -1,0 +1,37 @@
+{
+  "created": "2026-10-11",
+  "mode": "built-in image_gen",
+  "purpose": "Spatial illustrated theatre MVP; fictional composites and theatrical scenery, cultural review pending",
+  "assets": [
+    {
+      "file": "cast-atlas.png",
+      "prompt": "Use case: illustration-story.\nAsset type: one production sprite atlas for a seated VR illustrated theatre, Sankofa.\nCreate a SINGLE transparent PNG sprite sheet, portrait 2:3 canvas, arranged as EXACTLY TWO COLUMNS and THREE ROWS of equal cells. SIX full-body cut-out illustrations, one per cell. No captions, numbers, borders, background, shadows on a floor, props, lettering, or watermark. Leave generous transparent padding between every cell. All figures fit entirely inside their own cell; no overlap. Their feet share the same baseline within each cell and heads share the same scale. Draw the same two fictional women consistently across all three rows.\nLEFT COLUMN: Wambui, a fictional adult East African woman with deep brown skin, a warm ochre modest wrapped garment and ivory shoulder cloth, short natural hair.\nRIGHT COLUMN: Naserian, another fictional adult East African woman with deep brown skin, a muted brick-red modest wrapped garment and indigo shoulder cloth, short natural hair.\nThese are theatrical reconstructions, NOT portraits of real people, and NOT a claim to authentic ethnic costume. Avoid generic tribal ornaments, headdresses, fantasy, exaggerated anatomy, jewelry and stereotypes. Both have dignified, warm, expressive illustrated faces and believable anatomy.\nROW 1: both standing quietly in a three-quarter view toward each other, arms relaxed.\nROW 2: left woman offers something with an OPEN EMPTY right palm extended gently toward the viewer at waist height, supporting left hand nearby; right woman opens both EMPTY hands at waist height to receive something toward the center. Absolutely no vessel or object drawn in either hand: a separate real 3D gourd will occupy that space in Unity.\nROW 3: left woman has given the object away, open relaxed palms and a small warm smile; right woman acknowledges the exchange with one open palm toward the other woman and the other at her chest.\nStyle: beautiful editorial gouache and ink cut-paper illustration, tactile pigment, confident dark ink contours, expressive warm faces, clean readable silhouettes and richly shaded fabric folds. Mature cinematic illustrated folktale, subtle amber fire illumination and cool blue edge shading. Each illustration should feel like hand-painted book art brought to human scale. Preserve real alpha transparency outside the silhouettes. No rectangular paper backdrop, no photorealism, no 3D rendering.",
+      "source": "exec-57f11e13-656f-43c7-8409-2b1173cbc463.png",
+      "sha256": "0a08a598b061d1f27d2778563db302fd2c65b0153ceef382c195be7a0ee7797d",
+      "pixels": [
+        1024,
+        1536
+      ],
+      "alpha_range": [
+        0,
+        254
+      ],
+      "review_status": "Generated theatrical draft; no cultural or device acceptance. Provider-output terms require release review."
+    },
+    {
+      "file": "scenery-atlas.png",
+      "prompt": "Use case: illustration-story. Asset type: one transparent scenic-layer atlas for Sankofa, a VR illustrated theatre.\nCreate ONE square PNG with genuine transparent background and EXACTLY THREE equal horizontal rows of independent scenic cut-outs. No border or labels. Keep transparent padding above and below each strip so rows never touch. Each row spans most of the image width.\nTOP ROW: a distant East African upland treeline at dusk, quiet acacia silhouettes, forest slopes and violet hills, with an irregular cut-paper lower edge. No rectangular sky or backdrop.\nMIDDLE ROW: an intimate riverbank vignette: low rounded dark stones, soft ochre grasses and a narrow cool silver-blue ribbon of water, with irregular painterly edges, no people.\nBOTTOM ROW: a foreground cluster of reeds and riverbank grasses, richly painted individual shapes with gaps between their leaves; low spreading composition, no people.\nMatch mature cinematic folktale illustration: tactile gouache, pigment grain, confident ink shapes and restrained warm amber light against indigo/violet dusk. Beautiful original painted theatre scenery; believable botanical silhouettes, no fantasy. These will be placed at different depths and natural scale in VR. Full alpha transparency beyond painted shapes, NO white/black paper background, NO glow cloud filling transparent space, NO text, NO buildings, NO objects for people to hold, NO photorealism, NO 3D render, NO framing.",
+      "source": "exec-29e69129-1096-41e0-83ac-15cc50f8afa8.png",
+      "sha256": "89e107733abadc50b340b2a591464cde628d54b87fa8cc8c246d1bafbdee96ff",
+      "pixels": [
+        1254,
+        1254
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "review_status": "Generated theatrical draft; no cultural or device acceptance. Provider-output terms require release review."
+    }
+  ]
+}

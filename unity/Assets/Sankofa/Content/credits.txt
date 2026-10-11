@@ -1,3 +1,5 @@
+Illustrated theatre MVP: draft cast poses and scenery generated with OpenAI's built-in image generator for Sankofa. Fictional figures and theatrical landscapes, not verified portraits, dress or surveyed places. Cultural review pending. Prompts and asset hashes: Art/IllustratedTheatre/sources.json in the project.
+
 Sounds: Freesound field recordings, trimmed, looped and mixed to mono for Sankofa.
 "campfire_01.wav" by matucha, CC BY 4.0, freesound.org/s/170247
 "campfire sound" by SterckxS, CC BY 3.0, freesound.org/s/541572

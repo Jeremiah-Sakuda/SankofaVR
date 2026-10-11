@@ -44,6 +44,8 @@ namespace Sankofa.Runtime.App
         [SerializeField] PokePanel settingsPanel;
         [SerializeField] StoryStage stage;
         [SerializeField] StoryTransition transition;
+        [Tooltip("Optional separate local shelf for a development experience.")]
+        [SerializeField] string storeNamespace;
         [SerializeField] PalmReceiver receiver;
         [SerializeField] TouchReceiver toucher;
         [SerializeField] AttentionSource attention;
@@ -137,7 +139,9 @@ namespace Sankofa.Runtime.App
                     return null;
                 }
                 // Kept visits stay on this headset, in the application's private storage.
-                StoreFolder = StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "visits");
+                var localShelf = string.IsNullOrEmpty(storeNamespace) ? Path.Combine(Application.persistentDataPath, "visits") :
+                    Path.Combine(Application.persistentDataPath, "visits", storeNamespace);
+                StoreFolder = StoreFolderOverride ?? localShelf;
                 if (playable.Package.Status == ContentStatus.Placeholder) baseStatus = "Development placeholder story · not reviewed content";
                 else if (playable.Package.Status == ContentStatus.Draft) baseStatus = "Draft story · not yet reviewed by family or community";
                 return new VisitFlow(playable, null, new FileVisitStore(StoreFolder), stage);
@@ -324,6 +328,7 @@ namespace Sankofa.Runtime.App
                         if (invited != null)
                         {
                             invited.Feedback = 0;
+                            stage.ResolveIllustration(invited, c.Outcome == Outcome.Accepted);
                             if (c.Outcome == Outcome.Accepted && c.Invitation.Kind == InvitationKind.Receive) stage.Carry(invited, acceptingHand);
                         }
                         acceptingHand = null;

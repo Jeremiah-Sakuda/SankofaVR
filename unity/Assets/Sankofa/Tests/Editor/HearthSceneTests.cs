@@ -97,7 +97,7 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
             // A glow, touch point and place point are optional for staged objects; their surfaces are not.
-            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".pourPoint", ".holder", ".handOver", ".echoMesh" };
+            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".pourPoint", ".holder", ".illustratedHolder", ".handOver", ".echoMesh" };
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 Assert.That(MissingReferences(o).Where(m => !optional.Any(m.EndsWith)), Is.Empty, o.Id);

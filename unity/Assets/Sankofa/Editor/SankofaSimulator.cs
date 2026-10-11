@@ -17,13 +17,24 @@ namespace Sankofa.EditorTools
         [MenuItem("Sankofa/Play Hearth in XR Simulator")]
         public static void PlayHearth()
         {
+            Play(SankofaSceneBuilder.HearthScene);
+        }
+
+        [MenuItem("Sankofa/Play Illustrated Theatre in XR Simulator")]
+        public static void PlayIllustratedTheatre()
+        {
+            Play(SankofaSceneBuilder.TheatreScene);
+        }
+
+        static void Play(string scene)
+        {
             if (EditorApplication.isPlaying) return;
             // Meta disables its Activate item once the simulator is active, so check the runtime variable instead.
             var runtime = System.Environment.GetEnvironmentVariable("XR_SELECTED_RUNTIME_JSON") ?? "";
             if (!runtime.Contains("MetaXRSimulator") && !EditorApplication.ExecuteMenuItem(ActivateMenu))
                 Debug.LogWarning("[Sankofa] Could not activate the Meta XR Simulator from " + ActivateMenu + "; is it installed?");
-            EditorSceneManager.OpenScene(SankofaSceneBuilder.HearthScene, OpenSceneMode.Single);
-            Debug.Log("[Sankofa] Entering Play mode in the XR Simulator: " + SankofaSceneBuilder.HearthScene);
+            EditorSceneManager.OpenScene(scene, OpenSceneMode.Single);
+            Debug.Log("[Sankofa] Entering Play mode in the XR Simulator: " + scene);
             EditorApplication.EnterPlaymode();
         }
     }

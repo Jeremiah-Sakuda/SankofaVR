@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Sankofa/Scenes/IllustratedTheatre.unity
+    guid: cfe15438efe2b42aab10a9544b15f5e0
+  - enabled: 1
     path: Assets/Sankofa/Scenes/Hearth.unity
     guid: dff43fcce6aa64b73a4c17f88c7285d6
   m_configObjects:
