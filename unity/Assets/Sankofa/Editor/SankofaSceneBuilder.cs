@@ -225,7 +225,16 @@ namespace Sankofa.EditorTools
             float R(float a, float b) => Range(random, a, b);
             float Ground(Vector3 at) => SankofaMeshes.GroundHeight(at, FirePosition, GroundSeed);
 
-            var ground = Static(root, "Ground", SankofaMeshes.Terrain(FirePosition, GroundSeed), art.Ground);
+            var terrain = SankofaMeshes.Terrain(FirePosition, GroundSeed);
+            var cover = terrain.uv;
+            var vertices = terrain.vertices;
+            for (var i = 0; i < cover.Length; i++)
+            {
+                var distance = new Vector2(vertices[i].x - FirePosition.x, vertices[i].z - FirePosition.z).magnitude;
+                cover[i].y = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(2.3f, 4.5f, distance)) * (0.72f + SankofaMeshes.Fbm(vertices[i] * 0.4f, 109, 2) * 0.2f);
+            }
+            terrain.uv = cover;
+            var ground = Static(root, "Ground", terrain, art.Ground);
 
             var stones = new List<CombineInstance>();
             for (var i = 0; i < 12; i++)
@@ -339,11 +348,15 @@ namespace Sankofa.EditorTools
             Prim(root, "Night sky", PrimitiveType.Sphere, Vector3.zero, Vector3.one * 140f, art.Sky);
             var stars = Static(root, "Stars", SankofaMeshes.Stars(1800, 7, 62f), art.Stars);
 
+            var details = BuildUnderstory(root, art, 710, Ground,
+                p => new Vector2(p.x - FirePosition.x, p.z - FirePosition.z).magnitude > 2.8f &&
+                    !(Mathf.Abs(p.x) < 1.6f && p.z > 0f), 112, 11f, false);
             SankofaBake.Bake(
-                new[] { ground, stoneFilter, logFilter, coalFilter, seatFilter, trunkFilter, canopyFilter },
-                new[] { ground, stoneFilter, logFilter, seatFilter, trunkFilter, canopyFilter },
+                new[] { ground, stoneFilter, logFilter, coalFilter, seatFilter, trunkFilter, canopyFilter }.Concat(details).ToArray(),
+                new[] { ground, stoneFilter, logFilter, seatFilter, trunkFilter, canopyFilter }.Concat(details).ToArray(),
                 root.TransformPoint(FirePosition), root.TransformDirection(HearthMoon),
-                new HashSet<MeshFilter> { ground, stoneFilter, seatFilter, trunkFilter, canopyFilter });
+                new HashSet<MeshFilter>(new[] { ground, stoneFilter, seatFilter, trunkFilter, canopyFilter }.Concat(details)));
+            SaveMeshes(details.ToArray());
             SaveMeshes(new[] { ground, stoneFilter, logFilter, coalFilter, seatFilter, trunkFilter, canopyFilter, grass, stars });
             // The keepsake waits on the right stone, clear of the controls on the left.
             return (tops[1], tops[0]);

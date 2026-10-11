@@ -100,7 +100,9 @@ Shader "Sankofa/Sky"
                 // Overcast: a soft, slowly varied cloud deck that hides the stars and the band.
                 float2 cuv = dir.xz / max(h + 0.25, 0.05);
                 half deck = tex2D(_Noise, cuv * 0.35 + _Time.x * 0.02).r * 0.6 + tex2D(_Noise, cuv * 1.1).g * 0.4;
-                half3 cloud = _CloudColor.rgb * (0.82 + 0.36 * deck) * lerp(1.05, 0.9, saturate(h));
+                // Preserve broad cloud masses instead of averaging the noise into a uniform grey wash.
+                half mass = smoothstep(0.28, 0.72, deck);
+                half3 cloud = _CloudColor.rgb * (0.48 + 1.05 * mass) * lerp(1.05, 0.9, saturate(h));
                 col = lerp(col, cloud, _Overcast * smoothstep(-0.05, 0.12, h));
                 // The moon: a small bright disc in a wide, faint halo, only when the scene has one.
                 half moonLight = dot(_SankofaMoonColor.rgb, half3(0.33, 0.33, 0.33));

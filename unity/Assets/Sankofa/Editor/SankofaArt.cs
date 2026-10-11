@@ -184,6 +184,7 @@ namespace Sankofa.EditorTools
                 Ground = Make("Hearth ground", "Sankofa/Ground", m =>
                 {
                     m.SetColor("_Tint", new Color(0.9f, 0.86f, 0.82f));
+                    m.SetColor("_CoverColor", new Color(0.42f, 0.44f, 0.26f));
                     m.SetTexture("_Albedo", Scan("dry_ground_01", "diff"));
                     m.SetTexture("_Normal", Scan("dry_ground_01", "nor_gl"));
                     m.SetFloat("_Scale", 0.55f);
@@ -202,7 +203,7 @@ namespace Sankofa.EditorTools
                 TreeCanopy = Make("Tree canopy", "Sankofa/Fire Lit", m =>
                 {
                     m.SetTexture("_MainTex", EnsureFoliage());
-                    m.SetColor("_Color", new Color(0.23f, 0.30f, 0.15f));
+                    m.SetColor("_Color", new Color(0.38f, 0.46f, 0.22f));
                     m.SetFloat("_UseBake", 1);
                     m.SetFloat("_Wrap", 0.6f);
                     m.SetFloat("_Cull", 0);

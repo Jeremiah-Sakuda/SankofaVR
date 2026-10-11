@@ -35,7 +35,7 @@ namespace Sankofa.EditorTools
         /// A disc of ground centred on the visitor, fine nearby and coarse far away. Height, tint and the burn
         /// weight the ground shader blends by (UV.x) come from the scene; baking adds occlusion and visibility.
         /// </summary>
-        public static Mesh Ground(string name, Func<Vector3, float> height, Func<Vector3, Color> tint, Func<Vector3, float> burn, float near = 4f, float far = 80f)
+        public static Mesh Ground(string name, Func<Vector3, float> height, Func<Vector3, Color> tint, Func<Vector3, float> burn, float near = 4f, float far = 80f, Func<Vector3, float> cover = null)
         {
             const int segments = 144;
             var radii = new List<float>();
@@ -55,7 +55,7 @@ namespace Sankofa.EditorTools
                 var c = tint(at);
                 c.a = 1;
                 colors.Add(c);
-                weights.Add(new Vector2(Mathf.Clamp01(burn(at)), 0));
+                weights.Add(new Vector2(Mathf.Clamp01(burn(at)), Mathf.Clamp01(cover?.Invoke(at) ?? 0)));
             }
 
             Add(0, 0);

@@ -18,6 +18,7 @@ Shader "Sankofa/Ground"
         _MacroScale ("Variation scale", Float) = 0.07
         _MacroAmount ("Variation amount", Range(0, 1)) = 0.35
         _Wrap ("Light wrap", Range(0, 1)) = 0.2
+        _CoverColor ("Damp organic ground", Color) = (0.42, 0.44, 0.26, 1)
     }
     SubShader
     {
@@ -43,6 +44,7 @@ Shader "Sankofa/Ground"
             float _MacroScale;
             half _MacroAmount;
             half _Wrap;
+            fixed4 _CoverColor;
 
             float4 _SankofaLightPos;
             float4 _SankofaLightColor;
@@ -74,6 +76,7 @@ Shader "Sankofa/Ground"
                 half2 visibility : TEXCOORD3;
                 fixed4 color : COLOR;
                 UNITY_VERTEX_OUTPUT_STEREO
+                half cover : TEXCOORD4;
             };
 
             v2f vert(appdata v)
@@ -86,6 +89,7 @@ Shader "Sankofa/Ground"
                 o.world = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.normal = UnityObjectToWorldNormal(v.normal);
                 o.burn = v.uv.x;
+                o.cover = v.uv.y;
                 o.visibility = v.bake;
                 o.color = v.color;
                 return o;
@@ -102,9 +106,13 @@ Shader "Sankofa/Ground"
                     albedo = lerp(albedo, tex2D(_Albedo2, p * _Scale2).rgb, i.burn);
                     tangentNormal = normalize(lerp(tangentNormal, UnpackNormal(tex2D(_Normal2, p * _Scale2)), i.burn));
                 }
-                // Projected from above: the map's x runs along world X, its y along world Z.
-                half3 n = normalize(normalize(i.normal) * tangentNormal.z + half3(tangentNormal.x, 0, tangentNormal.y) * _NormalStrength);
                 half macro = tex2D(_Macro, p * _MacroScale).b;
+                // Authored ecological mask: damp humus/moss hides the parched-earth cracks at the banks
+                // and beneath vegetation. Fine noise supplies soil grain; no extra texture allocation.
+                half grain = tex2D(_Macro, p * 2.3).g;
+                albedo = lerp(albedo, _CoverColor.rgb * (0.7 + 0.6 * grain) * (0.8 + 0.4 * macro), i.cover);
+                // Projected from above: the map's x runs along world X, its y along world Z.
+                half3 n = normalize(normalize(i.normal) * tangentNormal.z + half3(tangentNormal.x, 0, tangentNormal.y) * _NormalStrength * (1 - i.cover * 0.85));
                 albedo *= _Tint.rgb * i.color.rgb * lerp(1, 0.6 + 0.8 * macro, _MacroAmount);
 
                 float3 toLight = _SankofaLightPos.xyz - i.world;

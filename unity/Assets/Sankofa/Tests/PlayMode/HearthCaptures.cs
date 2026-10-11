@@ -155,6 +155,33 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator CaptureEnvironmentStudy()
+        {
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1") Assert.Ignore("Set SANKOFA_CAPTURE=1 to write review images.");
+            LogAssert.ignoreFailingMessages = true;
+            SceneManager.LoadScene("Hearth");
+            yield return null;
+            Object.FindFirstObjectByType<SankofaApp>().enabled = false;
+            GameObject.Find("OVRCameraRig").transform.position = new Vector3(0, 1.15f, 0);
+            var eye = GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();
+            eye.fieldOfView = 90;
+            Object.FindFirstObjectByType<WorldAnchor>().Place();
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.StartScreen>().gameObject.SetActive(false);
+            foreach (var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None)) panel.gameObject.SetActive(false);
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>().gameObject.SetActive(false);
+            var stage = Object.FindFirstObjectByType<StoryStage>();
+            foreach (var id in new[] { "hearth", "story.water.1850s", "story.water.1899", "story.water.today" })
+            {
+                stage.ShowScene(id);
+                yield return new WaitForSeconds(0.5f);
+                eye.transform.rotation = Quaternion.Euler(12, 0, 0);
+                Capture(eye, "environment-" + id);
+                eye.transform.rotation = Quaternion.Euler(12, -48, 0);
+                Capture(eye, "environment-" + id + "-left");
+            }
+        }
+
+        [UnityTest]
         [Timeout(900000)] // Three visits rendered at review resolution take longer than the default three minutes.
         public IEnumerator CaptureVisits()
         {

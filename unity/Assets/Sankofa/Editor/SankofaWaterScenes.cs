@@ -83,12 +83,21 @@ namespace Sankofa.EditorTools
             return Color.Lerp(c, new Color(0.5f, 0.5f, 0.46f), Mathf.InverseLerp(20f, 50f, r));
         }
 
+        static float BoundaryCover(Vector3 p, bool cut)
+        {
+            var forest = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(1f, -5f, p.x));
+            var bank = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(0.8f, 2.8f, CourseDistance(p)));
+            var cover = Mathf.Max(forest * 0.86f, bank * 0.94f) * (0.8f + SankofaMeshes.Fbm(p * 0.4f, 108, 2) * 0.2f);
+            if (cut) cover *= Mathf.SmoothStep(0, 1, Mathf.InverseLerp(4.5f, 8f, new Vector2(p.x - 1f, p.z - 5.5f).magnitude));
+            return cover;
+        }
+
         /// <summary>The ground, the stream and the forest and plain around it, shared by both eras at the water.</summary>
         static (MeshFilter Ground, MeshFilter Water, List<MeshFilter> Static) BuildBoundary(Transform root, SankofaArtSet art, string era, int seed, bool cut, float trampled, Material sky, int starCount)
         {
             var random = new System.Random(seed);
             float R(float a, float b) => Range(random, a, b);
-            var ground = Static(root, "Ground", SankofaStoryMeshes.Ground(era + " ground", BoundaryGround, p => BoundaryTint(p, trampled), p => 0f, 5f, 90f), art.Ground);
+            var ground = Static(root, "Ground", SankofaStoryMeshes.Ground(era + " ground", BoundaryGround, p => BoundaryTint(p, trampled), p => 0f, 5f, 90f, p => BoundaryCover(p, cut)), art.Ground);
             var water = Static(root, "Stream", SankofaStoryMeshes.Ribbon(era + " stream", WaterLine(WaterAboveBed), StreamWidth, Vector3.up), art.Water);
 
             // Forest up the slope on the left and behind; acacias scattered over the plain on the right.
@@ -143,7 +152,12 @@ namespace Sankofa.EditorTools
             var stars = Static(root, "Stars", starMesh, art.Stars);
             // An overcast sky has no stars to show.
             if (starCount <= 0) stars.gameObject.SetActive(false);
-            return (ground, water, new List<MeshFilter> { trunkFilter, canopyFilter, stoneFilter, grass, stars });
+            var details = BuildUnderstory(root, art, seed + 700, BoundaryGround,
+                p => CourseDistance(p) > 0.52f && (p.x < -2.3f || p.z < -2f || p.x > 3.5f) &&
+                    (!cut || new Vector2(p.x - 1f, p.z - 5.5f).magnitude > 7f), cut ? 64 : 96, 15f, true);
+            var result = new List<MeshFilter> { trunkFilter, canopyFilter, stoneFilter, grass, stars };
+            result.AddRange(details);
+            return (ground, water, result);
         }
 
         // ---- before the railway ----
@@ -194,7 +208,8 @@ namespace Sankofa.EditorTools
             var woodFilter = Static(root, "Firewood", Combine(wood, "1850s firewood"), art.SeatWood);
 
             var light = TradersFireAt + new Vector3(0, BoundaryGround(TradersFireAt) + 0.25f, 0);
-            Bake(root, new[] { ground, rockFilter, trunks, canopies, stones, woodFilter }, light);
+            Bake(root, new[] { ground, rockFilter, trunks, canopies, stones, woodFilter }.Concat(statics.Skip(5)).ToArray(), light);
+            SaveMeshes(statics.Skip(5).ToArray());
             SaveMeshes(new[] { ground, water, rockFilter, trunks, canopies, stones, woodFilter, statics[3], statics[4] });
 
             // The spring comes out at the rock's lip and falls; the falling water is the thing the visitor touches.
@@ -678,7 +693,9 @@ namespace Sankofa.EditorTools
             }
             var stumpFilter = Static(root, "Stumps", Combine(stumps, "1899 stumps"), art.SeatWood);
 
-            Bake(root, new[] { ground, trunks, canopies, stones, tentFilter, timberFilter, stumpFilter }, CampLanternAt);
+            var stores = BuildCampStores(root, art);
+            Bake(root, new[] { ground, trunks, canopies, stones, tentFilter, timberFilter, stumpFilter }.Concat(statics.Skip(5)).Concat(stores).ToArray(), CampLanternAt);
+            SaveMeshes(statics.Skip(5).Concat(stores).ToArray());
             SaveMeshes(new[] { ground, water, trunks, canopies, stones, statics[3], statics[4], tentFilter, riggingFilter, timberFilter, stumpFilter });
 
             var rails = BuildRails(root, art, crib + Vector3.up * 0.48f);
@@ -817,7 +834,7 @@ namespace Sankofa.EditorTools
                 var c = Color.Lerp(new Color(0.55f, 0.52f, 0.47f), new Color(0.36f, 0.4f, 0.28f), near) * (1f + SankofaMeshes.Fbm(p * 0.8f, 95, 3) * 0.35f);
                 var bank = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(1.2f, 2.4f, CourseDistance(p)));
                 return Color.Lerp(c, new Color(0.38f, 0.36f, 0.33f), bank);
-            }, p => 0f, 5f, 160f), art.Ground);
+            }, p => 0f, 5f, 160f, p => Mathf.SmoothStep(0, 1, Mathf.InverseLerp(1.1f, 2.4f, CourseDistance(p))) * Mathf.SmoothStep(0, 1, Mathf.InverseLerp(16f, 6f, p.magnitude))), art.Ground);
             var riverPoints = SankofaStoryMeshes.Smooth(StreamCourse, 0.4f).Select(p => new Vector3(p.x, RiverGround(p) + 0.35f, p.z)).ToList();
             // Wide enough that its edges run under the banks.
             var river = Static(root, "River", SankofaStoryMeshes.Ribbon("Today river", riverPoints, 2.9f, Vector3.up), art.River);
@@ -968,7 +985,10 @@ namespace Sankofa.EditorTools
             cityStars.name = "Today stars";
             SaveMeshes(new[] { Static(root, "Stars", cityStars, art.Stars) });
 
-            Bake(root, new[] { ground, gardenFilter }, JikoAt + Vector3.up * 0.2f);
+            var details = BuildUnderstory(root, art, 489, RiverGround, p => CourseDistance(p) > 1.7f && (Mathf.Abs(p.x) > 3f || p.z < -2f) && p.z < 6f + Mathf.Abs(p.x) * 0.18f, 72, 13f, false);
+            details.AddRange(BuildCommunityBeds(root, art));
+            Bake(root, new[] { ground, gardenFilter }.Concat(details).ToArray(), JikoAt + Vector3.up * 0.2f);
+            SaveMeshes(details.ToArray());
             SaveMeshes(new[] { ground, river, cityFilter, gardenFilter, weeds, trunkFilter, crownFilter });
 
             var jiko = BuildJiko(root, art);

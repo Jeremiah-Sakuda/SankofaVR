@@ -68,6 +68,7 @@ Material:
     - _Wrap: 0.3
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _CoverColor: {r: 0.42, g: 0.44, b: 0.26, a: 1}
     - _DetailScale: {r: 2.4, g: 2.4, b: 0, a: 0}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _HighlightColor: {r: 1, g: 0.72, b: 0.37999994, a: 1}
