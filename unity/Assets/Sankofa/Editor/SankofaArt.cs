@@ -199,7 +199,17 @@ namespace Sankofa.EditorTools
                     "bark_brown_02", new Vector2(1f, 1f), 1.1f),
                 TreeBark = Scanned(Baked("Tree bark", new Color(0.32f, 0.3f, 0.28f), detail, "_DETAIL_UV", new Vector2(0.5f, 0.3f), 0f, 0.2f),
                     "bark_brown_02", new Vector2(1f, 0.6f), 1f),
-                TreeCanopy = Baked("Tree canopy", new Color(0.12f, 0.17f, 0.105f), detail, "_DETAIL_TRIPLANAR", new Vector2(0.8f, 0.8f), 0.6f, 0.3f),
+                TreeCanopy = Make("Tree canopy", "Sankofa/Fire Lit", m =>
+                {
+                    m.SetTexture("_MainTex", EnsureFoliage());
+                    m.SetColor("_Color", new Color(0.23f, 0.30f, 0.15f));
+                    m.SetFloat("_UseBake", 1);
+                    m.SetFloat("_Wrap", 0.6f);
+                    m.SetFloat("_Cull", 0);
+                    m.SetFloat("_Wind", 0.018f);
+                    m.EnableKeyword("_FOLIAGE");
+                    foreach (var keyword in new[] { "_DETAIL_PLANAR", "_DETAIL_TRIPLANAR", "_DETAIL_UV", "_SCANNED" }) m.DisableKeyword(keyword);
+                }),
                 Grass = Make("Grass", "Sankofa/Fire Lit", m =>
                 {
                     m.SetColor("_Color", Color.white);
@@ -427,6 +437,60 @@ namespace Sankofa.EditorTools
             texture.Apply(true);
             AssetDatabase.CreateAsset(texture, DetailPath);
             return texture;
+        }
+
+        // Original leaf sprig artwork, generated deterministically in the editor. Alpha coverage is retained
+        // in mip levels so distant crowns keep their density; no runtime texture generation or third-party art.
+        static Texture2D EnsureFoliage()
+        {
+            const string path = Folder + "/Foliage.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (existing != null) return existing;
+            const int size = 256;
+            var pixels = new Color[size * size];
+            var leaves = new System.Collections.Generic.List<Vector4>();
+            for (var row = 0; row < 6; row++)
+                foreach (var side in new[] { -1, 1 }) leaves.Add(new Vector4(0.5f + side * 0.145f, 0.18f + row * 0.125f, side * 0.65f, row * 0.09f));
+            leaves.Add(new Vector4(0.5f, 0.85f, 0, 0.3f));
+            for (var y = 0; y < size; y++)
+                for (var x = 0; x < size; x++)
+                {
+                    var p = new Vector2((x + 0.5f) / size, (y + 0.5f) / size);
+                    var opacity = Mathf.Clamp01((0.007f - Mathf.Abs(p.x - 0.5f)) * size) * (p.y > 0.03f && p.y < 0.91f ? 1 : 0);
+                    var tint = new Color(0.65f, 0.72f, 0.45f);
+                    foreach (var leaf in leaves)
+                    {
+                        var d = p - new Vector2(leaf.x, leaf.y);
+                        var c = Mathf.Cos(leaf.z); var s = Mathf.Sin(leaf.z);
+                        var q = new Vector2(d.x * c - d.y * s, d.x * s + d.y * c);
+                        var edge = 1 - (q.x * q.x / (0.075f * 0.075f) + q.y * q.y / (0.125f * 0.125f));
+                        var alpha = Mathf.Clamp01(edge * size * 0.3f);
+                        if (alpha <= opacity) continue;
+                        opacity = alpha;
+                        var vein = 1 - Mathf.Clamp01(Mathf.Abs(q.x) * 320);
+                        tint = Color.Lerp(new Color(0.72f, 0.87f, 0.55f), new Color(0.40f, 0.56f, 0.30f), Mathf.Clamp01(leaf.w + q.y * 2 + vein * 0.22f));
+                    }
+                    pixels[y * size + x] = new Color(tint.r, tint.g, tint.b, opacity);
+                }
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, true) {
+                name = "Sankofa leaf sprig", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear, anisoLevel = 2 };
+            texture.SetPixels(pixels); texture.Apply(true);
+            // Default box-filter mips thin cutout foliage. Restore the base level's covered fraction at each mip.
+            var fraction = System.Linq.Enumerable.Count(pixels, p => p.a >= 0.45f) / (float)pixels.Length;
+            for (var mip = 1; mip < texture.mipmapCount; mip++)
+            {
+                var colours = texture.GetPixels(mip);
+                var low = 0f; var high = 8f;
+                for (var step = 0; step < 12; step++)
+                {
+                    var scale = (low + high) * 0.5f;
+                    var coverage = System.Linq.Enumerable.Count(colours, p => p.a * scale >= 0.45f) / (float)colours.Length;
+                    if (coverage < fraction) low = scale; else high = scale;
+                }
+                for (var i = 0; i < colours.Length; i++) colours[i].a = Mathf.Clamp01(colours[i].a * high);
+                texture.SetPixels(colours, mip);
+            }
+            texture.Apply(false); AssetDatabase.CreateAsset(texture, path); return texture;
         }
 
         static byte Byte(float v) => (byte)Mathf.Clamp(Mathf.RoundToInt(v * 255f), 0, 255);

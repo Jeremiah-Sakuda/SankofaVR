@@ -1,6 +1,8 @@
 using System.Collections;
 using NUnit.Framework;
 using Sankofa.Runtime.Stage;
+using Sankofa.Runtime.App;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -8,6 +10,38 @@ namespace Sankofa.Tests
 {
     public class StageRecenterTests
     {
+        [UnityTest]
+        public IEnumerator CharacterActingFreezesOnPauseAndReleasesTheHandWhenItsObjectLeaves()
+        {
+            LogAssert.ignoreFailingMessages = true; // No headset: the Meta SDK logs unsupported native calls.
+            SceneManager.LoadScene("Hearth");
+            yield return null;
+            Object.FindFirstObjectByType<SankofaApp>().enabled = false;
+            var stage = Object.FindFirstObjectByType<StoryStage>();
+            stage.ShowScene("story.water.1899");
+            var figure = stage.Find("figure.njeri");
+            var motion = figure.GetComponent<FigureMotion>();
+            motion.ResetState(); figure.Reveal();
+            var vessel = stage.Find("gourd.empty");
+            vessel.Reveal();
+            var finger = System.Array.Find(figure.GetComponentsInChildren<Transform>(true), t => t.name == "index_02_r");
+            var eyes = System.Array.Find(figure.GetComponentsInChildren<SkinnedMeshRenderer>(true), t => t.name == "Eyes");
+            StageClock.Paused = false;
+            var deadline = Time.realtimeSinceStartup + 8;
+            while (eyes.GetBlendShapeWeight(0) < 50 && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(eyes.GetBlendShapeWeight(0), Is.GreaterThanOrEqualTo(50), "observe a real blink before pausing it");
+            var curled = finger.localRotation;
+            StageClock.Paused = true;
+            var blink = eyes.GetBlendShapeWeight(0);
+            yield return new WaitForSeconds(0.25f);
+            Assert.That(Quaternion.Angle(curled, finger.localRotation), Is.LessThan(0.1f), "paused fingers do not keep curling");
+            Assert.That(eyes.GetBlendShapeWeight(0), Is.EqualTo(blink).Within(0.001f), "paused eyes hold their expression");
+            vessel.MoveTo(vessel.transform.position + Vector3.forward, 0.5f);
+            StageClock.Paused = false;
+            yield return new WaitForSeconds(0.7f);
+            Assert.That(Quaternion.Angle(curled, finger.localRotation), Is.GreaterThan(5), "the hand opens after release");
+        }
+
         [UnityTest]
         public IEnumerator APausedFigureAndItsRouteFollowAStageTranslationRotationAndHeightChange()
         {

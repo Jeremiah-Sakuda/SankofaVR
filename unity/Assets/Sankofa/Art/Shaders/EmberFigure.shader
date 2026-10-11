@@ -12,6 +12,8 @@ Shader "Sankofa/Ember Figure"
         _Intensity ("Intensity", Float) = 1
         _Visibility ("Reveal opacity", Range(0, 1)) = 1
         _Feature ("Hair and facial details", Range(0, 1)) = 0
+        _Eye ("Painted eye surface", Range(0, 1)) = 0
+        _EyeClosed ("Closed eyelid", Range(0, 1)) = 0
         _Memory ("Memory echo", Range(0, 1)) = 0
         _Fabric ("Fabric surface", Range(0, 1)) = 0
         _Rim ("Edge sharpness", Float) = 2.2
@@ -33,7 +35,7 @@ Shader "Sankofa/Ember Figure"
 
         CGINCLUDE
         #include "EmberFigure.cginc"
-        half _Fabric, _Memory, _Feature, _Visibility;
+        half _Fabric, _Memory, _Feature, _Visibility, _Eye, _EyeClosed;
         float4 _SankofaLightPos, _SankofaLightColor;
         float4 _SankofaAmbientSky, _SankofaMoonDir, _SankofaMoonColor;
         ENDCG
@@ -55,6 +57,7 @@ Shader "Sankofa/Ember Figure"
                 float3 world : TEXCOORD0;
                 float2 uv : TEXCOORD2;
                 half3 normal : TEXCOORD1;
+                fixed3 color : TEXCOORD3;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -70,6 +73,7 @@ Shader "Sankofa/Ember Figure"
                 o.pos = UnityObjectToClipPos(float4(p, 1));
                 o.world = mul(unity_ObjectToWorld, float4(p, 1)).xyz;
                 o.uv = v.uv;
+                o.color = v.color.rgb;
                 o.normal = UnityObjectToWorldNormal(normalize(n));
                 return o;
             }
@@ -110,10 +114,14 @@ Shader "Sankofa/Ember Figure"
                 half atten = 1 / (1 + dot(toLight, toLight) * _SankofaLightPos.w);
                 half3 illumination = 0.22 + _SankofaAmbientSky.rgb * 0.8 + _SankofaLightColor.rgb * light * atten;
                 illumination += _SankofaMoonColor.rgb * saturate(dot(normal, normalize(_SankofaMoonDir.xyz)));
-                half weave = sin(i.uv.x * 600) * sin(i.uv.y * 650) * 0.035;
+                float2 thread = i.uv * float2(600, 650);
+                float2 footprint = fwidth(thread);
+                // Suppress weave smaller than a pixel instead of letting it shimmer across stereo views.
+                half weave = sin(thread.x) * sin(thread.y) * 0.035 * exp2(-dot(footprint, footprint)) * _Fabric;
                 half border = (1 - smoothstep(0.025, 0.065, abs(frac(i.uv.y) - 0.08))) * _Fabric;
                 half3 pigment = lerp(half3(0.10, 0.065, 0.045), _Color.rgb * 0.17, _Fabric);
                 pigment = lerp(pigment, half3(0.014, 0.009, 0.006), _Feature);
+                pigment = lerp(pigment, lerp(i.color, half3(0.10, 0.065, 0.045), _EyeClosed), _Eye);
                 half3 c = pigment * illumination * (1 + weave) + _Color.rgb * border * 0.055;
                 c += _Color.rgb * (edge * 0.04 + embers * 0.012 + flame * 0.008) * (1 - _Fabric * 0.6) * (1 - _Feature);
                 half wisp = tex2D(_Noise, float2(i.world.x * 2.3 + i.world.z * 1.7, i.world.y * 2.0 - _Time.y * 0.35)).g;

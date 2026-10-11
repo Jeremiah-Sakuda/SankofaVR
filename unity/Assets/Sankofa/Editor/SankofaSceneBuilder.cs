@@ -42,6 +42,10 @@ namespace Sankofa.EditorTools
         [MenuItem("Sankofa/Build Scenes")]
         public static void BuildScenes()
         {
+            // Also regenerate correctly when the menu is used twice in the same editor session.
+            figureController = null;
+            slenderBody = null;
+            clothedBodyFinished = false;
             if (!AssetDatabase.IsValidFolder("Assets/Sankofa/Scenes")) AssetDatabase.CreateFolder("Assets/Sankofa", "Scenes");
             var art = SankofaArt.Ensure();
             SankofaIcon.Ensure();

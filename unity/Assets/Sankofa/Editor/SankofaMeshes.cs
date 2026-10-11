@@ -329,15 +329,43 @@ namespace Sankofa.EditorTools
                 for (var k = 0; k < clumps; k++)
                 {
                     var size = height * R(0.04f, 0.07f);
-                    var clump = Stone(seed * 100 + b * 16 + k, 0, 0.25f, 10f);
+                    var clump = FoliageCluster(seed * 100 + b * 16 + k);
                     var around = R(0f, Mathf.PI * 2f);
                     var outward = Mathf.Sqrt(R(0f, 1f));
                     var at = tip + new Vector3(Mathf.Cos(around) * outward * crown, R(-0.15f, 0.45f) * crown * (1.2f - outward), Mathf.Sin(around) * outward * crown);
-                    canopyParts.Add(new CombineInstance { mesh = clump, transform = Matrix4x4.TRS(at, Quaternion.Euler(R(-15, 15), R(0, 360), R(-15, 15)), new Vector3(size * 1.3f, size * R(0.55f, 0.75f), size * 1.2f)) });
+                    canopyParts.Add(new CombineInstance { mesh = clump, transform = Matrix4x4.TRS(at, Quaternion.Euler(R(-15, 15), R(0, 360), R(-15, 15)), new Vector3(size * 1.8f, size * R(1.0f, 1.3f), size * 1.8f)) });
                 }
             }
             trunk = Combine(trunkParts, "Tree trunk " + seed);
             canopy = Combine(canopyParts, "Tree canopy " + seed);
+        }
+
+        /// <summary>Small sprigs distributed through a volume, with actual gaps and depth from every viewpoint.
+        /// Twelve two-sided cutout cards cost 24 triangles; no camera-facing billboard or runtime mesh updates.</summary>
+        public static Mesh FoliageCluster(int seed)
+        {
+            var random = new System.Random(seed);
+            float R(float a, float b) => a + (float)random.NextDouble() * (b - a);
+            var vertices = new List<Vector3>();
+            var uv = new List<Vector2>();
+            var triangles = new List<int>();
+            for (var i = 0; i < 12; i++)
+            {
+                var centre = new Vector3(R(-0.7f, 0.7f), R(-0.35f, 0.35f), R(-0.7f, 0.7f));
+                var rotation = Quaternion.Euler(R(-65, 65), R(0, 360), R(-40, 40));
+                var size = R(0.7f, 1.1f);
+                var first = vertices.Count;
+                foreach (var p in new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) })
+                {
+                    vertices.Add(centre + rotation * new Vector3((p.x - 0.5f) * size, (p.y - 0.5f) * size, 0));
+                    uv.Add(p);
+                }
+                triangles.AddRange(new[] { first, first + 2, first + 1, first + 1, first + 2, first + 3 });
+            }
+            var mesh = new Mesh(); mesh.SetVertices(vertices); mesh.SetUVs(0, uv); mesh.SetTriangles(triangles, 0);
+            mesh.SetColors(Fill(vertices.Count, Color.white));
+            mesh.SetUVs(1, new List<Vector2>(new Vector2[vertices.Count]));
+            return Finish(mesh, "Leaf sprigs " + seed);
         }
 
         static Mesh Combine(List<CombineInstance> parts, string name)

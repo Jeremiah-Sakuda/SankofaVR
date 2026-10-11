@@ -51,6 +51,7 @@ namespace Sankofa.Tests
                 Single<AttentionSource>(), Single<WorldAnchor>(),
             };
             components.AddRange(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+            components.AddRange(Object.FindObjectsByType<FigurePresence>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.AddRange(Object.FindObjectsByType<Runtime.Fire.HearthFire>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.AddRange(Object.FindObjectsByType<Runtime.Narration.NarrationPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             components.Add(Single<CaptionBoard>());
@@ -154,6 +155,37 @@ namespace Sankofa.Tests
                     }
                     finally { Object.DestroyImmediate(baked); }
                 }
+            }
+        }
+
+        [Test]
+        public void GarmentsCoverTheWaistFromEverySideAndEyesHaveAnAuthoredBlink()
+        {
+            foreach (var figure in Object.FindObjectsByType<FigurePresence>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var skins = figure.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+                var eyes = skins.Single(s => s.name == "Eyes");
+                Assert.That(eyes.sharedMesh.blendShapeCount, Is.EqualTo(1), figure.name + ": authored blink");
+                var cloth = skins.Single(s => s.name == "Shawl");
+                var height = new SerializedObject(figure.GetComponent<FigureMotion>()).FindProperty("height").floatValue;
+                var baked = new Mesh();
+                var probe = new GameObject("Garment coverage probe");
+                try
+                {
+                    cloth.BakeMesh(baked);
+                    var place = Matrix4x4.TRS(cloth.transform.position, cloth.transform.rotation, Vector3.one);
+                    baked.vertices = baked.vertices.Select(v => place.MultiplyPoint3x4(v)).ToArray();
+                    baked.RecalculateBounds();
+                    var collider = probe.AddComponent<MeshCollider>(); collider.sharedMesh = baked;
+                    var centre = figure.transform.TransformPoint(new Vector3(0, height * 0.665f, -height * 0.013f));
+                    for (var i = 0; i < 16; i++)
+                    {
+                        var direction = figure.transform.TransformDirection(new Vector3(Mathf.Cos(i * Mathf.PI / 8), 0, Mathf.Sin(i * Mathf.PI / 8)));
+                        Assert.That(collider.Raycast(new Ray(centre + direction * 0.5f, -direction), out var hit, 0.5f), Is.True,
+                            figure.name + ": open waist in direction " + i);
+                    }
+                }
+                finally { Object.DestroyImmediate(probe); Object.DestroyImmediate(baked); }
             }
         }
 

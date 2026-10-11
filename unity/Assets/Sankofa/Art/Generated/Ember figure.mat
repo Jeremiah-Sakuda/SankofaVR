@@ -34,6 +34,8 @@ Material:
     - _ArmPos: 0
     - _CrownY: 1000
     - _Drift: 0.25
+    - _Eye: 0
+    - _EyeClosed: 0
     - _Fabric: 0
     - _Feature: 0
     - _GroundY: 0

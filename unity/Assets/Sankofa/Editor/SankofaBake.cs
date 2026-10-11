@@ -21,6 +21,8 @@ namespace Sankofa.EditorTools
             var colliders = new List<MeshCollider>();
             foreach (var f in occluders)
             {
+                // Leaf cards are mostly air. Their full rectangles must not bake solid canopy shadows.
+                if (f.GetComponent<Renderer>().sharedMaterial.IsKeywordEnabled("_FOLIAGE")) continue;
                 var c = f.gameObject.AddComponent<MeshCollider>();
                 c.sharedMesh = f.sharedMesh;
                 colliders.Add(c);

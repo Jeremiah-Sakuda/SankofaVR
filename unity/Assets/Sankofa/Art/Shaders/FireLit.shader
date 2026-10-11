@@ -37,6 +37,7 @@ Shader "Sankofa/Fire Lit"
             #pragma multi_compile_instancing
             #pragma shader_feature_local _ _DETAIL_PLANAR _DETAIL_TRIPLANAR _DETAIL_UV
             #pragma shader_feature_local _ _SCANNED
+            #pragma shader_feature_local _ _FOLIAGE
             #include "UnityCG.cginc"
             #include "SankofaGrade.cginc"
 
@@ -119,6 +120,10 @@ Shader "Sankofa/Fire Lit"
             fixed4 frag(v2f i, fixed facing : VFACE) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+            #if defined(_FOLIAGE)
+                // Cutout, with depth writes: leaves reveal real gaps without transparent sorting layers.
+                clip(tex2D(_MainTex, TRANSFORM_TEX(i.uv, _MainTex)).a - 0.45);
+            #endif
                 half3 n = normalize(i.normal) * (facing > 0 ? 1 : -1);
                 half detail = 0.5;
                 half3 scan = half3(1, 1, 1);
@@ -173,6 +178,10 @@ Shader "Sankofa/Fire Lit"
                 half rim = pow(1 - saturate(dot(n, view)), 3) * saturate(dot(n, moonDir) * 0.5 + 0.5) * _Rim;
 
                 half3 ambient = lerp(_SankofaAmbientGround.rgb, _SankofaAmbientSky.rgb, n.y * 0.5 + 0.5) * i.color.a;
+            #if defined(_FOLIAGE)
+                // Thin leaves catch a little light through their back, rather than becoming black cards.
+                ambient += _SankofaAmbientSky.rgb * 0.2;
+            #endif
                 half3 lit = albedo * (ambient + _SankofaLightColor.rgb * ndl * attenuation * i.visibility.x + _SankofaMoonColor.rgb * (moon + rim) * i.color.a);
                 // Illumination warms the surface in proportion to its own colour, so painted detail stays legible.
                 lit += _Emission.rgb + _HighlightColor.rgb * (0.05 + albedo * 1.2) * _Highlight * (0.35 + 0.65 * ndl);

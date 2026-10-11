@@ -156,81 +156,99 @@ namespace Sankofa.EditorTools
             return cloth;
         }
 
-        // A fitted, skinned torso and short sleeve follows the actual shoulders and elbows. A lathed shell
-        // cannot fit that anatomy: it made a broad empty collar and detached triangular shoulders.
+        // A complete garment, authored in the posed figure's space and converted to bind space. It
+        // uses interpolated clip edges and the artist's weights at the neck and shoulders. Covered body faces are
+        // removed after garment derivation, so animated skin cannot poke through. Plain construction still needs cultural review.
         static Renderer FittedCloth(Transform figureRoot, SkinnedMeshRenderer body, SankofaArtSet art, float height)
         {
             const string path = "Assets/Sankofa/Art/Generated/Figure Shawl.asset";
             var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             if (mesh == null)
             {
-                var original = body.sharedMesh;
-                mesh = new Mesh { name = "Figure Shawl", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
-                var weights = original.boneWeights;
-                var verts = original.vertices;
-                var normals = original.normals;
-                var source = original.triangles;
-                var uv = original.uv;
-                var fitted = new ClothVertex[verts.Length];
-                var skinMatrices = SkinMatrices(body);
-                for (var k = 0; k < verts.Length; k++)
-                {
-                    // Offset in metres, converted to mesh space, prevents depth fighting and preserves skin weights.
-                    // FBX import includes a mirrored, nonuniform transform. TransformDirection ignores its
-                    // scale and can offset clothing inward; normals need the inverse-transpose matrix.
-                    var skin = SkinMatrix(skinMatrices, weights[k]);
-                    var worldNormal = skin.inverse.transpose.MultiplyVector(normals[k]).normalized;
-                    var local = figureRoot.InverseTransformPoint(skin.MultiplyPoint3x4(verts[k]));
-                    // Cloth hangs from the chest instead of adhering to the abdominal contour.
-                    if (local.y > height * 0.53f && local.y < height * 0.77f && local.z > 0 && Mathf.Abs(local.x) < height * 0.13f)
-                        local.z = Mathf.Max(local.z, height * 0.086f * (1 - Mathf.Pow(Mathf.Abs(local.x) / (height * 0.2f), 2)));
-                    local += figureRoot.InverseTransformVector(worldNormal * 0.009f);
-                    fitted[k] = new ClothVertex { Point = local, UV = uv[k], Weight = weights[k] };
-                }
-                // Clip actual triangles at the hem, neck and sleeves. Selecting vertices by bone name left
-                // jagged edges and stray patches on wrists; interpolation keeps the new edges skinned correctly.
-                var output = new List<ClothVertex>();
+                var vertices = new List<Vector3>();
+                var uv = new List<Vector2>();
+                var weights = new List<BoneWeight>();
                 var triangles = new List<int>();
-                for (var k = 0; k < source.Length; k += 3)
+                var skinMatrices = SkinMatrices(body);
+                int Bone(string name) => System.Array.FindIndex(body.bones, b => b.name == name);
+                void Vertex(Vector3 point, Vector2 tex, BoneWeight weight)
                 {
-                    var polygon = new List<ClothVertex> { fitted[source[k]], fitted[source[k + 1]], fitted[source[k + 2]] };
-                    polygon = ClipCloth(polygon, v => v.Point.y - height * 0.61f);
-                    polygon = ClipCloth(polygon, v => height * 0.86f - v.Point.y);
-                    polygon = ClipCloth(polygon, v => height * 0.205f - v.Point.x);
-                    polygon = ClipCloth(polygon, v => height * 0.205f + v.Point.x);
+                    vertices.Add(SkinMatrix(skinMatrices, weight).inverse.MultiplyPoint3x4(figureRoot.TransformPoint(point)));
+                    uv.Add(tex); weights.Add(weight);
+                }
+                var sourceVertices = body.sharedMesh.vertices;
+                var sourceNormals = body.sharedMesh.normals;
+                var sourceWeights = body.sharedMesh.boneWeights;
+                var sourceTriangles = body.sharedMesh.triangles;
+                var sourceUV = body.sharedMesh.uv;
+                var names = body.bones.Select(b => b.name).ToArray();
+                ClothVertex Surface(int index, bool torso)
+                {
+                    var skin = SkinMatrix(skinMatrices, sourceWeights[index]);
+                    var normal = skin.inverse.transpose.MultiplyVector(sourceNormals[index]).normalized;
+                    var point = figureRoot.InverseTransformPoint(skin.MultiplyPoint3x4(sourceVertices[index]) + normal * 0.014f);
+                    // Cotton hangs below the chest rather than outlining the base character's abdominal muscles.
+                    if (torso && point.y < height * 0.73f && point.z > 0)
+                        point.z = Mathf.Max(point.z, height * 0.082f * (1 - Mathf.Pow(point.x / (height * 0.17f), 2)));
+                    return new ClothVertex { Point = point, UV = sourceUV[index], Weight = sourceWeights[index] };
+                }
+                void Polygon(List<ClothVertex> polygon)
+                {
                     for (var j = 1; j + 1 < polygon.Count; j++)
                     {
-                        triangles.AddRange(new[] { output.Count, output.Count + 1, output.Count + 2 });
-                        output.AddRange(new[] { polygon[0], polygon[j], polygon[j + 1] });
+                        var first = vertices.Count;
+                        foreach (var v in new[] { polygon[0], polygon[j], polygon[j + 1] }) Vertex(v.Point, v.UV, v.Weight);
+                        triangles.AddRange(new[] { first, first + 1, first + 2 });
                     }
                 }
-                mesh.SetVertices(output.Select(v => SkinMatrix(skinMatrices, v.Weight).inverse.MultiplyPoint3x4(figureRoot.TransformPoint(v.Point))).ToList());
-                mesh.SetUVs(0, output.Select(v => v.UV).ToList());
-                mesh.boneWeights = output.Select(v => v.Weight).ToArray();
-                mesh.bindposes = body.sharedMesh.bindposes;
-                mesh.SetTriangles(triangles, 0);
-                mesh.normals = WeldedNormals(mesh);
-                mesh.RecalculateBounds();
+                bool Torso(int index)
+                {
+                    var n = names[DominantBone(sourceWeights[index])];
+                    return n.StartsWith("spine") || n.StartsWith("clavicle") || n.StartsWith("neck") || n == "Head" || n == "pelvis";
+                }
+                // Preserve the artist's shoulder/neck weights. An independent loft did not follow the neck
+                // when the kneeling clip bowed, and exposed a hole even with a perfectly closed waist.
+                for (var i = 0; i < sourceTriangles.Length; i += 3)
+                {
+                    var ids = new[] { sourceTriangles[i], sourceTriangles[i + 1], sourceTriangles[i + 2] };
+                    if (!ids.Any(Torso)) continue;
+                    var polygon = ids.Select(k => Surface(k, true)).ToList();
+                    polygon = ClipCloth(polygon, v => v.Point.y - height * 0.60f);
+                    polygon = ClipCloth(polygon, v => height * 0.865f - v.Point.y);
+                    Polygon(polygon);
+                }
+                // Clean cuffs on sleeves with the same artist-authored shoulder and arm weights.
+                foreach (var side in new[] { "l", "r" })
+                {
+                    var upperIndex = Bone("upperarm_" + side);
+                    var upper = figureRoot.InverseTransformPoint(body.bones[upperIndex].position);
+                    var lower = figureRoot.InverseTransformPoint(body.bones[Bone("lowerarm_" + side)].position);
+                    var length = Vector3.Distance(upper, lower);
+                    var axis = (lower - upper).normalized;
+                    for (var i = 0; i < sourceTriangles.Length; i += 3)
+                    {
+                        var ids = new[] { sourceTriangles[i], sourceTriangles[i + 1], sourceTriangles[i + 2] };
+                        if (!ids.Any(k => DominantBone(sourceWeights[k]) == upperIndex)) continue;
+                        var polygon = ids.Select(k => Surface(k, false)).ToList();
+                        polygon = ClipCloth(polygon, v => length * 0.65f - Vector3.Dot(v.Point - upper, axis));
+                        Polygon(polygon);
+                    }
+                }
+                mesh = new Mesh { name = "Figure Shawl" };
+                mesh.SetVertices(vertices); mesh.SetUVs(0, uv); mesh.SetTriangles(triangles, 0);
+                mesh.boneWeights = weights.ToArray(); mesh.bindposes = body.sharedMesh.bindposes;
+                mesh.normals = WeldedNormals(mesh); mesh.RecalculateBounds();
                 AssetDatabase.CreateAsset(mesh, path);
             }
             var go = new GameObject("Shawl");
             go.transform.SetParent(body.transform, false);
             var cloth = go.AddComponent<SkinnedMeshRenderer>();
-            cloth.sharedMesh = mesh;
-            cloth.bones = body.bones;
-            cloth.rootBone = body.rootBone;
+            cloth.sharedMesh = mesh; cloth.bones = body.bones; cloth.rootBone = body.rootBone;
             cloth.localBounds = body.localBounds;
             DrawAsFigure(cloth, art);
             cloth.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             cloth.receiveShadows = false;
             return cloth;
-        }
-
-        struct ClothVertex
-        {
-            public Vector3 Point;
-            public Vector2 UV;
-            public BoneWeight Weight;
         }
 
         static Matrix4x4[] SkinMatrices(SkinnedMeshRenderer body) => body.bones
@@ -252,12 +270,13 @@ namespace Sankofa.EditorTools
             return result;
         }
 
+        struct ClothVertex { public Vector3 Point; public Vector2 UV; public BoneWeight Weight; }
+
         static List<ClothVertex> ClipCloth(List<ClothVertex> input, System.Func<ClothVertex, float> distance)
         {
             var result = new List<ClothVertex>();
             if (input.Count == 0) return result;
-            var previous = input[input.Count - 1];
-            var previousDistance = distance(previous);
+            var previous = input[input.Count - 1]; var previousDistance = distance(previous);
             foreach (var current in input)
             {
                 var currentDistance = distance(current);
@@ -268,8 +287,7 @@ namespace Sankofa.EditorTools
                         UV = Vector2.Lerp(previous.UV, current.UV, t), Weight = BlendWeights(previous.Weight, current.Weight, t) });
                 }
                 if (currentDistance >= 0) result.Add(current);
-                previous = current;
-                previousDistance = currentDistance;
+                previous = current; previousDistance = currentDistance;
             }
             return result;
         }
@@ -283,8 +301,7 @@ namespace Sankofa.EditorTools
             Add(b.boneIndex0, b.weight0 * t); Add(b.boneIndex1, b.weight1 * t);
             Add(b.boneIndex2, b.weight2 * t); Add(b.boneIndex3, b.weight3 * t);
             var best = weights.OrderByDescending(kv => kv.Value).Take(4).ToArray();
-            var total = best.Sum(kv => kv.Value);
-            var result = new BoneWeight();
+            var total = best.Sum(kv => kv.Value); var result = new BoneWeight();
             if (best.Length > 0) { result.boneIndex0 = best[0].Key; result.weight0 = best[0].Value / total; }
             if (best.Length > 1) { result.boneIndex1 = best[1].Key; result.weight1 = best[1].Value / total; }
             if (best.Length > 2) { result.boneIndex2 = best[2].Key; result.weight2 = best[2].Value / total; }
@@ -404,7 +421,48 @@ namespace Sankofa.EditorTools
 
         static AnimatorController figureController;
         static Mesh slenderBody;
+        static bool clothedBodyFinished;
         const string SlenderBodyPath = "Assets/Sankofa/Art/Generated/Figure body.asset";
+        const string FigureEyesPath = "Assets/Sankofa/Art/Generated/Figure eyes.asset";
+
+        static void BlinkEyes(Transform figure, SkinnedMeshRenderer eyes)
+        {
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(FigureEyesPath);
+            if (mesh == null)
+            {
+                var source = eyes.sharedMesh;
+                mesh = new Mesh { name = "Figure eyes" };
+                mesh.vertices = source.vertices; mesh.normals = source.normals; mesh.uv = source.uv;
+                mesh.triangles = source.triangles; mesh.boneWeights = source.boneWeights; mesh.bindposes = source.bindposes;
+                var matrices = SkinMatrices(eyes);
+                var vertices = source.vertices;
+                var weights = source.boneWeights;
+                var points = vertices.Select((v, i) => figure.InverseTransformPoint(SkinMatrix(matrices, weights[i]).MultiplyPoint3x4(v))).ToArray();
+                var centreX = points.Average(p => p.x);
+                var leftY = points.Where(p => p.x < centreX).Average(p => p.y);
+                var rightY = points.Where(p => p.x >= centreX).Average(p => p.y);
+                var colours = new Color[vertices.Length];
+                var groups = new[] { points.Where(p => p.x < centreX).ToArray(), points.Where(p => p.x >= centreX).ToArray() };
+                var delta = new Vector3[vertices.Length];
+                for (var i = 0; i < vertices.Length; i++)
+                {
+                    var p = points[i];
+                    var centreY = p.x < centreX ? leftY : rightY;
+                    var group = groups[p.x < centreX ? 0 : 1];
+                    var x = group.Average(v => v.x); var z = group.Average(v => v.z);
+                    var radius = (group.Max(v => v.x) - group.Min(v => v.x)) * 0.24f;
+                    var r = new Vector2(p.x - x, p.y - centreY).magnitude;
+                    var pupil = p.z > z ? 1 - Mathf.SmoothStep(radius * 0.7f, radius * 1.2f, r) : 0;
+                    colours[i] = Color.Lerp(new Color(0.34f, 0.30f, 0.24f), new Color(0.02f, 0.015f, 0.01f), pupil);
+                    p.y = Mathf.Lerp(centreY, p.y, 0.08f);
+                    delta[i] = SkinMatrix(matrices, weights[i]).inverse.MultiplyPoint3x4(figure.TransformPoint(p)) - vertices[i];
+                }
+                mesh.AddBlendShapeFrame("Blink", 100, delta, new Vector3[delta.Length], new Vector3[delta.Length]);
+                mesh.colors = colours;
+                mesh.RecalculateBounds(); AssetDatabase.CreateAsset(mesh, FigureEyesPath);
+            }
+            eyes.sharedMesh = mesh;
+        }
 
         static int DominantBone(BoneWeight w)
         {
@@ -440,14 +498,10 @@ namespace Sankofa.EditorTools
             mesh.colors = original.colors;
             // One submesh, so the figure's depth material covers all of it.
             var sourceTriangles = Enumerable.Range(0, original.subMeshCount).SelectMany(original.GetTriangles).ToArray();
-            var kept = new List<int>();
-            bool CoveredLeg(int i) => names[DominantBone(weights[i])].StartsWith("thigh") || names[DominantBone(weights[i])].StartsWith("calf");
-            for (var k = 0; k < sourceTriangles.Length; k += 3)
-                if (!CoveredLeg(sourceTriangles[k]) && !CoveredLeg(sourceTriangles[k + 1]) && !CoveredLeg(sourceTriangles[k + 2]))
-                    kept.AddRange(new[] { sourceTriangles[k], sourceTriangles[k + 1], sourceTriangles[k + 2] });
-            var all = kept.ToArray();
+            // Keep all source surfaces until the garments are derived; trimming legs here also removed
+            // hip triangles needed to close the shirt's tucked hem.
             mesh.subMeshCount = 1;
-            mesh.SetTriangles(all, 0);
+            mesh.SetTriangles(sourceTriangles, 0);
             mesh.boneWeights = weights;
             mesh.bindposes = renderer.sharedMesh.bindposes;
             mesh.normals = WeldedNormals(mesh);
@@ -476,6 +530,7 @@ namespace Sankofa.EditorTools
             {
                 AssetDatabase.DeleteAsset("Assets/Sankofa/Art/Generated/Figure Wrap.asset");
                 AssetDatabase.DeleteAsset("Assets/Sankofa/Art/Generated/Figure Shawl.asset");
+                AssetDatabase.DeleteAsset(FigureEyesPath);
                 slenderBody = SlenderBody(renderer);
             }
             renderer.sharedMesh = slenderBody;
@@ -508,9 +563,27 @@ namespace Sankofa.EditorTools
                 new Vector2(0.125f, 0.53f), new Vector2(0.14f, 0.64f), new Vector2(0.16f, 0.74f),
                 new Vector2(0.168f, 0.8f), new Vector2(0.12f, 0.84f), new Vector2(0.047f, 0.868f),
             });
+            // The garment is the visible torso. Removing covered skin avoids animated chest/shoulder
+            // intersections rather than drawing two competing surfaces. Keep the complete source while
+            // deriving weighted sleeves, and keep exposed neck, head, arms, hands and feet afterwards.
+            if (!clothedBodyFinished)
+            {
+                clothedBodyFinished = true;
+                var names = renderer.bones.Select(b => b.name).ToArray();
+                var weights = slenderBody.boneWeights;
+                var source = slenderBody.triangles;
+                bool Covered(int i) { var n = names[DominantBone(weights[i])]; return n.StartsWith("spine") || n.StartsWith("clavicle") || n.StartsWith("thigh") || n.StartsWith("calf"); }
+                var kept = new List<int>();
+                for (var i = 0; i < source.Length; i += 3)
+                    if (!Covered(source[i]) && !Covered(source[i + 1]) && !Covered(source[i + 2]))
+                        kept.AddRange(new[] { source[i], source[i + 1], source[i + 2] });
+                slenderBody.SetTriangles(kept, 0);
+                EditorUtility.SetDirty(slenderBody);
+            }
             var detail = model.GetComponentsInChildren<SkinnedMeshRenderer>().Where(r => r != renderer && r != wrap && r != shawl).Cast<Renderer>().ToList();
             foreach (var r in detail)
             {
+                if (r.name == "Eyes") BlinkEyes(figureRoot, (SkinnedMeshRenderer)r);
                 DrawAsFigure(r, art);
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 r.receiveShadows = false;

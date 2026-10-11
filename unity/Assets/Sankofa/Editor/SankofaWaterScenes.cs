@@ -373,6 +373,16 @@ namespace Sankofa.EditorTools
             Set(motion, "sharingStream", pour);
             Set(motion, "tint", tint);
             SetArray(motion, "parts", cloth.Cast<Object>().ToArray());
+            var presence = figureRoot.gameObject.AddComponent<FigurePresence>();
+            Set(presence, "eyes", figureRoot.GetComponentsInChildren<SkinnedMeshRenderer>(true).Single(r => r.name == "Eyes"));
+            Set(presence, "heldAnchor", hands);
+            Set(presence, "rightHand", hand);
+            Set(presence, "leftHand", Bone("hand_l"));
+            var fingers = new List<Object>();
+            foreach (var side in new[] { "r", "l" })
+                foreach (var digit in new[] { "thumb", "index", "middle", "ring", "pinky" })
+                    for (var joint = 1; joint <= 3; joint++) fingers.Add(Bone(digit + "_0" + joint + "_" + side));
+            SetArray(presence, "fingers", fingers.ToArray());
             // Garments deform with the rig instead of shrinking rigid shells when the figure kneels.
             return o;
         }

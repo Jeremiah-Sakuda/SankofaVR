@@ -68,6 +68,7 @@ namespace Sankofa.Runtime.Stage
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int SmokeId = Shader.PropertyToID("_Smoke");
         static readonly int FeatureId = Shader.PropertyToID("_Feature");
+        static readonly int EyeId = Shader.PropertyToID("_Eye");
         static readonly int FabricId = Shader.PropertyToID("_Fabric");
         static readonly int HeadId = Shader.PropertyToID("_HeadSphere");
         static readonly int WalkingId = Animator.StringToHash("Walking");
@@ -115,6 +116,8 @@ namespace Sankofa.Runtime.Stage
         /// <summary>Metres walked so far, for a gait to keep its steps in time.</summary>
         public float Travelled => travelled;
         public float Kneel => kneel;
+        public float SharingWeight => shareElapsed < 0 || shareElapsed > 9 ? 0 :
+            Mathf.SmoothStep(0, 1, Mathf.Min(shareElapsed / 1.4f, (9 - shareElapsed) / 1.5f));
         /// <summary>How far each arm is raised forward (0 hanging, 1 held straight out).</summary>
         public (float Negative, float Positive) Arms => (armNeg, armPos);
 
@@ -537,7 +540,7 @@ namespace Sankofa.Runtime.Stage
         {
             if (sharingStream != null) sharingStream.enabled = false;
             if (sharePartner == null || shareElapsed < 0 || shareElapsed > 9 || anchors.Length == 0 || sharePartner.anchors.Length == 0) return;
-            var blend = Mathf.SmoothStep(0, 1, Mathf.Min(shareElapsed / 1.4f, (9 - shareElapsed) / 1.5f));
+            var blend = SharingWeight;
             var between = (transform.position + sharePartner.transform.position) * 0.5f;
             between.y = Mathf.Max(transform.position.y, sharePartner.transform.position.y) + height * 0.59f;
             var side = (sharePartner.transform.position - transform.position).normalized;
@@ -655,6 +658,7 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(SmokeId, bodySmoke);
             block.SetFloat(FabricId, 0f);
             block.SetFloat(FeatureId, 0f);
+            block.SetFloat(EyeId, 0f);
             body.SetPropertyBlock(block);
             if (parts.Length == 0) return;
             block.SetFloat(SmokeId, partSmoke);
@@ -668,6 +672,7 @@ namespace Sankofa.Runtime.Stage
                 c.enabled = body.enabled;
                 block.SetFloat(FabricId, animator != null && i < 2 ? 1f : 0f);
                 block.SetFloat(FeatureId, animator != null && i >= 2 ? 1f : 0f);
+                block.SetFloat(EyeId, c.name == "Eyes" ? 1f : 0f);
                 block.SetColor(ColorId, i == 0 ? tint * 0.65f : tint);
                 c.SetPropertyBlock(block);
                 if (i < partKneelScale.Length && partRest != null && i < partRest.Length)

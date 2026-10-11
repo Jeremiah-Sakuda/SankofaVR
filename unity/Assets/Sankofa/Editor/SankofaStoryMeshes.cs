@@ -325,7 +325,7 @@ namespace Sankofa.EditorTools
                 {
                     var size = height * R(0.14f, 0.24f);
                     var at = tip + new Vector3(R(-1.3f, 1.3f) * size, R(-0.05f, 0.08f) * size, R(-1.3f, 1.3f) * size);
-                    crowns.Add(new CombineInstance { mesh = SankofaMeshes.Stone(seed * 31 + b * 13 + k, 1, 0.3f, 10f), transform = Matrix4x4.TRS(at, Quaternion.Euler(0, R(0, 360), 0), new Vector3(size, size * 0.18f, size * R(0.8f, 1f))) });
+                    crowns.Add(new CombineInstance { mesh = SankofaMeshes.FoliageCluster(seed * 31 + b * 13 + k), transform = Matrix4x4.TRS(at, Quaternion.Euler(0, R(0, 360), 0), new Vector3(size, size * 0.55f, size * R(0.8f, 1f))) });
                 }
             }
             trunk = CombineMeshes(trunks, "Acacia trunk " + seed);
