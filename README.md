@@ -2,7 +2,7 @@
 
 **Sankofa — a story that notices what you notice.**
 
-A hands-first storytelling experience for Meta Quest. You sit at a night fire, and the fire is the griot. It welcomes you, asks when you would like to go, and brings a history into the space around you without moving you. You enter through its flame. People appear as shapes of firelight; you carry, receive and touch things, and the story changes with what you did. You return to the hearth with a keepsake and a thread to follow next time.
+A hands-first storytelling experience for Meta Quest. You sit at a night fire, and the fire is the griot. It welcomes you, asks when you would like to go, and brings a history into the space around you without moving you. You enter through its flame. People emerge in firelight; you carry, receive and touch things, and the story changes with what you did. You return to the hearth with a keepsake and a thread to follow next time.
 
 The first story is **Enkare Nairobi**, the cool-water stream that gave Nairobi its name, where Kikuyu and Maasai women traded. It is told across two eras and today:
 
@@ -22,7 +22,7 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 |---|---|
 | ![The hearth at night: the fire, a log seat and the stars](docs/media/hearth.jpg) | ![The stream at dusk in the 1850s, the forest to the left and the plain beyond](docs/media/dusk-1850s.jpg) |
 | The hearth, where the fire speaks | Before the railway: the stream at dusk |
-| ![Naserian, a figure of firelight, holds a bead out beside the trading hide](docs/media/bead-offered.jpg) | ![Njeri and Naisula among the railway camp's tents, 1899](docs/media/railway-1899.jpg) |
+| ![Naserian holds a bead out beside the trading hide](docs/media/bead-offered.jpg) | ![Njeri and Naisula among the railway camp's tents, 1899](docs/media/railway-1899.jpg) |
 | The bead is offered | When the railway came: the granddaughters |
 | ![The city at night across the river, a jiko burning in front](docs/media/river-today.jpg) | ![Back at the hearth, the bead waits beside the choice to keep the visit](docs/media/keepsake.jpg) |
 | The same water today | Home, with the keepsake |
@@ -35,6 +35,18 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 
 *Home again: what the visitor lingered on rises out of the fire.*
 
+## Figure revision
+
+![The same 1899 journey view before and after the character and lighting revision](docs/media/figures-comparison.jpg)
+
+*Left: the previous build (`e2dbd82`). Right: the current character revision. Both are actual desktop journey captures with the same camera framing.*
+
+| Standing | Kneeling | Sharing |
+|---|---|---|
+| ![The new skinned figure standing in lantern light](docs/media/figure-standing.jpg) | ![The skinned wrap covering the kneeling pose](docs/media/figure-kneeling.jpg) | ![Two women settling and pouring between their gourds](docs/media/figure-sharing.jpg) |
+
+*Close-up pose studies from the runtime, staged for inspection with captions hidden. These are presentation studies, not proof of visitor hand tracking or historical dress.*
+
 ## Status
 
 The full slice runs in software: a Unity project for Quest and an engine-free story core.
@@ -44,7 +56,7 @@ The full slice runs in software: a Unity project for Quest and an engine-free st
 | Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
 | Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
 | Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can replay the same path and outcomes, continue to today or be forgotten; questions and interruption timing are not replayed |
-| Figures | They walk in, kneel, carry their things, hand them over and walk away, and look back when you look at them |
+| Figures | Skinned garments, walk/kneel/give performances, directed gourd sharing, and a glance when your attention rests on them |
 | Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
 
 Not yet established:
