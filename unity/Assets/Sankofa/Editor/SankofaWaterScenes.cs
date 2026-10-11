@@ -361,19 +361,19 @@ namespace Sankofa.EditorTools
             Set(motion, "speed", 0.55f);
             Transform Bone(string name) => figureRoot.GetComponentsInChildren<Transform>(true).First(t => t.name == name);
             SetArray(motion, "reachArm", new Object[] { Bone("upperarm_r"), Bone("lowerarm_r"), hand });
+            SetArray(motion, "supportArm", new Object[] { Bone("upperarm_l"), Bone("lowerarm_l"), Bone("hand_l") });
+            var pour = Child(figureRoot, "Flour stream").gameObject.AddComponent<LineRenderer>();
+            pour.sharedMaterial = art.FlourTransfer;
+            pour.positionCount = 6;
+            pour.useWorldSpace = true;
+            pour.startWidth = 0.012f;
+            pour.endWidth = 0.007f;
+            pour.numCapVertices = 2;
+            pour.enabled = false;
+            Set(motion, "sharingStream", pour);
             Set(motion, "tint", tint);
             SetArray(motion, "parts", cloth.Cast<Object>().ToArray());
-            // Kneeling, the wrap gathers a little on the ground, still covering the knees, and the shawl falls shorter.
-            var kneelScale = new SerializedObject(motion);
-            var scales = kneelScale.FindProperty("partKneelScale");
-            scales.arraySize = 2;
-            scales.GetArrayElementAtIndex(0).floatValue = 0.9f;
-            scales.GetArrayElementAtIndex(1).floatValue = 0.8f;
-            var widens = kneelScale.FindProperty("partKneelWiden");
-            widens.arraySize = 2;
-            widens.GetArrayElementAtIndex(0).floatValue = 1.3f;
-            widens.GetArrayElementAtIndex(1).floatValue = 1f;
-            kneelScale.ApplyModifiedPropertiesWithoutUndo();
+            // Garments deform with the rig instead of shrinking rigid shells when the figure kneels.
             return o;
         }
 
@@ -494,6 +494,9 @@ namespace Sankofa.EditorTools
             body.transform.localPosition = new Vector3(0, -height * 0.4f, 0);
             SaveMeshes(new[] { body });
             var o = Staged(gourdRoot.gameObject, id, scene, visible, new[] { body.GetComponent<Renderer>() });
+            var opening = Child(gourdRoot, "Opening");
+            opening.localPosition = Vector3.up * height * 0.6f;
+            Set(o, "pourPoint", opening);
             Set(o, "attentionRadius", 0.12f);
             return o;
         }
@@ -681,10 +684,10 @@ namespace Sankofa.EditorTools
             var empty = BuildGourd(root, art, "gourd.empty", "story.water.1899", njeriAt + new Vector3(0.18f, 0.12f, -0.08f), 0.24f, 0.1f, 0.03f, 0.9f, false);
             var old = BuildGourd(root, art, "gourd.old", "story.water.1899", naisulaAt + new Vector3(-0.2f, 0.14f, -0.08f), 0.32f, 0.07f, 0.025f, 0.45f, false);
             var seed = BuildSeed(root, art, "seed", "story.water.1899", njeriAt + new Vector3(0.12f, 0.85f, -0.1f));
-            Carries(njeri, empty, "Hands", new Vector3(0, -0.21f, 0));
+            Carries(njeri, empty, "Hands", new Vector3(0, -0.14f, 0));
             Carries(njeri, seed, "Hands", new Vector3(0, 0.01f, 0.03f));
             HandsOver(seed, root, new Vector2(-0.15f, 1.45f));
-            Carries(naisula, old, "Hands", new Vector3(0, -0.28f, 0));
+            Carries(naisula, old, "Hands", new Vector3(0, -0.19f, 0));
 
             // Hammering somewhere along the line, now near, now further off. No recorded voices: the workers'
             // languages are to be checked before anyone is heard speaking. No cattle bells in a year without cattle.
@@ -771,7 +774,7 @@ namespace Sankofa.EditorTools
         static void ConfigureWater1899(SerializedProperty e, Transform root)
         {
             // A grey dawn under cloud: soft light from above, little colour, the lantern still burning.
-            Scene(e, "story.water.1899", false, root, new Color(0.22f, 0.22f, 0.24f),
+            Scene(e, "story.water.1899", false, root, new Color(0.16f, 0.185f, 0.2f),
                 new Color(0.16f, 0.165f, 0.18f), new Color(0.06f, 0.055f, 0.05f), 10f, 70f);
             e.FindPropertyRelative("TowardMoon").vector3Value = WaterMoon1899;
             e.FindPropertyRelative("Moon").colorValue = new Color(0.1f, 0.1f, 0.105f);

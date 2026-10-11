@@ -117,6 +117,44 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator CaptureFigureStudy()
+        {
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1") Assert.Ignore("Set SANKOFA_CAPTURE=1 to write review images.");
+            LogAssert.ignoreFailingMessages = true;
+            AudioListener.volume = 0;
+            SceneManager.LoadScene("Hearth");
+            yield return null;
+            var app = Object.FindFirstObjectByType<SankofaApp>();
+            app.enabled = false;
+            GameObject.Find("OVRCameraRig").transform.position = new Vector3(0, 1.15f, 0);
+            var eye = GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();
+            eye.fieldOfView = 70;
+            Object.FindFirstObjectByType<WorldAnchor>().Place();
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.StartScreen>().gameObject.SetActive(false);
+            foreach (var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None)) panel.gameObject.SetActive(false);
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>().gameObject.SetActive(false);
+            var stage = Object.FindFirstObjectByType<StoryStage>();
+            stage.ShowScene("story.water.1899");
+            var giver = stage.Find("figure.njeri");
+            var receiver = stage.Find("figure.naisula");
+            foreach (var id in new[] { "figure.njeri", "figure.naisula", "gourd.empty", "gourd.old", "lantern.1899" }) stage.Find(id).Reveal();
+            yield return new WaitForSeconds(2);
+            eye.transform.rotation = Quaternion.LookRotation(giver.transform.position + Vector3.up * 0.95f - eye.transform.position);
+            Capture(eye, "figure-study-standing");
+            var motion = giver.GetComponent<FigureMotion>();
+            motion.GoTo(giver.transform.position, eye.transform.position, true);
+            yield return new WaitForSeconds(2);
+            Capture(eye, "figure-study-kneeling");
+            motion.ResetState();
+            var partner = receiver.GetComponent<FigureMotion>();
+            motion.GoTo(receiver.transform.position + new Vector3(-0.85f, 0, 0.12f), receiver.transform.position, false, true, partner);
+            eye.transform.rotation = Quaternion.LookRotation(receiver.transform.position + new Vector3(-0.45f, 1.05f, 0) - eye.transform.position);
+            yield return new WaitForSeconds(6);
+            yield return Strip(eye, "figure-study-sharing", receiver.transform.position + new Vector3(-0.45f, 1.05f, 0), 5, 0.4f);
+            AudioListener.volume = 1;
+        }
+
+        [UnityTest]
         [Timeout(900000)] // Three visits rendered at review resolution take longer than the default three minutes.
         public IEnumerator CaptureVisits()
         {
@@ -237,7 +275,7 @@ namespace Sankofa.Tests
                 yield return new WaitForSeconds(1f);
                 CaptureBoth(eye, "13-granddaughters", people);
                 yield return Line("e2.share", 60);
-                yield return Strip(eye, "m5-pouring", new Vector3(0.0f, 1.0f, 1.4f), 6, 0.6f);
+                yield return Strip(eye, "m5-pouring", new Vector3(0.0f, 1.0f, 1.4f), 14, 0.6f);
                 yield return Invited("receive-seed");
                 yield return WaitFor(() => Vector3.Distance(stage.Find("seed").transform.position, stage.GiftPoint(stage.Find("seed").HandOverPlace.Value)) < 0.08f, 20);
                 Capture(eye, "14-seed");

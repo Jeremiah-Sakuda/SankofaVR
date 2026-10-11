@@ -5,6 +5,7 @@
         "Sankofa.Core",
         "Sankofa.Flow",
         "Sankofa.Runtime",
+        "Sankofa.Storage",
         "Sankofa.Interaction",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",

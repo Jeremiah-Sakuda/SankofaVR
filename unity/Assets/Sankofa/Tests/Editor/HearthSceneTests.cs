@@ -67,7 +67,7 @@ namespace Sankofa.Tests
             foreach (var figure in Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 var isPerson = figure.GetComponent<StageObject>().Id != "figure.ewe";
-                Assert.That(MissingReferences(figure).Where(m => isPerson || !(m.EndsWith(".animator") || m.EndsWith(".lookBone") || m.EndsWith(".headBone"))), Is.Empty, figure.name);
+                Assert.That(MissingReferences(figure).Where(m => isPerson || !(m.EndsWith(".animator") || m.EndsWith(".lookBone") || m.EndsWith(".headBone") || m.EndsWith(".sharingStream"))), Is.Empty, figure.name);
                 if (!isPerson) continue;
                 Assert.That(figure.GetComponentInChildren<SkinnedMeshRenderer>(), Is.Not.Null, figure.name + " has a skinned body");
                 // A person's head stands at a person's height, not a giant's or a child's.
@@ -96,11 +96,27 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
             // A glow, touch point and place point are optional for staged objects; their surfaces are not.
-            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".holder", ".handOver", ".echoMesh" };
+            var optional = new[] { ".glow", ".touchPoint", ".placePoint", ".pourPoint", ".holder", ".handOver", ".echoMesh" };
             foreach (var o in Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 Assert.That(MissingReferences(o).Where(m => !optional.Any(m.EndsWith)), Is.Empty, o.Id);
                 Assert.That(new SerializedObject(o).FindProperty("surfaces").arraySize, Is.GreaterThan(0), o.Id);
+            }
+        }
+
+        [Test]
+        public void ImportedMotionFitsTheNewCharactersAndEveryFigurePartHasOneDepthSurface()
+        {
+            foreach (var figure in Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var animator = figure.GetComponentInChildren<Animator>();
+                if (animator == null) continue; // The ewe has its own gait.
+                foreach (var clip in animator.runtimeAnimatorController.animationClips.Distinct())
+                    foreach (var binding in AnimationUtility.GetCurveBindings(clip))
+                        Assert.That(binding.path == "" || animator.transform.Find(binding.path) != null, Is.True,
+                            figure.name + ": missing animated joint " + binding.path + " in " + clip.name);
+                foreach (var skin in figure.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                    Assert.That(skin.sharedMesh.subMeshCount, Is.EqualTo(1), skin.name + ": depth must cover every surface");
             }
         }
 

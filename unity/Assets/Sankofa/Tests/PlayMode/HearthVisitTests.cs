@@ -51,6 +51,7 @@ namespace Sankofa.Tests
         [TearDown]
         public void CleanUp()
         {
+            StageClock.Paused = false;
             Time.timeScale = 1;
             AudioListener.volume = 1;
             Application.logMessageReceived -= watch;
@@ -66,6 +67,34 @@ namespace Sankofa.Tests
                 if (Time.realtimeSinceStartup > end) Assert.Fail("Timed out waiting for " + what);
                 yield return null;
             }
+        }
+
+        [UnityTest]
+        public IEnumerator SharingJoinsTheActualVesselOpeningsAndFreezesWithTheStory()
+        {
+            yield return Open(1);
+            app.enabled = false;
+            stage.ShowScene("story.water.1899");
+            foreach (var id in new[] { "figure.njeri", "figure.naisula", "gourd.empty", "gourd.old" }) stage.Find(id).Reveal();
+            yield return new WaitForSeconds(2);
+            var giver = stage.Find("figure.njeri").GetComponent<FigureMotion>();
+            var receiver = stage.Find("figure.naisula").GetComponent<FigureMotion>();
+            giver.ResetState();
+            receiver.ResetState();
+            giver.GoTo(receiver.transform.position + new Vector3(-0.85f, 0, 0.12f), receiver.transform.position, false, true, receiver);
+            var stream = giver.GetComponentInChildren<LineRenderer>();
+            yield return WaitFor(() => stream.enabled, 15, "the authored pour");
+            yield return null;
+            Assert.That(Vector3.Distance(stream.GetPosition(0), stage.Find("gourd.empty").PourPosition.Value), Is.LessThan(0.015f));
+            Assert.That(Vector3.Distance(stream.GetPosition(stream.positionCount - 1), stage.Find("gourd.old").PourPosition.Value), Is.LessThan(0.015f));
+            StageClock.Paused = true;
+            var elapsed = typeof(FigureMotion).GetField("shareElapsed", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var before = (float)elapsed.GetValue(giver);
+            yield return new WaitForSeconds(0.3f);
+            Assert.That((float)elapsed.GetValue(giver), Is.EqualTo(before));
+            Assert.That(stream.enabled, Is.True);
+            StageClock.Paused = false;
+            Assert.That(problems, Is.Empty);
         }
 
         IEnumerator Open(float pace)
@@ -293,7 +322,7 @@ namespace Sankofa.Tests
 
             // Kept on this device, then continued as a new child visit to the same water today.
             Assert.That(app.Flow.Keep(), Is.True);
-            Assert.That(Directory.GetFiles(folder, "*.json").Length, Is.EqualTo(1));
+            Assert.That(new Sankofa.Storage.FileVisitStore(folder).Load().Visits.Single().Id, Is.EqualTo(app.Flow.KeptVisit.Id));
             var kept = app.Flow.KeptVisit;
             Assert.That(app.Flow.BeginAgain(), Is.True);
             yield return null;

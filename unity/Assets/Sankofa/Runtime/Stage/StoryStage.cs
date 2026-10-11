@@ -192,7 +192,8 @@ namespace Sankofa.Runtime.Stage
                     }
                     var (place, kneel) = to.ApproachFrom(o.HomePosition);
                     // Going to another person, a figure that carries something holds it out when it arrives.
-                    figure.GoTo(place, to.transform.position, kneel, to.GetComponent<FigureMotion>() != null);
+                    var companion = to.GetComponent<FigureMotion>();
+                    figure.GoTo(place, to.transform.position, kneel, companion != null, companion);
                     break;
                 case ActionKind.Withdraw when figure != null:
                     figure.Leave();
@@ -357,7 +358,7 @@ namespace Sankofa.Runtime.Stage
             for (var i = 0; i < shown.Count; i++)
             {
                 var aside = toOneSide ? i * spacing : (i - (shown.Count - 1) / 2f) * spacing;
-                StartCoroutine(RiseEcho(shown[i], from, aside, i * 0.9f, largest, rise, showing));
+                StartCoroutine(RiseEcho(shown[i], transform.InverseTransformPoint(from), aside, i * 0.9f, largest, rise, showing));
             }
         }
 
@@ -378,21 +379,23 @@ namespace Sankofa.Runtime.Stage
             var height = Mathf.Clamp(extent * 0.25f, 0.08f, largest);
             var scale = height / Mathf.Max(0.01f, extent);
             go.transform.localScale = Vector3.one * scale;
-            var start = from + SeatRight * aside;
+            var start = from + transform.InverseTransformVector(SeatRight) * aside;
             var block = new MaterialPropertyBlock();
             const float rising = 3.5f;
             // Rises clear of the light it came from, below the captions, then stays, breathing a little.
             for (var t = 0f; go != null; t += StageClock.DeltaTime)
             {
                 var x = Mathf.Clamp01(t / rising);
-                var at = start + Vector3.up * (0.04f + rise * Mathf.SmoothStep(0f, 1f, x) + 0.01f * Mathf.Sin(t * 1.3f + aside * 9f));
-                go.transform.position = at - Vector3.up * o.EchoMesh.bounds.min.y * scale;
+                var local = start + Vector3.up * (0.04f + rise * Mathf.SmoothStep(0f, 1f, x) + 0.01f * Mathf.Sin(t * 1.3f + aside * 9f));
+                go.transform.localPosition = local - Vector3.up * o.EchoMesh.bounds.min.y * scale;
+                var at = transform.TransformPoint(local);
                 var toward = Vector3.ProjectOnPlane(head.position - at, Vector3.up);
                 if (toward.sqrMagnitude < 1e-4f) toward = -Vector3.forward;
                 go.transform.rotation = Quaternion.LookRotation(toward) * Quaternion.Euler(0, 20f * Mathf.Sin(t * 0.4f + aside * 5f), 0);
                 var glow = Mathf.Lerp(1.4f, 0.8f, Mathf.Clamp01((t - rising) / 2f)) * Mathf.Clamp01(t / 0.6f);
                 block.SetFloat("_Intensity", glow);
                 block.SetFloat("_Procedural", 0f);
+                block.SetFloat("_Memory", 1f);
                 block.SetFloat("_Height", height);
                 // The ground well below, so no part of an echo frays into smoke like a figure's feet.
                 block.SetFloat("_GroundY", at.y - 0.15f);
@@ -440,6 +443,7 @@ namespace Sankofa.Runtime.Stage
                 var fade = Mathf.Min(Mathf.Clamp01(t / 2.5f), Mathf.Clamp01((seconds - t) / 3f));
                 block.SetFloat("_Intensity", 0.55f * fade);
                 block.SetFloat("_Procedural", 0f);
+                block.SetFloat("_Memory", 1f);
                 block.SetFloat("_Height", 1.6f);
                 block.SetFloat("_GroundY", o.HomePosition.y);
                 block.SetFloat("_Smoke", 0.35f * fade);

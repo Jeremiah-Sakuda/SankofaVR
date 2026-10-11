@@ -10,6 +10,7 @@ namespace Sankofa.EditorTools
         public Material Flame, Glow, Sparks, Curtain, CaptionBacking, Pointer;
         public Material Workbench, Brass, LanternCore;
         public Material Water, Spill, River, EmberFigure, EmberFigureDepth, City, Gourd, Hide, Canvas, Steel, Soil, Leaf, Bead, Metal, Paint;
+        public Material FlourTransfer;
         public Material RailRust, Cladding, Liner, Maize, Headlight, TailLight, PalmRing;
         public Material Ground, Rock, BurningWood, Embers, HeldEmber, SeatWood, TreeBark, TreeCanopy, Grass, Sky, SkyDusk, SkyMorning, SkyCity, Stars, Smoke, Halo, Plaque;
     }
@@ -106,6 +107,12 @@ namespace Sankofa.EditorTools
                     // A slow, broad river: gentle ripples, so the glints stay few.
                     m.SetFloat("_Strength", 0.16f);
                 }),
+                FlourTransfer = Make("Flour transfer", "Sankofa/Fire Lit", m =>
+                {
+                    m.SetColor("_Color", new Color(0.9f, 0.85f, 0.62f));
+                    m.SetColor("_Emission", new Color(0.035f, 0.03f, 0.018f));
+                    m.SetFloat("_Cull", 0f);
+                }),
                 EmberFigure = Make("Ember figure", "Sankofa/Ember Figure", m => m.SetTexture("_Noise", noise)),
                 EmberFigureDepth = Make("Ember figure depth", "Sankofa/Ember Figure Depth", m => { }),
                 City = Make("City", "Sankofa/City", m => { m.SetFloat("_Lit", 0.22f); m.SetFloat("_Glow", 0.9f); }),
@@ -192,7 +199,7 @@ namespace Sankofa.EditorTools
                     "bark_brown_02", new Vector2(1f, 1f), 1.1f),
                 TreeBark = Scanned(Baked("Tree bark", new Color(0.32f, 0.3f, 0.28f), detail, "_DETAIL_UV", new Vector2(0.5f, 0.3f), 0f, 0.2f),
                     "bark_brown_02", new Vector2(1f, 0.6f), 1f),
-                TreeCanopy = Baked("Tree canopy", new Color(0.05f, 0.065f, 0.05f), detail, "_DETAIL_TRIPLANAR", new Vector2(0.8f, 0.8f), 0.6f, 0.3f),
+                TreeCanopy = Baked("Tree canopy", new Color(0.12f, 0.17f, 0.105f), detail, "_DETAIL_TRIPLANAR", new Vector2(0.8f, 0.8f), 0.6f, 0.3f),
                 Grass = Make("Grass", "Sankofa/Fire Lit", m =>
                 {
                     m.SetColor("_Color", Color.white);
@@ -260,8 +267,8 @@ namespace Sankofa.EditorTools
                     m.SetVector("_GlowDir", new Vector4(-0.3f, 0, 0.95f, 0));
                     m.SetFloat("_GlowWidth", 0.7f);
                     m.SetFloat("_GlowHeight", 0.18f);
-                    m.SetFloat("_Overcast", 0.78f);
-                    m.SetColor("_CloudColor", new Color(0.3f, 0.3f, 0.32f));
+                    m.SetFloat("_Overcast", 0.58f);
+                    m.SetColor("_CloudColor", new Color(0.19f, 0.225f, 0.25f));
                     m.SetFloat("_ShowMoon", 0);
                 }),
                 // Today: a city night, the sky lit orange from below by sodium streetlights.

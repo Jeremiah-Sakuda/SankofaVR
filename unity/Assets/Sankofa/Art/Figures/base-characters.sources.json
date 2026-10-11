@@ -1,0 +1,25 @@
+{
+  "provider": "Quaternius",
+  "pack": "Universal Base Characters \u2014 Standard",
+  "source": "https://quaternius.itch.io/universal-base-characters",
+  "licence": "CC0-1.0",
+  "downloaded_at": "2026-10-11T03:40:00Z",
+  "archive_sha256": "fdbf1804c90dfc1ea03e992bff7da2dfd1a79318e13270a660180f9308455f40",
+  "files": [
+    {
+      "path": "Superhero_Female_FullBody.fbx",
+      "sha256": "0727e7b236eeea4115531e07aeb2bb7690c1a58155f743bbf54282944fb97ea9"
+    },
+    {
+      "path": "Hair_BuzzedFemale.fbx",
+      "sha256": "aeb3a606d8b9b1818025dbf6b4640ff33f14b0e9676f3cbfe410321e1a1d6a5d"
+    },
+    {
+      "path": "License_Standard.txt",
+      "sha256": "c232257c8a2545520aa120cda96acb23d00a355d2e3339cba20b7ebf56f28a09",
+      "source_sha256": "0f4beaf0fe360a7732e58bbe3dbf60a2422367fbea60cb9ea4add968f383268e",
+      "changes": "CRLF converted to LF; trailing whitespace trimmed; all licence wording preserved."
+    }
+  ],
+  "changes": "Unity import removes materials; project assigns theatrical bronze/fabric surfaces, narrows torso, generates skinned clothing and directs existing UAL clips. Generic base anatomy and short hair are unreviewed artistic reconstruction, not historical evidence."
+}

@@ -15,7 +15,7 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] bool visibleAtStart;
         [Tooltip("Grow from nothing when revealed. Off for shapes of light, which fade in place instead.")]
         [SerializeField] bool scaleWithVisibility = true;
-        [SerializeField] Renderer[] surfaces;
+        [SerializeField] Renderer[] surfaces = new Renderer[0];
         [SerializeField] Renderer glow;
         [SerializeField] float glowIntensity = 1f;
         [SerializeField] bool emitsLight;
@@ -28,6 +28,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] float attentionRadius;
         [Tooltip("Where something placed on it comes to rest; just above the object if empty.")]
         [SerializeField] Transform placePoint;
+        [Tooltip("Opening of a vessel, used by the authored pouring performance; absent on other props.")]
+        [SerializeField] Transform pourPoint;
         [Tooltip("Where a figure stands or kneels to use it, one per side it can be approached from.")]
         [SerializeField] Transform[] approachPoints = new Transform[0];
         [Tooltip("Whether someone using it kneels there (a hide on a low stone) or stands.")]
@@ -41,6 +43,7 @@ namespace Sankofa.Runtime.Stage
 
         static readonly int HighlightId = Shader.PropertyToID("_Highlight");
         static readonly int IntensityId = Shader.PropertyToID("_Intensity");
+        static readonly int VisibilityId = Shader.PropertyToID("_Visibility");
 
         bool initialised;
         Vector3 startLocalPosition;
@@ -54,6 +57,8 @@ namespace Sankofa.Runtime.Stage
         Vector3? moveTarget;
         float smoothTime = 0.3f;
         Vector3 velocity;
+        Transform stageFrame;
+        Matrix4x4 lastStageFrame;
         Func<Vector3?> follow;
         float fadeAfter = -1;
 
@@ -77,6 +82,7 @@ namespace Sankofa.Runtime.Stage
         public float TouchRadius => touchRadius;
         public float AttentionRadius => attentionRadius;
         public Vector3 PlacePosition => placePoint != null ? placePoint.position : transform.position + Vector3.up * 0.05f;
+        public Vector3? PourPosition => pourPoint != null ? pourPoint.position : (Vector3?)null;
         /// <summary>
         /// Where a figure coming from <paramref name="from"/> stands or kneels to use this: the nearest of its approach
         /// points, so two people coming from either side take a side each; without one, half a metre short of it.
@@ -121,6 +127,8 @@ namespace Sankofa.Runtime.Stage
             block = new MaterialPropertyBlock();
             startLocalPosition = transform.localPosition;
             startParent = transform.parent;
+            stageFrame = holder != null ? holder.transform.parent : startParent;
+            lastStageFrame = stageFrame != null ? stageFrame.localToWorldMatrix : Matrix4x4.identity;
             startLocalRotation = transform.localRotation;
             startScale = transform.localScale;
             shown = shownTarget = visibleAtStart ? 1 : 0;
@@ -212,6 +220,7 @@ namespace Sankofa.Runtime.Stage
             LeaveHolder();
             Initialise();
             Release();
+            RebaseStage();
             moveTarget = world;
             smoothTime = Mathf.Max(0.05f, seconds / 3f);
         }
@@ -247,15 +256,28 @@ namespace Sankofa.Runtime.Stage
             CarriedBy = null;
         }
 
+        void RebaseStage()
+        {
+            var frame = stageFrame != null ? stageFrame.localToWorldMatrix : Matrix4x4.identity;
+            if (frame != lastStageFrame)
+            {
+                var delta = frame * lastStageFrame.inverse;
+                if (moveTarget.HasValue) moveTarget = delta.MultiplyPoint3x4(moveTarget.Value);
+                velocity = delta.MultiplyVector(velocity);
+                lastStageFrame = frame;
+            }
+        }
+
         void Update()
         {
+            RebaseStage();
             var dt = StageClock.DeltaTime;
             if (fadeAfter >= 0 && (fadeAfter -= dt) < 0) shownTarget = 0;
             shown = Mathf.MoveTowards(shown, shownTarget, dt / 0.6f);
             highlight = Mathf.MoveTowards(highlight, highlightTarget, dt / 1.2f);
             pulse = Mathf.MoveTowards(pulse, 0, dt / 1.1f);
             var goal = follow?.Invoke() ?? moveTarget;
-            if (goal.HasValue) transform.position = Vector3.SmoothDamp(transform.position, goal.Value, ref velocity, smoothTime, Mathf.Infinity, dt);
+            if (goal.HasValue && dt > 0) transform.position = Vector3.SmoothDamp(transform.position, goal.Value, ref velocity, smoothTime, Mathf.Infinity, dt);
             Apply();
         }
 
@@ -271,6 +293,7 @@ namespace Sankofa.Runtime.Stage
                 s.enabled = visible;
                 s.GetPropertyBlock(block);
                 block.SetFloat(HighlightId, lift * shown);
+                block.SetFloat(VisibilityId, shown);
                 s.SetPropertyBlock(block);
             }
             if (glow != null)

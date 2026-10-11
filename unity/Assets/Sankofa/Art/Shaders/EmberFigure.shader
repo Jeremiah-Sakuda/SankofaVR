@@ -1,13 +1,7 @@
-// People and animals of a story, shown as the griot shows them: shapes of firelight, brightest at their edges,
-// with embers drifting through them. Additive and unlit by the scene, so no face or likeness is ever drawn.
-// Intensity fades them in and out; Highlight brightens one when the story turns to them. Kneel folds a standing
-// body (feet at the origin, facing +Z, Height tall) down onto its knees, leaning a little forward. ArmNeg and ArmPos
-// swing the arm on each side forward from the shoulder (vertex colour red and green mark them); ArmIn brings the
-// hands in toward each other, to hold or present something. Its depth is drawn first, for every part of every figure,
-// by Ember Figure Depth (one queue earlier), so the nearest surface of the whole figure, body and cloth together, is
-// the only one lit: no arm doubles its glow and no body shows through its cloth. The feet dissolve into smoke. A
-// skinned body (Procedural 0) is posed by its animator instead. A thin smoky core dims what is behind a figure, so it
-// reads as a presence rather than glass.
+// Theatrical people: solid bronze bodies, quiet woven garments, restrained ember outlines and separate
+// dark facial/hair details. Lit by the same analytic fire/lantern and ambient as the stage. A memory echo
+// uses a brighter additive treatment. The companion depth pass prevents layered body and cloth surfaces
+// doubling their light. Generic CC0 character faces depict fictional composites, not real likenesses.
 Shader "Sankofa/Ember Figure"
 {
     Properties
@@ -16,6 +10,10 @@ Shader "Sankofa/Ember Figure"
         _Color ("Edge colour", Color) = (1, 0.55, 0.22, 1)
         _Core ("Core colour", Color) = (0.35, 0.1, 0.03, 1)
         _Intensity ("Intensity", Float) = 1
+        _Visibility ("Reveal opacity", Range(0, 1)) = 1
+        _Feature ("Hair and facial details", Range(0, 1)) = 0
+        _Memory ("Memory echo", Range(0, 1)) = 0
+        _Fabric ("Fabric surface", Range(0, 1)) = 0
         _Rim ("Edge sharpness", Float) = 2.2
         _Drift ("Ember drift", Float) = 0.25
         _Highlight ("Highlight", Range(0, 1)) = 0
@@ -35,6 +33,9 @@ Shader "Sankofa/Ember Figure"
 
         CGINCLUDE
         #include "EmberFigure.cginc"
+        half _Fabric, _Memory, _Feature, _Visibility;
+        float4 _SankofaLightPos, _SankofaLightColor;
+        float4 _SankofaAmbientSky, _SankofaMoonDir, _SankofaMoonColor;
         ENDCG
 
         Pass
@@ -52,6 +53,7 @@ Shader "Sankofa/Ember Figure"
             {
                 float4 pos : SV_POSITION;
                 float3 world : TEXCOORD0;
+                float2 uv : TEXCOORD2;
                 half3 normal : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -67,6 +69,7 @@ Shader "Sankofa/Ember Figure"
                 Pose(p, n, v.color);
                 o.pos = UnityObjectToClipPos(float4(p, 1));
                 o.world = mul(unity_ObjectToWorld, float4(p, 1)).xyz;
+                o.uv = v.uv;
                 o.normal = UnityObjectToWorldNormal(normalize(n));
                 return o;
             }
@@ -99,23 +102,28 @@ Shader "Sankofa/Ember Figure"
                 half f1 = tex2D(_Noise, float2((i.world.x - i.world.z) * 2.6, i.world.y * 0.75 - _Time.y * 0.9)).r;
                 half f2 = tex2D(_Noise, float2((i.world.x + i.world.z) * 5.0, i.world.y * 1.4 - _Time.y * 1.6)).g;
                 half flame = smoothstep(0.45, 0.9, f1 * 0.6 + f2 * 0.5) * lerp(1.2, 0.5, saturate(rise)) * (1 - head);
-                // A body of warm light rather than a person on fire: an even glow through it, the tongues moving
-                // gently within, the ember edge brightest.
-                half3 c = _Core.rgb * 0.15 + _Color.rgb * (0.16 + edge * 1.8 + embers * 0.8 + flame * 0.4);
-                // The hem and feet are smoke: a ragged edge that drifts upward, so the figure stands in the scene
-                // without a hard line where it meets the ground.
+                // Warm, solid theatrical bodies with quiet fabric: volume comes from the light direction,
+                // not a uniform orange fill. Only the silhouette carries the fire's ember signature.
+                half3 normal = normalize(i.normal);
+                float3 toLight = _SankofaLightPos.xyz - i.world;
+                half light = saturate(dot(normal, normalize(toLight)) * 0.7 + 0.3);
+                half atten = 1 / (1 + dot(toLight, toLight) * _SankofaLightPos.w);
+                half3 illumination = 0.22 + _SankofaAmbientSky.rgb * 0.8 + _SankofaLightColor.rgb * light * atten;
+                illumination += _SankofaMoonColor.rgb * saturate(dot(normal, normalize(_SankofaMoonDir.xyz)));
+                half weave = sin(i.uv.x * 600) * sin(i.uv.y * 650) * 0.035;
+                half border = (1 - smoothstep(0.025, 0.065, abs(frac(i.uv.y) - 0.08))) * _Fabric;
+                half3 pigment = lerp(half3(0.10, 0.065, 0.045), _Color.rgb * 0.17, _Fabric);
+                pigment = lerp(pigment, half3(0.014, 0.009, 0.006), _Feature);
+                half3 c = pigment * illumination * (1 + weave) + _Color.rgb * border * 0.055;
+                c += _Color.rgb * (edge * 0.12 + embers * 0.035 + flame * 0.025) * (1 - _Fabric * 0.6) * (1 - _Feature);
                 half wisp = tex2D(_Noise, float2(i.world.x * 2.3 + i.world.z * 1.7, i.world.y * 2.0 - _Time.y * 0.35)).g;
-                half feet = saturate((rise - 0.01 - wisp * 0.12) / 0.1);
-                // A soft, even fill in the head, so it reads as a head of light rather than a hollow rim, and carries a
-                // little more of the light, where a listener looks.
-                // Brighter where it faces the visitor, so it has the volume of a head rather than a flat plate.
-                half facing = saturate(dot(normalize(i.normal), view));
-                c += _Color.rgb * 0.35 * head * (0.8 + 0.2 * facing);
-                half crown = 1 + 0.2 * head;
+                half feet = saturate((rise - 0.005 - wisp * 0.02) / 0.035);
                 half presence = _Intensity * feet;
-                c *= presence * lerp(flicker, 1, head) * (1 + _Highlight * 0.8) * crown;
+                c = lerp(c, _Color.rgb * (0.12 + edge * 0.7 + embers * 0.12), _Memory);
+                c *= presence * (1 + _Highlight * 0.25);
                 // Premultiplied: the glow adds, and the smoke hides what is behind (a figure at full smoke is opaque).
-                return fixed4(SankofaGrade(c), saturate(_Smoke * presence));
+                // Illumination flicker changes brightness, never makes a clothed person transparent.
+                return fixed4(SankofaGrade(c), saturate(_Smoke * _Visibility * feet));
             }
             ENDCG
         }

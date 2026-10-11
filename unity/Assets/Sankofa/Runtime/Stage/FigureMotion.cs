@@ -7,7 +7,7 @@ namespace Sankofa.Runtime.Stage
     /// How a person or animal of the story moves: walking in along a path when revealed, going to stand or kneel
     /// where something is used, going back to its own place, and walking away when withdrawn. Presentation only: the
     /// story decides when, through reveal, move and withdraw, and the stage asks for a gesture when something the
-    /// figure holds is offered, set down or shown. A figure with an animator (the skinned mannequin) walks, kneels,
+    /// figure holds is offered, set down or shown. A figure with an animator (the skinned character) walks, kneels,
     /// gives and talks through it, and what it carries follows its hand and neck bones; a figure without one (the
     /// ewe, or the procedural silhouette) is posed by the light shader, which folds the body into a kneel and swings
     /// each arm from the shoulder, and its carried things follow the same fold.
@@ -33,6 +33,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Transform[] anchorBones = new Transform[0];
         [Tooltip("With an animator, the giving arm's upper arm, forearm and hand, reached toward whoever is given to.")]
         [SerializeField] Transform[] reachArm = new Transform[0];
+        [SerializeField] Transform[] supportArm = new Transform[0];
+        [SerializeField] LineRenderer sharingStream;
         [Tooltip("Drives a skinned body's walk, kneel, give and talk; without one the shader poses the body.")]
         [SerializeField] Animator animator;
         [Tooltip("Other parts drawn in the same light as the body (cloth, an animal's head and legs), which follow its visibility and colour.")]
@@ -65,6 +67,8 @@ namespace Sankofa.Runtime.Stage
         static readonly int GroundId = Shader.PropertyToID("_GroundY");
         static readonly int ColorId = Shader.PropertyToID("_Color");
         static readonly int SmokeId = Shader.PropertyToID("_Smoke");
+        static readonly int FeatureId = Shader.PropertyToID("_Feature");
+        static readonly int FabricId = Shader.PropertyToID("_Fabric");
         static readonly int HeadId = Shader.PropertyToID("_HeadSphere");
         static readonly int WalkingId = Animator.StringToHash("Walking");
         static readonly int KneelingId = Animator.StringToHash("Kneeling");
@@ -79,6 +83,7 @@ namespace Sankofa.Runtime.Stage
         Vector3 homeLocal;
         Quaternion homeRotation;
         Vector3 basePosition;
+        Matrix4x4 parentFrame;
         Quaternion? finalRotation;
         int next;
         float wait;
@@ -103,6 +108,8 @@ namespace Sankofa.Runtime.Stage
         Vector3 lookTarget;
         float lookFor;
         float lookWeight;
+        FigureMotion sharePartner;
+        float shareElapsed = -1;
 
         public bool Walking => next < route.Count && wait <= 0;
         /// <summary>Metres walked so far, for a gait to keep its steps in time.</summary>
@@ -122,6 +129,7 @@ namespace Sankofa.Runtime.Stage
             homeLocal = transform.localPosition;
             homeRotation = transform.localRotation;
             basePosition = transform.position;
+            parentFrame = ParentFrame;
             partRest = new Vector3[parts.Length];
             for (var i = 0; i < parts.Length; i++) partRest[i] = parts[i] != null ? parts[i].transform.localScale : Vector3.one;
             anchorRest = new Vector3[anchors.Length];
@@ -146,6 +154,9 @@ namespace Sankofa.Runtime.Stage
             kneelOnArrival = false;
             presentOnArrival = false;
             reachFor = presentFor = 0;
+            sharePartner = null;
+            shareElapsed = -1;
+            if (sharingStream != null) sharingStream.enabled = false;
             offered = null;
             handingOver = null;
             passing = null;
@@ -156,6 +167,7 @@ namespace Sankofa.Runtime.Stage
             transform.localPosition = homeLocal;
             transform.localRotation = homeRotation;
             basePosition = transform.position;
+            parentFrame = ParentFrame;
             Apply();
         }
 
@@ -183,6 +195,7 @@ namespace Sankofa.Runtime.Stage
         public void Reach(Vector3 toward, float seconds = 2.5f, StageObject waitingFor = null)
         {
             Initialise();
+            RebaseStage();
             reachSide = Mathf.Sign(transform.InverseTransformPoint(toward).x);
             if (reachSide == 0) reachSide = 1;
             reachFor = seconds;
@@ -209,6 +222,7 @@ namespace Sankofa.Runtime.Stage
         public void Glance(Vector3 at, float seconds = 2.5f)
         {
             Initialise();
+            RebaseStage();
             lookTarget = at;
             lookFor = seconds;
         }
@@ -222,6 +236,7 @@ namespace Sankofa.Runtime.Stage
         public void HandOver(StageObject item, Vector3 place, Vector3 point, Vector3 passTo)
         {
             Initialise();
+            RebaseStage();
             handingOver = item;
             handOverPoint = point;
             this.passTo = passTo;
@@ -240,9 +255,10 @@ namespace Sankofa.Runtime.Stage
         }
 
         /// <summary>Goes to a place, rising first if kneeling, then stands or kneels there facing what it came to.</summary>
-        public void GoTo(Vector3 place, Vector3 lookAt, bool kneelThere, bool presentThere = false)
+        public void GoTo(Vector3 place, Vector3 lookAt, bool kneelThere, bool presentThere = false, FigureMotion shareWith = null)
         {
             Initialise();
+            RebaseStage();
             route.Clear();
             next = 0;
             wait = 0;
@@ -251,6 +267,8 @@ namespace Sankofa.Runtime.Stage
             kneelTarget = 0;
             kneelOnArrival = kneelThere;
             presentOnArrival = presentThere;
+            sharePartner = shareWith;
+            shareElapsed = -1;
             var facing = lookAt - place;
             facing.y = 0;
             finalRotation = facing.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(facing) : HomeRotation;
@@ -313,6 +331,9 @@ namespace Sankofa.Runtime.Stage
         public void Leave()
         {
             Initialise();
+            RebaseStage();
+            sharePartner = null;
+            if (sharingStream != null) sharingStream.enabled = false;
             passing = null;
             handingOver = null;
             route.Clear();
@@ -345,8 +366,28 @@ namespace Sankofa.Runtime.Stage
                 if (o != null && o.Visible && Vector3.Distance(o.transform.position, o.HomePosition) < 0.15f) o.FadeAway(fade);
         }
 
+        Matrix4x4 ParentFrame => transform.parent != null ? transform.parent.localToWorldMatrix : Matrix4x4.identity;
+
+        // Presentation targets belong to the stage. Rebase cached world-space paths and gestures when the
+        // visitor recentres or changes height; animation of the figure itself never changes this frame.
+        void RebaseStage()
+        {
+            var current = ParentFrame;
+            if (current == parentFrame) return;
+            var delta = current * parentFrame.inverse;
+            basePosition = delta.MultiplyPoint3x4(basePosition);
+            for (var i = 0; i < route.Count; i++) route[i] = delta.MultiplyPoint3x4(route[i]);
+            reachTarget = delta.MultiplyPoint3x4(reachTarget);
+            handOverPoint = delta.MultiplyPoint3x4(handOverPoint);
+            passTo = delta.MultiplyPoint3x4(passTo);
+            lookTarget = delta.MultiplyPoint3x4(lookTarget);
+            if (finalRotation.HasValue) finalRotation = delta.rotation * finalRotation.Value;
+            parentFrame = current;
+        }
+
         void Update()
         {
+            RebaseStage();
             var dt = StageClock.DeltaTime;
             if (animator != null) animator.speed = StageClock.AnimatorSpeed;
             var walking = false;
@@ -367,7 +408,8 @@ namespace Sankofa.Runtime.Stage
                         if (next >= route.Count)
                         {
                             kneelTarget = kneelOnArrival ? 1 : 0;
-                            if (presentOnArrival) presentFor = 3.5f;
+                            if (presentOnArrival) presentFor = sharePartner != null ? 9f : 3.5f;
+                            if (sharePartner != null) shareElapsed = 0;
                             presentOnArrival = false;
                         }
                     }
@@ -393,6 +435,7 @@ namespace Sankofa.Runtime.Stage
                 if (passing.InHolderHands && passing.Visible) passing.MoveTo(passTo, 2.2f);
                 passing = null;
             }
+            if (shareElapsed >= 0) shareElapsed += dt;
             lookFor = Mathf.Max(0, lookFor - dt);
             lookWeight = Mathf.MoveTowards(lookWeight, lookFor > 0 && !walking ? 1f : 0f, dt / 0.5f);
             var reaching = reachArm.Length == 3 && offered != null && offered.InHolderHands && (reachFor > 0 || StillOffering);
@@ -406,7 +449,7 @@ namespace Sankofa.Runtime.Stage
                 animator.SetBool(WalkingId, walking);
                 animator.SetFloat(PaceId, speed / 1.1f);
                 animator.SetBool(KneelingId, kneelTarget > 0 && !walking);
-                animator.SetBool(TalkingId, presentFor > 0);
+                animator.SetBool(TalkingId, presentFor > 0 && sharePartner == null);
             }
             else FollowAnchors();
             Apply();
@@ -434,7 +477,12 @@ namespace Sankofa.Runtime.Stage
                 body.SetPropertyBlock(block);
             }
             for (var i = 0; i < anchors.Length && i < anchorBones.Length; i++)
-                if (anchors[i] != null && anchorBones[i] != null) anchors[i].position = anchorBones[i].position;
+                if (anchors[i] != null && anchorBones[i] != null)
+                {
+                    anchors[i].position = anchorBones[i].position;
+                    anchors[i].rotation = transform.rotation;
+                }
+            DirectSharing();
         }
 
         /// <summary>
@@ -458,13 +506,19 @@ namespace Sankofa.Runtime.Stage
         /// </summary>
         void ReachArm(Vector3 target, float weight)
         {
-            Transform upper = reachArm[0], lower = reachArm[1], hand = reachArm[2];
+            SolveArm(reachArm, target, weight);
+        }
+
+        static void SolveArm(Transform[] arm, Vector3 target, float weight)
+        {
+            if (arm.Length != 3) return;
+            Transform upper = arm[0], lower = arm[1], hand = arm[2];
             if (upper == null || lower == null || hand == null) return;
             Vector3 a = upper.position, b = lower.position, c = hand.position;
             float l1 = Vector3.Distance(a, b), l2 = Vector3.Distance(b, c);
             if (l1 < 1e-4f || l2 < 1e-4f) return;
             var toTarget = target - a;
-            var direction = toTarget.sqrMagnitude > 1e-6f ? toTarget.normalized : transform.forward;
+            var direction = toTarget.sqrMagnitude > 1e-6f ? toTarget.normalized : upper.forward;
             var d = Mathf.Clamp(toTarget.magnitude, Mathf.Abs(l1 - l2) + 0.01f, (l1 + l2) * 0.995f);
             var bend = Vector3.ProjectOnPlane(b - a, direction);
             if (bend.sqrMagnitude < 1e-6f) bend = Vector3.ProjectOnPlane(Vector3.down, direction);
@@ -475,6 +529,45 @@ namespace Sankofa.Runtime.Stage
             b = lower.position;
             c = hand.position;
             lower.rotation = Quaternion.Slerp(lower.rotation, Quaternion.FromToRotation(c - b, a + direction * d - b) * lower.rotation, weight);
+        }
+
+        // An authored exchange over the library's base pose: settle both vessels, tilt, pour, acknowledge,
+        // release. The application still owns when the exchange starts; this never advances the narrative.
+        void DirectSharing()
+        {
+            if (sharingStream != null) sharingStream.enabled = false;
+            if (sharePartner == null || shareElapsed < 0 || shareElapsed > 9 || anchors.Length == 0 || sharePartner.anchors.Length == 0) return;
+            var blend = Mathf.SmoothStep(0, 1, Mathf.Min(shareElapsed / 1.4f, (9 - shareElapsed) / 1.5f));
+            var between = (transform.position + sharePartner.transform.position) * 0.5f;
+            between.y = Mathf.Max(transform.position.y, sharePartner.transform.position.y) + height * 0.59f;
+            var side = (sharePartner.transform.position - transform.position).normalized;
+            side.y = 0;
+            var giverGrip = between - side * 0.17f + Vector3.up * 0.19f;
+            var receiverGrip = between + side * 0.08f;
+            SolveArm(reachArm, giverGrip, blend);
+            SolveArm(supportArm, giverGrip - side * 0.08f - Vector3.up * 0.12f, blend);
+            SolveArm(sharePartner.reachArm, receiverGrip, blend);
+            SolveArm(sharePartner.supportArm, receiverGrip - Vector3.up * 0.15f, blend);
+            // The receiver may LateUpdate after us; its hand anchor is updated again here explicitly.
+            anchors[0].position = anchorBones[0].position;
+            sharePartner.anchors[0].position = sharePartner.anchorBones[0].position;
+            var pour = Mathf.SmoothStep(0, 1, Mathf.Min((shareElapsed - 1.6f) / 1.3f, (6.8f - shareElapsed) / 1.4f));
+            anchors[0].rotation = Quaternion.AngleAxis(pour * 65f, Vector3.Cross(Vector3.up, side)) * transform.rotation;
+            Glance(receiverGrip, 0.5f);
+            sharePartner.Glance(giverGrip, 0.5f);
+            var giverVessel = System.Array.Find(carried, o => o != null && o.Visible && o.InHolderHands && o.PourPosition.HasValue);
+            var receiverVessel = System.Array.Find(sharePartner.carried, o => o != null && o.Visible && o.InHolderHands && o.PourPosition.HasValue);
+            if (sharingStream != null && pour > 0.7f && giverVessel != null && receiverVessel != null)
+            {
+                sharingStream.enabled = true;
+                var start = giverVessel.PourPosition.Value;
+                var end = receiverVessel.PourPosition.Value;
+                for (var k = 0; k < sharingStream.positionCount; k++)
+                {
+                    var t = (float)k / (sharingStream.positionCount - 1);
+                    sharingStream.SetPosition(k, Vector3.Lerp(start, end, t) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 0.02f);
+                }
+            }
         }
 
         void UpdateArms(float dt, bool walking)
@@ -560,9 +653,12 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(GroundId, basePosition.y);
             block.SetColor(ColorId, tint);
             block.SetFloat(SmokeId, bodySmoke);
+            block.SetFloat(FabricId, 0f);
+            block.SetFloat(FeatureId, 0f);
             body.SetPropertyBlock(block);
             if (parts.Length == 0) return;
             block.SetFloat(SmokeId, partSmoke);
+            block.SetFloat(FabricId, animator != null ? 1f : 0f);
             block.SetVector(HeadId, Vector4.zero);
             var folded = Mathf.SmoothStep(0f, 1f, kneel);
             for (var i = 0; i < parts.Length; i++)
@@ -570,6 +666,9 @@ namespace Sankofa.Runtime.Stage
                 var c = parts[i];
                 if (c == null) continue;
                 c.enabled = body.enabled;
+                block.SetFloat(FabricId, animator != null && i < 2 ? 1f : 0f);
+                block.SetFloat(FeatureId, animator != null && i >= 2 ? 1f : 0f);
+                block.SetColor(ColorId, i == 0 ? tint * 0.65f : tint);
                 c.SetPropertyBlock(block);
                 if (i < partKneelScale.Length && partRest != null && i < partRest.Length)
                 {
