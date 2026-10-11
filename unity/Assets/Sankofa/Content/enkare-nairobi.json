@@ -447,8 +447,8 @@
     },
     {
       "id": "back.kept",
-      "text": "I kept what you carried home. We can go back to the water and see what became of it, hear your visit again as it was, or begin somewhere else in time.",
-      "seconds": 16.56,
+      "text": "What you chose to keep is waiting here. We can revisit the same story and the choices you made, or begin somewhere else in time. If there is more of its thread to follow, the fire will offer it.",
+      "seconds": 20.32,
       "fire": "listening",
       "audio": "enkare-nairobi/back.kept"
     }
@@ -1010,8 +1010,8 @@
       "lines": [
         {
           "id": "e1.bead",
-          "text": "Naserian slips a bead from the string at her neck, and holds it out to the one who carried the flour.",
-          "seconds": 10.8,
+          "text": "Naserian slips a bead from the string at her neck, and holds it out to you. 'To remember what passed between us.'",
+          "seconds": 12.48,
           "fire": "holding",
           "claims": [
             "C12",
@@ -1045,7 +1045,7 @@
         "default": [
           {
             "id": "e1.bead.no",
-            "text": "She sets it on the stone beside you. 'For the one who carried.'",
+            "text": "She sets it on the stone beside you. 'It will be here when you want it.'",
             "seconds": 8.24,
             "pause_after": 1.0,
             "fire": "welcoming",

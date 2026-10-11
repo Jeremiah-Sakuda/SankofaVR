@@ -42,10 +42,10 @@
     "voice": "Kore"
   },
   "back.kept": {
-    "characters": 150,
-    "fingerprint": "45680603c57e532e3e82d7af1ac82eade8b47afc8dd8bb549a74d71542a14dc0",
+    "characters": 194,
+    "fingerprint": "23e4c8a7527bab854f0b25a7583208ef278bc1429097671cb2513d29c6203145",
     "model": "gemini-3.1-flash-tts-preview",
-    "seconds": 16.56,
+    "seconds": 20.32,
     "voice": "Kore"
   },
   "back.sit": {
@@ -63,15 +63,15 @@
     "voice": "Kore"
   },
   "e1.bead": {
-    "characters": 101,
-    "fingerprint": "6c2e59c1d6e7df3d07cc0c4c672fed6375c4f49d5871737ae79ba551c95f8226",
+    "characters": 113,
+    "fingerprint": "a7eb52a21d19e39ac018fb14db3b025d6e383367caae230ba5871593525fc595",
     "model": "gemini-3.1-flash-tts-preview",
-    "seconds": 10.8,
+    "seconds": 12.48,
     "voice": "Kore"
   },
   "e1.bead.no": {
-    "characters": 63,
-    "fingerprint": "4da0b6be781c14d94ec06f4b3bf37d9758275a773697f6e43f87f3d028c9adc9",
+    "characters": 72,
+    "fingerprint": "784fd633290d61718c0bcba3ecb069f29ad321cf09a6ef5ecc16c7fa28b5d555",
     "model": "gemini-3.1-flash-tts-preview",
     "seconds": 8.24,
     "voice": "Kore"
