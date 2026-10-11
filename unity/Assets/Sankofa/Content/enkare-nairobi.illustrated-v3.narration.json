@@ -1,0 +1,202 @@
+{
+  "e1.bead": {
+    "characters": 96,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "b8135812af711fd3aea39f8c944d35f753ebacada17f247064b9afc19c126be1",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 11.8,
+    "text": "\u201cFor the road,\u201d Naserian says. \u201cOpen your hand.\u201d She offers you a bead to remember this meeting.",
+    "voice": "Kore"
+  },
+  "e1.bead.rest.beside": {
+    "characters": 67,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "30d8d6dfe8adb5e5ab6ed8a34c6b3195a0a59b50374f0a5a59359b6814eba6cd",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 8.12,
+    "text": "The women linger by the water. No one is in a hurry to say goodbye.",
+    "voice": "Kore"
+  },
+  "e1.bead.rest.held": {
+    "characters": 67,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "30d8d6dfe8adb5e5ab6ed8a34c6b3195a0a59b50374f0a5a59359b6814eba6cd",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 7.2,
+    "text": "The women linger by the water. No one is in a hurry to say goodbye.",
+    "voice": "Kore"
+  },
+  "e1.carry": {
+    "characters": 48,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "d7ea5c8e64d2f4bf62c589f640b62a8c4be93244cc8c9443b618009f8a03a6d9",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 5.28,
+    "text": "\u201cWill you hold this while I speak?\u201d Wambui asks.",
+    "voice": "Kore"
+  },
+  "e1.offer.beside": {
+    "characters": 78,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "8ab6c90e7fa46540eeb5bd97fd64d3f3d44c75f19cb16abc03a23d27d07ed1c8",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 10.68,
+    "text": "Wambui glances at the gourd beside you. \u201cHelp me set it here.\u201d Touch the hide.",
+    "voice": "Kore"
+  },
+  "e1.offer.carried": {
+    "characters": 54,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "512083338d91d24f3d010dd96aaf9215c0312d98450f5a247c728deeb6d91f02",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 6.72,
+    "text": "\u201cSet it here, beside me,\u201d Wambui says. Touch the hide.",
+    "voice": "Kore"
+  },
+  "e1.paths": {
+    "characters": 148,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "5b6ce1db76bea587f793eb1e782054037f95fe41e58df998856cfeeb59ead12f",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 18.12,
+    "text": "Imagine the paths that lead here: past millet fields and hives at the forest edge; out across the plain, where cattle graze. They meet at the water.",
+    "voice": "Kore"
+  },
+  "e1.touch": {
+    "characters": 27,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "b455e5d0e39d0ea6f8c59b37c760a2c8426f98bdf63ce3031ea0d14cb1e05e68",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 3.64,
+    "text": "Put your hand in the water.",
+    "voice": "Kore"
+  },
+  "e1.water.felt": {
+    "characters": 117,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "7de8bff45cdc3006427c93176f270cd7ec5c9f3d623884f38453ff401893aac8",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 16.16,
+    "text": "Your hand passes over the water. Enkare Nairobi. Cool water, in Maa, the Maasai language. A name the city will carry.",
+    "voice": "Kore"
+  },
+  "e1.water.heard": {
+    "characters": 112,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "ba301bcdcc0f9011eff3c758dd2b78e5a6d119e623d89296445ea89e81abf974",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 15.44,
+    "text": "The stream runs beside you. Enkare Nairobi. Cool water, in Maa, the Maasai language. A name the city will carry.",
+    "voice": "Kore"
+  },
+  "q.e1.bead.answer": {
+    "characters": 131,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "98d53b7b215d77318c2f473de562bcfeb959083ae223ee121d2042110ecb24a0",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 15.16,
+    "text": "A way to remember an afternoon by the water. This gift is our invention; its colour carries no traditional meaning in this telling.",
+    "voice": "Kore"
+  },
+  "q.e1.flour.answer": {
+    "characters": 139,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "c461f3cfd4eb6b7793249f1b4d822591334173300130039861387bbae9a478fa",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 15.96,
+    "text": "Green bananas, dried and pounded. There are accounts of this flour being traded for sheep. How much Wambui owes today belongs to our story.",
+    "voice": "Kore"
+  },
+  "q.e1.friends.answer": {
+    "characters": 152,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "7ef4aa508177b293db185347e2364a209878b5ff6ba99264a0f37f0f785d39c7",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 15.84,
+    "text": "They have met here before. Each has had to wait for the other. That friendship is ours to imagine; trade and marriage really did join their communities.",
+    "voice": "Kore"
+  },
+  "q.e1.milk.answer": {
+    "characters": 144,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "994e77593612da899f5d2ea34082b52cdd2f0ecb50ee563c082ce3b6378ec53b",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 18.16,
+    "text": "Milk. A museum in Nairobi keeps a Maasai gourd smoked inside with oloirien wood. Imagine that trace of smoke in the vessel Naserian has brought.",
+    "voice": "Kore"
+  },
+  "q.e1.trust.answer": {
+    "characters": 132,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "d28d1de027f8a7967d073d718d3137face28b9227582dd18ab8c6a6448ad92f6",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 17.96,
+    "text": "Naserian remembers needing time herself. Wambui waited then. Now it is her turn. The sheep matters; so does seeing Wambui come back.",
+    "voice": "Kore"
+  },
+  "q.today.who.answer": {
+    "characters": 150,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "e46643ca401e832410bb7bc14089a63009e8890b26aabbd85fa8adb2a81544ec",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 17.28,
+    "text": "In our imagined garden, neighbours planted it together. Someone brought seedlings; someone carried water. Tomorrow, someone must come back to tend it.",
+    "voice": "Kore"
+  },
+  "today.bead.ask": {
+    "characters": 101,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "eaa7fc12631bd5c18c53cd30e7b41eb55c8b7552ed881a9e24ebd49b001ecdf7",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 11.76,
+    "text": "There is a place on the gate for the bead. Touch the gate to leave it here, for someone else to find.",
+    "voice": "Kore"
+  },
+  "today.rubbish": {
+    "characters": 179,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "8a6a1b4f5c95cbc6a016d409924b494aed3f5bbf9801582ed49ebeae3d17a77b",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 21.28,
+    "text": "Along this river, neighbours have cleared rubbish and planted places to gather and grow. The work is unfinished. This little garden is imagined; the work that inspired it is real.",
+    "voice": "Kore"
+  },
+  "welcome.choose": {
+    "characters": 48,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "f1a30e88ddd4717798f813b5f4ab2a65349daf9b60a7b672fa46ce912bd6d95a",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 6.6,
+    "text": "Reach out when you are ready. A fire is patient.",
+    "voice": "Kore"
+  },
+  "welcome.reach": {
+    "characters": 30,
+    "direction": "Read the following passage aloud in the warm, unhurried cadence of a West African griot \u2014 resonant, deep, with occasional pauses for emphasis. Let the words breathe. This is oral storytelling, not news reading.",
+    "fingerprint": "512c724c22e1050e1849b145c9dc872d73fc047bde51010cccb60523eddd1a3c",
+    "model": "gemini-3.1-flash-tts-preview",
+    "provider": "Google Cloud Text-to-Speech",
+    "seconds": 4.12,
+    "text": "There is a place for you here.",
+    "voice": "Kore"
+  }
+}

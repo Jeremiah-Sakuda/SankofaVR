@@ -82,8 +82,6 @@ namespace Sankofa.Tests
                     .Concat(b.Invitation?.Accepted ?? new Line[0]).Concat(b.Invitation?.Default ?? new Line[0])
                     .Concat(b.Questions.SelectMany(q => q.Lines))));
             var originals = Lines(baseline).ToDictionary(l => l.Id);
-            using var manifest = JsonDocument.Parse(File.ReadAllText(RepositoryFile(
-                "unity/Assets/Sankofa/Content/enkare-nairobi.illustrated-v2.narration.json")));
             foreach (var line in Lines(p))
             {
                 Assert.That(line.Audio, Is.Not.Null, line.Id);
@@ -93,6 +91,9 @@ namespace Sankofa.Tests
                     Assert.That(line.Text, Is.EqualTo(originals[line.Id].Text), "never reuse old speech for changed words");
                     continue;
                 }
+                var audioNamespace = line.Audio.Substring(0, line.Audio.IndexOf('/'));
+                using var manifest = JsonDocument.Parse(File.ReadAllText(RepositoryFile(
+                    "unity/Assets/Sankofa/Content/" + audioNamespace + ".narration.json")));
                 var record = manifest.RootElement.GetProperty(line.Id);
                 Assert.That(record.GetProperty("text").GetString(), Is.EqualTo(line.Text), line.Id);
                 var fingerprint = string.Join("\n", new[] { line.Text, record.GetProperty("model").GetString(),

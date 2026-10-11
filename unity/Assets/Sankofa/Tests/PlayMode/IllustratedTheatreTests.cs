@@ -231,6 +231,8 @@ namespace Sankofa.Tests
             yield return Until(() => app.Flow.OpenInvitation?.Id == "offer-flour");
             Capture(eye, "05-second-beat"); app.Flow.Accept("offer-flour");
             yield return new WaitForSeconds(1.5f); Capture(eye, "06-trade-response");
+            yield return Until(() => app.Flow.CurrentLine?.Id == "e1.rest");
+            Capture(eye, "06b-sheep-promise");
             yield return Until(() => app.Flow.OpenInvitation?.Id == "receive-bead");
             Capture(eye, "07-keepsake-offer"); app.Flow.Accept("receive-bead");
             yield return Until(() => app.Flow.Phase == VisitPhase.Closing && app.Flow.CurrentLine == null, 120);

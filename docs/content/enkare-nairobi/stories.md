@@ -2,13 +2,13 @@
 
 ## Current illustrated episode: What We Carry
 
-October 11, 2026 · Package v0.2.0 · **Draft for Maasai and Kikuyu family/community review.** The [playable package](../../../unity/Assets/Sankofa/Content/illustrated-theatre-mvp.json) is the runtime source of truth. The baseline 3D script remains below as a comparison record. This pass revises the first illustrated chapter and its contemporary continuation; it does not convert the 1899 chapter.
+October 11, 2026 · Package v0.3.0 · **Draft for Maasai and Kikuyu family/community review.** The [playable package](../../../unity/Assets/Sankofa/Content/illustrated-theatre-mvp.json) is the runtime source of truth. The baseline 3D script remains below as a comparison record. This pass revises the first illustrated chapter and its contemporary continuation; it does not convert the 1899 chapter.
 
 **The story:** Wambui arrives with less flour than she promised. Naserian has brought the sheep they agreed to exchange and has needs of her own. Wambui admits the shortfall. Naserian remembers a previous occasion when Wambui waited for her. They agree to leave part of the exchange unfinished and meet again. The bead brings the memory of that encounter home with the visitor.
 
 **The visitor's role:** a guest who can help, ask, receive or watch. The women's agreement is theirs on every path. An action changes their address to the visitor and the later recollection; it does not make an outsider the source of their trust. Silence is never described as choosing, refusing or failing.
 
-**Cultural grounding:** the regional history of trade and intermarriage gives the episode its setting. These individuals, their bargain, prior waiting, dialogue and bead gift are invented. The spoken disclosure precedes entry, including when the welcome is skipped by choosing early. No fixed traditional price, general debt custom, sacred bead meaning, inferred ancestry or present-day descendants are asserted. Maa naming, material details and the Akan origin of the title have distinct source notes in the [register](sources.md#illustrated-theatre-story-pass--october-11-2026). The modern garden is explicitly imagined.
+**Cultural grounding:** the regional history of trade and intermarriage gives the episode its setting. These individuals, their bargain, prior waiting, dialogue and bead gift are invented. The spoken disclosure precedes entry, including when the welcome is skipped by choosing early. No fixed traditional price, general debt custom, sacred bead meaning, inferred ancestry or present-day descendants are asserted. Maa naming, material details and the Akan origin of the title have distinct source notes in the [register](sources.md#illustrated-theatre-story-pass--october-11-2026). The modern garden is explicitly imagined; documented community river clean-ups and planting give it its contemporary context. Citations stay in the register, while the narrator names Enkare Nairobi and speaks direct invitations.
 
 | Moment | If the visitor acts | If the visitor waits | Later response |
 |---|---|---|---|
@@ -28,20 +28,24 @@ For someone unfamiliar with the setting, after one uninterrupted visit: who want
 
 No participant or cultural acceptance is claimed. Sources constrain assertions; they cannot establish that the episode feels right to the people it depicts.
 
+### Thread for the future 1899 conversion
+
+Carry forward the unfinished exchange and the promise to return. Draft Njeri sharing the last of her flour with Naisula as a remembered obligation two generations later, rather than a comparison with an old exchange price. Establish that family connection explicitly inside the fiction before the action; do not present these invented women as documented ancestors or infer the visitor's lineage. Let the women choose to share on every path, with the visitor's help changing address and recall. This is a writing direction, not a converted or reviewed chapter.
+
 ### Current recorded script
 
-The lines below are taken from package v0.2.0. Conditions describe real hand outcomes, not inferred emotions. Optional questions speak through the fire and resume the interrupted telling.
+The lines below are taken from package v0.3.0. Conditions describe real hand outcomes, not inferred emotions. Optional questions speak through the fire and resume the interrupted telling.
 
 #### Welcome
 > Come. Sit with me.
 
 > Tonight, two women meet by the water. One has brought less than she promised.
 
-> Come as a guest. You can lend a hand, or simply listen.
+> There is a place for you here.
 
 > We are going to what is now Kenya, before Nairobi became a city.
 
-> The story is waiting. Reach out when you are ready.
+> Reach out when you are ready. A fire is patient.
 
 #### Before the railway
 
@@ -65,13 +69,15 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 > Listen. That is the water.
 
-> You can reach towards the spring, or stay with its sound.
+> Imagine the paths that lead here: past millet fields and hives at the forest edge; out across the plain, where cattle graze. They meet at the water.
+
+> Put your hand in the water.
 
 *Invitation: Touch the water. Passive path after 12 seconds.*
 
-**Acts:** Your hand passes over the water. Nairobi takes its name from Maa, the Maasai language: cool water.
+**Acts:** Your hand passes over the water. Enkare Nairobi. Cool water, in Maa, the Maasai language. A name the city will carry.
 
-**Waits:** The stream runs beside you. Nairobi takes its name from Maa, the Maasai language: cool water.
+**Waits:** The stream runs beside you. Enkare Nairobi. Cool water, in Maa, the Maasai language. A name the city will carry.
 
 **Optional — Is this a real place?** The Nairobi River is real. Trade between Kikuyu and Maasai people is documented. These two women, this bargain and the bead are invented. We are imagining one meeting, not retelling a family memory.
 
@@ -81,7 +87,7 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 > Banana flour: dried green bananas, pounded. Wambui has kept some food at home. Now she must explain why this load is short.
 
-> 'Will you hold this while I speak?' Wambui asks. You can hold out an open hand.
+> “Will you hold this while I speak?” Wambui asks.
 
 *Invitation: Carry the flour. Passive path after 12 seconds.*
 
@@ -89,7 +95,7 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 **Waits:** Wambui rests the gourd beside you. 'I nearly turned back,' she says.
 
-**Optional — Why banana flour?** An account published by Louis Leakey describes Kikuyu traders exchanging banana flour with Maasai traders for sheep. It informs this scene. The amount Wambui promised is invented.
+**Optional — Why banana flour?** Green bananas, dried and pounded. There are accounts of this flour being traded for sheep. How much Wambui owes today belongs to our story.
 
 **e1.naserian**
 
@@ -101,9 +107,9 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 > 'And I walked here counting on it,' Naserian answers. For a moment, neither woman speaks.
 
-**Optional — Are they friends?** In this story they have traded before, and each has had to wait for the other. The particular friendship is imagined. Their communities have histories of trade and intermarriage.
+**Optional — Are they friends?** They have met here before. Each has had to wait for the other. That friendship is ours to imagine; trade and marriage really did join their communities.
 
-**Optional — What is in the gourd?** Milk. The National Museums of Kenya describes a Maasai gourd smoked with wood called oloirien. That material detail informs this prop; this particular vessel and its owner are imagined.
+**Optional — What is in the gourd?** Milk. A museum in Nairobi keeps a Maasai gourd smoked inside with oloirien wood. Imagine that trace of smoke in the vessel Naserian has brought.
 
 **e1.offer**
 
@@ -111,11 +117,11 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 *This visit: receive-flour:accepted*
 
-> Wambui asks you to set down the gourd you are carrying. Touch the hide to offer the flour, or let her take it from here.
+> “Set it here, beside me,” Wambui says. Touch the hide.
 
 *This visit: receive-flour:default*
 
-> The gourd is beside you. Touch the hide to help offer it, or let Wambui set it down.
+> Wambui glances at the gourd beside you. “Help me set it here.” Touch the hide.
 
 *Invitation: Offer the flour. Passive path after 12 seconds.*
 
@@ -143,21 +149,21 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 > Naserian speaks to you. 'Stay a little. We have time.'
 
-**Optional — Why trust her?** Because Naserian remembers being the one who needed time. Today she chooses to wait for Wambui. That choice belongs to these fictional women; it is not a rule about either community.
+**Optional — Why trust her?** Naserian remembers needing time herself. Wambui waited then. Now it is her turn. The sheep matters; so does seeing Wambui come back.
 
 **Optional — What does Wambui owe?** The flour she could not bring today, and another journey to meet Naserian. Neither woman has forgotten what her household needs. They have agreed to leave part of the exchange unfinished.
 
 **e1.gift**
 
-> 'For the road,' Naserian says. She offers you a bead to remember this meeting. Hold out a hand, if you would like it.
+> “For the road,” Naserian says. “Open your hand.” She offers you a bead to remember this meeting.
 
 *Invitation: Take the bead. Passive path after 12 seconds.*
 
-**Acts:** The bead rests in your hand. Something small to carry home. The women linger a moment before leaving. You can stay with the bead, or ask about it.
+**Acts:** The bead rests in your hand. Something small to carry home. The women linger by the water. No one is in a hurry to say goodbye.
 
-**Waits:** Naserian sets it beside you, within reach. 'For whenever you go.' The women linger a moment before leaving. You can stay with the bead, or ask about it.
+**Waits:** Naserian sets it beside you, within reach. 'For whenever you go.' The women linger by the water. No one is in a hurry to say goodbye.
 
-**Optional — What does the bead mean?** Here, it marks this meeting. We have invented the gift for the story. We are not giving its colour a traditional meaning or presenting it as a Maasai ceremony.
+**Optional — What does the bead mean?** A way to remember an afternoon by the water. This gift is our invention; its colour carries no traditional meaning in this telling.
 
 **e1.dusk**
 
@@ -221,13 +227,13 @@ The lines below are taken from package v0.2.0. Conditions describe real hand out
 
 **today.river**
 
-> Picture a small garden beside the Nairobi River. This garden is imagined, like the meeting you witnessed. Someone has made a place for things to grow.
+> Along this river, neighbours have cleared rubbish and planted places to gather and grow. The work is unfinished. This little garden is imagined; the work that inspired it is real.
 
-**Optional — Who planted this garden?** This particular garden and its gardeners are imagined. It lets us ask what a memory from the earlier story might mean in a place people share today.
+**Optional — Who planted this garden?** In our imagined garden, neighbours planted it together. Someone brought seedlings; someone carried water. Tomorrow, someone must come back to tend it.
 
 **today.bead**
 
-> There is a place on the gate for the bead. Touch it to leave a reminder of the meeting here. You can also let the bead stay beside you.
+> There is a place on the gate for the bead. Touch the gate to leave it here, for someone else to find.
 
 *Invitation: Hang the bead. Passive path after 12 seconds.*
 
