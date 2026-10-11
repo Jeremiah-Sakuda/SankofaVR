@@ -115,7 +115,7 @@ Shader "Sankofa/Ember Figure"
                 half3 pigment = lerp(half3(0.10, 0.065, 0.045), _Color.rgb * 0.17, _Fabric);
                 pigment = lerp(pigment, half3(0.014, 0.009, 0.006), _Feature);
                 half3 c = pigment * illumination * (1 + weave) + _Color.rgb * border * 0.055;
-                c += _Color.rgb * (edge * 0.12 + embers * 0.035 + flame * 0.025) * (1 - _Fabric * 0.6) * (1 - _Feature);
+                c += _Color.rgb * (edge * 0.04 + embers * 0.012 + flame * 0.008) * (1 - _Fabric * 0.6) * (1 - _Feature);
                 half wisp = tex2D(_Noise, float2(i.world.x * 2.3 + i.world.z * 1.7, i.world.y * 2.0 - _Time.y * 0.35)).g;
                 half feet = saturate((rise - 0.005 - wisp * 0.02) / 0.035);
                 half presence = _Intensity * feet;

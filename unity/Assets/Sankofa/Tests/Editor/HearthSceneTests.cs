@@ -129,6 +129,35 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void GeneratedGarmentsFitTheStandingFigureAfterUnitySkinning()
+        {
+            foreach (var figure in Object.FindObjectsByType<FigureMotion>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (figure.GetComponentInChildren<Animator>() == null) continue;
+                var height = new SerializedObject(figure).FindProperty("height").floatValue;
+                foreach (var cloth in figure.GetComponentsInChildren<SkinnedMeshRenderer>(true).Where(r => r.name == "Shawl" || r.name == "Wrap"))
+                {
+                    var baked = new Mesh();
+                    try
+                    {
+                        cloth.BakeMesh(baked);
+                        // BakeMesh(false) already includes the skeleton's scale. Applying lossyScale again
+                        // shrinks it twice; use the same placement convention as the runtime echo baker.
+                        var placement = Matrix4x4.TRS(cloth.transform.position, cloth.transform.rotation, Vector3.one);
+                        var points = baked.vertices.Select(v => figure.transform.InverseTransformPoint(placement.MultiplyPoint3x4(v))).ToArray();
+                        Assert.That(points.Length, Is.GreaterThan(300), cloth.name + ": a complete garment, not a stray fragment");
+                        var lower = cloth.name == "Shawl" ? 0.56f : 0.07f;
+                        var upper = cloth.name == "Shawl" ? 0.90f : 0.71f;
+                        Assert.That(points.Min(p => p.y), Is.GreaterThanOrEqualTo(height * lower), figure.name + " " + cloth.name + " lower bound");
+                        Assert.That(points.Max(p => p.y), Is.LessThanOrEqualTo(height * upper), figure.name + " " + cloth.name + " upper bound");
+                        Assert.That(points.Max(p => Mathf.Abs(p.x)), Is.LessThan(height * 0.25f), figure.name + " " + cloth.name + " width");
+                    }
+                    finally { Object.DestroyImmediate(baked); }
+                }
+            }
+        }
+
+        [Test]
         public void TheStageHoldsExactlyWhatTheBundledPackageCanUse()
         {
             var staged = Object.FindObjectsByType<StageObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
