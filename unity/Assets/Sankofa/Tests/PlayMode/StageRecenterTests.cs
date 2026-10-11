@@ -43,6 +43,41 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator StanceFeetStayPlantedWhileTheBodyAdvances()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            SceneManager.LoadScene("Hearth"); yield return null;
+            Object.FindFirstObjectByType<SankofaApp>().enabled = false;
+            var stage = Object.FindFirstObjectByType<StoryStage>(); stage.ShowScene("story.water.1899");
+            var figure = stage.Find("figure.njeri"); figure.Reveal();
+            var motion = figure.GetComponent<FigureMotion>(); motion.ResetState();
+            var foot = System.Array.Find(figure.GetComponentsInChildren<Transform>(true), t => t.name == "foot_r");
+            var grounding = figure.GetComponent<FigureGrounding>();
+            var start = figure.transform.position;
+            motion.GoTo(start + Vector3.left * 1.3f, start + Vector3.left * 2, false);
+            Vector3 previousFoot = foot.position, previousBody = start;
+            var wasPlanted = false; var measured = 0; var worstSlip = 0f;
+            var version = grounding.RightContactVersion;
+            Time.captureFramerate = 60; // Deterministic stance sampling, independent of unbounded batch frame rate.
+            var end = Time.realtimeSinceStartup + 7;
+            while (Time.realtimeSinceStartup < end && motion.Walking)
+            {
+                yield return null;
+                if (grounding.RightPlanted && wasPlanted && version == grounding.RightContactVersion && motion.WalkVelocity > 0.2f && Vector3.Distance(figure.transform.position, previousBody) > 0.001f)
+                {
+                    var shift = foot.position - previousFoot; shift.y = 0;
+                    measured++; worstSlip = Mathf.Max(worstSlip, shift.magnitude);
+                }
+                wasPlanted = grounding.RightPlanted;
+                version = grounding.RightContactVersion;
+                previousFoot = foot.position; previousBody = figure.transform.position;
+            }
+            Assert.That(Vector3.Distance(start, figure.transform.position), Is.GreaterThan(1f), "observe an actual walk");
+            Assert.That(measured, Is.GreaterThan(4), "observe stance while the body moves");
+            Assert.That(worstSlip, Is.LessThan(0.02f), "stance foot remains in place rather than skating with the root");
+        }
+
+        [UnityTest]
         public IEnumerator APausedFigureAndItsRouteFollowAStageTranslationRotationAndHeightChange()
         {
             var stage = new GameObject("Stage");
@@ -86,6 +121,6 @@ namespace Sankofa.Tests
             Object.Destroy(stage);
         }
 
-        [TearDown] public void ResetClock() => StageClock.Paused = false;
+        [TearDown] public void ResetClock() { StageClock.Paused = false; Time.captureFramerate = 0; }
     }
 }

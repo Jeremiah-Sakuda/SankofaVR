@@ -97,6 +97,43 @@ namespace Sankofa.Tests
             Assert.That(problems, Is.Empty);
         }
 
+        [UnityTest]
+        public IEnumerator ExchangePosesAndBothSupportingHandsSurvivePauseAndRecenter()
+        {
+            yield return Open(1); app.enabled = false; stage.ShowScene("story.water.1899");
+            foreach (var id in new[] { "figure.njeri", "figure.naisula", "gourd.empty", "gourd.old" }) stage.Find(id).Reveal();
+            var giver = stage.Find("figure.njeri").GetComponent<FigureMotion>();
+            var receiver = stage.Find("figure.naisula").GetComponent<FigureMotion>();
+            giver.ResetState(); receiver.ResetState();
+            giver.GoTo(receiver.transform.position + new Vector3(-0.85f, 0, 0.12f), receiver.transform.position, false, true, receiver);
+            var stream = giver.GetComponentInChildren<LineRenderer>();
+            yield return WaitFor(() => stream.enabled, 15, "the directed exchange"); yield return null;
+            Assert.That(receiver.SupportWeight, Is.GreaterThan(0.7f), "recipient supports her vessel too");
+            StageClock.Paused = true;
+            var frame = giver.transform.parent;
+            var bones = giver.GetComponentsInChildren<Transform>().Concat(receiver.GetComponentsInChildren<Transform>())
+                .Where(t => t.name == "neck_01" || t.name.StartsWith("hand_") || t.name.StartsWith("foot_")).ToArray();
+            var positions = bones.Select(t => frame.InverseTransformPoint(t.position)).ToArray();
+            var rotations = bones.Select(t => Quaternion.Inverse(frame.rotation) * t.rotation).ToArray();
+            yield return new WaitForSeconds(0.4f);
+            for (var i = 0; i < bones.Length; i++)
+            {
+                Assert.That(Vector3.Distance(frame.InverseTransformPoint(bones[i].position), positions[i]), Is.LessThan(0.003f), bones[i].name + " paused position");
+                Assert.That(Quaternion.Angle(Quaternion.Inverse(frame.rotation) * bones[i].rotation, rotations[i]), Is.LessThan(0.5f), bones[i].name + " paused rotation");
+            }
+            frame.SetPositionAndRotation(frame.position + new Vector3(0.8f, 0.08f, -0.4f), Quaternion.Euler(0, 37, 0) * frame.rotation);
+            yield return null; yield return null;
+            for (var i = 0; i < bones.Length; i++)
+                Assert.That(Vector3.Distance(frame.InverseTransformPoint(bones[i].position), positions[i]), Is.LessThan(0.008f), bones[i].name + " follows recentered stage");
+            Assert.That(Vector3.Distance(stream.GetPosition(0), stage.Find("gourd.empty").PourPosition.Value), Is.LessThan(0.015f));
+            Assert.That(Vector3.Distance(stream.GetPosition(stream.positionCount - 1), stage.Find("gourd.old").PourPosition.Value), Is.LessThan(0.015f));
+            StageClock.Paused = false;
+            yield return WaitFor(() => !stream.enabled && giver.SharingWeight == 0, 10, "exchange release");
+            yield return null;
+            Assert.That(receiver.SupportWeight, Is.LessThan(0.01f), "support pose releases when exchange ends");
+            Assert.That(problems, Is.Empty);
+        }
+
         IEnumerator Open(float pace)
         {
             SceneManager.LoadScene("Hearth");

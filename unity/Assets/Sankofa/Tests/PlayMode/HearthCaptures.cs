@@ -155,6 +155,49 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator CapturePerformanceStudy()
+        {
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1") Assert.Ignore("Set SANKOFA_CAPTURE=1 to write review images.");
+            LogAssert.ignoreFailingMessages = true;
+            var previousPace = Time.timeScale;
+            Time.timeScale = 1;
+            StageClock.Paused = false;
+            AudioListener.volume = 0;
+            SceneManager.LoadScene("Hearth"); yield return null;
+            Object.FindFirstObjectByType<SankofaApp>().enabled = false;
+            GameObject.Find("OVRCameraRig").transform.position = new Vector3(0, 1.15f, 0);
+            var eye = GameObject.Find("CenterEyeAnchor").GetComponent<Camera>(); eye.fieldOfView = 85;
+            Object.FindFirstObjectByType<WorldAnchor>().Place();
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.StartScreen>().gameObject.SetActive(false);
+            foreach (var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None)) panel.gameObject.SetActive(false);
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>().gameObject.SetActive(false);
+            var stage = Object.FindFirstObjectByType<StoryStage>(); stage.ShowScene("story.water.1899");
+            foreach (var id in new[] { "figure.njeri", "figure.naisula", "gourd.empty", "gourd.old", "lantern.1899" }) stage.Find(id).Reveal();
+            yield return new WaitForSeconds(1);
+            var giver = stage.Find("figure.njeri").GetComponent<FigureMotion>();
+            var receiver = stage.Find("figure.naisula").GetComponent<FigureMotion>();
+            giver.ResetState(); receiver.ResetState();
+            eye.transform.rotation = Quaternion.LookRotation(receiver.transform.position + new Vector3(-0.6f, 0.9f, 0) - eye.transform.position);
+            var recorder = eye.gameObject.AddComponent<ReviewFrameRecorder>();
+            var frame = 0;
+            Time.captureFramerate = 12;
+            try
+            {
+                giver.GoTo(receiver.transform.position + new Vector3(-0.85f, 0, 0.12f), receiver.transform.position, false, true, receiver);
+                recorder.Record = () =>
+                {
+                    if (frame >= 264) { recorder.enabled = false; return; }
+                    if (frame == 180) giver.GoHome();
+                    Capture(eye, $"performance-{frame:0000}", 800, 600);
+                    frame++;
+                };
+                yield return WaitFor(() => frame >= 264, 120);
+                Assert.That(frame, Is.EqualTo(264));
+            }
+            finally { recorder.enabled = false; Time.captureFramerate = 0; Time.timeScale = previousPace; StageClock.Paused = false; AudioListener.volume = 1; }
+        }
+
+        [UnityTest]
         public IEnumerator CaptureEnvironmentStudy()
         {
             if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1") Assert.Ignore("Set SANKOFA_CAPTURE=1 to write review images.");
@@ -317,4 +360,11 @@ namespace Sankofa.Tests
             }
         }
     }
+    [DefaultExecutionOrder(100)]
+    public sealed class ReviewFrameRecorder : MonoBehaviour
+    {
+        public Action Record;
+        void LateUpdate() => Record?.Invoke();
+    }
+
 }

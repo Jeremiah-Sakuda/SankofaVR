@@ -20,6 +20,15 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Renderer body;
         [SerializeField] float height = 1.6f;
         [SerializeField] float speed = 0.7f;
+        [Tooltip("Measured forward stance speed of the imported walk at playback rate 1, in metres/second.")]
+        [SerializeField] float walkClipSpeed = 1.1f;
+        float walkVelocity;
+        public float WalkVelocity => walkVelocity;
+        internal FigureMotion ExchangePartner => sharePartner;
+        internal float ExchangeTime => shareElapsed;
+        internal Transform Head => headBone;
+        internal float ExchangeSupport { get; private set; }
+        public float SupportWeight => Mathf.Max(SharingWeight, ExchangeSupport);
         [Tooltip("Height of the rise and fall of each step.")]
         [SerializeField] float bob = 0.016f;
         [SerializeField] float stepLength = 0.55f;
@@ -151,12 +160,16 @@ namespace Sankofa.Runtime.Stage
         {
             Initialise();
             route.Clear();
+            GetComponent<FigureGrounding>()?.ResetContacts();
             next = 0;
             wait = 0;
+            walkVelocity = 0;
+            ExchangeSupport = 0;
             kneel = kneelTarget = 0;
             kneelOnArrival = false;
             presentOnArrival = false;
             reachFor = presentFor = 0;
+            if (sharePartner != null) sharePartner.ExchangeSupport = 0;
             sharePartner = null;
             shareElapsed = -1;
             if (sharingStream != null) sharingStream.enabled = false;
@@ -270,6 +283,7 @@ namespace Sankofa.Runtime.Stage
             kneelTarget = 0;
             kneelOnArrival = kneelThere;
             presentOnArrival = presentThere;
+            if (sharePartner != null) sharePartner.ExchangeSupport = 0;
             sharePartner = shareWith;
             shareElapsed = -1;
             var facing = lookAt - place;
@@ -400,16 +414,26 @@ namespace Sankofa.Runtime.Stage
                 if (kneel > 0.02f) kneelTarget = 0;
                 else
                 {
-                    walking = true;
                     var to = route[next] - basePosition;
                     var distance = to.magnitude;
-                    var step = speed * dt;
-                    if (distance <= step)
+                    var flat = new Vector3(to.x, 0, to.z);
+                    var heading = flat.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(flat) : transform.rotation;
+                    var angle = Quaternion.Angle(transform.rotation, heading);
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, heading, dt * 100f);
+                    // Turn before stepping sideways; brake over the final stride instead of snapping to a stop.
+                    var desired = angle > 55f ? 0 : next == route.Count - 1
+                        ? Mathf.Min(speed, Mathf.Sqrt(2f * 0.9f * Mathf.Max(0, distance - 0.015f))) : speed;
+                    walkVelocity = Mathf.MoveTowards(walkVelocity, desired, dt * 0.9f);
+                    walking = walkVelocity > 0.015f;
+                    var step = walkVelocity * dt;
+                    if (distance <= Mathf.Max(step, 0.016f))
                     {
                         basePosition = route[next];
                         next++;
                         if (next >= route.Count)
                         {
+                            walking = false;
+                            walkVelocity = 0;
                             kneelTarget = kneelOnArrival ? 1 : 0;
                             if (presentOnArrival) presentFor = sharePartner != null ? 9f : 3.5f;
                             if (sharePartner != null) shareElapsed = 0;
@@ -418,12 +442,14 @@ namespace Sankofa.Runtime.Stage
                     }
                     else basePosition += to / distance * step;
                     travelled += Mathf.Min(step, distance);
-                    to.y = 0;
-                    if (to.sqrMagnitude > 1e-4f) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(to), dt * 5f);
+
                 }
             }
             else if (finalRotation.HasValue)
-                transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation.Value, dt * 3f);
+            {
+                walkVelocity = 0;
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, finalRotation.Value, dt * 85f);
+            }
 
             // Arrived to hand something over: hold it out, then let it go to the visitor on the firelight.
             if (handingOver != null && next >= route.Count && wait <= 0)
@@ -450,7 +476,7 @@ namespace Sankofa.Runtime.Stage
             if (animator != null)
             {
                 animator.SetBool(WalkingId, walking);
-                animator.SetFloat(PaceId, speed / 1.1f);
+                animator.SetFloat(PaceId, walkVelocity / Mathf.Max(0.1f, walkClipSpeed));
                 animator.SetBool(KneelingId, kneelTarget > 0 && !walking);
                 animator.SetBool(TalkingId, presentFor > 0 && sharePartner == null);
             }
@@ -485,13 +511,26 @@ namespace Sankofa.Runtime.Stage
                     anchors[i].position = anchorBones[i].position;
                     anchors[i].rotation = transform.rotation;
                 }
-            DirectSharing();
+
         }
 
         /// <summary>
         /// Turns the head bone over the animated pose toward a point, within a comfortable turn of the body's facing:
         /// up to 60 degrees aside and 25 up or down.
         /// </summary>
+        internal void FacePartner(Vector3 point)
+        {
+            if (Walking) return;
+            var toward = point - transform.position; toward.y = 0;
+            if (toward.sqrMagnitude > 1e-4f) finalRotation = Quaternion.LookRotation(toward);
+        }
+
+        internal void DirectLook(Vector3 target, float weight)
+        {
+            // A story-requested glance (including a response to the visitor) takes priority over incidental acting.
+            if (lookWeight < 0.001f) Look(target, weight);
+        }
+
         void Look(Vector3 target, float weight)
         {
             var to = target - lookBone.position;
@@ -512,7 +551,7 @@ namespace Sankofa.Runtime.Stage
             SolveArm(reachArm, target, weight);
         }
 
-        static void SolveArm(Transform[] arm, Vector3 target, float weight)
+        internal static void SolveArm(Transform[] arm, Vector3 target, float weight)
         {
             if (arm.Length != 3) return;
             Transform upper = arm[0], lower = arm[1], hand = arm[2];
@@ -536,11 +575,13 @@ namespace Sankofa.Runtime.Stage
 
         // An authored exchange over the library's base pose: settle both vessels, tilt, pour, acknowledge,
         // release. The application still owns when the exchange starts; this never advances the narrative.
-        void DirectSharing()
+        internal void DirectSharing()
         {
+            if (sharePartner != null) sharePartner.ExchangeSupport = 0;
             if (sharingStream != null) sharingStream.enabled = false;
             if (sharePartner == null || shareElapsed < 0 || shareElapsed > 9 || anchors.Length == 0 || sharePartner.anchors.Length == 0) return;
             var blend = SharingWeight;
+            sharePartner.ExchangeSupport = blend;
             var between = (transform.position + sharePartner.transform.position) * 0.5f;
             between.y = Mathf.Max(transform.position.y, sharePartner.transform.position.y) + height * 0.59f;
             var side = (sharePartner.transform.position - transform.position).normalized;
@@ -555,9 +596,10 @@ namespace Sankofa.Runtime.Stage
             anchors[0].position = anchorBones[0].position;
             sharePartner.anchors[0].position = sharePartner.anchorBones[0].position;
             var pour = Mathf.SmoothStep(0, 1, Mathf.Min((shareElapsed - 1.6f) / 1.3f, (6.8f - shareElapsed) / 1.4f));
-            anchors[0].rotation = Quaternion.AngleAxis(pour * 65f, Vector3.Cross(Vector3.up, side)) * transform.rotation;
-            Glance(receiverGrip, 0.5f);
-            sharePartner.Glance(giverGrip, 0.5f);
+            var tilt = Quaternion.AngleAxis(pour * 65f, Vector3.Cross(Vector3.up, side));
+            anchors[0].rotation = tilt * transform.rotation;
+            if (reachArm.Length == 3) reachArm[2].rotation = tilt * reachArm[2].rotation;
+
             var giverVessel = System.Array.Find(carried, o => o != null && o.Visible && o.InHolderHands && o.PourPosition.HasValue);
             var receiverVessel = System.Array.Find(sharePartner.carried, o => o != null && o.Visible && o.InHolderHands && o.PourPosition.HasValue);
             if (sharingStream != null && pour > 0.7f && giverVessel != null && receiverVessel != null)

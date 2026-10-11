@@ -335,7 +335,7 @@ namespace Sankofa.EditorTools
             walk.speedParameterActive = true;
             walk.speedParameter = "Pace";
             var kneel = body.AddState("Kneel");
-            kneel.motion = Clip("Fixing_Kneeling");
+            kneel.motion = KneelingRest(Clip("Fixing_Kneeling"));
             body.defaultState = idle;
             void Link(AnimatorState from, AnimatorState to, string parameter, bool value, float seconds)
             {

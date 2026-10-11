@@ -58,7 +58,7 @@ namespace Sankofa.Runtime.Stage
             var held = System.Array.Find(heldObjects, o => o != null && o.Visible && o.InHolderHands && o.transform.IsChildOf(heldAnchor));
             var dt = StageClock.DeltaTime;
             rightGrip = Mathf.MoveTowards(rightGrip, held != null ? 1 : 0, dt * 3);
-            leftGrip = Mathf.MoveTowards(leftGrip, held != null ? motion.SharingWeight : 0, dt * 3);
+            leftGrip = Mathf.MoveTowards(leftGrip, held != null ? motion.SupportWeight : 0, dt * 3);
             for (var i = 0; i < fingers.Length; i++)
             {
                 var finger = fingers[i];

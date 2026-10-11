@@ -388,6 +388,14 @@ namespace Sankofa.EditorTools
             Set(motion, "sharingStream", pour);
             Set(motion, "tint", tint);
             SetArray(motion, "parts", cloth.Cast<Object>().ToArray());
+            Set(motion, "walkClipSpeed", MeasureWalkSpeed(animator, new[] { Bone("foot_r"), Bone("foot_l") }));
+            var grounding = figureRoot.gameObject.AddComponent<FigureGrounding>();
+            Set(grounding, "animator", animator);
+            SetArray(grounding, "rightLeg", new Object[] { Bone("thigh_r"), Bone("calf_r"), Bone("foot_r") });
+            SetArray(grounding, "leftLeg", new Object[] { Bone("thigh_l"), Bone("calf_l"), Bone("foot_l") });
+            Set(grounding, "rightSole", Bone("foot_r").position.y - figureRoot.position.y);
+            Set(grounding, "leftSole", Bone("foot_l").position.y - figureRoot.position.y);
+            Set(figureRoot.gameObject.AddComponent<FigureExchange>(), "chest", Bone("spine_03"));
             var presence = figureRoot.gameObject.AddComponent<FigurePresence>();
             Set(presence, "eyes", figureRoot.GetComponentsInChildren<SkinnedMeshRenderer>(true).Single(r => r.name == "Eyes"));
             Set(presence, "heldAnchor", hands);
