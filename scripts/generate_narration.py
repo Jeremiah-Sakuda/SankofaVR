@@ -19,6 +19,7 @@ import base64
 import concurrent.futures
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import urllib.error
@@ -93,15 +94,22 @@ def main():
     parser.add_argument("--voice", default=VOICE)
     parser.add_argument("--only", default="", help="comma-separated line ids")
     parser.add_argument("--force", action="store_true", help="regenerate even if unchanged")
+    parser.add_argument("--clip-namespace", help="new immutable folder for a revision; preserves audio referenced by older kept visits")
     args = parser.parse_args()
 
     package = json.loads(args.package.read_text(encoding="utf-8"))
-    folder = ROOT / "unity/Assets/Sankofa/Resources/Narration" / package["id"]
+    namespace = args.clip_namespace or package["id"]
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", namespace):
+        parser.error("clip namespace must be a single alphanumeric/dot/dash/underscore name")
+    folder = ROOT / "unity/Assets/Sankofa/Resources/Narration" / namespace
     folder.mkdir(parents=True, exist_ok=True)
     # Kept beside the package, outside Resources, so it never ships in a build.
-    manifest_path = args.package.with_name(package["id"] + ".narration.json")
+    manifest_path = args.package.with_name(namespace + ".narration.json")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
     only = {i for i in args.only.split(",") if i}
+    by_id = {line["id"]: line for line in lines(package)}
+    if only - by_id.keys():
+        parser.error("unknown line ids: " + ", ".join(sorted(only - by_id.keys())))
 
     todo = []
     for line in lines(package):
@@ -112,7 +120,7 @@ def main():
         if args.force or not clip.exists() or manifest.get(line["id"], {}).get("fingerprint") != mark:
             todo.append((line, mark, clip))
 
-    access = token()
+    access = token() if todo else None
     print(f"{len(todo)} line(s) to voice with {args.model} / {args.voice}", file=sys.stderr)
 
     def work(item):
@@ -122,10 +130,20 @@ def main():
         except RuntimeError as error:
             return line["id"], None, str(error)
         # Stored as MP3 (VBR quality 3), several times smaller than the PCM the service returns.
-        wav = clip.with_suffix(".wav")
+        wav = clip.with_suffix(".candidate.wav")
+        candidate = clip.with_suffix(".candidate.mp3")
         wav.write_bytes(audio)
-        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(wav), "-c:a", "libmp3lame", "-q:a", "3", str(clip)], check=True)
-        wav.unlink()
+        try:
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(wav), "-c:a", "libmp3lame", "-q:a", "3", str(candidate)], check=True)
+            seconds = duration(candidate)
+            # Catch runaway speech/silence before attaching it to a short caption.
+            maximum = min(60, max(15, len(line["text"].split()) * 1.5 + 5))
+            if not 0.5 <= seconds <= maximum:
+                return line["id"], None, f"clip duration {seconds:.2f}s outside 0.5..{maximum:.1f}s; retry this line"
+            candidate.replace(clip)
+        finally:
+            wav.unlink(missing_ok=True)
+            candidate.unlink(missing_ok=True)
         return line["id"], mark, len(line["text"])
 
     failed = []
@@ -135,16 +153,22 @@ def main():
                 failed.append(line_id)
                 print("FAILED", line_id, detail[:200], file=sys.stderr)
                 continue
-            manifest[line_id] = {"fingerprint": mark, "model": args.model, "voice": args.voice, "characters": detail}
+            manifest[line_id] = {"fingerprint": mark, "provider": "Google Cloud Text-to-Speech",
+                                 "model": args.model, "voice": args.voice, "direction": DIRECTION,
+                                 "text": by_id[line_id]["text"], "characters": detail}
             print("voiced", line_id, file=sys.stderr)
 
     # Time every voiced line's caption and watchdog to its clip.
     for line in lines(package):
         clip = folder / (line["id"] + ".mp3")
-        if clip.exists():
-            line["audio"] = f"{package['id']}/{line['id']}"
+        mark = fingerprint(line["text"], args.model, args.voice, DIRECTION)
+        # A failed regeneration must never bind an old recording to revised words.
+        if clip.exists() and manifest.get(line["id"], {}).get("fingerprint") == mark and line["id"] not in failed:
+            line["audio"] = f"{namespace}/{line['id']}"
             line["seconds"] = round(duration(clip), 2)
             manifest.setdefault(line["id"], {})["seconds"] = line["seconds"]
+        elif not only or line["id"] in only:
+            line.pop("audio", None)
 
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     args.package.write_text(json.dumps(package, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
