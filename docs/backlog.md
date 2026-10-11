@@ -35,7 +35,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 - [ ] Compare bounded personalisation with an equally polished authored benchmark for relevance, coherence and pacing; separately evaluate the added value of live answers (stress-test T5).
 - [x] Define episode, claim, staged-object, beat, invitation and visit-journal records with stable IDs and validation (schema 1).
-- [ ] Define confirmed-intent, coverage and realised-plan records. Realised plans and kept visits (schema 1) exist and replay exactly; confirmed-intent and coverage records do not.
+- [ ] Define confirmed-intent, coverage and realised-plan records. Realised plans and kept visits (schema 1) exist and replay their path and outcomes; confirmed-intent and coverage records do not.
 - [ ] Add a small reviewed context package; preserve uncertainty and reject unsupported geographic substitutions. The [Enkare Nairobi package](../unity/Assets/Sankofa/Content/enkare-nairobi.json) cites every documented claim and labels reconstruction; it is unreviewed.
 - [ ] Generate two contrasting requests into visibly different legal scene plans before producing final narration. The two eras and the hand paths compose into different validated plans; nothing is generated at runtime yet.
 - [x] Validate evidence, asset availability, continuity, actions and endings; test malformed/stale/missing-asset proposals. Package and plan validators walk every route and outcome against the staged inventory; .NET and EditMode tests.
@@ -54,7 +54,8 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 - [ ] Complete three distinct scene plans for the reviewed context; compare paired interests for material differences.
 - [ ] Release the second reviewed narration language with accurate English subtitles and an explicit live-language support matrix.
-- [x] Save realised narration/plans and local keepsakes only when enabled; implement replay, continuation, deletion and version handling. A visit is kept only on **Keep this visit**; replay, continuation to today, forget with confirmation and schema checks exist in software.
+- [x] Save plans and local keepsakes only when enabled; implement path/outcome replay, continuation, deletion and version handling. A visit is kept only on **Keep this visit**; replay, continuation to today, forget with confirmation and schema checks exist in software. Interrupted questions and their timing are not replayed; complete realised-visit replay remains open.
+- [ ] Preserve the realised question/answer sequence and interruption boundaries in replay (SK-12); current replay preserves the authored path and invitation outcomes only.
 - [ ] Implement stable checkpoint resume, headset-removal pause, save failure and content-missing recovery.
 - [ ] Complete offline cold start, mid-question disconnect, invalid generation, permission denial and no-input endings.
 - [ ] Finalise privacy notices, retention/deletion behaviour, provider terms, credentials protection and asset/audio credits (SK-05–06, SK-12–16, SK-18).

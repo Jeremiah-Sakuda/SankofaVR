@@ -9,9 +9,9 @@ using Sankofa.Core.Visits;
 namespace Sankofa.Storage
 {
     /// <summary>
-    /// Kept visits as one JSON file each in a private folder (on Quest, the application's own storage). A save
-    /// writes a temporary file and moves it into place, so a failed save never leaves a half-written visit and
-    /// earlier visits stay intact. Unreadable files are reported, never deleted.
+    /// One active kept shelf in the application's private folder. Replacement atomically writes the complete visit;
+    /// a durable empty shelf prevents obsolete legacy JSON files from resurfacing after forgetting. Per-visit Save
+    /// remains for legacy callers. Unreadable records are reported rather than silently substituted or deleted.
     /// </summary>
     public sealed class FileVisitStore : IVisitStore
     {
@@ -144,18 +144,18 @@ namespace Sankofa.Storage
                 if (File.Exists(shelf))
                 {
                     var text = File.ReadAllText(shelf, Utf8);
-                    forgettingActive = text != EmptyShelf && SavedVisitCodec.Read(text).Id == id;
+                    forgettingActive = text == EmptyShelf || SavedVisitCodec.Read(text).Id == id;
                 }
                 if (forgettingActive)
                 {
-                        // Commit the empty shelf before cleanup. A crash or locked obsolete file cannot revive it.
-                        WriteShelf(EmptyShelf);
-                        foreach (var legacy in System.IO.Directory.GetFiles(Directory, "*" + Extension))
-                        {
-                            try { SavedVisitCodec.Read(File.ReadAllText(legacy, Utf8)); }
-                            catch (StoryFormatException) { continue; }
-                            File.Delete(legacy);
-                        }
+                    // Commit the empty shelf before cleanup. A crash or locked obsolete file cannot revive it.
+                    WriteShelf(EmptyShelf);
+                    foreach (var legacy in System.IO.Directory.GetFiles(Directory, "*" + Extension))
+                    {
+                        try { SavedVisitCodec.Read(File.ReadAllText(legacy, Utf8)); }
+                        catch (StoryFormatException) { continue; }
+                        File.Delete(legacy);
+                    }
                 }
                 if (File.Exists(target)) File.Delete(target);
             }
