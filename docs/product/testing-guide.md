@@ -47,7 +47,7 @@ Captions are always on.
 
 ## What to know
 
-- The people are fictional composites, drawn as faceless figures of firelight. The story is a draft awaiting review by Kikuyu and Maasai families. Each era says so in a small line under the captions.
+- The people are fictional composites. The baseline uses generic 3D characters; the separate illustrated-theatre MVP uses painted figures in its first chapter. Both are theatrical drafts awaiting review by Kikuyu and Maasai families. Each era says so in a small line under the captions.
 - Lines grounded in a source and lines that are reconstruction are kept distinct; see the [source register](../content/enkare-nairobi/sources.md).
 - Kept visits are stored only on the headset, and only when you press **Keep**: the story's path, what you did by hand, and up to three things you looked toward most (head direction, not eye tracking). No camera, voice or hand data is stored. **Forget** removes them.
 - There is no music. The ambience is field recordings, credited in the app under **Credits**.

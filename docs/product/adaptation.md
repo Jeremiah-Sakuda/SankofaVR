@@ -36,7 +36,7 @@ The web project existed before the entry period, and the Quest adaptation has be
 
 - **Spatial staging.** The visitor sits at a night fire. Each era is staged around them without moving them: the 1850s trading place at dusk, the 1899 railway camp and today's city river. They enter through the flame.
 - **Hands.** The visitor holds out a palm, carries and receives things, touches the rail, the gate or the soil, and points and pinches at panels. Every essential step also progresses passively, and controllers are optional.
-- **People as firelight.** Faceless figures of ember and smoke walk in, kneel, hand things over and leave. Each family line has its own colour.
+- **People and illustration.** The baseline has generic fictional 3D characters with project-made clothing and a restrained ember outline. A separate illustrated-theatre MVP replaces the first chapter's people with painted pose sheets at human scale and layers its scenery at different depths. Its physical gourd crosses from a painted palm into reachable space; an accepted invitation changes the illustration. Both forms remain drafts awaiting cultural and device review.
 - **Consequence and continuity.** The visitor's actions change what the griot says. A kept visit opens the continuation to today, carrying the visitor's own bead or seed, and replays its path and outcomes exactly (questions asked are not replayed). What the visitor lingered on rises back out of the fire at home and again as the continuation opens. Saving is explicit.
 - **Offline by design.** The full story is bundled, with no backend.
 
@@ -46,4 +46,4 @@ No source code, images, audio or music from the web repository are in this repos
 
 ## Deliberately deferred
 
-The web project's live generation from a visitor's own family seeds is not in this build. The PRD keeps it out of the MVP: a model would weave only the visitor's own fragments into the framing, labelled as theirs, and never infer ancestry. Live voice conversation is also deferred. Quest personalisation today comes from what the visitor chooses and does.
+The web project's live generation from a visitor's own family seeds and live voice conversation are not implemented. Later MVP decisions defer them; the original PRD still describes broader generated-story and conversation requirements, which remain open. Quest personalisation today comes from what the visitor chooses and does. The illustrated-theatre experiment changes presentation and does not establish acceptance of those broader requirements.

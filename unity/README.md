@@ -47,7 +47,10 @@ UNITY="/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity
 "$UNITY" -batchmode -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildIllustratedTheatre
 "$UNITY" -batchmode -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildIllustratedTheatre
 SANKOFA_CAPTURE=1 "$UNITY" -batchmode -projectPath "$PWD/unity" -buildTarget Android -runTests -testPlatform PlayMode -testFilter Sankofa.Tests.IllustratedTheatreTests -testResults "$PWD/artifacts/logs/illustrated-playmode.xml"
+sh scripts/make_illustrated_gallery.sh
 ```
+
+The gallery command exports three review stills and a silent handover video from `artifacts/illustrated-theatre` into `docs/media`. Capture cadence is for inspection and does not measure headset performance.
 
 From the repository root, with the editor installed through Unity Hub and a signed-in, licensed Unity account:
 

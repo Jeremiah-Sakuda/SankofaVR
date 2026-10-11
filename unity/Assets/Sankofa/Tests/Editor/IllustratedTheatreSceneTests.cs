@@ -45,12 +45,15 @@ namespace Sankofa.Tests
         {
             var scene = Object.FindFirstObjectByType<StoryStage>().Scenes.Single(s => s.Root.GetComponent<IllustratedTheatre>() != null);
             var renderers = scene.Root.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled).ToArray();
-            ulong triangles = 0;
+            long triangles = 0;
             foreach (var renderer in renderers)
             {
                 var mesh = renderer.GetComponent<MeshFilter>()?.sharedMesh;
                 if (mesh == null) continue;
-                for (var sub = 0; sub < mesh.subMeshCount; sub++) triangles += mesh.GetIndexCount(sub) / 3;
+                long meshTriangles = 0;
+                for (var sub = 0; sub < mesh.subMeshCount; sub++) meshTriangles += mesh.GetIndexCount(sub) / 3;
+                // Use the baseline's convention: each additional material pass also counts.
+                triangles += meshTriangles * Mathf.Max(1, renderer.sharedMaterials.Length - mesh.subMeshCount + 1);
             }
             TestContext.WriteLine($"Illustrated chapter: {triangles} triangles, {renderers.Length} renderers (geometry proxy only)");
             Assert.That(triangles, Is.LessThanOrEqualTo(300000));

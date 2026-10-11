@@ -37,11 +37,14 @@ Keep contracts small, serialisable and versioned at persistence/service boundari
 | Add a reviewed setting or narration language | New content package and coverage entries; shared visitor flow remains; language support is evaluated independently |
 | No network or microphone permission | Local hands and complete bundled story remain available; fallback is disclosed |
 | Swap simulator input for Quest hands | Input adapter changes; accepted story actions keep their meaning |
+| Replace rigged figures with illustrated theatre | A content layout selects cards, poses and tangible props; accepted story events, hand gestures, storage and replay retain their meaning |
 | Enable or remove room-aware MR | Placement adapter changes; full VR remains usable and story logic is unchanged |
 | Interruption, timeout or out-of-order response | Application invalidates request; stale cues never reach the active scene |
 | Replay after service changes | Saved realised content plays; a new generation is never represented as an exact replay |
 
 These are implementation acceptance intentions, not completed checks. For each substantial change, record its owning module, affected requirement, observable behaviour and relevant evidence. A feature that crosses boundaries should have one owner and explicit contracts, not duplicate state in several scenes.
+
+The illustrated-theatre MVP implements that presentation replacement for one historical chapter. `IllustratedFigure` owns painted poses and the origin of a physical gift. `IllustratedTheatre` consumes resolved invitations to select cast responses and scenic emphasis. Layout and response mappings are authored content; neither renderer accepts a story choice. `SankofaApp` sends the same resolved outcome during a live visit and replay. Its local shelf uses a separate namespace from the baseline scene. The scene builder composes this version from the existing foundation without regenerating or replacing the baseline scene.
 
 ## Competition context is removable
 
