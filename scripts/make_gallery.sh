@@ -18,8 +18,9 @@ still figure-study-kneeling figure-kneeling
 still figure-study-sharing-03 figure-sharing
 still 14-seed figures-after
 # Optional baseline copied before changing the scene. Both panels use the same journey framing.
-if [[ -f artifacts/polish-before/14-seed.png ]]; then
-  ffmpeg -loglevel error -y -i artifacts/polish-before/14-seed.png -vf "scale=1280:-2" -q:v 4 "$out/figures-before.jpg"
+baseline=artifacts/polish-round12-baseline/14-seed.png
+if [[ -f "$baseline" ]]; then
+  ffmpeg -loglevel error -y -i "$baseline" -vf "scale=1280:-2" -q:v 4 "$out/figures-before.jpg"
   ffmpeg -loglevel error -y -i "$out/figures-before.jpg" -i "$out/figures-after.jpg" -filter_complex "[0:v][1:v]hstack=inputs=2" -q:v 4 "$out/figures-comparison.jpg"
 fi
 # The entry through the flame as one strip of frames.

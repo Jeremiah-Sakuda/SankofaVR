@@ -39,7 +39,7 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 
 ![The same 1899 journey view before and after the character and lighting revision](docs/media/figures-comparison.jpg)
 
-*Left: the previous build (`e2dbd82`). Right: the current character revision. Both are actual desktop journey captures with the same camera framing.*
+*Left: polish round 12 (`e3788de`). Right: the current character and foliage revision. Both are actual desktop journey captures with the same camera framing.*
 
 | Standing | Kneeling | Sharing |
 |---|---|---|
@@ -56,7 +56,7 @@ The full slice runs in software: a Unity project for Quest and an engine-free st
 | Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
 | Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
 | Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can replay the same path and outcomes, continue to today or be forgotten; questions and interruption timing are not replayed |
-| Figures | Skinned garments, walk/kneel/give performances, directed gourd sharing, and a glance when your attention rests on them |
+| Figures | Complete skinned tops and wraps, walk/kneel/give performances, directed gourd sharing, held-object finger poses, blinks, and a glance when your attention rests on them |
 | Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
 
 Not yet established:
