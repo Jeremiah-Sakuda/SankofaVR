@@ -116,7 +116,15 @@ namespace Sankofa.Tests
                         Assert.That(binding.path == "" || animator.transform.Find(binding.path) != null, Is.True,
                             figure.name + ": missing animated joint " + binding.path + " in " + clip.name);
                 foreach (var skin in figure.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                {
                     Assert.That(skin.sharedMesh.subMeshCount, Is.EqualTo(1), skin.name + ": depth must cover every surface");
+                    Assert.That(skin.sharedMesh.boneWeights.Length, Is.EqualTo(skin.sharedMesh.vertexCount), skin.name + ": skin every vertex");
+                    foreach (var weight in skin.sharedMesh.boneWeights)
+                    {
+                        Assert.That(weight.weight0 + weight.weight1 + weight.weight2 + weight.weight3, Is.EqualTo(1).Within(0.001f), skin.name + ": normalised weights");
+                        Assert.That(new[] { weight.boneIndex0, weight.boneIndex1, weight.boneIndex2, weight.boneIndex3 }.All(i => i >= 0 && i < skin.bones.Length), Is.True, skin.name + ": valid skeleton index");
+                    }
+                }
             }
         }
 

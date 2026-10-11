@@ -164,22 +164,12 @@ namespace Sankofa.EditorTools
             {
                 mesh = Object.Instantiate(body.sharedMesh);
                 mesh.name = "Figure Shawl";
-                var bones = body.bones;
                 var weights = mesh.boneWeights;
                 var verts = mesh.vertices;
                 var normals = mesh.normals;
-                var origin = body.transform.parent.position.y;
-                bool Covered(int i)
-                {
-                    var n = bones[DominantBone(weights[i])].name;
-                    return n.StartsWith("spine") || n.StartsWith("clavicle") || n == "pelvis" ||
-                        (n.StartsWith("upperarm") && body.transform.TransformPoint(verts[i]).y > origin + height * 0.69f);
-                }
-                var triangles = new List<int>();
                 var source = mesh.triangles;
-                for (var k = 0; k < source.Length; k += 3)
-                    if (Covered(source[k]) && Covered(source[k + 1]) && Covered(source[k + 2]))
-                        triangles.AddRange(new[] { source[k], source[k + 1], source[k + 2] });
+                var uv = mesh.uv;
+                var fitted = new ClothVertex[verts.Length];
                 for (var k = 0; k < verts.Length; k++)
                 {
                     // Offset in metres, converted to mesh space, prevents depth fighting and preserves skin weights.
@@ -188,10 +178,31 @@ namespace Sankofa.EditorTools
                     // Cloth hangs from the chest instead of adhering to the abdominal contour.
                     if (local.y > height * 0.53f && local.y < height * 0.77f && local.z > 0 && Mathf.Abs(local.x) < height * 0.13f)
                         local.z = Mathf.Max(local.z, height * 0.086f * (1 - Mathf.Pow(Mathf.Abs(local.x) / (height * 0.2f), 2)));
-                    verts[k] = body.transform.InverseTransformPoint(figureRoot.TransformPoint(local));
-                    verts[k] += body.transform.InverseTransformVector(worldNormal * 0.009f);
+                    local += figureRoot.InverseTransformVector(worldNormal * 0.009f);
+                    fitted[k] = new ClothVertex { Point = local, UV = uv[k], Weight = weights[k] };
                 }
-                mesh.vertices = verts;
+                // Clip actual triangles at the hem, neck and sleeves. Selecting vertices by bone name left
+                // jagged edges and stray patches on wrists; interpolation keeps the new edges skinned correctly.
+                var output = new List<ClothVertex>();
+                var triangles = new List<int>();
+                for (var k = 0; k < source.Length; k += 3)
+                {
+                    var polygon = new List<ClothVertex> { fitted[source[k]], fitted[source[k + 1]], fitted[source[k + 2]] };
+                    polygon = ClipCloth(polygon, v => v.Point.y - height * 0.61f);
+                    polygon = ClipCloth(polygon, v => height * 0.86f - v.Point.y);
+                    polygon = ClipCloth(polygon, v => height * 0.205f - v.Point.x);
+                    polygon = ClipCloth(polygon, v => height * 0.205f + v.Point.x);
+                    for (var j = 1; j + 1 < polygon.Count; j++)
+                    {
+                        triangles.AddRange(new[] { output.Count, output.Count + 1, output.Count + 2 });
+                        output.AddRange(new[] { polygon[0], polygon[j], polygon[j + 1] });
+                    }
+                }
+                mesh.Clear();
+                mesh.SetVertices(output.Select(v => body.transform.InverseTransformPoint(figureRoot.TransformPoint(v.Point))).ToList());
+                mesh.SetUVs(0, output.Select(v => v.UV).ToList());
+                mesh.boneWeights = output.Select(v => v.Weight).ToArray();
+                mesh.bindposes = body.sharedMesh.bindposes;
                 mesh.SetTriangles(triangles, 0);
                 mesh.normals = WeldedNormals(mesh);
                 mesh.RecalculateBounds();
@@ -208,6 +219,53 @@ namespace Sankofa.EditorTools
             cloth.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             cloth.receiveShadows = false;
             return cloth;
+        }
+
+        struct ClothVertex
+        {
+            public Vector3 Point;
+            public Vector2 UV;
+            public BoneWeight Weight;
+        }
+
+        static List<ClothVertex> ClipCloth(List<ClothVertex> input, System.Func<ClothVertex, float> distance)
+        {
+            var result = new List<ClothVertex>();
+            if (input.Count == 0) return result;
+            var previous = input[input.Count - 1];
+            var previousDistance = distance(previous);
+            foreach (var current in input)
+            {
+                var currentDistance = distance(current);
+                if ((previousDistance >= 0) != (currentDistance >= 0))
+                {
+                    var t = previousDistance / (previousDistance - currentDistance);
+                    result.Add(new ClothVertex { Point = Vector3.Lerp(previous.Point, current.Point, t),
+                        UV = Vector2.Lerp(previous.UV, current.UV, t), Weight = BlendWeights(previous.Weight, current.Weight, t) });
+                }
+                if (currentDistance >= 0) result.Add(current);
+                previous = current;
+                previousDistance = currentDistance;
+            }
+            return result;
+        }
+
+        static BoneWeight BlendWeights(BoneWeight a, BoneWeight b, float t)
+        {
+            var weights = new Dictionary<int, float>();
+            void Add(int bone, float weight) => weights[bone] = (weights.TryGetValue(bone, out var value) ? value : 0) + weight;
+            Add(a.boneIndex0, a.weight0 * (1 - t)); Add(a.boneIndex1, a.weight1 * (1 - t));
+            Add(a.boneIndex2, a.weight2 * (1 - t)); Add(a.boneIndex3, a.weight3 * (1 - t));
+            Add(b.boneIndex0, b.weight0 * t); Add(b.boneIndex1, b.weight1 * t);
+            Add(b.boneIndex2, b.weight2 * t); Add(b.boneIndex3, b.weight3 * t);
+            var best = weights.OrderByDescending(kv => kv.Value).Take(4).ToArray();
+            var total = best.Sum(kv => kv.Value);
+            var result = new BoneWeight();
+            if (best.Length > 0) { result.boneIndex0 = best[0].Key; result.weight0 = best[0].Value / total; }
+            if (best.Length > 1) { result.boneIndex1 = best[1].Key; result.weight1 = best[1].Value / total; }
+            if (best.Length > 2) { result.boneIndex2 = best[2].Key; result.weight2 = best[2].Value / total; }
+            if (best.Length > 3) { result.boneIndex3 = best[3].Key; result.weight3 = best[3].Value / total; }
+            return result;
         }
 
         const string FigureControllerPath = "Assets/Sankofa/Art/Generated/Figure.controller";
