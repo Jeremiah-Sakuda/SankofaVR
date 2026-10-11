@@ -2,6 +2,8 @@
 
 Version 1.0 · September 30, 2026 · Product direction selected; implementation and validation pending
 
+**October 11 implementation/planning note:** the current v0.3.0 illustrated theatre implements an authored encounter, recorded questions, action-specific consequences and a saved continuation. It does not implement this document's generated plans, live conversation or additional-language acceptance. The [current sprint proposal](delivery-plan.md#current-sprint-plan) recommends a narrower competition release profile and records those gaps explicitly; it does not mark SK-03/04, SK-06 or SK-09 complete. The original requirements below remain the broader product baseline until a release-scope decision is recorded.
+
 **A story that notices what you notice.**
 
 Sankofa welcomes you around a living fire, listens to the histories and questions that brought you there, and brings a personalised story into the space around you. The fire is the griot: its voice, movement, light and pauses create the sense of someone being present. You enter its stories through the flame and return to the same hearth carrying something that now has meaning.

@@ -4,6 +4,48 @@ September 30, 2026 · [PRD v1.0](product/prd.md) · [Delivery plan](product/deli
 
 A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Some runtime requirements now exist in software with the draft Enkare Nairobi package; none has device, content or participant acceptance. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
 
+## Current illustrated-theatre sprints
+
+October 11 proposal · [Schedule, capacity, dependencies and exit gates](product/delivery-plan.md#current-sprint-plan). Sprint tickets are additional work from v0.3.0, not claims of acceptance. The earlier requirement inventory remains below. The recommended narrower release profile leaves generation, live conversation and an additional narration language open in the original PRD.
+
+### Sprint 1 — Prove the encounter
+
+- [ ] S1-01 — Build the current episode; record Quest access, supported-device candidate, first hands/depth/reach/performance findings.
+- [ ] S1-02 — Prepare family/community, Maa-pronunciation and unfamiliar-reader review materials; incorporate actual feedback when available.
+- [ ] S1-03 — Audit look/ask/act responses; specify the illustrated acknowledgement and preserve consent/passive behavior.
+- [ ] S1-04 — Resolve the release-profile decision and start provenance/terms, eligibility, reviewer and hardware dependencies; record any blockers.
+
+### Sprint 2 — Make the theatre convincing
+
+- [ ] S2-01 — Make the sheep recognisable at the promise; remove the hide/rock compositing defect and choose one river treatment.
+- [ ] S2-02 — Apply reviewed cast/garment changes; add the minimum acknowledgement pose vocabulary and route `AnswerLook`/`AcknowledgeVisitor` to illustrated presentation.
+- [ ] S2-03 — Match tangible gourd/bead materials and lighting to the illustration; verify palm origin, reachable destination and both outcomes.
+- [ ] S2-04 — Review the fire/entry/return, pose transitions, narration pacing, ambience balance and captions together; capture and device-check the result.
+
+### Sprint 3 — Make returning worthwhile
+
+- [ ] S3-01 — Convert the contemporary coda to the same illustrated art direction, preserving C15/R2 and the optional gate placement.
+- [ ] S3-02 — Verify kept actions and attention recall across relaunch, replay and continuation; unsaved/forgotten visits make no retained-memory claim.
+- [ ] S3-03 — Consolidate active story authoring and scene-specific presentation; preserve the historical comparison and older saved audio/content compatibility.
+- [ ] S3-04 — Update release build selection, testing guide and captures so they describe the illustrated candidate rather than the earlier baseline.
+
+### Sprint 4 — Make it dependable
+
+- [ ] S4-01 — Complete sustained device profiling and ten full visits; fix transparent-layer, fire and input/caption issues on supported hardware.
+- [ ] S4-02 — Run five formative novice sessions against the PRD completion/consequence target; retain actual observations and fix failures.
+- [ ] S4-03 — Test one-hand, passive, pause/headset removal, recenter, questions, offline, save failure, replay and forget paths.
+- [ ] S4-04 — Incorporate remaining cultural/pronunciation/listening corrections; publish accurate coverage and close release asset-rights findings.
+
+### Sprint 5 — Make the submission convincing
+
+- [ ] S5-01 — Produce the candidate APK and verify independent installation and judge access through the required channel, with user-authorised external actions.
+- [ ] S5-02 — Prepare a real-footage demo under three minutes, screenshots, adaptation comparison and accurate entry copy/testing instructions.
+- [ ] S5-03 — Verify credits, supported devices, coverage, candidate hashes and freeze/access plan; prepare the reviewable submission for the user's publishing/submission authorisation.
+
+### Conditional expansion
+
+- [ ] X-01 — Convert 1899 around the remembered promise only after core gates pass and an additional 12–20 hours exists without consuming acceptance/submission reserve.
+
 ## Product baseline
 
 - [x] Document selected name, fire narrator, personalisation, visual approach, user stories and acceptance requirements.
