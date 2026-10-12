@@ -12,7 +12,7 @@ October 11 proposal · [Schedule, capacity, dependencies and exit gates](product
 
 - [ ] S1-01 — Build the current episode; record Quest access, supported-device candidate, first hands/depth/reach/performance findings.
 - [ ] S1-02 — Prepare family/community, Maa-pronunciation and unfamiliar-reader review materials; incorporate actual feedback when available.
-- [ ] S1-03 — Audit look/ask/act responses; specify the illustrated acknowledgement and preserve consent/passive behavior.
+- [x] S1-03 — Audit look/ask/act responses; specify the illustrated acknowledgement and preserve consent/passive behavior. [Audit](reviews/2026-10-12-look-ask-act-audit.md): looks at people never registered (fixed, tested); painted figures now turn to the visitor (interim, tested); a painted look-at-you pose remains in S2-02.
 - [ ] S1-04 — Resolve the release-profile decision and start provenance/terms, eligibility, reviewer and hardware dependencies; record any blockers.
 
 ### Sprint 2 — Make the theatre convincing

@@ -104,6 +104,47 @@ namespace Sankofa.Tests
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
+        static float Yaw(IllustratedFigure f, Vector3 toward)
+        {
+            var card = f.Surface.transform;
+            var facing = Vector3.ProjectOnPlane(card.rotation * Vector3.back, Vector3.up);
+            return Vector3.Angle(facing, Vector3.ProjectOnPlane(toward - card.position, Vector3.up));
+        }
+
+        [UnityTest]
+        public IEnumerator PaintedPeopleTurnToTheVisitorAndFollowTheirLook()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            foreach (var id in new[] { "figure.wambui", "figure.naserian", "gourd.milk" }) stage.Perform(new StoryAction(ActionKind.Reveal, id));
+            var wambui = stage.Find("figure.wambui").GetComponent<IllustratedFigure>();
+            var eye = Camera.main.transform.position;
+            var before = Yaw(wambui, eye);
+            // Looked at, she turns toward the visitor, and settles back once the moment has passed.
+            stage.AnswerLook("figure.wambui");
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(wambui.GlanceWeight, Is.GreaterThan(0.9f));
+            Assert.That(Yaw(wambui, eye), Is.LessThan(before - 5f), "she has turned toward the visitor");
+            yield return new WaitForSeconds(3.2f);
+            Assert.That(wambui.GlanceWeight, Is.LessThan(0.01f), "and turned back");
+            Assert.That(Yaw(wambui, eye), Is.EqualTo(before).Within(0.5f));
+            // Looking at a thing, the nearest painted person follows the look to it.
+            var naserian = stage.Find("figure.naserian").GetComponent<IllustratedFigure>();
+            stage.AnswerLook("gourd.milk");
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(naserian.GlanceWeight + wambui.GlanceWeight, Is.GreaterThan(0.9f), "someone follows the visitor's look");
+            // Acting, the visitor is acknowledged; paused, the turn holds still.
+            yield return new WaitForSeconds(3.2f);
+            stage.AcknowledgeVisitor();
+            yield return new WaitForSeconds(0.3f);
+            StageClock.Paused = true;
+            var held = naserian.GlanceWeight + wambui.GlanceWeight;
+            yield return new WaitForSeconds(0.5f);
+            Assert.That(naserian.GlanceWeight + wambui.GlanceWeight, Is.EqualTo(held).Within(0.0001f), "pause holds the turn");
+            StageClock.Paused = false;
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
         [UnityTest]
         public IEnumerator IllustratedVisitCanFinishKeepAndReplayItsAcceptedPoses()
         {

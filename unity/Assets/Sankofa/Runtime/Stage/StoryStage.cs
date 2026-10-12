@@ -309,20 +309,13 @@ namespace Sankofa.Runtime.Stage
         {
             var o = Find(id);
             if (o == null) return;
-            if (o.TryGetComponent<FigureMotion>(out var looked) && looked.CanGlance)
+            if (o.TryGetComponent<IGlancer>(out var looked) && looked.CanGlance)
             {
                 looked.Glance(head.position, 3f);
                 return;
             }
-            FigureMotion nearest = null;
-            var best = float.MaxValue;
-            foreach (var other in Objects)
-            {
-                if (!other.Visible || other.Scene != ActiveScene || !other.TryGetComponent<FigureMotion>(out var f) || !f.CanGlance) continue;
-                var d = Vector3.Distance(other.transform.position, o.transform.position);
-                if (d < best) { best = d; nearest = f; }
-            }
-            if (nearest != null) nearest.Glance(o.transform.position, 2.5f);
+            var nearest = NearestGlancer(o.AttentionCentre);
+            if (nearest != null) nearest.Glance(o.AttentionCentre, 2.5f);
         }
 
         readonly List<GameObject> echoes = new List<GameObject>();
@@ -484,15 +477,22 @@ namespace Sankofa.Runtime.Stage
         /// <summary>The visitor did what the story asked: the nearest person of it, if any, turns to look at them.</summary>
         public void AcknowledgeVisitor()
         {
-            FigureMotion nearest = null;
+            var nearest = NearestGlancer(head.position);
+            if (nearest != null) nearest.Glance(head.position, 3f);
+        }
+
+        /// <summary>The person of the story now in the scene, 3D or painted, nearest a point.</summary>
+        IGlancer NearestGlancer(Vector3 point)
+        {
+            IGlancer nearest = null;
             var best = float.MaxValue;
             foreach (var other in Objects)
             {
-                if (!other.Visible || other.Scene != ActiveScene || !other.TryGetComponent<FigureMotion>(out var f) || !f.CanGlance) continue;
-                var d = Vector3.Distance(other.transform.position, head.position);
-                if (d < best) { best = d; nearest = f; }
+                if (!other.Visible || other.Scene != ActiveScene || !other.TryGetComponent<IGlancer>(out var g) || !g.CanGlance) continue;
+                var d = Vector3.Distance(other.transform.position, point);
+                if (d < best) { best = d; nearest = g; }
             }
-            if (nearest != null) nearest.Glance(head.position, 3f);
+            return nearest;
         }
 
         /// <summary>A kept visit's keepsake goes down to rest on the hearth stone, where it waits for the next visit.</summary>

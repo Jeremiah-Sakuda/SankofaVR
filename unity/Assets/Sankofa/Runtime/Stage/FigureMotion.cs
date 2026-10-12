@@ -13,7 +13,7 @@ namespace Sankofa.Runtime.Stage
     /// each arm from the shoulder, and its carried things follow the same fold.
     /// </summary>
     [RequireComponent(typeof(StageObject))]
-    public sealed class FigureMotion : MonoBehaviour
+    public sealed class FigureMotion : MonoBehaviour, IGlancer
     {
         [Tooltip("Where the figure walks in from, through to just before its own place, in its parent's space; empty to appear in place.")]
         [SerializeField] Vector3[] entryPath = new Vector3[0];

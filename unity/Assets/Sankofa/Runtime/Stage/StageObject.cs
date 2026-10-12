@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using Sankofa.Runtime.Input;
 using UnityEngine;
@@ -83,7 +84,34 @@ namespace Sankofa.Runtime.Stage
         public bool InHolderHands => holder != null && CarriedBy == null && transform.IsChildOf(holder.transform);
         public Vector3 TouchPosition => touchPoint != null ? touchPoint.position : transform.position;
         public float TouchRadius => touchRadius;
+        /// <summary>What shows of it: the renderers it fades, highlights and pulses.</summary>
+        public IReadOnlyList<Renderer> Surfaces => surfaces;
         public float AttentionRadius => attentionRadius;
+        /// <summary>
+        /// Where the visitor looks to notice it: the middle of what shows of it (a person's body, not the ground at her
+        /// feet; the falling water, not the point it was built from), or its position when nothing shows.
+        /// </summary>
+        public Vector3 AttentionCentre
+        {
+            get
+            {
+                Bounds? seen = null;
+                foreach (var s in surfaces)
+                {
+                    if (s == null) continue;
+                    var b = s.bounds;
+                    if (b.size.sqrMagnitude < 1e-8f) continue;
+                    if (seen.HasValue)
+                    {
+                        var all = seen.Value;
+                        all.Encapsulate(b);
+                        seen = all;
+                    }
+                    else seen = b;
+                }
+                return seen?.center ?? transform.position;
+            }
+        }
         public Vector3 PlacePosition => placePoint != null ? placePoint.position : transform.position + Vector3.up * 0.05f;
         public Vector3? PourPosition => pourPoint != null ? pourPoint.position : (Vector3?)null;
         /// <summary>

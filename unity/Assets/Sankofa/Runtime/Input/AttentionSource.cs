@@ -34,7 +34,7 @@ namespace Sankofa.Runtime.Input
             candidates.Clear();
             foreach (var o in stage.Objects)
                 if (o.AttentionRadius > 0 && o.Visible && o.Scene == stage.ActiveScene)
-                    candidates.Add(new AttentionCandidate(o.Id, N(o.transform.position), o.AttentionRadius));
+                    candidates.Add(new AttentionCandidate(o.Id, N(o.AttentionCentre), o.AttentionRadius));
             var noticed = tracker.Update(N(head.position), N(head.forward), candidates, Time.deltaTime);
             if (noticed != null) Noticed?.Invoke(noticed);
         }
