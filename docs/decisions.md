@@ -478,3 +478,14 @@ S1-03 audited how the illustrated episode answers each kind of participation ([a
 Desktop and batch software evidence only; whether the turn reads as attention, and whether head-direction noticing feels attentive or twitchy, needs a headset.
 
 **Build for the first device session (S1-01):** the illustrated APK built from `977c78b` as `0.1.0+977c78b`, 84.6 MB, zero errors, development credentials verified absent (SHA-256 `9af2ed7a…0334`). It is debug-signed and has not run on a headset; Quest access, the supported-device decision and the first hands, depth, reach and performance findings remain open. Review packets for family and first-time listeners are built by `scripts/make_review_packet.py`; they have not been sent.
+
+## Sprint 2: one painted world — October 12, 2026
+
+Captures of the illustrated chapter showed modelled stand-ins doubling or contradicting the painting. Requirement SK-12 (visual coherence); module: stage presentation, through the theatre scene builder only, so the 3D baseline is unchanged. Judging lens: polish and experience design.
+
+- **One river.** The painted water is the stream. The modelled stream ribbon and its pale bank stones are off in the theatre; the touchable water spill stays.
+- **No double image on a pose change.** Changing pose used to cross-fade two silhouettes, which showed two heads. The figure's light now dips, the pose swaps at the bottom, and the light returns, like a stage lamp; one pose is drawn at a time. A change during a change continues from what is showing at the same brightness. Tested in PlayMode.
+- **Props in the paintings' language.** The gourds, bead and hide use a new painted-prop shader: the fire's direction, lifted, gives three tone bands with brush-broken edges, violet-leaning shadows and an ink edge. The ground is tinted toward the painting's earth, so the women no longer stand on a near-black floor.
+- **The sheep is heard, not seen.** The translucent ewe read as a blob between the women. Until a painted sheep exists it is hidden in the theatre; it stays in the story and its bleats play, but it cannot be noticed or remembered. Tradeoff: the narration still says Naserian "has brought the sheep" and "Take the sheep" with no sheep in view, carried by sound alone. A painted sheep (S2-01) waits on the art provider decision.
+
+Desktop captures and batch tests only. Whether the dip reads as theatre or as a flicker, and whether the props sit in the painting at Quest resolution and lens distortion, needs a headset.

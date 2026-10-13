@@ -5,7 +5,7 @@ Shader "Sankofa/Illustration"
         _MainTex ("Illustration atlas", 2D) = "white" {}
         _FrameA ("Previous pose UV rect", Vector) = (0, 0, 1, 1)
         _FrameB ("Pose UV rect", Vector) = (0, 0, 1, 1)
-        _PoseBlend ("Pose dissolve", Range(0, 1)) = 1
+        _PoseBlend ("Pose change: previous dims, the new pose brightens", Range(0, 1)) = 1
         _Visibility ("Story visibility", Range(0, 1)) = 1
         _Unfold ("Paint reveal", Range(0, 1)) = 1
         _Highlight ("Attention invitation", Range(0, 1)) = 0
@@ -50,15 +50,17 @@ Shader "Sankofa/Illustration"
             fixed4 frag(v2f i) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-                fixed4 a = tex2D(_MainTex, AtlasUV(i.uv, _FrameA));
-                fixed4 b = tex2D(_MainTex, AtlasUV(i.uv, _FrameB));
-                half alpha = lerp(a.a, b.a, _PoseBlend);
-                clip(alpha - 0.22);
+                // A pose change is a dip in the figure's light with a clean swap at the bottom, as a stage lamp
+                // would, never a double exposure of two silhouettes.
+                float4 frame = _PoseBlend < 0.5 ? _FrameA : _FrameB;
+                fixed4 texel = tex2D(_MainTex, AtlasUV(i.uv, frame));
+                half dip = 1 - abs(_PoseBlend * 2 - 1);
+                clip(texel.a - 0.22);
                 // Stable object-space grain works identically for both eyes and writes depth; no transparent sorting.
                 float grain = frac(sin(dot(floor(i.uv * 280), float2(12.9898, 78.233))) * 43758.5453);
                 clip(_Visibility - grain * 0.98 - 0.001);
                 clip(_Unfold * 1.15 - i.uv.y - grain * 0.12);
-                half3 paint = lerp(a.rgb * a.a, b.rgb * b.a, _PoseBlend) / max(alpha, 0.001);
+                half3 paint = texel.rgb * (1 - 0.72 * smoothstep(0, 1, dip));
                 float3 toward = _SankofaLightPos.xyz - i.world;
                 half attenuation = 1 / (1 + dot(toward, toward) * _SankofaLightPos.w);
                 half3 light = half3(0.82, 0.86, 0.94) + _SankofaLightColor.rgb * attenuation * 0.1;

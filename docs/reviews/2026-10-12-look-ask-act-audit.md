@@ -25,4 +25,4 @@ Looking never advances the story or accepts an invitation in any path; a look on
 - **A painted "looking at you" pose.** Turning the card is an interim acknowledgement. A fourth pose row in each cast atlas (head toward the viewer) would read more clearly; it waits on the art provider decision and the family's notes (S2-02).
 - **Only the first question about a person glows** when she is looked at (Naserian has two). Acceptable: the other remains on the panel.
 - **Head direction is generous.** The allowance is the object's angular radius plus 7°. That is right for a hint and wrong for anything consequential, which is why nothing consequential uses it. Whether it feels attentive or twitchy can only be judged in a headset (S4-01).
-- **The sheep.** It can be noticed, but it reads poorly between the women (S2-01).
+- **The sheep.** It read poorly between the women, so in the illustrated theatre it is now heard only: it cannot be noticed or remembered until it is painted (S2-01).

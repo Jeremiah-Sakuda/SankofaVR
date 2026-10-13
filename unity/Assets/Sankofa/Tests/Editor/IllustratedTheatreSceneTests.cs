@@ -61,6 +61,22 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void ThePaintingIsNotDoubledByModelledStandIns()
+        {
+            var stage = Object.FindFirstObjectByType<StoryStage>();
+            var root = stage.Scenes.Single(s => s.Root.GetComponent<IllustratedTheatre>() != null).Root;
+            var shown = root.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled).Select(r => r.name).ToArray();
+            Assert.That(shown, Has.None.EqualTo("Stream").And.None.EqualTo("Bank stones"), "the painted river is the only river");
+            var ewe = stage.Find("figure.ewe");
+            Assert.That(ewe.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled), Is.Empty, "the unpainted sheep is heard, not seen");
+            Assert.That(ewe.AttentionRadius, Is.Zero, "and cannot be noticed or remembered as a shape");
+            Assert.That(ewe.EchoMesh, Is.Null);
+            foreach (var id in new[] { "gourd.flour", "gourd.milk", "hide", "bead" })
+                foreach (var surface in stage.Find(id).Surfaces)
+                    Assert.That(surface.sharedMaterial.shader.name, Is.EqualTo("Sankofa/Painted Prop"), id + " is drawn in the paintings' language");
+        }
+
+        [Test]
         public void ArtPreservesAlphaAndUsesDepthWritesAndStereoSafeRendering()
         {
             foreach (var figure in Object.FindObjectsByType<IllustratedFigure>(FindObjectsInactive.Include, FindObjectsSortMode.None))

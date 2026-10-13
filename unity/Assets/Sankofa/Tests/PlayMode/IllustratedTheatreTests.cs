@@ -111,6 +111,56 @@ namespace Sankofa.Tests
             return Vector3.Angle(facing, Vector3.ProjectOnPlane(toward - card.position, Vector3.up));
         }
 
+        /// <summary>The pose the shader draws, and how far its light has dipped, mirroring Illustration.shader.</summary>
+        static (Vector4 frame, float dip) Shown(IllustratedFigure f)
+        {
+            var block = new MaterialPropertyBlock();
+            f.Surface.GetPropertyBlock(block);
+            var t = block.GetFloat("_PoseBlend");
+            return (t < 0.5f ? block.GetVector("_FrameA") : block.GetVector("_FrameB"), 1 - Mathf.Abs(t * 2 - 1));
+        }
+
+        [UnityTest]
+        public IEnumerator PoseChangesDipAndSwapWithoutJumping()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            stage.Perform(new StoryAction(ActionKind.Reveal, "figure.wambui"));
+            var wambui = stage.Find("figure.wambui").GetComponent<IllustratedFigure>();
+            yield return null;
+            var rest = Shown(wambui);
+            Assert.That(rest.dip, Is.EqualTo(0).Within(0.001f));
+            // One pose is drawn at a time: the old one dims, then the new one brightens.
+            wambui.SetPose(1);
+            Assert.That(Shown(wambui).frame, Is.EqualTo(rest.frame), "the change starts from the pose that was showing");
+            Assert.That(Shown(wambui).dip, Is.EqualTo(0).Within(0.001f), "at full light");
+            yield return Until(() => wambui.PoseBlend > 0.6f, 5);
+            var rising = Shown(wambui);
+            Assert.That(rising.frame, Is.Not.EqualTo(rest.frame), "the swap happened at the bottom of the dip");
+            // Another change while the light returns continues from what is shown, at the same brightness.
+            wambui.SetPose(2);
+            Assert.That(Shown(wambui).frame, Is.EqualTo(rising.frame));
+            Assert.That(Shown(wambui).dip, Is.EqualTo(rising.dip).Within(0.001f));
+            yield return Until(() => wambui.PoseBlend >= 1, 5);
+            var settled = Shown(wambui);
+            Assert.That(settled.dip, Is.EqualTo(0).Within(0.001f));
+            Assert.That(settled.frame, Is.Not.EqualTo(rest.frame).And.Not.EqualTo(rising.frame), "and it ends in the latest pose");
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
+        [UnityTest]
+        public IEnumerator UnpaintedSheepIsHeardNotSeen()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            stage.Perform(new StoryAction(ActionKind.Reveal, "figure.ewe"));
+            yield return new WaitForSeconds(1.5f);
+            var ewe = stage.Find("figure.ewe");
+            Assert.That(ewe.Visible, Is.True, "the sheep is in the story, so its sounds play");
+            Assert.That(ewe.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled).Select(r => r.name), Is.Empty);
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
         [UnityTest]
         public IEnumerator PaintedPeopleTurnToTheVisitorAndFollowTheirLook()
         {

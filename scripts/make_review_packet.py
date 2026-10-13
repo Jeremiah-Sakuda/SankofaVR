@@ -189,7 +189,7 @@ sound of the water and the fire, and optional questions. The voice is a computer
 
 <h2>The pictures</h2>
 <p class='note'>Drafts, made with an image generator. The clothing, hair and setting are placeholders until you tell us what
-would be right. The sheep is not drawn yet: the pale shape between the women is a stand-in.</p>
+would be right. The sheep is not drawn yet, so for now it is only heard.</p>
 {''.join(figures)}
 
 <h2>Questions for you</h2>

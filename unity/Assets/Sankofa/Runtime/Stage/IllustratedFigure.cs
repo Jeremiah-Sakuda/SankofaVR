@@ -70,9 +70,14 @@ namespace Sankofa.Runtime.Stage
             if (frames == null || frames.Length == 0) return;
             value = Mathf.Clamp(value, 0, frames.Length - 1);
             if (value == pose) return;
-            previousPose = blend < 0.5f ? previousPose : pose;
+            // The light dips, the pose swaps at the bottom, the light returns. Mid-change, keep the brightness
+            // continuous: still dimming, carry on into the new pose; already rising, dim the shown pose from there.
+            if (blend >= 0.5f)
+            {
+                previousPose = pose;
+                blend = 1 - blend;
+            }
             pose = value;
-            blend = 0;
             Apply();
         }
 
@@ -136,7 +141,7 @@ namespace Sankofa.Runtime.Stage
             surface.GetPropertyBlock(block); // Keep StageObject's visibility and attention feedback.
             block.SetVector("_FrameA", frames[previousPose]);
             block.SetVector("_FrameB", frames[pose]);
-            block.SetFloat("_PoseBlend", Mathf.SmoothStep(0, 1, blend));
+            block.SetFloat("_PoseBlend", blend);
             surface.SetPropertyBlock(block);
         }
     }

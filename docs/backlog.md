@@ -17,10 +17,10 @@ October 11 proposal · [Schedule, capacity, dependencies and exit gates](product
 
 ### Sprint 2 — Make the theatre convincing
 
-- [ ] S2-01 — Make the sheep recognisable at the promise; remove the hide/rock compositing defect and choose one river treatment.
+- [ ] S2-01 — Make the sheep recognisable at the promise; remove the hide/rock compositing defect and choose one river treatment. *Progress:* one river (the painted water; the modelled ribbon and bank stones are off in the theatre); the translucent ewe stand-in is hidden and the sheep is heard only. A painted sheep waits on art.
 - [ ] S2-02 — Apply reviewed cast/garment changes; add the minimum acknowledgement pose vocabulary and route `AnswerLook`/`AcknowledgeVisitor` to illustrated presentation.
-- [ ] S2-03 — Match tangible gourd/bead materials and lighting to the illustration; verify palm origin, reachable destination and both outcomes.
-- [ ] S2-04 — Review the fire/entry/return, pose transitions, narration pacing, ambience balance and captions together; capture and device-check the result.
+- [ ] S2-03 — Match tangible gourd/bead materials and lighting to the illustration; verify palm origin, reachable destination and both outcomes. *Progress:* gourds, bead and hide use a painted-prop shader (banded firelight, ink edge, brush grain); the ground is lifted to the painting's earth. Palm and reach need a headset.
+- [ ] S2-04 — Review the fire/entry/return, pose transitions, narration pacing, ambience balance and captions together; capture and device-check the result. *Progress:* pose changes are a dip in the figure's light with one swap, never a double image (tested).
 
 ### Sprint 3 — Make returning worthwhile
 

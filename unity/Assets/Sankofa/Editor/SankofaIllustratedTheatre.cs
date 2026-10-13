@@ -105,9 +105,31 @@ namespace Sankofa.EditorTools
                 var name = renderer.name.ToLowerInvariant();
                 if (name.Contains("canop") || name.Contains("trunk") || name.Contains("shrubs") ||
                     name.Contains("sedges") || name.Contains("leaf litter") || name.Contains("grass") ||
-                    name.Contains("fallen limbs") || name.Contains("edge outcrops"))
+                    name.Contains("fallen limbs") || name.Contains("edge outcrops") ||
+                    // One river: the painted water is the stream, so the modelled ribbon and its pale stones leave.
+                    name == "stream" || name == "bank stones")
                     renderer.enabled = false;
             }
+            // The sheep is heard, not seen, until it is painted: a translucent model reads as a blob between two
+            // painted women. Its bleats and its place in the story stay; it cannot be noticed or remembered.
+            var ewe = stage.Find("figure.ewe");
+            foreach (var renderer in ewe.GetComponentsInChildren<Renderer>(true)) renderer.enabled = false;
+            SetArray(ewe, "surfaces", new Object[0]);
+            Set(ewe, "glow", null);
+            Set(ewe, "attentionRadius", 0f);
+            Set(ewe, "echoMesh", null);
+            // The ground the women stand on meets the painting's values: violet-brown earth, not a dark stage floor.
+            var ground = root.Find("Ground").GetComponent<Renderer>();
+            var groundPath = TheatreFolder + "/Painted ground.mat";
+            AssetDatabase.DeleteAsset(groundPath);
+            var groundMaterial = new Material(ground.sharedMaterial) { name = "Painted ground" };
+            groundMaterial.SetColor("_Tint", new Color(1.9f, 1.6f, 1.8f, 1f));
+            AssetDatabase.CreateAsset(groundMaterial, groundPath);
+            ground.sharedMaterial = groundMaterial;
+            // Things handled in the story are drawn in the paintings' language: banded firelight and an ink edge.
+            foreach (var (id, ink) in new[] { ("gourd.flour", 0.44f), ("gourd.milk", 0.44f), ("hide", 0.3f), ("bead", 0.24f) })
+                foreach (var surface in stage.Find(id).Surfaces)
+                    surface.sharedMaterial = PaintedPropMaterial(id, surface.sharedMaterial, ink);
             var layers = new List<Renderer>();
             foreach (var l in layout.layers)
             {
@@ -169,6 +191,18 @@ namespace Sankofa.EditorTools
             material.SetTexture("_MainTex", atlas);
             material.SetVector("_FrameA", frame); material.SetVector("_FrameB", frame);
             material.SetFloat("_PoseBlend", 1);
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+
+        static Material PaintedPropMaterial(string id, Material source, float ink)
+        {
+            var path = TheatreFolder + "/Painted " + id + ".mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null) { material = new Material(Shader.Find("Sankofa/Painted Prop")); AssetDatabase.CreateAsset(material, path); }
+            material.SetColor("_Color", source != null && source.HasProperty("_Color") ? source.color : Color.white);
+            material.SetTexture("_Noise", AssetDatabase.LoadAssetAtPath<Texture2D>(SankofaArt.NoisePath));
+            material.SetFloat("_InkWidth", ink);
             EditorUtility.SetDirty(material);
             return material;
         }
