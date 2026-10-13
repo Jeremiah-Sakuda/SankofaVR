@@ -13,9 +13,11 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Renderer[] frame;
         [SerializeField] StoryStage stage;
         [SerializeField] string defaultRoute = "era.1850s";
+        [SerializeField] string alternateRoute = "era.1850s.remembered";
         MaterialPropertyBlock block;
         Vector3 scale;
         public string DefaultRoute => defaultRoute;
+        public string OtherRoute(string previous) => previous == defaultRoute ? alternateRoute : defaultRoute;
         public bool Framed { get; private set; } = true;
         public float Expansion { get; private set; }
         void Awake() { scale = painting.localScale; block = new MaterialPropertyBlock(); }

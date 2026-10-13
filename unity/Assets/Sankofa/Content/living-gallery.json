@@ -17,10 +17,6 @@
       "kind": "story"
     },
     {
-      "id": "story.water.1899",
-      "kind": "story"
-    },
-    {
       "id": "story.water.today",
       "kind": "story"
     }
@@ -139,76 +135,6 @@
         "place"
       ],
       "continues": "bead.kept"
-    },
-    {
-      "id": "lantern.1899",
-      "scene": "story.water.1899",
-      "name": "the lantern",
-      "capabilities": [
-        "reveal",
-        "illuminate"
-      ],
-      "continues": "ember"
-    },
-    {
-      "id": "rails",
-      "scene": "story.water.1899",
-      "name": "the rails",
-      "capabilities": [
-        "reveal",
-        "illuminate",
-        "touch"
-      ]
-    },
-    {
-      "id": "figure.njeri",
-      "scene": "story.water.1899",
-      "name": "Njeri",
-      "capabilities": [
-        "reveal",
-        "illuminate",
-        "withdraw",
-        "move"
-      ]
-    },
-    {
-      "id": "gourd.empty",
-      "scene": "story.water.1899",
-      "name": "Njeri's gourd",
-      "capabilities": [
-        "reveal",
-        "illuminate"
-      ]
-    },
-    {
-      "id": "figure.naisula",
-      "scene": "story.water.1899",
-      "name": "Naisula",
-      "capabilities": [
-        "reveal",
-        "illuminate",
-        "withdraw",
-        "move"
-      ]
-    },
-    {
-      "id": "gourd.old",
-      "scene": "story.water.1899",
-      "name": "Naisula's gourd",
-      "capabilities": [
-        "reveal",
-        "illuminate"
-      ]
-    },
-    {
-      "id": "seed",
-      "scene": "story.water.1899",
-      "name": "the seed",
-      "capabilities": [
-        "offer",
-        "place"
-      ],
-      "continues": "seed.kept"
     },
     {
       "id": "jiko",

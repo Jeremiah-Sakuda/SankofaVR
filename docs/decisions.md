@@ -552,3 +552,21 @@ Two continuation route definitions share the modern coda beats and use the exist
 New narration: twenty lines, generated through the existing Google Cloud TTS pipeline with the user's explicit export approval after automatic approval review initially rejected the export. Versioned namespace `enkare-nairobi.gallery-v4` preserves old clips. Files were generated without playback; no simulator was launched. Cultural/voice listening review remains pending.
 
 First checkpoint: **292 .NET, 28 Unity EditMode, four gallery PlayMode tests passed**. PlayMode is muted batch software evidence with synthetic input, not a simulator/headset session. Tests cover both thread revelations/continuations, preview waiting, passive/reduced-motion stationary flow and an explicit synthetic-hand keep. Runtime captures expose remaining presentation issues (vignette scale/placement and closing caption clutter), which are the next polish increment. No headset, cultural or participant acceptance is claimed.
+
+
+## October 13, 2026 — keep the original storytelling purpose
+
+During implementation, the user asked to retain Sankofa's focus on stories that may have been lost to time while keeping broad appeal. The gallery's purpose is now expressed as “stories time nearly left behind.” An accessible human situation leads each exhibit; specific cultural context supplies identity. *What We Carry* remains an imagined encounter grounded in documented context, not a claimed rediscovered account of real people. This framing changes gallery/product copy; it adds no runtime generation, new historical claim or additional narration export.
+
+
+## October 13, 2026 — gallery polish and software verification
+
+The frame now sits in a charcoal gallery with its purpose, “Stories time nearly left behind,” above *What We Carry*. Entry remains explicit. Smaller vignette cards leave the women visible; closing caption clutter is removed. The candidate excludes the unused 1899 rigs while retaining them in the comparison scene. A saved visit offers the other thread directly without replacing old kept plans.
+
+The modern coda uses a provenance-recorded OpenAI-generated river painting, expanded to cover the forward view, with a softly fading nearby bank and tangible gate, soil and bead. The old modelled river and distant city are hidden so there is one water. Its gate touch point and gallery controls/recess stay within the conservative seated reach used in software checks; real hands, stereo depth, overdraw and comfort are still device gates. This image was generated with the built-in image tool; its model name was not exposed and is not inferred. Output terms and cultural review remain pending.
+
+Tracking grace can retain a last-known hand visually, but palm/touch receivers now reject that pose as a new act. A focused PlayMode test verifies that stale tracking cannot complete a receive and that live input can. Reduced-motion return uses a dissolve without a scale jump.
+
+Verification: **292 .NET tests**, **28 Unity EditMode tests**, **seven distinct gallery PlayMode tests**, and **four offline narration-pipeline tests** passed. The full five-test gallery run covered both routes and continuations, passive/reduced-motion flow, explicit synthetic-hand keep and an object question that neither accepts an invitation nor reveals the later memory. Additional runs covered the modern composition and stale-hand rejection; final focused runs repeated entrance and keep after layout edits. These are muted batch tests with synthetic input. No audio was played and no simulator was launched.
+
+Current review stills: [gallery](media/living-gallery.jpg), [remembered meeting](media/gallery-remembered.jpg), [modern river](media/gallery-modern-river.jpg). The latter is a staged composition check; full route flow is verified separately. Vignette illustrations remain prototypes. Hardware, participant, cultural, pronunciation/listening, rights and release-channel acceptance remain open. The implementation is the scoped authored candidate, not completion of the broader generated-story/live-language PRD.

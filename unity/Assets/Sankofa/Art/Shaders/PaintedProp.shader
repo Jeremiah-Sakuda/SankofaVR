@@ -13,6 +13,7 @@ Shader "Sankofa/Painted Prop"
         _Highlight ("Highlight", Range(0, 1)) = 0
         _Visibility ("Story visibility", Range(0, 1)) = 1
         _VertexTint ("Use vertex pigment", Range(0, 1)) = 1
+        _GroundRadius ("Optional near-floor radius", Float) = 0
     }
     SubShader
     {
@@ -31,7 +32,7 @@ Shader "Sankofa/Painted Prop"
             fixed4 _Ink;
             half _InkWidth;
             half _Highlight;
-            half _Visibility, _VertexTint;
+            half _Visibility, _VertexTint; float _GroundRadius;
             float4 _SankofaLightPos;
             float4 _SankofaLightColor;
             float4 _SankofaAmbientSky;
@@ -72,6 +73,11 @@ Shader "Sankofa/Painted Prop"
             fixed4 frag(v2f i) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+                if (_GroundRadius > 0)
+                {
+                    float grainEdge = frac(sin(dot(floor(i.local.xz * 90), float2(12.9898,78.233))) * 43758.5453);
+                    clip(saturate((_GroundRadius - length(i.local.xz)) / 0.5) - grainEdge * 0.98 - 0.001);
+                }
                 // Story reveal/withdraw must also work on solid painted surfaces. Stable local grain keeps
                 // the fade matched in both eyes and never reveals objects behind the animal or vessel.
                 float reveal = frac(sin(dot(floor(i.local.xy * 300 + i.local.z * 83), float2(12.9898, 78.233))) * 43758.5453);

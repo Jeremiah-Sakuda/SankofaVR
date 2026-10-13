@@ -4,7 +4,7 @@ October 8, 2026 · How Sankofa for Quest adapts the original web Sankofa. This s
 
 ## Selected gallery direction
 
-October 13: the user selected Sankofa as a living gallery, with *What We Carry* as its first artwork. The next candidate will connect the framed illustration to a spatial encounter and back again, with authored perspectives, tangible hospitality and a griot that supplies context without premature reveals. See the [current scope](illustrated-theatre-scope.md). These additions remain planned; the implemented comparison below describes the preceding Quest foundation. Recorded contextual questions are not live conversation.
+October 13: the user selected Sankofa as a living gallery, with *What We Carry* as its first artwork. The `LivingGallery` candidate connects the framed illustration to a spatial encounter and back again, with two authored perspective vignettes, tangible hospitality and a griot that supplies context without premature reveals. A physical memento can be explicitly deposited beside the unchanged painting; the modern continuation uses a painted background and tangible foreground. See the [current scope](illustrated-theatre-scope.md). Muted batch tests and desktop captures establish these additions in software. Device, cultural and participant acceptance remain open; the comparison below describes the preceding Quest foundation. Recorded contextual questions are not live conversation.
 
 ## The original
 

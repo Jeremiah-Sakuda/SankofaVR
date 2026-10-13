@@ -6,7 +6,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 ## Current illustrated-theatre sprints
 
-October 13: use the [detailed product scope](product/illustrated-theatre-scope.md) and [current delivery plan](product/delivery-plan.md#current-sprint-plan). The user selected the living gallery framing: *What We Carry* is the first exhibit, with a contextual griot. The items below are not yet implemented or accepted. The earlier S1–S5 tickets remain as historical evidence below and are not an additional workload. Generated planning, live conversation and additional narration language remain open in the broader PRD.
+October 13: use the [detailed product scope](product/illustrated-theatre-scope.md) and [current delivery plan](product/delivery-plan.md#current-sprint-plan). The user selected the living gallery framing: *What We Carry* is the first exhibit, with a contextual griot. Parts of the items below now exist in software; no tick implies participant, cultural or device acceptance. The earlier S1–S5 tickets remain as historical evidence below and are not an additional workload. Generated planning, live conversation and additional narration language remain open in the broader PRD.
 
 - [ ] IT-P01 — Prove gallery → framed painting → depth → gourd → gallery, direct question and paired hospitality with current assets and three-person comprehension.
 - [ ] IT-P02 — Write exhibit placard, two vignette scripts, griot context/reveal map and claim map; incorporate cultural/editorial review without spoilers.
@@ -19,6 +19,10 @@ October 13: use the [detailed product scope](product/illustrated-theatre-scope.m
 - [ ] IT-P09 — Add exhibit-side Keep, gallery return/navigation, alternate thread and coda outcomes; test work/memento identity, relaunch, failed save, legacy replay and forget.
 - [ ] IT-P10 — Run formative users, cultural/listening review and hardware recovery/performance checks; fix observed failures.
 - [ ] IT-P11 — Freeze and independently install the candidate; prepare honest demonstration, adaptation copy and submission materials; publish only when authorised.
+
+### October 13 implementation progress
+
+IT-P01/02/04–09 have a software foundation in the new gallery scene: frame/world/return, two vignette scripts and routes, safe question availability/chips, milk outcomes, painted modern background, explicit deposit and legacy plan/outcome replay. The .NET suite checks all 128 historical outcome combinations and both continuations; Unity checks cover scene wiring and representative full flows. User comprehension, cast/vignette refinement, cultural/listening review, hand reliability and performance on Quest remain open. These broad work packages remain unchecked until their full exit gates are met. IT-P03/10/11 require hardware, external reviewers or release-account access in addition to the prepared local review build.
 
 ### Earlier sprint inventory
 

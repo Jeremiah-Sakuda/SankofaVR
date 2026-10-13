@@ -1,3 +1,21 @@
+# Living gallery review build
+
+October 13, 2026 · Local review APK: `artifacts/Sankofa-LivingGallery.apk`. No Competition channel exists yet. The checks below need a headset for hand/reach/depth acceptance; desktop batch captures only establish staging/flow.
+
+1. Sit comfortably and launch the build. The framed *What We Carry* painting waits; it must not enter by itself. Settings include text, reduced motion, height and recenter.
+2. Select **Enter painting** for the default gourd perspective, or **What she remembers** for the other perspective. You can use fingertips or point and pinch, with either hand.
+3. Listen to the reconstruction disclosure. Receive the ember if you wish, or let it rest nearby. The image opens into depth without moving your viewpoint.
+4. Follow the women by the water. The gourd route shows food divided before Wambui leaves; the memory route shows an earlier meeting. Ask an available object question with its labelled chip or the nearby questions panel. Looking alone does not ask or accept.
+5. Receive or watch the flour hand-off. Help set the flour down, or wait. Check that Naserian offers milk directly after help and places it nearby after waiting; both paths welcome you and let you receive or leave it.
+6. Receive or leave the bead. The meeting ends and the same framed painting returns. Keep by the panel, or receive the closing memento, carry an open palm to the labelled recess, hold briefly, then close/release. Passing over it or losing tracking must not save.
+7. **Back to the artwork** opens the saved options: follow the other thread, replay this visit, visit the modern river, or forget. Replay preserves the retained authored plan and outcomes; question timing is not replayed.
+8. In today's imagined garden, leave the bead on the gate deliberately or let it stay beside you. Return again. Relaunch should remember only an explicitly kept visit; forgetting removes it locally.
+9. Repeat once with no hand actions after Enter, once with one hand, and once with reduced motion. Test pause, headset removal/focus loss, recenter and interrupted questions. Record build/device, failure details and whether reach, depth, text and sound are comfortable.
+
+The current candidate has no live AI dialogue, newly generated personal histories, second narration language or compulsory walking. Historical context and fictional encounters are distinct. Cultural, pronunciation, asset-rights and actual Quest performance review remain pending. These notes do not claim they are accepted.
+
+---
+
 # Testing guide
 
 For judges and testers of Sankofa on Meta Quest. A full visit, with the continuation to today, takes 10 to 15 minutes, seated; one era on its own (*Before the railway*, steps 1 to 6 below) is a complete story in about 7 minutes. Every step works with hands alone. Touch controllers are optional, and the story also moves on by itself if you do nothing.

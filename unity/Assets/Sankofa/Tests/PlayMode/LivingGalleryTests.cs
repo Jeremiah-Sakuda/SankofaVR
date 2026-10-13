@@ -112,6 +112,54 @@ namespace Sankofa.Tests
             Assert.That(Directory.GetFiles(folder).Length,Is.GreaterThan(0));
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
+        [UnityTest] public IEnumerator AnObjectQuestionAsksOnceWithoutAcceptingAnInvitationOrSpoilingWaiting()
+        {
+            yield return Open();Time.timeScale=10;app.Begin();
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="e1.price",150);
+            Assert.That(app.Flow.Questions.Any(q=>q.Id=="q.e1.friends"),Is.False);
+            var chips=Object.FindFirstObjectByType<Sankofa.Runtime.UI.ObjectQuestions>();
+            yield return null;
+            var chip=chips.Panels.First(p=>!p.Hidden&&p.Ids.Contains("q:q.e1.milk"));
+            var outcomes=app.Flow.Journal.Outcomes.Count;
+            chip.PressFromPointer("q:q.e1.milk");
+            yield return Until(()=>app.Flow.Answering?.Id=="q.e1.milk",5);
+            Assert.That(app.Flow.Journal.Outcomes.Count,Is.EqualTo(outcomes));
+            Assert.That(app.Flow.Journal.Asked.Count(q=>q=="q.e1.milk"),Is.EqualTo(1));
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator ModernRiverPresentationKeepsOnlyOneWaterAndTangibleForeground()
+        {
+            yield return Open();app.enabled=false;
+            foreach(var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None))panel.Hidden=true;
+            yield return gallery.Transition("story.water.today",new Continuity[0],true);
+            foreach(var id in new[]{"gate","soil","jiko"})stage.Perform(new Sankofa.Core.Story.StoryAction(Sankofa.Core.Story.ActionKind.Reveal,id));
+            yield return new WaitForSeconds(1.5f);
+            var modern=stage.Scenes.Single(s=>s.Id=="story.water.today").Root;
+            Assert.That(modern.transform.Find("Illustrated modern river").GetComponent<Renderer>().enabled,Is.True);
+            Assert.That(modern.transform.Find("River").GetComponent<Renderer>().enabled,Is.False);
+            Capture("05-modern-river");Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator ALastKnownHandPoseCannotCompleteANewReceive()
+        {
+            yield return Open();app.enabled=false;
+            var hand=Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h=>!h.IsLeft);
+            hand.enabled=false;var point=new Vector3(0.1f,1.0f,0.45f);var sample=Palm(point,true);sample.Tracked=true;
+            var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+            typeof(Sankofa.Runtime.Input.HandSource).GetField("tracked",flags).SetValue(hand,true);
+            typeof(Sankofa.Runtime.Input.HandSource).GetField("live",flags).SetValue(hand,false);
+            typeof(Sankofa.Runtime.Input.HandSource).GetField("last",flags).SetValue(hand,sample);
+            var target=new GameObject("Test offer");target.transform.position=point;
+            var receiver=Object.FindFirstObjectByType<Sankofa.Runtime.Input.PalmReceiver>();var received=false;
+            receiver.Received+=(id,h)=>received=true;receiver.Listen("confidence-test",target.transform);
+            yield return new WaitForSeconds(0.6f);
+            Assert.That(hand.Holding,Is.True);Assert.That(received,Is.False,"last-known poses supply visuals, not a new act");
+            hand.Simulated=()=>Palm(point,true);yield return Until(()=>received,3);
+            receiver.Close();hand.Simulated=null;Object.Destroy(target);
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
         static Sankofa.Interaction.HandSample Palm(Vector3 point,bool open)
         {
             System.Numerics.Vector3 N(Vector3 v)=>new System.Numerics.Vector3(v.x,v.y,v.z);

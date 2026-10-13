@@ -2,9 +2,15 @@
 
 **Sankofa — Step inside the story.**
 
-The selected direction is a living art gallery for Meta Quest: encounter a painting, enter its composition, experience a story that responds to your perspective and actions, then return to the same work understanding it differently. **What We Carry** is the first exhibit. The griot supplies context without revealing the story ahead of time; the fire remains its presence inside the artwork. Entry and exploration work while seated.
+Sankofa focuses on stories time nearly left behind: everyday lives and relationships, made legible through specific cultural context and honest imaginative telling. Its living art gallery for Meta Quest lets you encounter a painting, enter its composition, experience a story that responds to your perspective and actions, then return to the same work understanding it differently. **What We Carry** is the first exhibit. The griot supplies context without revealing the story ahead of time; the fire remains its presence inside the artwork. Entry and exploration work while seated.
 
-The [living gallery product scope](docs/product/illustrated-theatre-scope.md) specifies the frame-to-world journey, two authored perspectives, contextual narration and exhibit-side memories. **The current build is still the illustrated-theatre prototype described below.** Gallery entry/return and those new story features are planned, not yet implemented.
+The [living gallery product scope](docs/product/illustrated-theatre-scope.md) guides the implementation. The new **LivingGallery** scene plays package v0.4.0: a framed view of the actual encounter, stationary entry/return, two authored revelations, explicit object questions, milk hospitality and a physical keepsake deposit. A saved visit offers the other perspective, replay or the painted modern river continuation. New narration is recorded and bundled. This is software/desktop evidence; device comfort/performance, cultural review and final art/listening acceptance remain open.
+
+Open `unity/Assets/Sankofa/Scenes/LivingGallery.unity`. Scene generation and the review APK use `SankofaSceneBuilder.BuildLivingGallery` and `SankofaBuild.BuildLivingGallery`. The earlier theatre and 3D scenes below remain comparison records. There is no runtime story generation or live AI conversation.
+
+![Sankofa living gallery: What We Carry, waiting for deliberate entry](docs/media/living-gallery.jpg)
+
+[Remembered-meeting vignette](docs/media/gallery-remembered.jpg) · [Modern river continuation](docs/media/gallery-modern-river.jpg). These October 13 captures are muted desktop batch renders, not headset footage. Vignette art is a prototype; cast, garments, narration and cultural context still need review. The modern scene uses a draft OpenAI-generated painting with [exact prompt and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json).
 
 The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. Fictional encounters draw on the regional history of Kikuyu–Maasai trade. The baseline package visits two eras and today:
 
@@ -16,11 +22,11 @@ Its facts come from a [source register](docs/content/enkare-nairobi/sources.md).
 
 **SankofaVR** is the repository name; **Sankofa** is the product.
 
-## Illustrated-theatre MVP
+## Earlier illustrated-theatre MVP
 
-The latest prototype tests a spatial illustrated theatre using the existing Unity foundation. Three painted scenic layers unfold at different depths. Wambui's physical gourd leaves her illustrated palm and comes within reach; receiving it changes her painted pose. Offering it to the trading hide changes both women using the same three-pose vocabulary. The fire, narration, tangible objects, hand input, passive path and opt-in keepsake/replay flow remain part of the experience.
+The earlier comparison prototype tests a spatial illustrated theatre using the existing Unity foundation. Three painted scenic layers unfold at different depths. Wambui's physical gourd leaves her illustrated palm and comes within reach; receiving it changes her painted pose. Offering it to the trading hide changes both women using the same three-pose vocabulary. The fire, narration, tangible objects, hand input, passive path and opt-in keepsake/replay flow remain part of the experience.
 
-The current story pass, **What We Carry** (package v0.3.0), follows an imagined meeting: Wambui brings less flour than promised, and Naserian remembers a time Wambui waited for her. The visitor can help or watch; their later address and remembered visit follow what actually happened. The modern coda lets the bead remain beside a passive visitor instead of placing it on a gate automatically. Read the [current script, response map and review questions](docs/content/enkare-nairobi/stories.md#current-illustrated-episode-what-we-carry). Remaining work is grouped in the [five-sprint proposal](docs/product/delivery-plan.md#current-sprint-plan). Historical context and invented encounters are distinguished in the telling; family/community review is still pending.
+Its story pass, **What We Carry** (package v0.3.0), follows an imagined meeting: Wambui brings less flour than promised, and Naserian remembers a time Wambui waited for her. The visitor can help or watch; their later address and remembered visit follow what actually happened. The modern coda lets the bead remain beside a passive visitor instead of placing it on a gate automatically. Read the [current script, response map and review questions](docs/content/enkare-nairobi/stories.md#current-illustrated-episode-what-we-carry). Remaining work is grouped in the [five-sprint proposal](docs/product/delivery-plan.md#current-sprint-plan). Historical context and invented encounters are distinguished in the telling; family/community review is still pending.
 
 ![The painted trading scene after the visitor offers the gourd](docs/media/illustrated-trade.jpg)
 

@@ -17,8 +17,13 @@ namespace Sankofa.Tests
             Assert.That(PackageValidator.Accept(p,out var report,stage),Is.Not.Null,report.ToString());
             Assert.That(p.Routes.Count(r=>!r.IsContinuation),Is.EqualTo(2));
             Assert.That(stage.Find("memory.portions"),Is.Not.Null);
+            Assert.That(Vector3.Distance(stage.Find("gate").TouchPosition,new Vector3(0,1.15f,0)),Is.LessThan(0.65f),"gate interaction stays within seated reach");
             Assert.That(stage.Find("memory.waiting"),Is.Not.Null);
             Assert.That(stage.Find("gourd.milk").IllustratedHolder,Is.Not.Null);
+            Assert.That(stage.HasScene("story.water.1899"),Is.False,"unplayed rigs stay in the comparison scene");
+            Assert.That(Object.FindObjectsByType<FigurePresence>(FindObjectsInactive.Include,FindObjectsSortMode.None),Is.Empty);
+            var modern=stage.Scenes.Single(s=>s.Id=="story.water.today").Root;
+            Assert.That(modern.transform.Find("Illustrated modern river"),Is.Not.Null);
         }
         [Test] public void GalleryUsesAStaticCanonicalImageAndSeatedControls()
         {

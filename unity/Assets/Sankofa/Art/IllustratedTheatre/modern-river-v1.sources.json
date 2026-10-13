@@ -1,0 +1,12 @@
+{
+  "provider": "OpenAI",
+  "tool": "image_gen.imagegen (built-in)",
+  "model": "not exposed by tool; not inferred",
+  "date": "2026-10-13",
+  "asset": "modern-river-v1.png",
+  "sha256": "c1738a263371f557e6236e62cc823b8f1b67ebd6a6061683b7903d1dcf9b896e",
+  "status": "draft imagined garden; cultural/device review pending",
+  "terms_status": "release output terms still to be recorded and reviewed",
+  "prompt": "Use case: illustration-story. Asset type: wide 16:9 environment painting for a seated VR illustrated theatre. Create a beautiful contemporary Kenyan urban riverbank at dusk, an explicitly imagined garden inspired by Nairobi river restoration. Painterly watercolor and opaque gouache, richly textured brushwork, warm ochre and muted indigo/violet shadows, matching a hand-painted historical theatre. A silver-blue stream clearly crosses the middle third horizontally, planted banks and modest neighbourhood apartment buildings beyond, warm windows, distant modern skyline suggested without exact landmark reconstruction. Eye-level seated composition, horizon roughly 45 percent down the image. Near bank is open and uncluttered, leaving the lower centre available for separate tangible garden/gate objects. Tall acacia-like trees frame the left and right edges without hiding the river. Quiet, hopeful evening, remaining city imperfections, inviting rather than pristine utopia. No people, no text, no logos, no frames, no foreground gate, no bead, no flour gourd, no fire, no poster UI. This is scenic art, not a documentary photograph. Entire canvas painted with complete opaque coverage.",
+  "source_images": []
+}

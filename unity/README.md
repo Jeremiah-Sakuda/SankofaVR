@@ -11,6 +11,19 @@
 | Input | Hands first, through Meta's OpenXR hand skeleton: touch, open palm and fingertip presses, or point and pinch at a panel. Touch controllers are optional (point and pull the trigger). Passthrough off: full VR is the baseline |
 | Application id | `com.sankofa.quest`, provisional. A store release channel fixes it permanently; confirm before the first upload |
 
+## Living gallery
+
+The candidate scene is `Assets/Sankofa/Scenes/LivingGallery.unity`, package `Content/living-gallery.json` v0.4.0. One canonical framed work opens into the same scene around the stationary seat. Explicit gallery controls select a gourd or remembered-meeting perspective, each with a short vignette; looking at or receiving an object does not choose a cultural or moral position. The contextual griot and question availability preserve the later reveal; the friendship question is offered after the agreement. Flour placement changes milk hospitality, with a receive or passive path on each arrangement.
+
+The closing memento can be kept by the existing panel or by receiving it, holding an open palm over the labelled recess for 0.45 seconds and releasing it. Tracking loss cancels deposit arming. A saved work offers the other thread directly, replay or the same water today. The existing illustrated shelf namespace and old clip keys preserve older plan/outcome replay; exact question/interruption replay remains unimplemented.
+
+```sh
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildLivingGallery
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildLivingGallery
+```
+
+`artifacts/Sankofa-LivingGallery.apk` is a local review build. Generation and muted batch tests do not launch the XR Simulator. The frame image is generated from the actual historical scene; the modern background is draft generated art, with [prompt and provenance](Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json). No headset or cultural acceptance is implied. Audio files are bundled for product use; they were not played during this iteration at the user's request.
+
 ## Layout
 
 ```text

@@ -1,6 +1,6 @@
 # Gallery narration for review
 
-October 13, 2026 · Draft fictional encounter and contextual narration. These twenty new/changed lines are not recorded yet.
+October 13, 2026 · Draft fictional encounter and contextual narration. These twenty new/changed lines are recorded and bundled under `enkare-nairobi.gallery-v4`, using the existing Google Cloud Text-to-Speech service with explicit user approval for the text export. They were generated without playback; performance, pronunciation and cultural listening review remain pending.
 
 **gallery.sit**
 

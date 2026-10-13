@@ -171,7 +171,7 @@ namespace Sankofa.Runtime.App
                 choicesPanel.Show(new List<(string, string)> { (LeaveId, "Leave") });
                 return;
             }
-            captions.SetStatus(baseStatus);
+            captions.SetStatus(gallery != null ? "" : baseStatus);
             anchor.PlacedEvent += ShowStart;
             if (anchor.Placed) ShowStart();
         }
@@ -330,12 +330,12 @@ namespace Sankofa.Runtime.App
                         CloseReceivers();
                         stage.ResetAll();
                         gallery?.ResetView();
-                        captions.SetStatus(baseStatus);
+                        captions.SetStatus(gallery != null ? "" : baseStatus);
                         break;
                     case Cue.VisitStarted v:
                         stage.ClearEchoes();
                         var mode = v.Mode == VisitMode.Continued ? "Continuing a kept visit" : v.Mode == VisitMode.Replayed ? "Replay of a kept visit, as it was" : null;
-                        captions.SetStatus(string.Join(" · ", new[] { mode, baseStatus }.Where(s => !string.IsNullOrEmpty(s))));
+                        captions.SetStatus(string.Join(" · ", new[] { mode, gallery != null ? "" : baseStatus }.Where(s => !string.IsNullOrEmpty(s))));
                         break;
                     case Cue.Speak s:
                         narration.Play(s.Token, s.Line);
@@ -391,6 +391,11 @@ namespace Sankofa.Runtime.App
                             options.Insert(0, ("gallery-enter", "Enter painting"));
                             options.Add((ControlKind.Leave.ToString(), "Leave"));
                         }
+                        if (gallery != null && flow.Menu == ChoiceMenu.Returning && flow.KeptVisit != null && flow.Phase == VisitPhase.Choosing)
+                        {
+                            options.RemoveAll(o => o.Item1 == ControlKind.NewStory.ToString());
+                            options.Insert(0, ("gallery-other", "Follow the other thread"));
+                        }
                         choicesPanel.Show(options);
                         break;
                     case Cue.Questions q:
@@ -408,7 +413,7 @@ namespace Sankofa.Runtime.App
                     case Cue.Closed c:
                         LogJournal();
                         stage.Settle();
-                        if (c.Completed) captions.Notice(WhatYouDid(), 14, true);
+                        if (c.Completed && gallery == null) captions.Notice(WhatYouDid(), 14, true);
                         break;
                     case Cue.Echo e:
                         stage.Echo(e.ObjectIds);
@@ -500,6 +505,12 @@ namespace Sankofa.Runtime.App
         void OnControl(string id)
         {
             if (id == "gallery-enter") { Begin(); return; }
+            if (id == "gallery-other" && gallery != null && flow?.KeptVisit != null)
+            {
+                var saved = flow.Package.Route(flow.KeptVisit.Route);
+                EnterExhibit(gallery.OtherRoute(saved?.Follows ?? flow.KeptVisit.Route));
+                return;
+            }
             if (flow == null || !started)
             {
                 if (id == LeaveId) Quit();

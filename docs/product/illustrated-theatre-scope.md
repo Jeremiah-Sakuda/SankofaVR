@@ -4,13 +4,19 @@ October 13, 2026 · Gallery direction selected by the user; implementation and a
 
 **Sankofa — Step inside the story.** A living art gallery whose paintings become spatial experiences. You encounter a work, enter its composition, participate in its story, and return to the same painting with a different understanding of what it holds. The story responds to the perspective you choose and what you actually do.
 
+**Purpose:** make room for stories time nearly left behind: ordinary encounters, relationships and perspectives that a visitor may never have heard. The human situation supplies broad appeal; specific place, material life and reviewed context supply identity. A gallery is the way into those stories. The first authored encounter is openly imagined from documented context, not advertised as a recovered account of actual people.
+
 The first artwork is **What We Carry**, the existing illustrated encounter at Enkare Nairobi. Its two authored threads reveal different aspects of Wambui and Naserian's meeting. The griot remains a warm narrator: welcoming visitors, making unfamiliar context legible and bridging gaps without disclosing the story's turns. Inside this first artwork, the fire is its visible presence. The women retain agency over their agreement.
 
-This is the current planning reference. The user selected the gallery as the organizing premise; implementation details, estimates and acceptance targets below remain to be verified. It supersedes the earlier theatre-only framing and [first-place proposal](first-place-plan.md). The [PRD](prd.md), [delivery plan](delivery-plan.md#current-sprint-plan) and [backlog](../backlog.md#current-illustrated-theatre-sprints) follow this direction. Broader freeform generation, live conversation and additional-language requirements remain open; recorded contextual narration does not complete them. Existing runtime content and scenes remain unchanged until tested implementation lands.
+This is the current planning reference. The user selected the gallery as the organizing premise; implementation details, estimates and acceptance targets below remain to be verified. It supersedes the earlier theatre-only framing and [first-place proposal](first-place-plan.md). The [PRD](prd.md), [delivery plan](delivery-plan.md#current-sprint-plan) and [backlog](../backlog.md#current-illustrated-theatre-sprints) follow this direction. Broader freeform generation, live conversation and additional-language requirements remain open; recorded contextual narration does not complete them. The existing comparison scenes remain available; the implementation checkpoint below records the new candidate.
+
+## Implementation checkpoint
+
+October 13: the new `LivingGallery` scene and v0.4.0 authored package implement the gallery/frame journey, two vignette routes, explicit object question chips, milk hospitality, contextual narration, a painted modern background and a physical kept memento. The older theatre remains a comparison. Core route/outcome/legacy-replay and muted Unity checks establish software behavior only; device, cultural, participant and final art/listening acceptance are still open. See the [decision record](../decisions.md) for exact checks and artifacts. The sections below remain the intended acceptance contract, not a declaration that the full PRD or all eleven work packages have passed.
 
 ## Product promise and boundaries
 
-**Working public description:** “A living gallery of paintings you can enter, explore and experience.” The gallery is the product; the illustrated theatre is how its first artwork performs. “A story that notices what you notice” remains an interaction test: readable acknowledgement of attention, deliberate choices, and truthful consequences. It does not imply eye tracking or unrestricted conversation.
+**Working public description:** “A living gallery for stories time nearly left behind. Step into a painting and discover the lives within it.” The gallery is the product; the illustrated theatre is how its first artwork performs. “A story that notices what you notice” remains an interaction test: readable acknowledgement of attention, deliberate choices, and truthful consequences. It does not imply eye tracking or unrestricted conversation.
 
 The competition candidate contains **one complete exhibit**: a framed composition, a seated way to enter, two perspectives on the same encounter, and an illustrated contemporary continuation. A modest gallery setting replaces the standalone opening/closing hearth environment. The fire lives inside the artwork and can speak from within its frame before entry. There is one welcome and one transition into the story.
 
@@ -24,11 +30,11 @@ English narration and captions; Maa names and Kenyan context require appropriate
 
 Authored personalisation means selecting different scenes, revelations and their order from reviewed content. It is not generated family history. The gallery must not imply that a contemporary generated composition is a historical painting or that all painted details are documented. Exact replay and alternate perspective are visibly different actions.
 
-## Current foundation and missing work
+## Starting foundation and remaining acceptance
 
-The inspected build has the fire, stationary transitions, three-layer illustrated encounter, two cast columns with three poses each, tangible flour and bead, authored questions, accepted/passive outcomes, a local kept-visit store, replay and a modern continuation. Recent work added visible sheep, painted props, palm alignment during turns/recentering, acknowledgement, better hand-off timing and input grace. The latest code is later than the last documented review APK; rebuild before distribution.
+Before the gallery implementation, the inspected theatre build had the fire, stationary transitions, three-layer illustrated encounter, two cast columns with three poses each, tangible flour and bead, authored questions, accepted/passive outcomes, a local kept-visit store, replay and a modern continuation. Recent work added visible sheep, painted props, palm alignment during turns/recentering, acknowledgement, better hand-off timing and input grace. The latest code is later than the last documented review APK; rebuild before distribution.
 
-The gallery/frame, exhibit preview, composition-matched entry/return, meaningful thread selection, two vignettes, direct scene questions, milk hospitality, painted modern coda and exhibit-side physical Keep remain to be built. Hardware, cultural, participant and release acceptance remain unverified. The procedural sheep is enough for the first probe.
+The gallery/frame, exhibit preview, composition-matched entry/return, meaningful thread selection, two vignettes, direct scene questions, milk hospitality, painted modern coda and exhibit-side physical Keep now have an implemented software candidate. Hardware, cultural, participant and release acceptance remain unverified. The vignette art and procedural sheep remain prototype assets for that first probe.
 
 Extend the existing application, story package and editor builders. Retain the original `Hearth` scene as a comparison record. Gallery presentation replaces the current lobby/closing presentation in the candidate; it does not create a second application, visit store or mandatory intermediate hearth room.
 

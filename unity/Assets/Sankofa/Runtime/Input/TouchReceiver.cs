@@ -55,6 +55,7 @@ namespace Sankofa.Runtime.Input
             for (var i = 0; i < hands.Length; i++)
             {
                 var g = gestures[i];
+                if (!hands[i].Tracked || hands[i].Holding) { g.Reset(); continue; }
                 if (g.Update(hands[i].Sample, position, Time.deltaTime))
                 {
                     var id = invitationId;

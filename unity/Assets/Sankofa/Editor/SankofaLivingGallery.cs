@@ -26,19 +26,20 @@ namespace Sankofa.EditorTools
             var stage = Object.FindFirstObjectByType<StoryStage>();
             var world = Object.FindFirstObjectByType<WorldAnchor>().transform;
             var painting = CaptureComposition(stage, "story.water.1850s", "What We Carry");
+            BuildModernIllustration(stage);
             var home = stage.Scenes.Single(s => s.IsHearth);
             var surroundings = Child(home.Root.transform, "Gallery architecture");
             // Hide the inherited outdoor environment; the gallery is the outer journey, not another stop before it.
             foreach (var r in home.Root.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
-            var plaster = GalleryPigment("Warm plaster", new Color(0.46f, 0.4f, 0.34f));
-            var floor = GalleryPigment("Slate floor", new Color(0.12f, 0.135f, 0.15f));
+            var plaster = GalleryPigment("Warm plaster", new Color(0.16f, 0.175f, 0.19f));
+            var floor = GalleryPigment("Slate floor", new Color(0.065f, 0.073f, 0.085f));
             var wood = GalleryPigment("Walnut frame", new Color(0.16f, 0.105f, 0.065f));
             var brass = GalleryPigment("Brass edge", new Color(0.66f, 0.42f, 0.2f));
             Prim(surroundings, "Floor", PrimitiveType.Cube, new Vector3(0,-0.06f,1.8f), new Vector3(10,0.1f,10), floor);
             Prim(surroundings, "Exhibit wall", PrimitiveType.Cube, new Vector3(0,1.8f,3.3f), new Vector3(9,4,0.12f), plaster);
             foreach (var x in new[] {-4.5f,4.5f})
                 Prim(surroundings, "Side wall", PrimitiveType.Cube, new Vector3(x,1.8f,0), new Vector3(0.12f,4,7), plaster);
-            Prim(surroundings, "Exhibit ledge", PrimitiveType.Cube, new Vector3(0,0.68f,0.55f), new Vector3(1.22f,0.035f,0.28f), wood);
+            Prim(surroundings, "Exhibit ledge", PrimitiveType.Cube, new Vector3(0,0.66f,0.55f), new Vector3(1.22f,0.035f,0.28f), wood);
             var work = Child(world, "What We Carry framed");
             work.localPosition = new Vector3(0,1.53f,3.19f);
             var imageMaterial = new Material(Shader.Find("Sankofa/Gallery Canvas")) { name = "What We Carry canonical" };
@@ -56,14 +57,22 @@ namespace Sankofa.EditorTools
                     edges.Add(Prim(work,"Frame vertical",PrimitiveType.Cube,new Vector3(sign*w/2,0,-0.014f),new Vector3(trim.Item1,h,0.045f),trim.Item2).GetComponent<Renderer>());
                 }
             }
-            GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(-2.4f,2.5f,3.22f),0.36f,1.3f);
-            GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,0.39f,3.16f),0.58f,3.8f);
-            GalleryText(surroundings,"Exhibit placard","Enkare Nairobi · before the railway\nAn imagined meeting in a documented place",new Vector3(0,0.14f,3.16f),0.29f,4f);
+            GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(0,3.07f,3.16f),0.85f,3.0f);
+            GalleryText(surroundings,"Gallery purpose","Stories time nearly left behind",new Vector3(0,2.88f,3.16f),0.42f,3.8f);
+            GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.68f,3.16f),0.68f,3.8f);
+            GalleryText(surroundings,"Exhibit placard","Enkare Nairobi · before the railway\nAn imagined meeting · draft for cultural review",new Vector3(0,0.28f,3.16f),0.42f,4f);
             var gallery=world.gameObject.AddComponent<LivingGallery>();
             Set(gallery,"painting",work); Set(gallery,"canvas",canvas); Set(gallery,"stage",stage);
             SetArray(gallery,"frame",edges.Cast<Object>().ToArray());
             Set(stage.GetComponent<StoryTransition>(),"gallery",gallery);
             BuildVignettes(stage);
+            var unused=stage.Scenes.Single(x=>x.Id=="story.water.1899");
+            SetArray(stage,"objects",stage.Objects.Where(x=>x.Scene!="story.water.1899").Cast<Object>().ToArray());
+            var stageData=new SerializedObject(stage);var scenes=stageData.FindProperty("scenes");
+            for(var i=scenes.arraySize-1;i>=0;i--)
+                if(scenes.GetArrayElementAtIndex(i).FindPropertyRelative("Id").stringValue==unused.Id)scenes.DeleteArrayElementAtIndex(i);
+            stageData.ApplyModifiedPropertiesWithoutUndo();
+            Object.DestroyImmediate(unused.Root);
             var milk=stage.Find("gourd.milk");
             var naserian=stage.Find("figure.naserian").GetComponent<IllustratedFigure>();
             milk.transform.SetParent(naserian.transform.Find("Hands"), false);
@@ -83,21 +92,34 @@ namespace Sankofa.EditorTools
             }
             var deposit=world.gameObject.AddComponent<GalleryKeep>();Set(deposit,"app",app);Set(deposit,"stage",stage);
             SetArray(deposit,"hands",Object.FindObjectsByType<HandSource>(FindObjectsSortMode.None).Cast<Object>().ToArray());
-            var recess=Marker(world,"Keep recess",new Vector3(0.4f,0.78f,0.5f));Set(deposit,"recess",recess);
-            Prim(surroundings,"Keep recess rim",PrimitiveType.Cylinder,new Vector3(0.4f,0.706f,0.5f),new Vector3(0.17f,0.008f,0.17f),brass);
-            GalleryText(surroundings,"Keep recess label","KEEP THIS VISIT",new Vector3(0.38f,0.77f,0.42f),0.22f,0.38f);
+            var recess=Marker(world,"Keep recess",new Vector3(0.3f,0.85f,0.42f));Set(deposit,"recess",recess);
+            Prim(surroundings,"Keep station",PrimitiveType.Cylinder,new Vector3(0.3f,0.75f,0.42f),new Vector3(0.14f,0.075f,0.14f),wood);
+            Prim(surroundings,"Keep recess rim",PrimitiveType.Cylinder,new Vector3(0.3f,0.826f,0.42f),new Vector3(0.17f,0.008f,0.17f),brass);
+            GalleryText(surroundings,"Keep recess label","KEEP THIS VISIT",new Vector3(0.3f,0.94f,0.42f),0.13f,0.28f);
+            SetArray(app,"storyAmbience",Object.FindObjectsByType<Sankofa.Runtime.Audio.StoryAmbience>(FindObjectsInactive.Include,FindObjectsSortMode.None).Cast<Object>().ToArray());
             Set(app,"gallery",gallery); Set(app,"packageJson",AssetDatabase.LoadAssetAtPath<TextAsset>(GalleryPackage));
             // Keep the existing shelf: legacy kept plans retain their original routes, content and audio.
             Set(app,"storeNamespace","illustrated-theatre-mvp");
             var card=Object.FindFirstObjectByType<StartScreen>();
             foreach(var text in card.GetComponentsInChildren<TextMeshPro>()) text.enabled=false;
-            world.Find("Keepsake point").localPosition=new Vector3(0.4f,0.72f,0.5f);
+            world.Find("Keepsake point").localPosition=new Vector3(0.3f,0.84f,0.42f);
             world.Find("Rest point").localPosition=new Vector3(0.28f,0.77f,0.5f);
             world.Find("Keepsake shown point").localPosition=new Vector3(0.19f,0.94f,0.48f);
-            world.Find("Choices panel").localPosition=new Vector3(-0.19f,0.97f,0.47f);
+            var choices=world.Find("Choices panel");
+            choices.localPosition=new Vector3(0,0.90f,0.56f);
+            choices.localRotation=FacingVisitor(choices.localPosition);
+            Set(choices.GetComponent<PokePanel>(),"buttonSize",new Vector2(0.24f,0.075f));
+            Set(choices.GetComponent<PokePanel>(),"labelSize",0.32f);
+            Set(choices.GetComponent<PokePanel>(),"gap",0.018f);
             home.Sky=new Color(0.08f,0.075f,0.065f); home.FogStart=30; home.FogEnd=60;
             home.AmbientSky=new Color(0.33f,0.29f,0.25f); home.AmbientGround=new Color(0.13f,0.12f,0.1f);
-            home.Grade=new Vector4(1.4f,0.85f,0.1f,0.1f);
+            home.Grade=new Vector4(1.25f,0.85f,0.1f,0.1f);
+            var captions=Object.FindFirstObjectByType<CaptionBoard>();
+            captions.transform.localPosition=new Vector3(0,0.84f,1.5f);
+            captions.transform.localRotation=FacingVisitor(captions.transform.localPosition);
+            Set(captions,"width",1.08f);
+            Set(captions.GetComponent<LazyFollow>(),"verticalSlack",24f);
+            Set(app,"fireComparison",false);
             // Put the living flame at the painted fire, inside the work; it remains the visible narrator.
             var fire=Object.FindFirstObjectByType<Sankofa.Runtime.Fire.HearthFire>(FindObjectsInactive.Include);
             fire.transform.localPosition=new Vector3(0.03f,0.73f,3.1f); fire.transform.localScale=Vector3.one*0.36f;
@@ -109,24 +131,48 @@ namespace Sankofa.EditorTools
             AssetDatabase.SaveAssets();
             Debug.Log("[Sankofa] Living gallery built: "+GalleryScene);
         }
+        static void BuildModernIllustration(StoryStage stage)
+        {
+            // The provenance-recorded river illustration supplies distance; the near garden is tangible.
+            var image=ImportAtlas("Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.png");
+            var root=stage.Scenes.Single(s=>s.Id=="story.water.today").Root.transform;
+            var near=stage.Objects.Where(o=>o.Scene=="story.water.today").SelectMany(o=>o.Surfaces).ToArray();
+            var nearFloor=GalleryPigment("Modern bank",new Color(0.43f,0.27f,0.16f));nearFloor.SetFloat("_GroundRadius",1.6f);
+            root.Find("Ground").GetComponent<Renderer>().sharedMaterial=nearFloor;
+            var gate=stage.Find("gate");gate.transform.localPosition=new Vector3(0.15f,0,0.5f);gate.transform.localRotation=Quaternion.Euler(0,-25,0);
+            gate.transform.Find("Touch point").localPosition=new Vector3(-0.12f,0.9f,0.02f);
+            foreach(var r in root.GetComponentsInChildren<Renderer>(true))
+                if(!near.Contains(r)&&r.name!="Ground")r.enabled=false;
+            foreach(var traffic in root.GetComponentsInChildren<Traffic>(true))traffic.enabled=false;
+            var path=GalleryFolder+"/Modern river illustration.mat";
+            var material=AssetDatabase.LoadAssetAtPath<Material>(path);
+            if(material==null){material=new Material(Shader.Find("Sankofa/Gallery Canvas"));AssetDatabase.CreateAsset(material,path);}
+            material.mainTexture=image;EditorUtility.SetDirty(material);
+            var card=IllustrationCard(root,"Illustrated modern river",28f,15.75f,material);
+            card.transform.localPosition=new Vector3(0,-6.725f,7.5f);
+            foreach(var id in new[]{"gate","soil","bead.today"})
+                foreach(var r in stage.Find(id).Surfaces)
+                    r.sharedMaterial=GalleryPigment("Modern "+id,id=="gate"?new Color(0.22f,0.36f,0.25f):id=="soil"?new Color(0.30f,0.20f,0.13f):new Color(0.65f,0.34f,0.20f));
+        }
+
         static void BuildVignettes(StoryStage stage)
         {
             var root=stage.Scenes.Single(s=>s.Id=="story.water.1850s").Root.transform;
             var list=stage.Objects.Cast<Object>().ToList();
             foreach(var memory in new[]{"portions","waiting"})
             {
-                var go=Child(root,"Remembered "+memory);go.localPosition=new Vector3(-0.68f,1.2f,1.12f);
+                var go=Child(root,"Remembered "+memory);go.localPosition=new Vector3(0,1.44f,1.85f);
                 go.localRotation=FacingVisitor(go.localPosition);
                 var surfaces=new System.Collections.Generic.List<Renderer>();
-                surfaces.Add(Prim(go,"Memory backing",PrimitiveType.Cube,Vector3.zero,new Vector3(0.94f,0.66f,0.022f),GalleryPigment("Memory ink",new Color(0.095f,0.075f,0.07f))).GetComponent<Renderer>());
+                surfaces.Add(Prim(go,"Memory backing",PrimitiveType.Cube,Vector3.zero,new Vector3(0.82f,0.56f,0.022f),MemoryPaper()).GetComponent<Renderer>());
                 if(memory=="portions")
                 {
-                    foreach(var x in new[]{-0.23f,0.23f})
+                    foreach(var x in new[]{-0.20f,0.20f})
                     {
-                        surfaces.Add(Prim(go,"Flour bowl",PrimitiveType.Cylinder,new Vector3(x,-0.08f,-0.09f),new Vector3(0.2f,0.012f,0.16f),GalleryPigment("Flour",new Color(0.73f,0.63f,0.43f)),Quaternion.Euler(70,0,0)).GetComponent<Renderer>());
+                        surfaces.Add(Prim(go,"Flour bowl",PrimitiveType.Cylinder,new Vector3(x,-0.17f,-0.14f),new Vector3(0.2f,0.012f,0.16f),GalleryPigment("Flour",new Color(0.73f,0.63f,0.43f)),Quaternion.Euler(32,0,0)).GetComponent<Renderer>());
                         var source=stage.Find("gourd.flour").Surfaces.First();
                         var vessel=Static(go,"Morning vessel",source.GetComponent<MeshFilter>().sharedMesh,source.sharedMaterial).GetComponent<Renderer>();
-                        vessel.transform.localPosition=new Vector3(x,-0.25f,-0.05f);vessel.transform.localScale=Vector3.one*0.52f;surfaces.Add(vessel);
+                        vessel.transform.localPosition=new Vector3(x,-0.18f,-0.06f);vessel.transform.localScale=Vector3.one*0.70f;surfaces.Add(vessel);
                     }
                 }
                 else
@@ -134,8 +180,8 @@ namespace Sankofa.EditorTools
                     var atlas=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/IllustratedTheatre/cast-atlas.png");
                     for(var i=0;i<2;i++)
                     {
-                        var card=IllustrationCard(go,"Remembered woman "+i,0.46f,0.54f,IllustrationMaterial("Memory figure "+i,atlas,new Vector4(i*0.5f,2f/3,0.5f,1f/3)));
-                        card.transform.localPosition=new Vector3((i-0.5f)*0.43f,-0.3f,-0.04f);surfaces.Add(card);
+                        var card=IllustrationCard(go,"Remembered woman "+i,0.39f,0.46f,IllustrationMaterial("Memory figure "+i,atlas,new Vector4(i*0.5f,2f/3,0.5f,1f/3)));
+                        card.transform.localPosition=new Vector3((i-0.5f)*0.37f,-0.24f,-0.04f);surfaces.Add(card);
                     }
                 }
                 var item=go.gameObject.AddComponent<StageObject>();
@@ -144,6 +190,14 @@ namespace Sankofa.EditorTools
                 list.Add(item);
             }
             SetArray(stage,"objects",list.ToArray());
+        }
+
+        static Material MemoryPaper()
+        {
+            var path=GalleryFolder+"/Memory paper.mat";
+            var material=AssetDatabase.LoadAssetAtPath<Material>(path);
+            if(material==null){material=new Material(Shader.Find("Unlit/Color"));AssetDatabase.CreateAsset(material,path);}
+            material.color=new Color(0.11f,0.125f,0.14f);EditorUtility.SetDirty(material);return material;
         }
 
         static Material GalleryPigment(string name, Color color)
@@ -162,7 +216,7 @@ namespace Sankofa.EditorTools
             text.text=words;text.fontSize=size;text.color=new Color(0.92f,0.82f,0.64f);
             text.alignment=TextAlignmentOptions.Center;text.rectTransform.sizeDelta=new Vector2(width,0.3f);
         }
-        static Texture2D CaptureComposition(StoryStage stage,string id,string name)
+        static Texture2D CaptureComposition(StoryStage stage,string id,string name,bool includeObjects=true)
         {
             stage.ShowScene(id);
             var scene=stage.Scenes.Single(s=>s.Id==id).Root;
@@ -172,7 +226,9 @@ namespace Sankofa.EditorTools
             foreach(var o in stage.Objects.Where(o=>o.Scene==id))
                 foreach(var r in o.Surfaces)
                 {
-                    r.enabled=true;var b=new MaterialPropertyBlock();
+                    r.enabled=includeObjects;
+                    if(!includeObjects)continue;
+                    var b=new MaterialPropertyBlock();
                     b.SetFloat("_Visibility",1);b.SetFloat("_Unfold",1);b.SetFloat("_PoseBlend",1);
                     if(o.TryGetComponent<IllustratedFigure>(out var f))
                     {var uv = new Vector4(o.Id == "figure.naserian" ? 0.5f : 0, 2f/3, 0.5f, 1f/3); b.SetVector("_FrameA",uv); b.SetVector("_FrameB",uv);}
