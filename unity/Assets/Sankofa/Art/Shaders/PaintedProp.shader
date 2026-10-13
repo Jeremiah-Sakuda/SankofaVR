@@ -11,6 +11,8 @@ Shader "Sankofa/Painted Prop"
         _Ink ("Ink colour", Color) = (0.12, 0.07, 0.04, 1)
         _InkWidth ("Ink width", Range(0, 1)) = 0.42
         _Highlight ("Highlight", Range(0, 1)) = 0
+        _Visibility ("Story visibility", Range(0, 1)) = 1
+        _VertexTint ("Use vertex pigment", Range(0, 1)) = 1
     }
     SubShader
     {
@@ -29,6 +31,7 @@ Shader "Sankofa/Painted Prop"
             fixed4 _Ink;
             half _InkWidth;
             half _Highlight;
+            half _Visibility, _VertexTint;
             float4 _SankofaLightPos;
             float4 _SankofaLightColor;
             float4 _SankofaAmbientSky;
@@ -69,13 +72,17 @@ Shader "Sankofa/Painted Prop"
             fixed4 frag(v2f i) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+                // Story reveal/withdraw must also work on solid painted surfaces. Stable local grain keeps
+                // the fade matched in both eyes and never reveals objects behind the animal or vessel.
+                float reveal = frac(sin(dot(floor(i.local.xy * 300 + i.local.z * 83), float2(12.9898, 78.233))) * 43758.5453);
+                clip(_Visibility - reveal * 0.98 - 0.001);
                 half3 n = normalize(i.normal);
                 float3 view = normalize(_WorldSpaceCameraPos - i.world);
                 // Grain and brush strokes fixed to the object, so they move with it and match in both eyes. Strokes
                 // run around the object, as a painter models a rounded form.
                 half grain = tex2D(_Noise, i.local.xy * 9 + i.local.z * 5).b;
                 half strokes = tex2D(_Noise, float2(i.local.x * 7 + i.local.z * 5, i.local.y * 30)).r;
-                half3 pigment = _Color.rgb * i.color.rgb * (0.9 + 0.2 * grain);
+                half3 pigment = _Color.rgb * lerp(half3(1, 1, 1), i.color.rgb, _VertexTint) * (0.9 + 0.2 * grain);
                 pigment = lerp(dot(pigment, half3(0.3, 0.59, 0.11)).xxx, pigment, 0.95);
 
                 // The painter's key: the fire's direction, lifted, so tops catch the light and undersides fall into

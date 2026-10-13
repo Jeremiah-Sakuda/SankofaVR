@@ -15,11 +15,13 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] float dissolveSeconds = 0.65f;
         [Tooltip("Degrees the painted figure turns, at most, toward what she glances at.")]
         [SerializeField] float glanceTurn = 15f;
+        [SerializeField] StoryTransition transition;
 
         MaterialPropertyBlock block;
         Vector3 surfaceRest;
         bool surfaceRestKnown;
         Vector3 glanceAt;
+        Matrix4x4 glanceFrame;
         float glanceFor, glanceWeight;
         int previousPose, pose;
         float blend = 1;
@@ -51,6 +53,7 @@ namespace Sankofa.Runtime.Stage
         public void Glance(Vector3 at, float seconds)
         {
             glanceAt = at;
+            glanceFrame = transform.parent != null ? transform.parent.localToWorldMatrix : Matrix4x4.identity;
             glanceFor = seconds;
             if (TryGetComponent<StageObject>(out var staged)) staged.Pulse();
         }
@@ -58,10 +61,9 @@ namespace Sankofa.Runtime.Stage
         public void ResetState()
         {
             glanceFor = glanceWeight = 0;
-            Turn(0);
             previousPose = pose = 0;
             blend = 1;
-            if (giftOrigin != null) giftOrigin.localPosition = waitingHand;
+            Turn(0);
             Apply();
         }
 
@@ -78,6 +80,11 @@ namespace Sankofa.Runtime.Stage
                 blend = 1 - blend;
             }
             pose = value;
+            if (transition != null && transition.ReducedMotion)
+            {
+                previousPose = pose;
+                blend = 1;
+            }
             Apply();
         }
 
@@ -85,7 +92,7 @@ namespace Sankofa.Runtime.Stage
         public void Offer(StageObject item, StoryStage stage)
         {
             SetPose(1);
-            giftOrigin.localPosition = offeringHand;
+            Turn(Mathf.SmoothStep(0, 1, glanceWeight));
             item.ShowAt(giftOrigin.position);
             item.MoveTo(stage.OfferPosition(), 1.4f);
         }
@@ -103,7 +110,14 @@ namespace Sankofa.Runtime.Stage
 
         void Update()
         {
+            var frame = transform.parent != null ? transform.parent.localToWorldMatrix : Matrix4x4.identity;
+            if ((glanceFor > 0 || glanceWeight > 0) && frame != glanceFrame)
+            {
+                glanceAt = (frame * glanceFrame.inverse).MultiplyPoint3x4(glanceAt);
+                glanceFrame = frame;
+            }
             blend = Mathf.MoveTowards(blend, 1, StageClock.DeltaTime / Mathf.Max(0.05f, dissolveSeconds));
+            if (transition != null && transition.ReducedMotion) { previousPose = pose; blend = 1; }
             glanceFor = Mathf.Max(0, glanceFor - StageClock.DeltaTime);
             glanceWeight = Mathf.MoveTowards(glanceWeight, glanceFor > 0 ? 1 : 0, StageClock.DeltaTime / 0.5f);
             Turn(Mathf.SmoothStep(0, 1, glanceWeight));
@@ -121,7 +135,7 @@ namespace Sankofa.Runtime.Stage
                 surfaceRestKnown = true;
             }
             var yaw = 0f;
-            if (weight > 0.001f)
+            if (weight > 0.001f && (transition == null || !transition.ReducedMotion))
             {
                 // The painting faces along the figure's -Z; turn that toward the point, level.
                 var facing = Vector3.ProjectOnPlane(transform.rotation * Vector3.back, Vector3.up);
@@ -132,6 +146,13 @@ namespace Sankofa.Runtime.Stage
             var turn = Quaternion.Euler(0, yaw, 0);
             card.localRotation = turn;
             card.localPosition = turn * surfaceRest;
+            // The painted palm and its physical gift must turn together until the gift leaves the hand.
+            if (giftOrigin != null)
+            {
+                var shownPose = blend < 0.5f ? previousPose : pose;
+                giftOrigin.localPosition = turn * (shownPose == 1 ? offeringHand : waitingHand);
+                giftOrigin.localRotation = turn;
+            }
         }
 
         void Apply()

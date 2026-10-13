@@ -58,6 +58,8 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] float[] partKneelWiden = new float[0];
         [Tooltip("The edge colour of this figure's light; one family line shares one colour across the eras.")]
         [SerializeField] Color tint = new Color(1f, 0.55f, 0.22f, 1f);
+        [Tooltip("Keep authored material pigments while retaining the animal's movement and pause behavior.")]
+        [SerializeField] bool useMaterialPigment;
         [Tooltip("With an animator, the bone that turns the head when the figure glances at something.")]
         [SerializeField] Transform lookBone;
         [Tooltip("With an animator, the head bone, about which the light of the head is calm.")]
@@ -696,7 +698,7 @@ namespace Sankofa.Runtime.Stage
             block.SetFloat(ArmInId, armIn);
             block.SetFloat(ProceduralId, animator != null ? 0f : 1f);
             block.SetFloat(GroundId, basePosition.y);
-            block.SetColor(ColorId, tint);
+            if (!useMaterialPigment) block.SetColor(ColorId, tint);
             block.SetFloat(SmokeId, bodySmoke);
             block.SetFloat(FabricId, 0f);
             block.SetFloat(FeatureId, 0f);
@@ -715,7 +717,7 @@ namespace Sankofa.Runtime.Stage
                 block.SetFloat(FabricId, animator != null && i < 2 ? 1f : 0f);
                 block.SetFloat(FeatureId, animator != null && i >= 2 ? 1f : 0f);
                 block.SetFloat(EyeId, c.name == "Eyes" ? 1f : 0f);
-                block.SetColor(ColorId, i == 0 ? tint * 0.65f : tint);
+                if (!useMaterialPigment) block.SetColor(ColorId, i == 0 ? tint * 0.65f : tint);
                 c.SetPropertyBlock(block);
                 if (i < partKneelScale.Length && partRest != null && i < partRest.Length)
                 {

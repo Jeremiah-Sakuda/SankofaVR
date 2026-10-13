@@ -31,6 +31,8 @@ Material:
     m_Floats:
     - _Highlight: 0
     - _InkWidth: 0.24
+    - _VertexTint: 1
+    - _Visibility: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Ink: {r: 0.11999995, g: 0.06999998, b: 0.04, a: 1}

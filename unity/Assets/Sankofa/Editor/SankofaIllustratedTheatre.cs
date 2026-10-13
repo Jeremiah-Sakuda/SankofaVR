@@ -72,12 +72,14 @@ namespace Sankofa.EditorTools
                 item.transform.localRotation = Quaternion.identity;
                 var body = IllustrationCard(item.transform, f.id + " painted", f.width, f.height, castMaterial);
                 body.transform.localPosition = new Vector3(-0.18f, -0.07f, 0);
-                SetArray(item, "surfaces", new Object[] { body });
+                var shade = ContactShade(item.transform, f.id, 0.5f, 0.26f);
+                SetArray(item, "surfaces", new Object[] { body, shade });
                 Set(item, "echoMesh", body.GetComponent<MeshFilter>().sharedMesh);
                 Set(item, "scaleWithVisibility", false);
                 Set(item, "holder", null);
                 var actor = item.gameObject.AddComponent<IllustratedFigure>();
                 Set(actor, "surface", body);
+                Set(actor, "transition", stage.GetComponent<StoryTransition>());
                 var hand = item.transform.Find("Hands");
                 Set(actor, "giftOrigin", hand);
                 Set(actor, "waitingHand", new Vector3(f.handX, f.handY, -0.03f));
@@ -110,14 +112,32 @@ namespace Sankofa.EditorTools
                     name == "stream" || name == "bank stones")
                     renderer.enabled = false;
             }
-            // The sheep is heard, not seen, until it is painted: a translucent model reads as a blob between two
-            // painted women. Its bleats and its place in the story stay; it cannot be noticed or remembered.
+            // Keep the sheep tangible and readable when the story names it. The existing geometry gets the same
+            // opaque pigment treatment as the gifts, instead of translucent firelight through the river stones.
             var ewe = stage.Find("figure.ewe");
-            foreach (var renderer in ewe.GetComponentsInChildren<Renderer>(true)) renderer.enabled = false;
-            SetArray(ewe, "surfaces", new Object[0]);
+            var sheepSurfaces = ewe.GetComponentsInChildren<MeshRenderer>(true);
+            foreach (var surface in sheepSurfaces)
+            {
+                var fleece = surface.name == "Body";
+                var material = PaintedPropMaterial(fleece ? "sheep fleece" : "sheep face and legs", null, 0.25f);
+                material.SetColor("_Color", fleece ? new Color(0.78f, 0.69f, 0.5f) : new Color(0.32f, 0.23f, 0.17f));
+                material.SetFloat("_VertexTint", 0); // The legacy meshes encode shader masks in black vertex colours.
+                surface.sharedMaterials = new[] { material };
+                surface.enabled = true;
+            }
+            SetArray(ewe, "surfaces", sheepSurfaces.Cast<Object>().ToArray());
             Set(ewe, "glow", null);
-            Set(ewe, "attentionRadius", 0f);
-            Set(ewe, "echoMesh", null);
+            Set(ewe, "attentionRadius", 0.24f);
+            Set(ewe.GetComponent<FigureMotion>(), "useMaterialPigment", true);
+            var echo = new Mesh { name = "Painted sheep memory" };
+            echo.CombineMeshes(sheepSurfaces.Select(r => new CombineInstance
+            {
+                mesh = r.GetComponent<MeshFilter>().sharedMesh,
+                transform = ewe.transform.worldToLocalMatrix * r.transform.localToWorldMatrix
+            }).ToArray());
+            var echoPath = TheatreFolder + "/Painted sheep memory.asset";
+            AssetDatabase.DeleteAsset(echoPath); AssetDatabase.CreateAsset(echo, echoPath);
+            Set(ewe, "echoMesh", echo);
             // The ground the women stand on meets the painting's values: violet-brown earth, not a dark stage floor.
             var ground = root.Find("Ground").GetComponent<Renderer>();
             var groundPath = TheatreFolder + "/Painted ground.mat";
@@ -130,6 +150,12 @@ namespace Sankofa.EditorTools
             foreach (var (id, ink) in new[] { ("gourd.flour", 0.44f), ("gourd.milk", 0.44f), ("hide", 0.3f), ("bead", 0.24f) })
                 foreach (var surface in stage.Find(id).Surfaces)
                     surface.sharedMaterial = PaintedPropMaterial(id, surface.sharedMaterial, ink);
+            foreach (var id in new[] { "gourd.flour", "gourd.milk" })
+            {
+                var pigment = stage.Find(id).Surfaces.First().sharedMaterial;
+                pigment.SetColor("_Color", new Color(0.62f, 0.38f, 0.22f));
+                pigment.SetFloat("_InkWidth", 0.3f);
+            }
             var layers = new List<Renderer>();
             foreach (var l in layout.layers)
             {
@@ -203,8 +229,25 @@ namespace Sankofa.EditorTools
             material.SetColor("_Color", source != null && source.HasProperty("_Color") ? source.color : Color.white);
             material.SetTexture("_Noise", AssetDatabase.LoadAssetAtPath<Texture2D>(SankofaArt.NoisePath));
             material.SetFloat("_InkWidth", ink);
+            material.SetFloat("_VertexTint", 1);
             EditorUtility.SetDirty(material);
             return material;
+        }
+
+        static Renderer ContactShade(Transform person, string id, float width, float depth)
+        {
+            var path = TheatreFolder + "/Contact shade.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(Shader.Find("Sankofa/Contact Shade"));
+                AssetDatabase.CreateAsset(material, path);
+            }
+            var shade = IllustrationCard(person, id + " contact", width, depth, material);
+            shade.transform.localRotation = Quaternion.Euler(90, 0, 0);
+            shade.transform.localPosition = new Vector3(-0.18f, 0.018f, -depth / 2);
+            shade.shadowCastingMode = ShadowCastingMode.Off;
+            return shade;
         }
 
         static Renderer IllustrationCard(Transform parent, string name, float width, float height, Material material)

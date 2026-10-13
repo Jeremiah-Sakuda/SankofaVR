@@ -149,15 +149,18 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
-        public IEnumerator UnpaintedSheepIsHeardNotSeen()
+        public IEnumerator SheepIsVisibleWhenNamedAndWithdrawsWithTheStory()
         {
             yield return Open(); app.enabled = false;
             stage.ShowScene("story.water.1850s");
             stage.Perform(new StoryAction(ActionKind.Reveal, "figure.ewe"));
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(9f);
             var ewe = stage.Find("figure.ewe");
             Assert.That(ewe.Visible, Is.True, "the sheep is in the story, so its sounds play");
-            Assert.That(ewe.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled).Select(r => r.name), Is.Empty);
+            Assert.That(ewe.Surfaces.Count(r => r.enabled), Is.EqualTo(6), "the sheep named in the story has a readable body, head and legs");
+            stage.Perform(new StoryAction(ActionKind.Withdraw, "figure.ewe"));
+            yield return new WaitForSeconds(12f);
+            Assert.That(ewe.Surfaces.Any(r => r.enabled), Is.False, "the solid animal leaves with the women");
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
@@ -192,6 +195,50 @@ namespace Sankofa.Tests
             yield return new WaitForSeconds(0.5f);
             Assert.That(naserian.GlanceWeight + wambui.GlanceWeight, Is.EqualTo(held).Within(0.0001f), "pause holds the turn");
             StageClock.Paused = false;
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
+        [UnityTest]
+        public IEnumerator PaintedPalmAndHeldGiftStayTogetherThroughAcknowledgementAndRecenter()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            stage.Perform(new StoryAction(ActionKind.Reveal, "figure.wambui"));
+            stage.Perform(new StoryAction(ActionKind.Reveal, "gourd.flour"));
+            var woman = stage.Find("figure.wambui").GetComponent<IllustratedFigure>();
+            var palm = woman.Surface.transform.InverseTransformPoint(woman.GiftOrigin);
+            stage.AnswerLook("figure.wambui");
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(Vector3.Distance(palm, woman.Surface.transform.InverseTransformPoint(woman.GiftOrigin)), Is.LessThan(0.001f), "the vessel stays on the same painted palm as she turns");
+            var turning = woman.Surface.transform.localRotation;
+            StageClock.Paused = true;
+            var frame = woman.transform.parent;
+            frame.SetPositionAndRotation(frame.position + new Vector3(1, 0.1f, 0.4f), Quaternion.Euler(0, 35, 0) * frame.rotation);
+            yield return null;
+            Assert.That(Quaternion.Angle(turning, woman.Surface.transform.localRotation), Is.LessThan(0.01f), "recenter preserves the stage-relative glance, including during pause");
+            Assert.That(Vector3.Distance(palm, woman.Surface.transform.InverseTransformPoint(woman.GiftOrigin)), Is.LessThan(0.001f));
+            StageClock.Paused = false;
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
+        [UnityTest]
+        public IEnumerator ReducedMotionAcknowledgesWithoutTurningOrDippingThePaintedFigure()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            stage.Perform(new StoryAction(ActionKind.Reveal, "figure.wambui"));
+            var transition = stage.GetComponent<StoryTransition>();
+            transition.ReducedMotion = true;
+            var woman = stage.Find("figure.wambui").GetComponent<IllustratedFigure>();
+            stage.AnswerLook("figure.wambui");
+            woman.SetPose(1);
+            yield return new WaitForSeconds(0.3f);
+            Assert.That(woman.GlanceWeight, Is.GreaterThan(0), "the story still acknowledges attention");
+            Assert.That(Quaternion.Angle(woman.Surface.transform.localRotation, Quaternion.identity), Is.LessThan(0.01f));
+            Assert.That(woman.PoseBlend, Is.EqualTo(1), "reduced motion uses a clean pose swap with no dip");
+            var properties = new MaterialPropertyBlock(); woman.Surface.GetPropertyBlock(properties);
+            Assert.That(properties.GetFloat("_Highlight"), Is.GreaterThan(0), "acknowledgement remains visible in the light");
+            transition.ReducedMotion = false;
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
