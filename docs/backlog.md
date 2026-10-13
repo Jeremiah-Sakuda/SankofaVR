@@ -6,7 +6,7 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 ## Current illustrated-theatre sprints
 
-October 11 proposal · [Schedule, capacity, dependencies and exit gates](product/delivery-plan.md#current-sprint-plan). Sprint tickets are additional work from v0.3.0, not claims of acceptance. The earlier requirement inventory remains below. The recommended narrower release profile leaves generation, live conversation and an additional narration language open in the original PRD.
+October 11 proposal · [Schedule, capacity, dependencies and exit gates](product/delivery-plan.md#current-sprint-plan). October 13: the [plan for first place](product/first-place-plan.md) proposes a re-allocation of these sprints after the judging-criteria scores; it awaits the user's decisions. Sprint tickets are additional work from v0.3.0, not claims of acceptance. The earlier requirement inventory remains below. The recommended narrower release profile leaves generation, live conversation and an additional narration language open in the original PRD.
 
 ### Sprint 1 — Prove the encounter
 
