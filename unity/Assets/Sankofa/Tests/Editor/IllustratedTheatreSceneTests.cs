@@ -68,14 +68,15 @@ namespace Sankofa.Tests
             var shown = root.GetComponentsInChildren<Renderer>(true).Where(r => r.enabled).Select(r => r.name).ToArray();
             Assert.That(shown, Has.None.EqualTo("Stream").And.None.EqualTo("Bank stones"), "the painted river is the only river");
             var ewe = stage.Find("figure.ewe");
-            Assert.That(ewe.Surfaces.Count(), Is.EqualTo(6), "body, head and four legs are part of the story reveal");
+            Assert.That(ewe.Surfaces.Count(), Is.EqualTo(7), "body, head, face marks and four legs are part of the story reveal");
             Assert.That(ewe.AttentionRadius, Is.GreaterThan(0), "a visible animal can answer noticing");
             Assert.That(ewe.EchoMesh, Is.Not.Null, "its memory includes the animal, not just the fleece");
             foreach (var surface in ewe.Surfaces)
             {
                 Assert.That(surface.sharedMaterials.Length, Is.EqualTo(1), "no translucent depth/colour passes remain");
                 Assert.That(surface.sharedMaterial.shader.name, Is.EqualTo("Sankofa/Painted Prop"));
-                Assert.That(surface.sharedMaterial.GetFloat("_VertexTint"), Is.Zero, "legacy black masks cannot erase the pigment");
+                if (surface.name != "Painted face marks")
+                    Assert.That(surface.sharedMaterial.GetFloat("_VertexTint"), Is.Zero, "legacy black masks cannot erase the pigment");
             }
             foreach (var id in new[] { "gourd.flour", "gourd.milk", "hide", "bead" })
                 foreach (var surface in stage.Find(id).Surfaces)

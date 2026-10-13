@@ -157,7 +157,7 @@ namespace Sankofa.Tests
             yield return new WaitForSeconds(9f);
             var ewe = stage.Find("figure.ewe");
             Assert.That(ewe.Visible, Is.True, "the sheep is in the story, so its sounds play");
-            Assert.That(ewe.Surfaces.Count(r => r.enabled), Is.EqualTo(6), "the sheep named in the story has a readable body, head and legs");
+            Assert.That(ewe.Surfaces.Count(r => r.enabled), Is.EqualTo(7), "the sheep named in the story has a readable body, head, face and legs");
             stage.Perform(new StoryAction(ActionKind.Withdraw, "figure.ewe"));
             yield return new WaitForSeconds(12f);
             Assert.That(ewe.Surfaces.Any(r => r.enabled), Is.False, "the solid animal leaves with the women");

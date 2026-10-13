@@ -106,7 +106,7 @@ SANKOFA_CAPTURE=1 "$UNITY" -batchmode -projectPath "$PWD/unity" -buildTarget And
 - **Return.** The world folds back through the light, and the keepsake (a bead or a seed bundle) rests on the right hearth stone. **Keep this visit**, Begin again or Leave.
 - **Kept visits.** Only an explicit Keep saves a visit, as one local file. The welcome back then offers the kept path and outcomes to replay (questions and interruption timing are not replayed), follow to the same water today, start a new story, or forget it, after a confirmation. Today recalls only what was kept.
 - **Interruption.** Pause (button, headset removal or the system menu) stops speech and freezes every timer, and the figures, the ewe, the traffic and incidental sounds hold still. Resume restarts the line from its start without repeating its actions. **Return to the fire** leaves the story at any point and is never recorded as finishing it.
-- **Settings.** Caption size, reduced motion (a short dim dissolve with no rising fire), ambience level (full, low or off), recenter, and in development builds the fire comparison below.
+- **Settings.** Caption size, reduced motion (a short dim dissolve with no rising fire), ambience level (full, low or off), recenter, and in development builds the fire comparison below. In the illustrated theatre, reduced motion also uses a direct pose swap and a light acknowledgement without card turning.
 
 Each cue is logged as `[Sankofa] <cue> at <visit time>`, and the visit journal is logged when the visitor reaches the closing. Read them with `adb logcat -s Unity` on a headset.
 

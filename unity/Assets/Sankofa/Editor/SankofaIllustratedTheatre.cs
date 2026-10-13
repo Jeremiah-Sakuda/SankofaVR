@@ -115,6 +115,7 @@ namespace Sankofa.EditorTools
             // Keep the sheep tangible and readable when the story names it. The existing geometry gets the same
             // opaque pigment treatment as the gifts, instead of translucent firelight through the river stones.
             var ewe = stage.Find("figure.ewe");
+            var features = SheepFace(ewe.transform.Find("Neck"));
             var sheepSurfaces = ewe.GetComponentsInChildren<MeshRenderer>(true);
             foreach (var surface in sheepSurfaces)
             {
@@ -125,6 +126,9 @@ namespace Sankofa.EditorTools
                 surface.sharedMaterials = new[] { material };
                 surface.enabled = true;
             }
+            var facePigment = PaintedPropMaterial("sheep facial details", null, 0.12f);
+            facePigment.SetColor("_Color", Color.white);
+            features.sharedMaterial = facePigment;
             SetArray(ewe, "surfaces", sheepSurfaces.Cast<Object>().ToArray());
             Set(ewe, "glow", null);
             Set(ewe, "attentionRadius", 0.24f);
@@ -248,6 +252,31 @@ namespace Sankofa.EditorTools
             shade.transform.localPosition = new Vector3(-0.18f, 0.018f, -depth / 2);
             shade.shadowCastingMode = ShadowCastingMode.Off;
             return shade;
+        }
+
+        static Renderer SheepFace(Transform neck)
+        {
+            var pieces = new List<CombineInstance>();
+            void Mark(Vector3 at, Vector3 scale, Color pigment)
+            {
+                var piece = SankofaMeshes.Stone(2900 + pieces.Count, 2, 0.015f, 10f);
+                piece.colors = Enumerable.Repeat(pigment, piece.vertexCount).ToArray();
+                pieces.Add(new CombineInstance { mesh = piece, transform = Matrix4x4.TRS(at, Quaternion.identity, scale) });
+            }
+            var ink = new Color(0.075f, 0.045f, 0.035f);
+            foreach (var side in new[] { -1f, 1f })
+            {
+                Mark(new Vector3(side * 0.057f, 0.095f, 0.16f), new Vector3(0.012f, 0.016f, 0.016f), ink);
+                Mark(new Vector3(side * 0.066f, 0.1f, 0.156f), new Vector3(0.004f, 0.005f, 0.005f), new Color(0.86f, 0.78f, 0.61f));
+            }
+            Mark(new Vector3(0, 0.06f, 0.272f), new Vector3(0.041f, 0.02f, 0.016f), ink);
+            var mesh = new Mesh { name = "Painted sheep face" };
+            mesh.CombineMeshes(pieces.ToArray());
+            foreach (var piece in pieces) Object.DestroyImmediate(piece.mesh);
+            var path = TheatreFolder + "/Painted sheep face.asset";
+            AssetDatabase.DeleteAsset(path); AssetDatabase.CreateAsset(mesh, path);
+            var face = Static(neck, "Painted face marks", mesh, null).GetComponent<MeshRenderer>();
+            return face;
         }
 
         static Renderer IllustrationCard(Transform parent, string name, float width, float height, Material material)
