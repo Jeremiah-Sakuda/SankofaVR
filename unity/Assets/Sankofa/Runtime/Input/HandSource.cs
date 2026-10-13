@@ -8,7 +8,8 @@ namespace Sankofa.Runtime.Input
 {
     /// <summary>
     /// One tracked hand from Meta's OpenXR hand skeleton, translated into engine-free samples. Low-confidence
-    /// tracking counts as untracked so a reappearing hand cannot press or receive anything.
+    /// tracking counts as untracked so a reappearing hand cannot press or receive anything; a flicker shorter than
+    /// <see cref="lostGrace"/> keeps the last confident pose instead, so it does not undo a hold, touch or pinch.
     /// </summary>
     [DefaultExecutionOrder(100)]
     public sealed class HandSource : MonoBehaviour
@@ -19,6 +20,8 @@ namespace Sankofa.Runtime.Input
         [SerializeField] bool left;
         [SerializeField] OVRHand hand;
         [SerializeField] OVRSkeleton skeleton;
+        [Tooltip("Seconds a hand may drop below confident tracking and keep its last pose.")]
+        [SerializeField] float lostGrace = 0.18f;
 
         readonly Dictionary<Material, Material> raised = new Dictionary<Material, Material>();
         Transform wrist, indexProximal, middleProximal, littleProximal, indexTip, middleTip, ringTip;
@@ -33,12 +36,18 @@ namespace Sankofa.Runtime.Input
         /// </summary>
         public Func<HandSample> Simulated { get; set; }
 
-        bool tracked;
+        bool tracked, live, everLive;
+        float lostFor;
+        HandSample last;
         public bool Tracked => Simulated != null || tracked;
-        public Vector3? Fingertip => Simulated != null ? V(Simulated().IndexTip) : tracked ? indexTip.position : (Vector3?)null;
-        public Vector3 PalmCenter => Simulated != null ? V(HandGeometry.PalmCenter(Simulated())) : tracked ? (wrist.position + middleProximal.position) * 0.5f : Vector3.zero;
+        /// <summary>True while tracking has dropped for a moment and the hand is held at its last confident pose.</summary>
+        public bool Holding => Simulated == null && tracked && !live;
+        public Vector3? Fingertip => Simulated != null ? V(Simulated().IndexTip) : tracked ? V(Sample.IndexTip) : (Vector3?)null;
+        public Vector3 PalmCenter => Simulated != null ? V(HandGeometry.PalmCenter(Simulated())) : tracked ? (V(Sample.Wrist) + V(Sample.MiddleProximal)) * 0.5f : Vector3.zero;
 
-        public HandSample Sample => Simulated != null ? WithTracking(Simulated()) : !tracked ? new HandSample { IsLeft = left } : new HandSample
+        public HandSample Sample => Simulated != null ? WithTracking(Simulated()) : !tracked ? new HandSample { IsLeft = left } : live ? Live() : last;
+
+        HandSample Live() => new HandSample
         {
             Tracked = true,
             IsLeft = left,
@@ -64,7 +73,15 @@ namespace Sankofa.Runtime.Input
         void Update()
         {
             if (indexTip == null) FindBones();
-            tracked = indexTip != null && hand != null && hand.IsTracked && hand.IsDataHighConfidence && skeleton.IsDataValid;
+            live = indexTip != null && hand != null && hand.IsTracked && hand.IsDataHighConfidence && skeleton.IsDataValid;
+            if (live)
+            {
+                everLive = true;
+                lostFor = 0;
+                last = Live();
+            }
+            else lostFor += Time.unscaledDeltaTime;
+            tracked = live || (everLive && lostFor < lostGrace);
         }
 
         void LateUpdate()

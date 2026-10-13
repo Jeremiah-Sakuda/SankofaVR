@@ -16,6 +16,8 @@ namespace Sankofa.Runtime.Stage
         [Tooltip("Degrees the painted figure turns, at most, toward what she glances at.")]
         [SerializeField] float glanceTurn = 15f;
         [SerializeField] StoryTransition transition;
+        [Tooltip("Seconds a gift rests in the painted palms, once they show, before it crosses to the visitor.")]
+        [SerializeField] float restInPalm = 0.5f;
 
         MaterialPropertyBlock block;
         Vector3 surfaceRest;
@@ -25,6 +27,13 @@ namespace Sankofa.Runtime.Stage
         float glanceFor, glanceWeight;
         int previousPose, pose;
         float blend = 1;
+        StageObject offering;
+        StoryStage offeringStage;
+        bool offeringShown;
+        float offeringRest;
+        int ShownPose => blend < 0.5f ? previousPose : pose;
+        /// <summary>The gift waiting to be given, shown in the palms once they are painted, then sent across.</summary>
+        public StageObject Offering => offering;
         public int Pose => pose;
         public float PoseBlend => blend;
         public Vector3 GiftOrigin => giftOrigin.position;
@@ -61,6 +70,7 @@ namespace Sankofa.Runtime.Stage
         public void ResetState()
         {
             glanceFor = glanceWeight = 0;
+            offering = null;
             previousPose = pose = 0;
             blend = 1;
             Turn(0);
@@ -88,13 +98,41 @@ namespace Sankofa.Runtime.Stage
             Apply();
         }
 
-        /// <summary>The gourd starts at a painted palm and crosses into the visitor's reachable space.</summary>
+        /// <summary>
+        /// The gift appears in the painted palms only once the offering pose shows (never at the hip of the pose being
+        /// left), rests there a moment so it is seen as hers, then crosses into the visitor's reachable space.
+        /// </summary>
         public void Offer(StageObject item, StoryStage stage)
         {
             SetPose(1);
+            offering = item;
+            offeringStage = stage;
+            offeringShown = false;
+            offeringRest = restInPalm;
             Turn(Mathf.SmoothStep(0, 1, glanceWeight));
-            item.ShowAt(giftOrigin.position);
-            item.MoveTo(stage.OfferPosition(), 1.4f);
+            Give(0);
+        }
+
+        /// <summary>Stops giving this gift: it was received before it crossed.</summary>
+        public void CancelOffer(StageObject item)
+        {
+            if (offering == item) offering = null;
+        }
+
+        void Give(float dt)
+        {
+            if (offering == null || ShownPose != 1) return;
+            if (!offeringShown)
+            {
+                offering.ShowAt(giftOrigin.position);
+                offering.Pulse();
+                offeringShown = true;
+            }
+            else offering.transform.position = giftOrigin.position;
+            offeringRest -= dt;
+            if (offeringRest > 0) return;
+            offering.MoveTo(offeringStage.OfferPosition(), 1.4f);
+            offering = null;
         }
 
         public void Perform(StoryAction action, StageObject item)
@@ -121,6 +159,7 @@ namespace Sankofa.Runtime.Stage
             glanceFor = Mathf.Max(0, glanceFor - StageClock.DeltaTime);
             glanceWeight = Mathf.MoveTowards(glanceWeight, glanceFor > 0 ? 1 : 0, StageClock.DeltaTime / 0.5f);
             Turn(Mathf.SmoothStep(0, 1, glanceWeight));
+            Give(StageClock.DeltaTime);
             Apply();
         }
 

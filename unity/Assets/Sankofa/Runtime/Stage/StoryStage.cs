@@ -239,6 +239,8 @@ namespace Sankofa.Runtime.Stage
                         o.Holder.Reach(target.PlacePosition, 2f);
                     o.Reveal();
                     o.MoveTo(target != null ? target.PlacePosition : o.HomePosition, 1.3f);
+                    var scene = Array.Find(scenes, s => s.Id == ActiveScene);
+                    if (scene != null && scene.Root.TryGetComponent<IllustratedTheatre>(out var theatre)) theatre.Placed(o, target);
                     break;
                 case ActionKind.Withdraw:
                     o.Withdraw(IsHearth(o.Scene) ? fire.transform.position + Vector3.up * 0.12f : o.HomePosition);
@@ -252,6 +254,8 @@ namespace Sankofa.Runtime.Stage
         /// </summary>
         public void Carry(StageObject o, HandSource hand)
         {
+            // Taken before it left the painted palms: the visitor's hand owns it now.
+            if (o.IllustratedHolder != null) o.IllustratedHolder.CancelOffer(o);
             if (hand == null)
             {
                 o.MoveTo(carryPoint.position, 0.8f);

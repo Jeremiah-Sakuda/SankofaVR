@@ -66,6 +66,31 @@ namespace Sankofa.Tests
             AssertPair(continuation, "again.bead.held", "again.bead.left", accepted.Contains("receive-bead"));
         }
 
+        [Test]
+        public void ASilentVisitorIsTakenIntoTheOnlyStoryButAReturningOneIsAsked()
+        {
+            var store = new MemoryStore();
+            var flow = new VisitFlow(Package(), store: store);
+            var view = new FakePresentation(flow);
+            flow.Start();
+            view.RunUntil(() => flow.Phase == VisitPhase.Choosing && flow.CurrentLine == null);
+            view.Advance(14);
+            Assert.That(flow.Phase, Is.EqualTo(VisitPhase.Choosing), "the fire leaves time to choose");
+            view.Advance(1.2);
+            Assert.That(flow.Phase, Is.Not.EqualTo(VisitPhase.Choosing), "silence is a way to begin");
+            Assert.That(view.Of<Cue.VisitStarted>().Single().Mode, Is.EqualTo(VisitMode.Chosen));
+            Assert.That(flow.Plan.Plan.Route, Is.EqualTo("era.1850s"));
+
+            Finish(flow, view);
+            Assert.That(flow.Keep(), Is.True);
+            var again = new VisitFlow(Package(), store: store);
+            var returning = new FakePresentation(again);
+            again.Start();
+            returning.Advance(120);
+            Assert.That(again.Phase, Is.EqualTo(VisitPhase.Choosing), "with a kept visit, the visitor chooses what comes next");
+            Assert.That(returning.Of<Cue.VisitStarted>(), Is.Empty);
+        }
+
         static void AssertPair(IEnumerable<string> heard, string accepted, string passive, bool acted)
         {
             Assert.That(heard, Does.Contain(acted ? accepted : passive));

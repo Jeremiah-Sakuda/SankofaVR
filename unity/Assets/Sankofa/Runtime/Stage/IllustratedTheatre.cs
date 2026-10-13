@@ -19,7 +19,13 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Renderer[] layers;
         [SerializeField] IllustrationResponse[] responses;
         [SerializeField] StoryTransition transition;
+        [Tooltip("Where what the visitor sets down for the painted people comes to rest: on the painted ground between them.")]
+        [SerializeField] Transform tradeGround;
+        [SerializeField] float settleSeconds = 2.2f;
+        [SerializeField] float crossSeconds = 2.6f;
         MaterialPropertyBlock block;
+        StageObject placed, placedOn;
+        float placedFor;
         float elapsed;
         int selectedLayer = -1;
         float selection;
@@ -36,8 +42,25 @@ namespace Sankofa.Runtime.Stage
             selectedLayer = -1;
             selection = 0;
             AcceptedResponses = 0;
+            placed = placedOn = null;
+            CrossedIntoPainting = false;
             Apply();
         }
+
+        /// <summary>
+        /// Something set down within the visitor's reach for the painted people (the flour on the hide) settles, then
+        /// both cross into the painting together and rest between them: the exchange happens where they stand.
+        /// </summary>
+        public void Placed(StageObject item, StageObject on)
+        {
+            if (tradeGround == null || item == null || on == null) return;
+            placed = item;
+            placedOn = on;
+            placedFor = 0;
+        }
+
+        /// <summary>True once something set down has been sent across into the painting.</summary>
+        public bool CrossedIntoPainting { get; private set; }
 
         public void Resolve(StageObject item, bool accepted)
         {
@@ -60,6 +83,14 @@ namespace Sankofa.Runtime.Stage
         void Update()
         {
             elapsed += StageClock.DeltaTime;
+            if (placed != null && (placedFor += StageClock.DeltaTime) >= settleSeconds)
+            {
+                var onTop = placedOn.PlacePosition - placedOn.transform.position;
+                placedOn.MoveTo(tradeGround.position, crossSeconds);
+                placed.MoveTo(tradeGround.position + onTop, crossSeconds);
+                CrossedIntoPainting = true;
+                placed = placedOn = null;
+            }
             selection = Mathf.MoveTowards(selection, 1, StageClock.DeltaTime / 0.8f);
             Apply();
         }

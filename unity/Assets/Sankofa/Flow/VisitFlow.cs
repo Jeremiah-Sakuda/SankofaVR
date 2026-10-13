@@ -17,6 +17,11 @@ namespace Sankofa.Flow
         public double MinWaitAfterResume = 6;
         /// <summary>In a replay, how long an invitation stays visible before its kept outcome plays.</summary>
         public double ReplayHold = 2.5;
+        /// <summary>
+        /// When only one story can be chosen and the visitor does nothing at the hearth, it begins after this long:
+        /// silence is a complete way to participate. Zero or less waits for a choice.
+        /// </summary>
+        public double SingleStoryWait = 15;
     }
 
     /// <summary>
@@ -81,6 +86,7 @@ namespace Sankofa.Flow
 
         int transitionToken;
         double transitionElapsed;
+        double choiceIdle;
         SceneDef transitionTarget;
         Continuation afterTransition;
         bool pauseAfterTransition;
@@ -559,6 +565,7 @@ namespace Sankofa.Flow
             if (Phase == VisitPhase.Idle || Phase == VisitPhase.Paused || Phase == VisitPhase.Ended) return;
             if (double.IsNaN(deltaSeconds) || deltaSeconds <= 0) return;
             Clock += deltaSeconds;
+            if (BeginOnlyStoryAfterSilence(deltaSeconds)) return;
             switch (activity)
             {
                 case Activity.Speaking:
@@ -597,6 +604,19 @@ namespace Sankofa.Flow
         }
 
         // ---- internals ----
+
+        bool BeginOnlyStoryAfterSilence(double deltaSeconds)
+        {
+            if (Phase != VisitPhase.Choosing || Menu != ChoiceMenu.Interests || activity != Activity.None || settings.SingleStoryWait <= 0)
+            {
+                choiceIdle = 0;
+                return false;
+            }
+            var routes = package.FirstRoutes.Take(2).ToList();
+            if (routes.Count != 1) return false;
+            choiceIdle += deltaSeconds;
+            return choiceIdle >= settings.SingleStoryWait && Choose(routes[0].Id);
+        }
 
         bool AtChoice(ChoiceMenu menu) => (Phase == VisitPhase.Welcome || Phase == VisitPhase.Choosing) && Menu == menu;
 

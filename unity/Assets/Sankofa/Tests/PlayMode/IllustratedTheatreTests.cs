@@ -72,8 +72,13 @@ namespace Sankofa.Tests
             var giver = stage.Find("figure.wambui").GetComponent<IllustratedFigure>();
             var gourd = stage.Find("gourd.flour");
             stage.Perform(new StoryAction(ActionKind.Offer, "gourd.flour"));
-            Assert.That(Vector3.Distance(gourd.transform.position, giver.GiftOrigin), Is.LessThan(0.001f), "the physical object starts in the painted palm");
-            yield return new WaitForSeconds(0.2f);
+            Assert.That(giver.Offering, Is.EqualTo(gourd), "the gift waits for the offering pose to show");
+            yield return Until(() => giver.PoseBlend >= 0.5f, 5);
+            yield return null;
+            Assert.That(Vector3.Distance(gourd.transform.position, giver.GiftOrigin), Is.LessThan(0.001f), "the physical object starts in the painted palm, not at the hip of the pose being left");
+            Assert.That(giver.Offering, Is.EqualTo(gourd), "and rests there a moment, so it is seen as hers");
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(giver.Offering, Is.Null, "then it crosses");
             StageClock.Paused = true;
             var poseBlend = giver.PoseBlend; var before = gourd.transform.position; var unfold = theatre.UnfoldTime;
             yield return new WaitForSeconds(0.25f);
@@ -161,6 +166,51 @@ namespace Sankofa.Tests
             stage.Perform(new StoryAction(ActionKind.Withdraw, "figure.ewe"));
             yield return new WaitForSeconds(12f);
             Assert.That(ewe.Surfaces.Any(r => r.enabled), Is.False, "the solid animal leaves with the women");
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
+        [UnityTest]
+        public IEnumerator AGiftTakenWhileStillInThePaintedPalmsStaysWithTheVisitor()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            stage.Perform(new StoryAction(ActionKind.Reveal, "figure.naserian"));
+            var giver = stage.Find("figure.naserian").GetComponent<IllustratedFigure>();
+            var bead = stage.Find("bead");
+            stage.Perform(new StoryAction(ActionKind.Offer, "bead"));
+            yield return Until(() => giver.PoseBlend >= 0.5f, 5);
+            yield return null;
+            Assert.That(giver.Offering, Is.EqualTo(bead));
+            stage.Carry(bead, null);
+            Assert.That(giver.Offering, Is.Null, "received by the button before it crossed");
+            yield return new WaitForSeconds(2.5f);
+            Assert.That(Vector3.Distance(bead.transform.position, giver.GiftOrigin), Is.GreaterThan(0.5f), "it is not pulled back to her palm");
+            Assert.That(Vector3.Distance(bead.transform.position, stage.OfferPosition()), Is.GreaterThan(0.05f), "nor sent on to the offer point afterwards");
+            Assert.That(problems, Is.Empty, string.Join("\n", problems));
+        }
+
+        [UnityTest]
+        public IEnumerator FlourSetDownWithinReachCrossesToRestBetweenTheWomen()
+        {
+            yield return Open(); app.enabled = false;
+            stage.ShowScene("story.water.1850s");
+            foreach (var id in new[] { "figure.wambui", "figure.naserian", "gourd.flour", "hide" }) stage.Perform(new StoryAction(ActionKind.Reveal, id));
+            var hide = stage.Find("hide");
+            var gourd = stage.Find("gourd.flour");
+            var seat = Camera.main.transform.position;
+            var reach = Vector3.Distance(seat, hide.transform.position);
+            stage.Perform(new StoryAction(ActionKind.Place, "gourd.flour", "hide"));
+            yield return new WaitForSeconds(1.6f);
+            Assert.That(Vector3.Distance(gourd.transform.position, hide.PlacePosition), Is.LessThan(0.08f), "first it is set down within reach");
+            Assert.That(theatre.CrossedIntoPainting, Is.False);
+            yield return new WaitForSeconds(4.5f);
+            Assert.That(theatre.CrossedIntoPainting, Is.True);
+            var wambui = stage.Find("figure.wambui").transform.position;
+            var naserian = stage.Find("figure.naserian").transform.position;
+            Assert.That(Vector3.Distance(seat, hide.transform.position), Is.GreaterThan(reach + 0.8f), "then it crosses into the painting");
+            Assert.That(Vector3.Distance(gourd.transform.position, hide.PlacePosition), Is.LessThan(0.08f), "the flour rests on the hide");
+            var between = Vector3.Distance(wambui, hide.transform.position) + Vector3.Distance(hide.transform.position, naserian);
+            Assert.That(between, Is.LessThan(Vector3.Distance(wambui, naserian) * 1.35f), "between the two women");
             Assert.That(problems, Is.Empty, string.Join("\n", problems));
         }
 
@@ -372,6 +422,8 @@ namespace Sankofa.Tests
             yield return Until(() => app.Flow.CurrentLine?.Id == "e1.rest");
             Capture(eye, "06b-sheep-promise");
             yield return Until(() => app.Flow.OpenInvitation?.Id == "receive-bead");
+            // Once her offering pose shows, the bead rests in her palms before it crosses.
+            yield return new WaitForSeconds(0.6f);
             Capture(eye, "07-keepsake-offer"); app.Flow.Accept("receive-bead");
             yield return Until(() => app.Flow.Phase == VisitPhase.Closing && app.Flow.CurrentLine == null, 120);
             Capture(eye, "08-return");

@@ -30,7 +30,10 @@ namespace Sankofa.Runtime.Input
 
         enum Source { None, Hand, Controller, Mouse }
 
-        readonly PointerSelect select = new PointerSelect();
+        // A pinch moves the aim: forgive a moment off the button it began on.
+        readonly PointerSelect select = new PointerSelect(slipGrace: 0.15);
+        Ray handRay;
+        float handStrength;
         Source source;
 
         public bool Tracked => source != Source.None;
@@ -55,7 +58,7 @@ namespace Sankofa.Runtime.Input
             if (target != null) target.PointAt(id);
             // Keyed by panel as well as button, so a pinch begun on one panel cannot land on another's button.
             var key = target == null ? null : target.GetInstanceID() + "/" + id;
-            if (select.Update(source != Source.None, strength, key, (int)source) != null) target.PressFromPointer(id);
+            if (select.Update(source != Source.None, strength, key, (int)source, Time.deltaTime) != null) target.PressFromPointer(id);
             Draw(pointer, target != null ? distance : 0f);
         }
 
@@ -64,6 +67,13 @@ namespace Sankofa.Runtime.Input
             pointer = default;
             strength = 0;
             var h = hand != null ? hand.Hand : null;
+            if (h != null && hand.Holding)
+            {
+                // Tracking flickered: hold the last confident aim and pinch rather than dropping the press.
+                pointer = handRay;
+                strength = handStrength;
+                return Source.Hand;
+            }
             if (h != null && hand.Tracked && h.IsPointerPoseValid)
             {
                 // This hand's finger already at a panel is poking it; its ray yields so one gesture is not read twice.
@@ -75,6 +85,8 @@ namespace Sankofa.Runtime.Input
                 var pose = h.PointerPose;
                 pointer = new Ray(pose.position, pose.forward);
                 strength = h.GetFingerPinchStrength(OVRHand.HandFinger.Index);
+                handRay = pointer;
+                handStrength = strength;
                 return Source.Hand;
             }
             var c = left ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;

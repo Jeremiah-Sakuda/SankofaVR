@@ -287,6 +287,24 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void ABriefSlipOffTheButtonIsForgivenButALongOneOrAnotherButtonIsNot()
+        {
+            var s = new PointerSelect(slipGrace: 0.15);
+            s.Update(true, 1, "begin", 0, 0.016);
+            s.Update(true, 1, null, 0, 0.1);
+            Assert.That(s.Update(true, 0, null, 0, 0.016), Is.EqualTo("begin"), "the pinch's release nudged the aim off the button");
+
+            s.Update(true, 1, "begin", 0, 0.016);
+            s.Update(true, 1, null, 0, 0.1);
+            s.Update(true, 1, null, 0, 0.1);
+            Assert.That(s.Update(true, 0, "begin", 0, 0.016), Is.Null, "too long off the button cancels");
+
+            s.Update(true, 1, "begin", 0, 0.016);
+            s.Update(true, 1, "leave", 0, 0.016);
+            Assert.That(s.Update(true, 0, "begin", 0, 0.016), Is.Null, "another button cancels at once");
+        }
+
+        [Test]
         public void LosingThePointerCancelsAHeldSelect()
         {
             var s = new PointerSelect();

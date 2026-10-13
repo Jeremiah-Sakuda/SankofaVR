@@ -177,7 +177,9 @@ namespace Sankofa.Runtime.App
         {
             if (placed) return;
             placed = true;
-            startScreen.Show();
+            // The review status is said once, on the title card, so it never overlaps the card's own text.
+            captions.SetStatus("");
+            startScreen.Show(baseStatus);
             choicesPanel.Show(new List<(string, string)> { (StartId, "Begin"), (LeaveId, "Leave") });
         }
 
@@ -187,6 +189,7 @@ namespace Sankofa.Runtime.App
             if (!AtStart) return;
             started = true;
             startScreen.Hide();
+            captions.SetStatus(baseStatus);
             flow.Start();
             Dispatch();
         }

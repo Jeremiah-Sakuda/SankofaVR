@@ -150,6 +150,21 @@ namespace Sankofa.EditorTools
             groundMaterial.SetColor("_Tint", new Color(1.9f, 1.6f, 1.8f, 1f));
             AssetDatabase.CreateAsset(groundMaterial, groundPath);
             ground.sharedMaterial = groundMaterial;
+            // A painted moon: a quiet disc with a small halo, not a wide photographic bloom over the painted sky.
+            var skyPath = TheatreFolder + "/Painted dusk sky.mat";
+            AssetDatabase.DeleteAsset(skyPath);
+            Material paintedSky = null;
+            foreach (var renderer in root.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (renderer.sharedMaterial == null || renderer.sharedMaterial.shader.name != "Sankofa/Sky") continue;
+                if (paintedSky == null)
+                {
+                    paintedSky = new Material(renderer.sharedMaterial) { name = "Painted dusk sky" };
+                    paintedSky.SetFloat("_MoonHalo", 0.35f);
+                    AssetDatabase.CreateAsset(paintedSky, skyPath);
+                }
+                renderer.sharedMaterial = paintedSky;
+            }
             // Things handled in the story are drawn in the paintings' language: banded firelight and an ink edge.
             foreach (var (id, ink) in new[] { ("gourd.flour", 0.44f), ("gourd.milk", 0.44f), ("hide", 0.3f), ("bead", 0.24f) })
                 foreach (var surface in stage.Find(id).Surfaces)
@@ -171,6 +186,10 @@ namespace Sankofa.EditorTools
             var theatre = root.gameObject.AddComponent<IllustratedTheatre>();
             SetArray(theatre, "layers", layers.Cast<Object>().ToArray());
             Set(theatre, "transition", stage.GetComponent<StoryTransition>());
+            // What the visitor sets down for the women rests on the painted ground between them, at Wambui's side of
+            // the sheep and beyond the painted near reeds, so it stays in view.
+            var tradeGround = new Vector3(-0.38f, 0, 2.2f);
+            Set(theatre, "tradeGround", Marker(root, "Trade ground", tradeGround + Vector3.up * (BoundaryGround(tradeGround) + 0.05f)));
             var data = new SerializedObject(theatre);
             var responses = data.FindProperty("responses"); responses.arraySize = layout.responses.Length;
             for (var i = 0; i < layout.responses.Length; i++)

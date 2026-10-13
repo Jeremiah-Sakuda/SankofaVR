@@ -17,6 +17,7 @@ Shader "Sankofa/Sky"
         _Overcast ("Overcast", Range(0, 1)) = 0
         _CloudColor ("Cloud", Color) = (0.3, 0.31, 0.33, 1)
         _ShowMoon ("Show the moon", Float) = 1
+        _MoonHalo ("Moon halo amount", Range(0, 1)) = 1
     }
     SubShader
     {
@@ -45,6 +46,7 @@ Shader "Sankofa/Sky"
             half _Overcast;
             fixed4 _CloudColor;
             half _ShowMoon;
+            half _MoonHalo;
             float4 _SankofaMoonDir;
             float4 _SankofaMoonColor;
 
@@ -112,7 +114,7 @@ Shader "Sankofa/Sky"
                     float facing = dot(dir, normalize(_SankofaMoonDir.xyz));
                     float disc = smoothstep(0.99985, 0.99992, facing);
                     float halo = pow(saturate(facing), 220.0) * 0.6 + pow(saturate(facing), 18.0) * 0.08;
-                    col += half3(0.75, 0.8, 0.9) * disc * 1.6 + _SankofaMoonColor.rgb * halo * 6;
+                    col += half3(0.75, 0.8, 0.9) * disc * 1.6 + _SankofaMoonColor.rgb * halo * 6 * _MoonHalo;
                 }
                 return fixed4(SankofaDither(SankofaGrade(col), i.pos.xy), 1);
             }
