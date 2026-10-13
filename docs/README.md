@@ -7,6 +7,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | Document | What it holds |
 |---|---|
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
+| [Illustrated theatre scope](product/illustrated-theatre-scope.md) | Current iteration: journey, two threads, interaction rules, production limits, user stories, work packages and gates |
 | [Delivery plan](product/delivery-plan.md) | Capacity, staged proofs and release evidence |
 | [Adaptation summary](product/adaptation.md) | What the Quest version keeps, adds and defers from the original web Sankofa |
 | [Testing guide](product/testing-guide.md) | How judges and testers install and play a visit with hands |

@@ -1,5 +1,7 @@
 # Sankofa: the plan for first place
 
+**Superseded planning proposal:** the October 13 [illustrated theatre product scope](illustrated-theatre-scope.md) now controls proposed feature priorities, estimates and acceptance gates. This document remains a record of the earlier analysis. In particular, its predicted scores/winning odds, no-device strategy, attention-triggered speech, evidence glow and cut order are not implementation commitments. No behavior below is marked implemented by this notice.
+
 October 13, 2026 · Proposal for the user's decision · Replaces the week-by-week allocation of the [five-sprint plan](delivery-plan.md#current-sprint-plan); keeps its gates, rules and cuts unless stated. Read with the [judging-criteria audit](../reviews/2026-10-13-judging-criteria-audit.md), the [PRD](prd.md) and the [decision record](../decisions.md).
 
 The objective is the Entertainment first prize, nothing less. This document says what the winning version of Sankofa is, which moves get there, what each costs in the user's hours, and what is cut. The probabilities and scores in it are estimates from repository-only reviews, not measurements; the field is unknown.

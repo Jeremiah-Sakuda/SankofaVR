@@ -2,7 +2,7 @@
 
 Version 1.0 · September 30, 2026 · Product direction selected; implementation and validation pending
 
-**October 11 implementation/planning note:** the current v0.3.0 illustrated theatre implements an authored encounter, recorded questions, action-specific consequences and a saved continuation. It does not implement this document's generated plans, live conversation or additional-language acceptance. The [current sprint proposal](delivery-plan.md#current-sprint-plan) recommends a narrower competition release profile and records those gaps explicitly; it does not mark SK-03/04, SK-06 or SK-09 complete. The original requirements below remain the broader product baseline until a release-scope decision is recorded.
+**October 13 release-planning note:** the [illustrated theatre product scope](illustrated-theatre-scope.md) is the current detailed proposal: two authored perspectives, tangible hospitality, explicit contextual questions and a coherent kept return. The existing v0.3.0 build implements an authored encounter and saved continuation, not those proposed additions. Generated plans, freeform requests, live conversation and additional-language acceptance below remain broader requirements and are not fulfilled by this narrower candidate. The scope does not silently mark SK-03/04, SK-06 or SK-09 complete.
 
 **A story that notices what you notice.**
 

@@ -1,70 +1,40 @@
 # Sankofa — delivery and validation plan
 
-Updated October 11, 2026 · Current sprint proposal for the illustrated-theatre direction
+Updated October 13, 2026 · Current sprint proposal for the illustrated-theatre direction
 
-The [PRD](prd.md) records the broader product requirements; the [backlog](../backlog.md#current-illustrated-theatre-sprints) contains sprint tickets. The schedule below replaces the old milestone calendar for planning from the current build. The September baseline is preserved later in this file as history, not a description of the present repository.
+The [PRD](prd.md) records the broader product requirements; the [backlog](../backlog.md#current-illustrated-theatre-sprints) contains sprint tickets. The schedule below follows the detailed illustrated theatre scope for planning from the current build. The September baseline is preserved later in this file as history, not a description of the present repository.
 
 ## Current sprint plan
 
-**Starting point:** illustrated package v0.3.0, one historical encounter plus a contemporary continuation, recorded narration, honest active/passive outcomes, questions, saved replay and recall. The first chapter is illustrated; the continuation still uses the earlier presentation. Software checks pass. Device performance, hands-only hardware completion, cultural acceptance, released asset rights and external installation remain unverified. The latest story changes are not in the old MVP APK.
+October 13: the [illustrated theatre product scope](illustrated-theatre-scope.md) is the current detailed proposal. It supersedes the October 11 allocation and the later [first-place proposal](first-place-plan.md). It preserves hardware, cultural, participant and release gates. The original PRD remains the broader contract; this narrower authored candidate does not complete generated planning, live conversation or additional-language requirements.
 
-**Recommendation:** finish a complete, convincing visit and a rewarding return visit. The next work is a short story/comprehension and device check, followed by visible listening and consistent art. The distinctive moment remains a tangible object crossing from a painted hand into the visitor's space, followed by an acknowledgement and a later memory of the actual action.
+**Starting point:** package v0.3.0 plus the October 12–13 illustrated polish and interaction fixes. The encounter, questions, passive paths, saved replay and contemporary continuation exist in software. New perspective threads, milk hospitality, painted bookends/coda and physical Keep are proposed work. Rebuild the latest source before testing or distributing: the last recorded APK predates the latest interaction changes.
+
+**Recommendation:** prove the painted entry, direct object question and visible hospitality consequence with current assets, then build two short authored revelations around the existing agreement. Preserve one complete silent route, one-hand use and a coherent ending. See the scope for journey timing, storyboards, interaction/state rules, asset limits, user stories and test cases.
 
 ### Scope and capacity
 
-Plan around **12–15 focused hours/week**, provisionally, until the user supplies current availability. Headset access is still an open dependency, not assumed absent or purchased. These are solo part-time timeboxes, not promises that unfamiliar Unity/device work fits them. Reviewer and hardware lead time is outside the hour estimates; request access early. No purchases, messages to reviewers or public submissions are authorised by this document.
-
-The five sprints allocate **48–58 hours of planned work**, with **12–17 hours left for fixes and uncertainty** within a 60–75-hour envelope. Use the lower end for initial commitments. Re-estimate after Sprint 1 from observed effort; do not borrow the release buffer to conceal overruns.
-
-| Scope | Proposed competition treatment | Status against the original PRD |
-|---|---|---|
-| Fire, illustrated encounter, tangible hand-off, truthful responses, questions, replay and contemporary return | Required for this candidate | Implemented in part; user/device/content acceptance remains open |
-| English narration and captions; Maa names reviewed in context | Required | Additional-language requirement SK-06 remains unfulfilled |
-| Authored scene and outcome variation | Describe exactly what changes | Generated planning and paired freeform-interest requirements SK-03/04 remain unfulfilled; do not claim generation |
-| Live conversation | Defer; keep authored, hand-selectable questions | SK-09 remains open, not passed by recorded answers |
-| Illustrated 1899 chapter | Conditional expansion after core gates pass | Existing baseline chapter is not an accepted illustrated conversion |
-| MR, more cultures/languages, new AI services, rigged-character work | Outside this sprint commitment | Broader roadmap; no automatic promotion to deadline-critical work |
-
-This is an explicit **recommended release profile**, not a declaration that the full PRD is complete. Before committing a release scope, reconcile the profile in the PRD/decision record; any decision to retain generation, conversation or another language requires an added estimate and a compensating scope or capacity change. The ambition is in the quality and embodied response of the experience, not in an untested feature count.
+Provisional capacity remains 12–15 focused user hours/week. The revised estimate is **52–65 user hours plus 10 hours contingency**, or **62–75 hours**, and **76–112 hours of assisted engineering effort**. Engineering effort includes integration/testing and is not an unattended-cycle promise; some review time overlaps the two columns. At 12 hours/week, trim at least two hours from the low plan or add capacity. Re-estimate after the first probe. Hardware and reviewer lead times remain independent dependencies.
 
 ### Sprint calendar and exit gates
 
-| Sprint | Dates / planned hours | Visitor outcome and principal work | Exit gate |
-|---|---|---|---|
-| **1 — Prove the encounter** | Oct 12–18 / 8–10 h | Review the story with insiders and unfamiliar readers; get the current build onto Quest; inspect the attention/response gap; start asset-rights and eligibility checks | First-device findings recorded; review corrections prioritised; one observable attention/explicit-action response specified; no unresolved major story misunderstanding hidden by new art |
-| **2 — Make the theatre convincing** | Oct 19–25 / 12–14 h | Clear sheep silhouette; resolve hide/rock overlap and doubled water; match gourd/bead to painted lighting; implement illustrated acknowledgement; integrate reviewed costume/pose changes and audio/transition polish | User accepts the actual encounter in motion; sheep, hand-off and response read clearly; passive, pause and recenter paths remain truthful; device spot-check shows the art change is affordable |
-| **3 — Make returning worthwhile** | Oct 26–Nov 1 / 10–12 h | Bring the contemporary coda into the same visual language; retain specific recall and gate choice; consolidate active story authoring/presentation wiring without breaking old saves | A kept visit survives relaunch, replays faithfully and opens a coherent illustrated continuation that recalls what actually happened; an unsaved visit makes no memory claim |
-| **4 — Make it dependable** | Nov 2–8 / 10–12 h | Device profiling, full hands-only use, novice sessions, accessibility/recovery, final narration/cultural corrections | PRD formative target: at least 4/5 visitors finish unassisted and explain a consequence; 10 complete device visits; recorded performance/recovery evidence; no unresolved critical experience faults |
-| **5 — Make the submission convincing** | Nov 9–15 / 8–10 h | Candidate APK, independent installation, concise real-footage demo, adaptation evidence, accurate coverage/credits/testing guide | Another person installs and completes the candidate; description matches the build; rights and access are cleared; reviewable submission package ready by Nov 15 |
+| Sprint | Dates | User hours | Result and gate |
+|---|---|---:|---|
+| 1 Prove the behavior | Oct 13–19 | 9–11 | Paired prototype, two vignette scripts, three-person comprehension check, baseline device/access findings and review packets |
+| 2 Build the complete telling | Oct 20–26 | 12–15 | Both threads have distinct revelations; invitation/question ownership is clear; reviewed art/audio and milk outcomes work |
+| 3 Make the return complete | Oct 27–Nov 2 | 10–13 | Painted coda, physical Keep, alternate thread, both-parent continuation and legacy replay/forget pass |
+| 4 Verify and simplify | Nov 3–9 | 12–14 | Formative novice targets assessed, ten complete device visits, meaningful profile/recovery evidence and review corrections |
+| 5 Present and release | Nov 10–16 | 9–12 | Frozen candidate installed independently; real-runtime demo and accurate materials; submission when authorised |
 
-**Nov 16:** internal submission target, with the user's authorisation for publishing/submitting. **Nov 17–18:** contingency for access/submission problems. The official deadline remains **Nov 18, 2026, noon Pacific / 3 p.m. Eastern**, checked October 11 against the [official rules](https://start-developer-competition-26.devpost.com/rules). Dates are planning targets, not scheduled automations.
-
-### Sprint 1: start here
-
-1. **Current-build/device baseline.** Build the v0.3 episode, record build/commit, and arrange Quest access. On the device, test the fire, seated depth, cutout edges, gourd reach, touch alternative, text, return and worst-looking transparent layers. A desktop capture can prepare this session but cannot close its gate.
-2. **Story review before more illustration.** Prepare the current read-through, six cast drawings and a short question sheet for the user's family/community review. Ask an unfamiliar reader to explain what each woman needed, why Naserian waited, what the visitor changed and what is invented. Separately review names and Maa delivery with a fluent speaker. The user handles reviewer outreach unless they authorise sending it. Record specific corrections and review scope, not a blanket claim of authenticity.
-3. **Define the response that people can see.** Trace what the visitor looks toward, asks and does against the actual narration/poses. Head direction may offer a question or a gentle acknowledgement; it must not take an object, choose a moral position or interrupt uninvited. Specify one in-scene acknowledgement for the illustrated cast and its passive/pause/recenter behavior before implementing new pose art in Sprint 2. Preserve the current hand-off and outcome-specific address/recall.
-4. **Clear expensive uncertainties early.** Identify actual image provider/model and output terms where recoverable; never invent provenance. Decide replacement assets if necessary. Check narration terms, recorded-sound licences/incidental music, reviewer availability and entrant/Start access now, with final clearance before release. Select supported hardware after the first device session. These checks should prevent late rework, not start in submission week.
+Internal target remains November 16. November 17–18 is contingency, with the official November 18 noon Pacific / 3 p.m. Eastern deadline checked October 13 in the [official rules](https://start-developer-competition-26.devpost.com/rules). No automation or external submission has been scheduled.
 
 ### Delivery rules and dependencies
 
-- Each sprint ends with a runnable APK or a clearly identified source-only result, a short capture, a status/acceptance note and a small committed change set. Keep cultural, desktop, simulator and actual-device evidence separate.
-- Start reviewer/access coordination in Sprint 1 and keep it moving during repository work. If hardware is unavailable at Sprint 1's end, continue reversible story/asset work but keep the device gate open and defer content expansion. Do not spend all remaining time improving a desktop view.
-- Sprint 2 cast regeneration depends on reviewer notes and asset rights. Unreviewed placeholders can support code work, but are not accepted release art. If art exceeds its timebox, prioritise readable characters/sheep, material coherence and the physical hand-off over decorative scenery.
-- The active release should have one maintained story source with scene-specific presentation. Preserve the earlier baseline as a comparison record. Keep old clip keys and explicit save compatibility; do not merge stores or invalidate kept visits merely to remove a prototype folder.
-- Check actual headset performance in Sprints 1–3 as assets change. Sprint 4 is sustained and complete-path acceptance, not the first headset run. Target the selected device refresh rate; investigate stutters, sustained thermal behavior and cutout overdraw. The [judging guidance](https://start-developer-competition-26.devpost.com/details/judging) requires performant device use and names a 60 fps minimum; editor fps is not evidence of it.
-- Functional acceptance includes one hand, no input, microphone denial/no controller, questions and resume, pause/headset removal, recenter, offline use, save/relaunch/replay/forget and controlled save-failure testing. Preserve current caption and reduced-motion options. Scope-specific provider tests apply only if a provider actually ships.
-- The final demonstration leads with the fire, physical hand-off, observable response and remembered return. Explain web-to-VR lineage and actual additions. Use the required Competition channel and a video under three minutes; final entry/access/freeze requirements are in the [rules](https://start-developer-competition-26.devpost.com/rules). Record candidate hash/version and maintain the submitted experience through judging.
+The current ticket sequence is IT-P01–IT-P11 in the [backlog](../backlog.md#current-illustrated-theatre-sprints). Critical path: prototype and story → route/interaction integration → kept return → user/device acceptance → release. Review and hardware preparation proceed alongside development; a quality governor or simulator cannot close their gates.
 
-### Expansion and overrun policy
+Cut optional stick feeding, animal approach, peripheral scenery and decorative effects first. Simplify vignette art before deleting its unique revelation. Preserve the illustrated modern ending, hospitality without penalty, truthful passive outcomes, cultural review and device testing. If only one thread fits, record that reduction and narrow the product claim explicitly. Do not consume the acceptance/submission reserve to disguise overruns.
 
-**1899 is the first expansion to consider, not a prerequisite to finish Sprint 3.** Its story spine is the unfinished promise remembered two generations later. Budget an additional **12–20 focused hours** for writing/review, art, narration, integration and checks; this is a provisional estimate to replace with measured pipeline effort. Promote it only after the first chapter and coda pass review/device gates and those extra hours exist beyond the test/submission reserve. The smaller package can still demonstrate replay and a meaningful return visit.
-
-If capacity is 6–10 hours/week, the full proposed list does not fit: retain the first encounter and the already functional coda, limit new art to defects and essential coherence, and seek more access/time rather than claiming the same acceptance for less work. If capacity is 20+ hours/week, complete the core gates sooner before promoting 1899; do not automatically add a live service.
-
-If a sprint slips, cut 1899 and decorative work first. Then explicitly renegotiate breadth or the release profile; never trade away hands-only completion, honest cultural framing, necessary rights, device validation or judge access. Unresolved critical story, device or rights findings mean the candidate is not ready, regardless of a calendar date.
-
----
+A checked software ticket is not a cultural, participant or device pass. Save concise evidence tied to build/commit and retain private raw material outside Git. No purchases, reviewer messages or public submissions are authorised merely by this plan.
 
 ## September 30 baseline plan (historical)
 
