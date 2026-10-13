@@ -295,8 +295,17 @@ namespace Sankofa.Core.Story
                     Error("invitation.wait", path + ".wait_seconds", $"invitation '{inv.Id}' needs a finite positive wait before its default path");
                 if (string.IsNullOrWhiteSpace(inv.Alternative))
                     Error("invitation.alternative", path + ".alternative", $"invitation '{inv.Id}' needs a label for its nearby select alternative");
-                if (inv.Kind == InvitationKind.Receive && !beat.Lines.Any(l => l.When == null && l.Actions.Any(a => a.Kind == ActionKind.Offer && a.Object == inv.Object)))
-                    Error("invitation.offer", path, $"no unconditional line in beat '{beat.Id}' offers '{inv.Object}' before inviting the visitor to take it");
+                if (inv.Kind == InvitationKind.Receive)
+                {
+                    var unconditional = beat.Lines.Any(l => l.When == null && l.Actions.Any(a => a.Kind == ActionKind.Offer && a.Object == inv.Object));
+                    // Hospitality may offer in the hands on one earlier outcome and set the same vessel within
+                    // reach on the other. Both outcomes of that same prior invitation must explicitly present it.
+                    var paired = beat.Lines.Where(l => l.When != null && l.Actions.Any(a => a.Object == inv.Object &&
+                            (a.Kind == ActionKind.Offer || (a.Kind == ActionKind.Place && a.At == null))))
+                        .GroupBy(l => l.When.Invitation).Any(g => g.Any(l => l.When.Outcome == Outcome.Accepted) && g.Any(l => l.When.Outcome == Outcome.Default));
+                    if (!unconditional && !paired)
+                        Error("invitation.offer", path, $"beat '{beat.Id}' must offer '{inv.Object}' unconditionally or explicitly present it on both prior outcomes");
+                }
                 if (inv.Accepted.Count == 0)
                     Error("invitation.accepted", path + ".accepted", $"invitation '{inv.Id}' must acknowledge an accepted action");
                 if (inv.Default.Count == 0)

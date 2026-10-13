@@ -16,6 +16,7 @@ namespace Sankofa.Runtime.Stage
     {
         [SerializeField] Renderer curtain;
         [SerializeField] StoryStage stage;
+        [SerializeField] LivingGallery gallery;
         [SerializeField] Color fullColor = new Color(1f, 0.62f, 0.3f);
         [SerializeField] Color reducedColor = new Color(0.22f, 0.16f, 0.11f);
         [SerializeField] float fullIn = 1.5f;
@@ -63,6 +64,13 @@ namespace Sankofa.Runtime.Stage
 
         IEnumerator Run(int token, string toScene, IReadOnlyList<Continuity> continuities)
         {
+            if (gallery != null)
+            {
+                yield return gallery.Transition(toScene, continuities, ReducedMotion);
+                routine = null;
+                Finished?.Invoke(token);
+                yield break;
+            }
             var reduced = ReducedMotion;
             var peak = reduced ? 0.94f : 1f;
             curtain.enabled = true;

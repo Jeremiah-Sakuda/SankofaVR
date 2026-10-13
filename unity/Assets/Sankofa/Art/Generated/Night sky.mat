@@ -31,6 +31,7 @@ Material:
     m_Floats:
     - _GlowHeight: 0.25
     - _GlowWidth: 0.6
+    - _MoonHalo: 1
     - _Overcast: 0
     - _ShowMoon: 1
     m_Colors:

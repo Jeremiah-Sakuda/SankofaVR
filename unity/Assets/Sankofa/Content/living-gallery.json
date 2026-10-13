@@ -1,0 +1,1821 @@
+{
+  "schema": 2,
+  "kind": "package",
+  "id": "enkare-nairobi.illustrated-mvp",
+  "version": "0.4.0",
+  "title": "Sankofa — What We Carry",
+  "locale": "en",
+  "status": "draft",
+  "note": "Living gallery prototype. Fictional encounters and remembered scenes; cultural and device review pending.",
+  "scenes": [
+    {
+      "id": "hearth",
+      "kind": "hearth"
+    },
+    {
+      "id": "story.water.1850s",
+      "kind": "story"
+    },
+    {
+      "id": "story.water.1899",
+      "kind": "story"
+    },
+    {
+      "id": "story.water.today",
+      "kind": "story"
+    }
+  ],
+  "objects": [
+    {
+      "id": "ember",
+      "scene": "hearth",
+      "capabilities": [
+        "offer",
+        "place",
+        "withdraw"
+      ]
+    },
+    {
+      "id": "bead.kept",
+      "scene": "hearth",
+      "capabilities": [
+        "place"
+      ]
+    },
+    {
+      "id": "seed.kept",
+      "scene": "hearth",
+      "capabilities": [
+        "place"
+      ]
+    },
+    {
+      "id": "fire.1850s",
+      "scene": "story.water.1850s",
+      "capabilities": [
+        "reveal",
+        "illuminate"
+      ],
+      "continues": "ember"
+    },
+    {
+      "id": "water.spill",
+      "scene": "story.water.1850s",
+      "name": "the spring",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "touch"
+      ]
+    },
+    {
+      "id": "figure.wambui",
+      "scene": "story.water.1850s",
+      "name": "Wambui",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "withdraw",
+        "move"
+      ]
+    },
+    {
+      "id": "gourd.flour",
+      "scene": "story.water.1850s",
+      "name": "Wambui's gourd of flour",
+      "capabilities": [
+        "offer",
+        "place",
+        "reveal"
+      ]
+    },
+    {
+      "id": "figure.naserian",
+      "scene": "story.water.1850s",
+      "name": "Naserian",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "withdraw",
+        "move"
+      ]
+    },
+    {
+      "id": "figure.ewe",
+      "scene": "story.water.1850s",
+      "name": "the ewe",
+      "capabilities": [
+        "reveal",
+        "withdraw"
+      ]
+    },
+    {
+      "id": "gourd.milk",
+      "scene": "story.water.1850s",
+      "name": "the gourd of milk",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "offer",
+        "place"
+      ]
+    },
+    {
+      "id": "hide",
+      "scene": "story.water.1850s",
+      "name": "the trading hide",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "touch"
+      ]
+    },
+    {
+      "id": "bead",
+      "scene": "story.water.1850s",
+      "name": "the bead",
+      "capabilities": [
+        "offer",
+        "place"
+      ],
+      "continues": "bead.kept"
+    },
+    {
+      "id": "lantern.1899",
+      "scene": "story.water.1899",
+      "name": "the lantern",
+      "capabilities": [
+        "reveal",
+        "illuminate"
+      ],
+      "continues": "ember"
+    },
+    {
+      "id": "rails",
+      "scene": "story.water.1899",
+      "name": "the rails",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "touch"
+      ]
+    },
+    {
+      "id": "figure.njeri",
+      "scene": "story.water.1899",
+      "name": "Njeri",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "withdraw",
+        "move"
+      ]
+    },
+    {
+      "id": "gourd.empty",
+      "scene": "story.water.1899",
+      "name": "Njeri's gourd",
+      "capabilities": [
+        "reveal",
+        "illuminate"
+      ]
+    },
+    {
+      "id": "figure.naisula",
+      "scene": "story.water.1899",
+      "name": "Naisula",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "withdraw",
+        "move"
+      ]
+    },
+    {
+      "id": "gourd.old",
+      "scene": "story.water.1899",
+      "name": "Naisula's gourd",
+      "capabilities": [
+        "reveal",
+        "illuminate"
+      ]
+    },
+    {
+      "id": "seed",
+      "scene": "story.water.1899",
+      "name": "the seed",
+      "capabilities": [
+        "offer",
+        "place"
+      ],
+      "continues": "seed.kept"
+    },
+    {
+      "id": "jiko",
+      "scene": "story.water.today",
+      "name": "the jiko",
+      "capabilities": [
+        "reveal",
+        "illuminate"
+      ],
+      "continues": "ember"
+    },
+    {
+      "id": "gate",
+      "scene": "story.water.today",
+      "name": "the garden gate",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "touch"
+      ]
+    },
+    {
+      "id": "soil",
+      "scene": "story.water.today",
+      "name": "the garden",
+      "capabilities": [
+        "reveal",
+        "illuminate",
+        "touch"
+      ]
+    },
+    {
+      "id": "sprout",
+      "scene": "story.water.today",
+      "capabilities": [
+        "reveal"
+      ]
+    },
+    {
+      "id": "bead.today",
+      "scene": "story.water.today",
+      "capabilities": [
+        "place"
+      ],
+      "continues": "bead.kept"
+    },
+    {
+      "id": "seed.today",
+      "scene": "story.water.today",
+      "capabilities": [
+        "place"
+      ],
+      "continues": "seed.kept"
+    },
+    {
+      "id": "memory.portions",
+      "scene": "story.water.1850s",
+      "name": "an imagined earlier moment",
+      "capabilities": [
+        "reveal",
+        "withdraw"
+      ]
+    },
+    {
+      "id": "memory.waiting",
+      "scene": "story.water.1850s",
+      "name": "an imagined earlier moment",
+      "capabilities": [
+        "reveal",
+        "withdraw"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "state": "documented",
+      "text": "Nairobi takes its name from a Maa phrase commonly translated as cool water. Maa spelling and pronunciation remain for speaker review.",
+      "sources": [
+        "https://en.wikipedia.org/wiki/History_of_Nairobi",
+        "https://www.paukwa.or.ke/story-series/trackingourrailways/construction-of-the-railway-navigating-nairobi/",
+        "https://nairobiassembly.go.ke/motion/provision-of-free-clean-drinking-water-in-hotels-and-other-public-areas/"
+      ]
+    },
+    {
+      "id": "C3",
+      "state": "documented",
+      "text": "The Uganda Railway reached the site, 326 km from Mombasa, on 30 May 1899; it became a supply depot, a camp for construction workers (many from India) and the railway's headquarters.",
+      "sources": [
+        "https://www.paukwa.or.ke/story-series/trackingourrailways/construction-of-the-railway-navigating-nairobi/",
+        "Cybriwsky, R. A. (2013) Capital Cities around the World. ABC-CLIO, p. 303."
+      ]
+    },
+    {
+      "id": "C4",
+      "state": "documented",
+      "text": "An account in Leakey (1977), vol. 1, p. 20, describes Kikuyu traders taking banana flour to Maasai traders in exchange for sheep. Printed-page confirmation remains pending; it does not establish a universal exchange rate.",
+      "sources": [
+        "Leakey, L. S. B. (1977) The Southern Kikuyu before 1903. Academic Press, vol. 1, p. 20."
+      ]
+    },
+    {
+      "id": "C6",
+      "state": "documented",
+      "text": "Kikuyu and Maasai areas of settlement and economic activity overlapped; trade and intermarriage connected them. This does not establish the fictional bargain or friendship in this story.",
+      "sources": [
+        "Muriuki, G. (1974) A History of the Kikuyu 1500-1900. Oxford University Press.",
+        "https://soas-repository.worktribe.com/output/402032/a-history-of-the-kikuyu-to-1904",
+        "Overton, J. (1988) 'The Origins of the Kikuyu Land Problem: Land Alienation and Land Use in Kiambu, Kenya, 1895-1920', African Studies Review 31(2). https://www.cambridge.org/core/journals/african-studies-review/article/origins-of-the-kikuyu-land-problem-land-alienation-and-land-use-in-kiambu-kenya-18951920/01BDC3BCB4D2A9AC40F00F52500F1916"
+      ]
+    },
+    {
+      "id": "C7",
+      "state": "documented",
+      "text": "The Maasai milk gourd (ekukuri) was smoked inside with oloirien wood.",
+      "sources": [
+        "https://artsandculture.google.com/story/_gUx7TIiep4KKA"
+      ]
+    },
+    {
+      "id": "C14",
+      "state": "documented",
+      "text": "Sankofa is an Akan word meaning, literally, 'go back and get it'.",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sankofa",
+        "https://nmaahc.si.edu/object/nmaahc_2014.321",
+        "https://www.berea.edu/centers/carter-g-woodson-center-for-interracial-education/the-power-of-sankofa"
+      ]
+    },
+    {
+      "id": "C15",
+      "state": "documented",
+      "text": "Community groups along the Nairobi River have undertaken waste removal, urban farming and restoration of public green spaces. UN-Habitat’s October 2024 river-walk account documents these efforts and remaining pollution. This does not identify the fictional garden as a real project or imply the entire river has been restored.",
+      "sources": [
+        "https://www.unhabitatyouth.org/en/a-transect-through-nairobis-past-present-and-future-outlook-river-walk-for-urban-regeneration/"
+      ]
+    },
+    {
+      "id": "R1",
+      "state": "reconstruction",
+      "text": "Wambui and Naserian are fictional characters. Their meeting, family needs, earlier waiting, words, deferred payment, bead gift and inclusion of the visitor are imagined; none establishes a cultural custom, documented event or the visitor's ancestry."
+    },
+    {
+      "id": "R2",
+      "state": "reconstruction",
+      "text": "The present-day riverside garden, the bead on its gate and any future visitor are imagined. They do not identify a real restoration project or descendants of the fictional women."
+    }
+  ],
+  "welcome": [
+    {
+      "id": "welcome.sit",
+      "text": "Come. Sit with me.",
+      "seconds": 3.24,
+      "pause_after": 1.2,
+      "fire": "welcoming",
+      "audio": "enkare-nairobi/welcome.sit"
+    },
+    {
+      "id": "welcome.water",
+      "text": "We are going to what is now Kenya, before Nairobi became a city.",
+      "seconds": 8.96,
+      "pause_after": 0.8,
+      "fire": "telling",
+      "claims": [
+        "C1"
+      ],
+      "audio": "enkare-nairobi.illustrated-v2/welcome.water"
+    }
+  ],
+  "welcome_back": [
+    {
+      "id": "back.sit",
+      "text": "You came back. Sit with me.",
+      "seconds": 4.28,
+      "pause_after": 0.8,
+      "fire": "welcoming",
+      "audio": "enkare-nairobi/back.sit"
+    },
+    {
+      "id": "back.kept",
+      "text": "The visit you kept is waiting here. We can return to its telling, with your earlier actions, or follow the water into another time.",
+      "seconds": 14.04,
+      "fire": "listening",
+      "audio": "enkare-nairobi.illustrated-v2/back.kept"
+    }
+  ],
+  "choose": [],
+  "routes": [
+    {
+      "id": "era.1850s",
+      "label": "What she brings",
+      "beats": [
+        "gather.1850s",
+        "offer",
+        "e1.water",
+        "e1.wambui",
+        "e1.portions",
+        "e1.naserian",
+        "e1.offer",
+        "e1.turn-intro",
+        "e1.turn",
+        "e1.after",
+        "e1.milk-rest",
+        "e1.gift",
+        "e1.dusk",
+        "home.back",
+        "home.1850s"
+      ],
+      "keepsake": "bead.kept",
+      "next": "today.from-1850s"
+    },
+    {
+      "id": "era.1850s.remembered",
+      "label": "What she remembers",
+      "beats": [
+        "gather.1850s",
+        "offer",
+        "e1.water",
+        "e1.wambui",
+        "e1.naserian",
+        "e1.offer",
+        "e1.turn-intro",
+        "e1.waiting",
+        "e1.turn",
+        "e1.after",
+        "e1.milk-rest",
+        "e1.gift",
+        "e1.dusk",
+        "home.back",
+        "home.1850s"
+      ],
+      "keepsake": "bead.kept",
+      "next": "today.from-remembered"
+    },
+    {
+      "id": "today.from-1850s",
+      "label": "The same water, today",
+      "follows": "era.1850s",
+      "beats": [
+        "again.bead",
+        "offer",
+        "today.enter",
+        "today.river",
+        "today.bead",
+        "today.sankofa",
+        "home.today"
+      ],
+      "keepsake": "ember"
+    },
+    {
+      "id": "today.from-remembered",
+      "label": "The same water, today",
+      "follows": "era.1850s.remembered",
+      "beats": [
+        "again.bead",
+        "offer",
+        "today.enter",
+        "today.river",
+        "today.bead",
+        "today.sankofa",
+        "home.today"
+      ],
+      "keepsake": "ember"
+    }
+  ],
+  "beats": [
+    {
+      "id": "offer",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "offer.light",
+          "text": "Every story I tell begins with a little of my light.",
+          "seconds": 6.92,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "audio": "enkare-nairobi/offer.light"
+        },
+        {
+          "id": "offer.hand",
+          "text": "Hold out your open hand, palm up, and I will give you an ember to carry.",
+          "seconds": 10.04,
+          "fire": "holding",
+          "actions": [
+            {
+              "do": "offer",
+              "object": "ember"
+            }
+          ],
+          "audio": "enkare-nairobi/offer.hand"
+        }
+      ],
+      "invitation": {
+        "id": "receive-ember",
+        "kind": "receive",
+        "object": "ember",
+        "alternative": "Take the ember",
+        "wait_seconds": 14,
+        "accepted": [
+          {
+            "id": "offer.accepted",
+            "text": "It is yours to carry now. Keep it close.",
+            "seconds": 6.48,
+            "pause_after": 0.8,
+            "fire": "welcoming",
+            "audio": "enkare-nairobi/offer.accepted"
+          }
+        ],
+        "default": [
+          {
+            "id": "offer.default",
+            "text": "I will set it beside you, then. It will follow us.",
+            "seconds": 6.28,
+            "pause_after": 0.8,
+            "fire": "holding",
+            "actions": [
+              {
+                "do": "place",
+                "object": "ember"
+              }
+            ],
+            "audio": "enkare-nairobi/offer.default"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gather.1850s",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "gallery.sit",
+          "text": "Come. Sit with me.",
+          "seconds": 3.0,
+          "pause_after": 1.2,
+          "fire": "welcoming",
+          "audio": "enkare-nairobi.gallery-v4/gallery.sit"
+        },
+        {
+          "id": "gallery.where",
+          "text": "We are going to what is now Kenya, before Nairobi became a city.",
+          "seconds": 9.08,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "C1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.where"
+        },
+        {
+          "id": "e1.gather",
+          "text": "Kikuyu and Maasai people traded across this region. Wambui and Naserian, their words and their gifts, are imagined for this story.",
+          "seconds": 17.44,
+          "pause_after": 0.8,
+          "fire": "gathering",
+          "claims": [
+            "C6",
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.gather"
+        }
+      ]
+    },
+    {
+      "id": "e1.water",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.listen",
+          "text": "Listen. That is the water.",
+          "seconds": 4.72,
+          "pause_after": 1.2,
+          "fire": "gathering",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "water.spill"
+            }
+          ],
+          "audio": "enkare-nairobi/e1.listen"
+        },
+        {
+          "id": "e1.paths",
+          "text": "Imagine the paths that lead here: past millet fields and hives at the forest edge; out across the plain, where cattle graze. They meet at the water.",
+          "seconds": 18.12,
+          "pause_after": 1,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/e1.paths"
+        },
+        {
+          "id": "e1.touch",
+          "text": "Put your hand in the water.",
+          "seconds": 3.64,
+          "fire": "holding",
+          "audio": "enkare-nairobi.illustrated-v3/e1.touch"
+        }
+      ],
+      "invitation": {
+        "id": "touch-water",
+        "kind": "touch",
+        "object": "water.spill",
+        "alternative": "Touch the water",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "e1.water.felt",
+            "text": "Your hand passes over the water. Enkare Nairobi. Cool water, in Maa, the Maasai language. A name the city will carry.",
+            "seconds": 16.16,
+            "pause_after": 1.0,
+            "fire": "telling",
+            "claims": [
+              "C1"
+            ],
+            "actions": [
+              {
+                "do": "illuminate",
+                "object": "water.spill"
+              }
+            ],
+            "audio": "enkare-nairobi.illustrated-v3/e1.water.felt"
+          }
+        ],
+        "default": [
+          {
+            "id": "e1.water.heard",
+            "text": "The stream runs beside you. Enkare Nairobi. Cool water, in Maa, the Maasai language. A name the city will carry.",
+            "seconds": 15.44,
+            "pause_after": 1.0,
+            "fire": "telling",
+            "claims": [
+              "C1"
+            ],
+            "actions": [
+              {
+                "do": "illuminate",
+                "object": "water.spill"
+              }
+            ],
+            "audio": "enkare-nairobi.illustrated-v3/e1.water.heard"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.e1.real",
+          "label": "Is this a real place?",
+          "lines": [
+            {
+              "id": "q.e1.real.answer",
+              "text": "The Nairobi River is real. Trade between Kikuyu and Maasai people is documented. These two women, this bargain and the bead are invented. We are imagining one meeting, not retelling a family memory.",
+              "seconds": 22.64,
+              "fire": "holding",
+              "claims": [
+                "C1",
+                "C6",
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v2/q.e1.real.answer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e1.wambui",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.wambui.arrives",
+          "text": "Here is Wambui, a Kikuyu trader. She has walked since morning with flour for Naserian.",
+          "seconds": 11.28,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "figure.wambui"
+            },
+            {
+              "do": "reveal",
+              "object": "gourd.flour"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.wambui.arrives"
+        },
+        {
+          "id": "e1.flour",
+          "text": "Banana flour: green bananas dried, then pounded. The gourd has travelled with her all morning.",
+          "seconds": 12.48,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/e1.flour"
+        },
+        {
+          "id": "e1.carry",
+          "text": "“Will you hold this while I speak?” Wambui asks.",
+          "seconds": 5.28,
+          "fire": "holding",
+          "actions": [
+            {
+              "do": "offer",
+              "object": "gourd.flour"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/e1.carry"
+        }
+      ],
+      "invitation": {
+        "id": "receive-flour",
+        "kind": "receive",
+        "object": "gourd.flour",
+        "alternative": "Carry the flour",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "e1.carry.yes",
+            "text": "The gourd rests in your hand. 'Thank you. I nearly turned back,' Wambui says.",
+            "seconds": 10.84,
+            "pause_after": 0.8,
+            "fire": "welcoming",
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.carry.yes"
+          }
+        ],
+        "default": [
+          {
+            "id": "e1.carry.no",
+            "text": "Wambui rests the gourd beside you. 'I nearly turned back,' she says.",
+            "seconds": 9.44,
+            "pause_after": 0.8,
+            "fire": "holding",
+            "actions": [
+              {
+                "do": "place",
+                "object": "gourd.flour"
+              }
+            ],
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.carry.no"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.e1.flour",
+          "label": "Why banana flour?",
+          "about": "gourd.flour",
+          "lines": [
+            {
+              "id": "q.e1.flour.answer",
+              "text": "Green bananas, dried and pounded. There are accounts of this flour being traded for sheep. How much Wambui owes today belongs to our story.",
+              "seconds": 15.96,
+              "fire": "telling",
+              "claims": [
+                "C4",
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.e1.flour.answer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e1.naserian",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.naserian.arrives",
+          "text": "Naserian, a Maasai trader, has brought the sheep she agreed to exchange for the flour, and a gourd of milk.",
+          "seconds": 11.48,
+          "pause_after": 0.4,
+          "fire": "telling",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "figure.naserian"
+            },
+            {
+              "do": "reveal",
+              "object": "figure.ewe"
+            },
+            {
+              "do": "reveal",
+              "object": "gourd.milk"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.naserian.arrives"
+        },
+        {
+          "id": "e1.milk",
+          "text": "She needs the flour for her household. She also needs a promise she can count on.",
+          "seconds": 9.84,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "illuminate",
+              "object": "gourd.milk"
+            }
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.milk"
+        },
+        {
+          "id": "e1.price",
+          "text": "Wambui speaks first. 'It is less than I promised. I have no more to bring today.'",
+          "seconds": 9.92,
+          "pause_after": 1.0,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.price"
+        },
+        {
+          "id": "e1.problem",
+          "text": "'And I walked here counting on it,' Naserian answers. For a moment, neither woman speaks.",
+          "seconds": 11.0,
+          "pause_after": 3.0,
+          "fire": "holding",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.problem"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q.e1.milk",
+          "label": "What is in the gourd?",
+          "about": "gourd.milk",
+          "lines": [
+            {
+              "id": "q.e1.milk.answer",
+              "text": "Milk. A museum in Nairobi keeps a Maasai gourd smoked inside with oloirien wood. Imagine that trace of smoke in the vessel Naserian has brought.",
+              "seconds": 18.16,
+              "fire": "telling",
+              "claims": [
+                "C7",
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.e1.milk.answer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e1.offer",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.hide",
+          "text": "A hide waits within reach. There is room to set down the flour before it goes between the women.",
+          "seconds": 12.24,
+          "fire": "holding",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "hide"
+            },
+            {
+              "do": "move",
+              "object": "figure.wambui",
+              "at": "hide"
+            },
+            {
+              "do": "move",
+              "object": "figure.naserian",
+              "at": "hide"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/e1.hide"
+        },
+        {
+          "id": "e1.offer.carried",
+          "text": "“Set it here, beside me,” Wambui says. Touch the hide.",
+          "seconds": 6.72,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "receive-flour:accepted",
+          "audio": "enkare-nairobi.illustrated-v3/e1.offer.carried"
+        },
+        {
+          "id": "e1.offer.beside",
+          "text": "Wambui glances at the gourd beside you. “Help me set it here.” Touch the hide.",
+          "seconds": 10.68,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "receive-flour:default",
+          "audio": "enkare-nairobi.illustrated-v3/e1.offer.beside"
+        }
+      ],
+      "invitation": {
+        "id": "offer-flour",
+        "kind": "touch",
+        "object": "hide",
+        "alternative": "Offer the flour",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "e1.offer.yes",
+            "text": "You bring the flour between them. Naserian pauses over the gourd.",
+            "seconds": 8.72,
+            "pause_after": 1.6,
+            "fire": "telling",
+            "actions": [
+              {
+                "do": "place",
+                "object": "gourd.flour",
+                "at": "hide"
+              }
+            ],
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.offer.yes"
+          }
+        ],
+        "default": [
+          {
+            "id": "e1.offer.no",
+            "text": "Wambui sets the flour between them. Naserian pauses over the gourd.",
+            "seconds": 8.8,
+            "pause_after": 1.6,
+            "fire": "telling",
+            "actions": [
+              {
+                "do": "place",
+                "object": "gourd.flour",
+                "at": "hide"
+              }
+            ],
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.offer.no"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e1.turn",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.rest",
+          "text": "'Take the sheep. Bring the rest when you can.'",
+          "seconds": 5.08,
+          "pause_after": 1,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.rest"
+        },
+        {
+          "id": "e1.kin",
+          "text": "Wambui says, 'I will come myself.' They have a reason to meet again.",
+          "seconds": 9.68,
+          "pause_after": 1,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.kin"
+        }
+      ]
+    },
+    {
+      "id": "e1.after",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.witness.helped",
+          "text": "Naserian turns to you. 'You helped us set it down. Here, share a little milk.'",
+          "seconds": 9.48,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "offer",
+              "object": "gourd.milk"
+            }
+          ],
+          "when": "offer-flour:accepted",
+          "audio": "enkare-nairobi.gallery-v4/e1.witness.helped"
+        },
+        {
+          "id": "e1.witness.quiet",
+          "text": "Naserian sets the milk beside the fire. 'Stay a little. There is room for you here.'",
+          "seconds": 9.52,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "place",
+              "object": "gourd.milk"
+            }
+          ],
+          "when": "offer-flour:default",
+          "audio": "enkare-nairobi.gallery-v4/e1.witness.quiet"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q.e1.trust",
+          "label": "Why trust her?",
+          "about": "figure.naserian",
+          "lines": [
+            {
+              "id": "q.e1.trust.answer",
+              "text": "Naserian remembers needing time herself. Wambui waited then. Now it is her turn. The sheep matters; so does seeing Wambui come back.",
+              "seconds": 17.96,
+              "pause_after": 0.6,
+              "fire": "telling",
+              "claims": [
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.e1.trust.answer"
+            }
+          ]
+        },
+        {
+          "id": "q.e1.cost",
+          "label": "What does Wambui owe?",
+          "about": "figure.wambui",
+          "lines": [
+            {
+              "id": "q.e1.cost.answer",
+              "text": "The flour she could not bring today, and another journey to meet Naserian. Neither woman has forgotten what her household needs. They have agreed to leave part of the exchange unfinished.",
+              "seconds": 17.04,
+              "pause_after": 0.6,
+              "fire": "telling",
+              "claims": [
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v2/q.e1.cost.answer"
+            }
+          ]
+        },
+        {
+          "id": "q.e1.friends",
+          "label": "Are they friends?",
+          "lines": [
+            {
+              "id": "q.e1.friends.answer",
+              "text": "They have met here before. Each has had to wait for the other. That friendship is ours to imagine; trade and marriage really did join their communities.",
+              "seconds": 15.84,
+              "fire": "telling",
+              "claims": [
+                "R1",
+                "C6"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.e1.friends.answer"
+            }
+          ],
+          "about": "figure.naserian"
+        }
+      ],
+      "invitation": {
+        "id": "receive-milk",
+        "kind": "receive",
+        "object": "gourd.milk",
+        "alternative": "Receive the milk",
+        "wait_seconds": 10,
+        "accepted": [
+          {
+            "id": "gallery.milk.held",
+            "text": "The vessel rests in your hand. The meeting has made room for you.",
+            "seconds": 8.04,
+            "pause_after": 0.7,
+            "fire": "telling",
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.gallery-v4/gallery.milk.held"
+          }
+        ],
+        "default": [
+          {
+            "id": "gallery.milk.beside",
+            "text": "The milk stays within reach. There is no hurry to take it.",
+            "seconds": 7.84,
+            "pause_after": 0.7,
+            "fire": "telling",
+            "claims": [
+              "R1"
+            ],
+            "actions": [
+              {
+                "do": "place",
+                "object": "gourd.milk"
+              }
+            ],
+            "audio": "enkare-nairobi.gallery-v4/gallery.milk.beside"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e1.gift",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.bead",
+          "text": "“For the road,” Naserian says. “Open your hand.” She offers you a bead to remember this meeting.",
+          "seconds": 11.8,
+          "fire": "holding",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "offer",
+              "object": "bead"
+            }
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/e1.bead"
+        }
+      ],
+      "invitation": {
+        "id": "receive-bead",
+        "kind": "receive",
+        "object": "bead",
+        "alternative": "Take the bead",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "e1.bead.yes",
+            "text": "The bead rests in your hand. Something small to carry home.",
+            "seconds": 8.24,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.bead.yes"
+          },
+          {
+            "id": "e1.bead.rest.held",
+            "text": "The women linger by the water. No one is in a hurry to say goodbye.",
+            "seconds": 7.2,
+            "pause_after": 2,
+            "fire": "telling",
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v3/e1.bead.rest.held"
+          }
+        ],
+        "default": [
+          {
+            "id": "e1.bead.no",
+            "text": "Naserian sets it beside you, within reach. 'For whenever you go.'",
+            "seconds": 8.56,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "actions": [
+              {
+                "do": "place",
+                "object": "bead"
+              }
+            ],
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.bead.no"
+          },
+          {
+            "id": "e1.bead.rest.beside",
+            "text": "The women linger by the water. No one is in a hurry to say goodbye.",
+            "seconds": 8.12,
+            "pause_after": 2,
+            "fire": "telling",
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v3/e1.bead.rest.beside"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.e1.bead",
+          "label": "What does the bead mean?",
+          "about": "bead",
+          "lines": [
+            {
+              "id": "q.e1.bead.answer",
+              "text": "A way to remember an afternoon by the water. This gift is our invention; its colour carries no traditional meaning in this telling.",
+              "seconds": 15.16,
+              "pause_after": 0.6,
+              "fire": "telling",
+              "claims": [
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.e1.bead.answer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e1.dusk",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.part",
+          "text": "They leave by the paths that brought them. There is still flour to bring another day. Neither is leaving with an empty promise.",
+          "seconds": 13.72,
+          "pause_after": 1.5,
+          "fire": "holding",
+          "actions": [
+            {
+              "do": "withdraw",
+              "object": "figure.wambui"
+            },
+            {
+              "do": "withdraw",
+              "object": "figure.naserian"
+            },
+            {
+              "do": "withdraw",
+              "object": "figure.ewe"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.part"
+        }
+      ]
+    },
+    {
+      "id": "home.back",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "home.back.ember",
+          "text": "The water settles into paint again. Here is the same picture, with the meeting still inside it.",
+          "seconds": 11.4,
+          "pause_after": 0.8,
+          "fire": "welcoming",
+          "actions": [
+            {
+              "do": "withdraw",
+              "object": "ember"
+            }
+          ],
+          "audio": "enkare-nairobi.gallery-v4/home.back.ember"
+        }
+      ]
+    },
+    {
+      "id": "home.1850s",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "home.trade.helped",
+          "text": "You helped bring the flour between them. What happened next was their agreement to make.",
+          "seconds": 9.68,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "offer-flour:accepted",
+          "audio": "enkare-nairobi.illustrated-v2/home.trade.helped"
+        },
+        {
+          "id": "home.trade.quiet",
+          "text": "You were there while they worked it out. Their meeting had room for a quiet guest.",
+          "seconds": 9.28,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "offer-flour:default",
+          "audio": "enkare-nairobi.illustrated-v2/home.trade.quiet"
+        },
+        {
+          "id": "home.bead.held",
+          "text": "The bead you received carries that meeting home with you.",
+          "seconds": 6.88,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "receive-bead:accepted",
+          "audio": "enkare-nairobi.illustrated-v2/home.bead.held"
+        },
+        {
+          "id": "home.bead.beside",
+          "text": "The bead Naserian left beside you has come back with the story.",
+          "seconds": 7.92,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "receive-bead:default",
+          "audio": "enkare-nairobi.illustrated-v2/home.bead.beside"
+        },
+        {
+          "id": "home.bead",
+          "text": "Wambui arrived worried about what she owed. Naserian remembered what they had already given each other.",
+          "seconds": 11.76,
+          "pause_after": 1.5,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/home.bead"
+        },
+        {
+          "id": "home.next",
+          "text": "Keep this visit if you want to return. Another part of the painting waits for you, and the same water has a story in the city of today.",
+          "seconds": 13.28,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "audio": "enkare-nairobi.gallery-v4/home.next"
+        }
+      ]
+    },
+    {
+      "id": "again.bead",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "again.bead.held",
+          "recall": "receive-bead:accepted",
+          "text": "Last time, you received the bead Naserian offered.",
+          "seconds": 6.12,
+          "pause_after": 0.6,
+          "fire": "welcoming",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/again.bead.held"
+        },
+        {
+          "id": "again.bead.left",
+          "recall": "receive-bead:default",
+          "text": "Last time, Naserian set the bead beside you.",
+          "seconds": 6.28,
+          "pause_after": 0.6,
+          "fire": "welcoming",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/again.bead.left"
+        },
+        {
+          "id": "again.trade.helped",
+          "text": "You helped bring the flour between the women. They made their agreement, and included you in the meeting.",
+          "seconds": 11.6,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "recall": "offer-flour:accepted",
+          "audio": "enkare-nairobi.illustrated-v2/again.trade.helped"
+        },
+        {
+          "id": "again.trade.quiet",
+          "text": "Wambui set down the flour herself. You were there to hear the agreement that followed.",
+          "seconds": 8.8,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "recall": "offer-flour:default",
+          "audio": "enkare-nairobi.illustrated-v2/again.trade.quiet"
+        },
+        {
+          "id": "again.bead.bring",
+          "text": "Bring it. We are going back to the water.",
+          "seconds": 6.0,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [
+            {
+              "do": "place",
+              "object": "bead.kept"
+            }
+          ],
+          "audio": "enkare-nairobi/again.bead.bring"
+        }
+      ]
+    },
+    {
+      "id": "today.enter",
+      "scene": "story.water.today",
+      "lines": [
+        {
+          "id": "today.same",
+          "text": "The same river, in the city of today. Listen for the water beneath the traffic.",
+          "seconds": 11.56,
+          "pause_after": 1.2,
+          "fire": "gathering",
+          "claims": [
+            "C1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/today.same"
+        },
+        {
+          "id": "today.name",
+          "text": "The city that grew here took its name from it: Nairobi.",
+          "seconds": 7.08,
+          "pause_after": 1.0,
+          "fire": "telling",
+          "claims": [
+            "C1",
+            "C3"
+          ],
+          "audio": "enkare-nairobi/today.name"
+        }
+      ]
+    },
+    {
+      "id": "today.river",
+      "scene": "story.water.today",
+      "lines": [
+        {
+          "id": "today.rubbish",
+          "text": "Along this river, neighbours have cleared rubbish and planted places to gather and grow. The work is unfinished. This little garden is imagined; the work that inspired it is real.",
+          "seconds": 21.28,
+          "pause_after": 1.0,
+          "fire": "telling",
+          "claims": [
+            "C15",
+            "R2"
+          ],
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "gate"
+            },
+            {
+              "do": "reveal",
+              "object": "soil"
+            }
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/today.rubbish"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q.today.who",
+          "label": "Who planted this garden?",
+          "about": "soil",
+          "lines": [
+            {
+              "id": "q.today.who.answer",
+              "text": "In our imagined garden, neighbours planted it together. Someone brought seedlings; someone carried water. Tomorrow, someone must come back to tend it.",
+              "seconds": 17.28,
+              "fire": "telling",
+              "claims": [
+                "R2"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.today.who.answer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "today.bead",
+      "scene": "story.water.today",
+      "lines": [
+        {
+          "id": "today.bead.ask",
+          "text": "There is a place on the gate for the bead. Touch the gate to leave it here, for someone else to find.",
+          "seconds": 11.76,
+          "fire": "holding",
+          "claims": [
+            "R2"
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/today.bead.ask"
+        }
+      ],
+      "invitation": {
+        "id": "hang-bead",
+        "kind": "touch",
+        "object": "gate",
+        "alternative": "Hang the bead",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "today.bead.yes",
+            "text": "You leave it where another visitor might notice it. They will have their own questions.",
+            "seconds": 10.64,
+            "pause_after": 1.2,
+            "fire": "welcoming",
+            "claims": [
+              "R2"
+            ],
+            "actions": [
+              {
+                "do": "place",
+                "object": "bead.today",
+                "at": "gate"
+              }
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/today.bead.yes"
+          }
+        ],
+        "default": [
+          {
+            "id": "today.bead.no",
+            "text": "The bead stays beside you. You can carry a memory without leaving it behind.",
+            "seconds": 8.72,
+            "pause_after": 1.2,
+            "fire": "welcoming",
+            "claims": [
+              "R2"
+            ],
+            "actions": [
+              {
+                "do": "place",
+                "object": "bead.today"
+              }
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/today.bead.no"
+          }
+        ]
+      }
+    },
+    {
+      "id": "today.sankofa",
+      "scene": "story.water.today",
+      "lines": [
+        {
+          "id": "today.word",
+          "text": "I borrow a word from the Akan people of Ghana: Sankofa. Go back and get it.",
+          "seconds": 9.96,
+          "pause_after": 1.0,
+          "fire": "telling",
+          "claims": [
+            "C14"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/today.word"
+        },
+        {
+          "id": "today.brought.shared",
+          "text": "You brought a memory to this place. What might the next person carry onward?",
+          "seconds": 8.84,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R2"
+          ],
+          "when": "hang-bead:accepted",
+          "audio": "enkare-nairobi.illustrated-v2/today.brought.shared"
+        },
+        {
+          "id": "today.brought.carried",
+          "text": "The memory is still with you. Where it goes from here is open.",
+          "seconds": 9.64,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "claims": [
+            "R2"
+          ],
+          "when": "hang-bead:default",
+          "audio": "enkare-nairobi.illustrated-v2/today.brought.carried"
+        }
+      ]
+    },
+    {
+      "id": "home.today",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "home.today.ember",
+          "text": "We are back before the painting. Our telling ends here. What stays with you can go further.",
+          "seconds": 11.2,
+          "fire": "welcoming",
+          "audio": "enkare-nairobi.gallery-v4/home.today.ember"
+        }
+      ]
+    },
+    {
+      "id": "e1.turn-intro",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.promise",
+          "text": "'I did not want you waiting for me with no word,' Wambui says.",
+          "seconds": 6.04,
+          "pause_after": 1,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.promise"
+        },
+        {
+          "id": "e1.remember",
+          "text": "Naserian answers, 'Last time, you waited for me.'",
+          "seconds": 6.8,
+          "pause_after": 2.2,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.remember"
+        }
+      ]
+    },
+    {
+      "id": "e1.portions",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "gallery.portions.enter",
+          "text": "Before she left, Wambui sat with what remained. Imagine that morning with her.",
+          "seconds": 10.72,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "memory.portions"
+            }
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.portions.enter"
+        },
+        {
+          "id": "gallery.portions.divide",
+          "text": "One portion for the journey. Another to stay at home. Neither was large.",
+          "seconds": 7.92,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.portions.divide"
+        },
+        {
+          "id": "gallery.portions.leave",
+          "text": "She could bring less than she had promised, or leave less than she could spare.",
+          "seconds": 8.84,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.portions.leave"
+        },
+        {
+          "id": "gallery.portions.return",
+          "text": "She lifted the gourd and came to speak for herself.",
+          "seconds": 7.16,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "withdraw",
+              "object": "memory.portions"
+            }
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.portions.return"
+        }
+      ]
+    },
+    {
+      "id": "e1.waiting",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "gallery.waiting.enter",
+          "text": "Another afternoon, at this same water. This is the meeting Naserian remembers.",
+          "seconds": 11.48,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "memory.waiting"
+            }
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.waiting.enter"
+        },
+        {
+          "id": "gallery.waiting.short",
+          "text": "That time, Naserian arrived with less than she had promised. Wambui had walked there counting on her.",
+          "seconds": 10.16,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.waiting.short"
+        },
+        {
+          "id": "gallery.waiting.stay",
+          "text": "Wambui stayed. They found words for what could be given then, and what would have to wait.",
+          "seconds": 10.08,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.waiting.stay"
+        },
+        {
+          "id": "gallery.waiting.return",
+          "text": "Now the waiting has changed hands.",
+          "seconds": 4.92,
+          "pause_after": 1.6,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "withdraw",
+              "object": "memory.waiting"
+            }
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.waiting.return"
+        }
+      ]
+    },
+    {
+      "id": "e1.milk-rest",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "gallery.milk.rest",
+          "text": "The milk rests beside you. Naserian reaches for something smaller.",
+          "seconds": 9.28,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "place",
+              "object": "gourd.milk"
+            }
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.milk.rest"
+        }
+      ]
+    }
+  ],
+  "early_return": [
+    {
+      "id": "early.later",
+      "text": "The water will still be there. We can go back whenever you like.",
+      "seconds": 7.72,
+      "fire": "welcoming",
+      "audio": "enkare-nairobi/early.later"
+    }
+  ]
+}

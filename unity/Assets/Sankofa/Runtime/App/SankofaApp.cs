@@ -41,9 +41,11 @@ namespace Sankofa.Runtime.App
         [Tooltip("Choices and the nearby alternatives to gestures, raised into view where the visitor will see them.")]
         [SerializeField] PokePanel choicesPanel;
         [SerializeField] PokePanel questionsPanel;
+        [SerializeField] ObjectQuestions objectQuestions;
         [SerializeField] PokePanel settingsPanel;
         [SerializeField] StoryStage stage;
         [SerializeField] StoryTransition transition;
+        [SerializeField] LivingGallery gallery;
         [Tooltip("Optional separate local shelf for a development experience.")]
         [SerializeField] string storeNamespace;
         [SerializeField] PalmReceiver receiver;
@@ -92,11 +94,13 @@ namespace Sankofa.Runtime.App
                 controls.AddFingertip(() => h.Fingertip);
                 choicesPanel.AddFingertip(() => h.Fingertip);
                 questionsPanel.AddFingertip(() => h.Fingertip);
+                if (objectQuestions != null) foreach (var p in objectQuestions.Panels) p.AddFingertip(() => h.Fingertip);
                 settingsPanel.AddFingertip(() => h.Fingertip);
             }
             controls.Pressed += OnControl;
             choicesPanel.Pressed += OnControl;
             questionsPanel.Pressed += OnQuestion;
+            if (objectQuestions != null) objectQuestions.Pressed += OnQuestion;
             settingsPanel.Pressed += OnSetting;
             narration.Finished += token =>
             {
@@ -144,7 +148,7 @@ namespace Sankofa.Runtime.App
                 StoreFolder = StoreFolderOverride ?? localShelf;
                 if (playable.Package.Status == ContentStatus.Placeholder) baseStatus = "Development placeholder story · not reviewed content";
                 else if (playable.Package.Status == ContentStatus.Draft) baseStatus = "Draft story · not yet reviewed by family or community";
-                return new VisitFlow(playable, null, new FileVisitStore(StoreFolder), stage);
+                return new VisitFlow(playable, gallery != null ? new FlowSettings { SingleStoryWait = 0 } : null, new FileVisitStore(StoreFolder), stage);
             }
             catch (StoryFormatException e)
             {
@@ -179,6 +183,14 @@ namespace Sankofa.Runtime.App
             placed = true;
             // The review status is said once, on the title card, so it never overlaps the card's own text.
             captions.SetStatus("");
+            if (gallery != null)
+            {
+                started = true;
+                startScreen.Hide();
+                flow.Start(skipWelcome: true);
+                Dispatch();
+                return;
+            }
             startScreen.Show(baseStatus);
             choicesPanel.Show(new List<(string, string)> { (StartId, "Begin"), (LeaveId, "Leave") });
         }
@@ -186,12 +198,34 @@ namespace Sankofa.Runtime.App
         /// <summary>Leaves the start screen and opens the hearth: the fire's welcome, then the choice.</summary>
         public void Begin()
         {
+            if (gallery != null)
+            {
+                EnterExhibit(gallery.DefaultRoute);
+                return;
+            }
             if (!AtStart) return;
             started = true;
             startScreen.Hide();
             captions.SetStatus(baseStatus);
             flow.Start();
             Dispatch();
+        }
+
+        public bool KeepVisit()
+        {
+            var kept = flow != null && flow.Keep();
+            if (flow != null) Dispatch();
+            return kept;
+        }
+
+        public bool EnterExhibit(string route)
+        {
+            if (gallery == null || flow == null) return false;
+            if (flow.Phase == VisitPhase.Closing) flow.BeginAgain();
+            if (flow.Menu == ChoiceMenu.Returning) flow.NewStory();
+            var entered = flow.Choose(route);
+            Dispatch();
+            return entered;
         }
 
         void Update()
@@ -295,6 +329,7 @@ namespace Sankofa.Runtime.App
                     case Cue.ResetStage _:
                         CloseReceivers();
                         stage.ResetAll();
+                        gallery?.ResetView();
                         captions.SetStatus(baseStatus);
                         break;
                     case Cue.VisitStarted v:
@@ -324,6 +359,7 @@ namespace Sankofa.Runtime.App
                         else toucher.Listen(o.Invitation.Id, invited);
                         // The questions step aside while the visitor reaches for something, so nothing floats over it.
                         questionsPanel.Hidden = true;
+                        if (objectQuestions != null) objectQuestions.Hidden = true;
                         break;
                     case Cue.InvitationClosed c:
                         receiver.Close();
@@ -337,6 +373,7 @@ namespace Sankofa.Runtime.App
                         acceptingHand = null;
                         invited = null;
                         questionsPanel.Hidden = false;
+                        if (objectQuestions != null) objectQuestions.Hidden = false;
                         // The story notices what the visitor did: the nearest person of it turns to them.
                         if (c.Outcome == Outcome.Accepted) stage.AcknowledgeVisitor();
                         break;
@@ -348,9 +385,16 @@ namespace Sankofa.Runtime.App
                     case Cue.Controls c:
                         // Pause and return stay at the lap; every choice comes up into view.
                         controls.Show(c.Options.Where(IsStoryControl).Select(o => (ControlId(o), ControlLabel(o))).ToList());
-                        choicesPanel.Show(c.Options.Where(o => !IsStoryControl(o)).Select(o => (ControlId(o), ControlLabel(o))).ToList());
+                        var options = c.Options.Where(o => !IsStoryControl(o)).Select(o => (ControlId(o), ControlLabel(o))).ToList();
+                        if (gallery != null && flow.Menu == ChoiceMenu.Interests && (flow.Phase == VisitPhase.Choosing || flow.Phase == VisitPhase.Welcome))
+                        {
+                            options.Insert(0, ("gallery-enter", "Enter painting"));
+                            options.Add((ControlKind.Leave.ToString(), "Leave"));
+                        }
+                        choicesPanel.Show(options);
                         break;
                     case Cue.Questions q:
+                        objectQuestions?.Show(q.Available);
                         questionsPanel.Show(q.Available.Select(x => ("q:" + x.Id, x.Label)).ToList());
                         break;
                     case Cue.QuestionAsked _:
@@ -434,8 +478,8 @@ namespace Sankofa.Runtime.App
             {
                 case ControlKind.Choose: return o.Label;
                 case ControlKind.Follow: return o.Label;
-                case ControlKind.Replay: return "Hear it again";
-                case ControlKind.NewStory: return "Something new";
+                case ControlKind.Replay: return gallery != null ? "Replay this visit" : "Hear it again";
+                case ControlKind.NewStory: return gallery != null ? "Another perspective" : "Something new";
                 case ControlKind.Back: return "Back";
                 case ControlKind.Forget: return "Forget this visit";
                 case ControlKind.ConfirmForget: return "Forget it";
@@ -443,9 +487,9 @@ namespace Sankofa.Runtime.App
                 case ControlKind.Pause: return "Pause";
                 case ControlKind.Resume when flow.ConfirmingReturn: return "Stay in the story";
                 case ControlKind.Resume: return "Resume";
-                case ControlKind.ReturnToHearth: return "Return to the fire";
+                case ControlKind.ReturnToHearth: return gallery != null ? "Return to the gallery" : "Return to the fire";
                 case ControlKind.Keep: return o.Target == null ? "Keep this visit" : "Keep this instead";
-                case ControlKind.BeginAgain: return "Begin again";
+                case ControlKind.BeginAgain: return gallery != null ? "Back to the artwork" : "Begin again";
                 case ControlKind.Leave: return "Leave";
                 case ControlKind.ConfirmLeave: return flow.Phase == VisitPhase.Paused ? "Leave Sankofa" : "Leave without keeping";
                 case ControlKind.CancelLeave: return "Stay";
@@ -455,6 +499,7 @@ namespace Sankofa.Runtime.App
 
         void OnControl(string id)
         {
+            if (id == "gallery-enter") { Begin(); return; }
             if (flow == null || !started)
             {
                 if (id == LeaveId) Quit();
@@ -483,7 +528,7 @@ namespace Sankofa.Runtime.App
                         if (flow.AskToReturn())
                         {
                             askedReturn = true;
-                            captions.Notice("Return to the fire? The story stops here, and a visit left early cannot be kept.", 30, true);
+                            captions.Notice((gallery != null ? "Return to the gallery?" : "Return to the fire?") + " The story stops here, and a visit left early cannot be kept.", 30, true);
                         }
                     }
                     else flow.ReturnToHearth();

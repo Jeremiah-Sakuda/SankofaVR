@@ -27,6 +27,9 @@ namespace Sankofa.EditorTools
             Build(SankofaSceneBuilder.TheatreScene, "Sankofa-IllustratedTheatre.apk");
         }
 
+        [MenuItem("Sankofa/Build Living Gallery APK")]
+        public static void BuildLivingGallery() => Build(SankofaSceneBuilder.GalleryScene, "Sankofa-LivingGallery.apk");
+
         static void Build(string scene, string outputName)
         {
             var repository = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));

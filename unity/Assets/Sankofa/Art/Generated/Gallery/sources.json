@@ -1,0 +1,11 @@
+{
+  "kind": "project-authored scene render",
+  "source": "SankofaLivingGallery.CaptureComposition",
+  "composition": "What We Carry",
+  "inputs": [
+    "../Theatre",
+    "../../IllustratedTheatre/sources.json"
+  ],
+  "status": "draft; cultural and device review pending",
+  "note": "Static capture of authored Unity scene; generated illustration inputs retain their original provenance."
+}
