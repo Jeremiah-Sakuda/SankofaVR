@@ -1,6 +1,6 @@
 # Unity application
 
-**Status — October 4, 2026:** the first full slice, built and tested in software with the draft [Enkare Nairobi](../docs/content/enkare-nairobi/README.md) story package and its pre-rendered narration. It has not run on a headset, in the Meta XR Simulator with hands, or with a participant. The stories are not yet reviewed by family or community.
+**Status — October 13, 2026:** the `LivingGallery` authored candidate has passed software checks and has a local review APK. The current gallery checks are muted batch tests and desktop captures, with no simulator launched during this iteration. No Quest, participant or cultural/listening acceptance is claimed. Earlier comparison evidence is retained below.
 
 | Item | Version or choice |
 |---|---|
