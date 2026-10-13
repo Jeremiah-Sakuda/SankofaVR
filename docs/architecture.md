@@ -46,6 +46,14 @@ These are implementation acceptance intentions, not completed checks. For each s
 
 The illustrated-theatre MVP implements that presentation replacement for one historical chapter. `IllustratedFigure` owns painted poses and the origin of a physical gift. `IllustratedTheatre` consumes resolved invitations to select cast responses and scenic emphasis. Layout and response mappings are authored content; neither renderer accepts a story choice. `SankofaApp` sends the same resolved outcome during a live visit and replay. Its local shelf uses a separate namespace from the baseline scene. The scene builder composes this version from the existing foundation without regenerating or replacing the baseline scene.
 
+## Selected gallery direction
+
+October 13: the [living gallery scope](product/illustrated-theatre-scope.md) makes gallery preview, explicit exhibit entry and reframed return the outer journey. This is planned work. The current theatre implementation described above remains the runtime baseline.
+
+One exhibit record connects title/placard, preview/layout references, route IDs and continuation eligibility. The gallery consumes that record and the existing kept-visit adapter; it does not own a duplicate story engine or store. Application flow owns entry, route/default provenance, cancellation, closing and save. Presentation owns the correspondence between framed composition and spatial layers. Narration/validated content own what context is safe at each revealed beat; the renderer never decides that attention authorises a spoiler or choice. The first artwork uses fire as the griot's visible presence.
+
+Preserve old saved route/package identities when mapping them to the exhibit. A canonical painting is independent of the visitor's saved memento. No catalogue backend, network service, locomotion system or additional artwork is implied by this boundary.
+
 ## Competition context is removable
 
 The tracked agent entry point requires a local competition brief during development. The product runtime never reads that file, and the file is not a feature flag or deployed model prompt. Durable product requirements such as accessible interaction, reliable recovery and accurate content live in the PRD. Prize strategy, current scoring and submission notes remain in the local brief. Changing a future competition profile must not require rewriting the story engine.

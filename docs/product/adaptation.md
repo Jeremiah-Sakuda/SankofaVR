@@ -2,6 +2,10 @@
 
 October 8, 2026 · How Sankofa for Quest adapts the original web Sankofa. This summary is for the Adapted / Significantly Updated division; the organisers decide the classification. Software, simulator and device evidence are kept distinct, as elsewhere.
 
+## Selected gallery direction
+
+October 13: the user selected Sankofa as a living gallery, with *What We Carry* as its first artwork. The next candidate will connect the framed illustration to a spatial encounter and back again, with authored perspectives, tangible hospitality and a griot that supplies context without premature reveals. See the [current scope](illustrated-theatre-scope.md). These additions remain planned; the implemented comparison below describes the preceding Quest foundation. Recorded contextual questions are not live conversation.
+
 ## The original
 
 [Sankofa](https://github.com/Jeremiah-Sakuda/Sankofa) is the user's own web project ([submission](https://devpost.com/software/sankofa-y47f9p)), built for the Gemini Live Agent Challenge and licensed AGPL-3.0. Its README describes the following, as read on October 8, 2026:

@@ -1,53 +1,87 @@
-# Sankofa illustrated theatre product scope
+# Sankofa living gallery product scope
 
-October 13, 2026 · Detailed implementation proposal requested by the user · Baseline inspected: `6c3b356`
+October 13, 2026 · Gallery direction selected by the user; implementation and acceptance pending · Runtime baseline inspected: `6c3b356`
 
-Sankofa invites you into a painting, makes room for you as a guest, and reveals a story through what you choose to follow. The fire tells one complete encounter through two authored threads. Your hands affect the performance and how its characters include you; the women's agreement remains their own. A kept visit opens the other perspective and a contemporary continuation.
+**Sankofa — Step inside the story.** A living art gallery whose paintings become spatial experiences. You encounter a work, enter its composition, participate in its story, and return to the same painting with a different understanding of what it holds. The story responds to the perspective you choose and what you actually do.
 
-This is the current planning reference for the next iteration. It supersedes the feature priorities and estimates in [the earlier first-place proposal](first-place-plan.md). It scopes work, not completed behavior or an instruction to publish. The [PRD](prd.md) remains the broader product contract; its generated-story, freeform-input and additional-language requirements remain open. The [delivery plan](delivery-plan.md#current-sprint-plan) and [backlog](../backlog.md#current-illustrated-theatre-sprints) point here for the current implementation sequence. Runtime content remains in the existing package until a separately tested content revision lands.
+The first artwork is **What We Carry**, the existing illustrated encounter at Enkare Nairobi. Its two authored threads reveal different aspects of Wambui and Naserian's meeting. The griot remains a warm narrator: welcoming visitors, making unfamiliar context legible and bridging gaps without disclosing the story's turns. Inside this first artwork, the fire is its visible presence. The women retain agency over their agreement.
+
+This is the current planning reference. The user selected the gallery as the organizing premise; implementation details, estimates and acceptance targets below remain to be verified. It supersedes the earlier theatre-only framing and [first-place proposal](first-place-plan.md). The [PRD](prd.md), [delivery plan](delivery-plan.md#current-sprint-plan) and [backlog](../backlog.md#current-illustrated-theatre-sprints) follow this direction. Broader freeform generation, live conversation and additional-language requirements remain open; recorded contextual narration does not complete them. Existing runtime content and scenes remain unchanged until tested implementation lands.
 
 ## Product promise and boundaries
 
-**Visitor-facing working description:** “Sit with the fire. Step inside a painted story. Discover what its people carry.” Keep the established “a story that notices what you notice” as a design test: noticing must produce readable acknowledgement, while deliberate selection determines questions and story threads. It must not imply eye tracking or unrestricted conversation.
+**Working public description:** “A living gallery of paintings you can enter, explore and experience.” The gallery is the product; the illustrated theatre is how its first artwork performs. “A story that notices what you notice” remains an interaction test: readable acknowledgement of attention, deliberate choices, and truthful consequences. It does not imply eye tracking or unrestricted conversation.
 
-The release candidate contains one Kenyan setting, two fictional women, two interpretations of their meeting, one shared agreement, and an illustrated modern river coda. English narration and captions; Maa names and Kenyan context require appropriate review. Sankofa's Akan origin is named separately. Neither the title nor the inherited griot voice implies that these distinct traditions are interchangeable.
+The competition candidate contains **one complete exhibit**: a framed composition, a seated way to enter, two perspectives on the same encounter, and an illustrated contemporary continuation. A modest gallery setting replaces the standalone opening/closing hearth environment. The fire lives inside the artwork and can speak from within its frame before entry. There is one welcome and one transition into the story.
+
+The long-term gallery can be explored through multiple artworks with their own voices, aesthetics and reviewed contexts. The first release must be fully usable while seated: looking around and selecting a painting provides access without compulsory walking, joystick travel or camera movement. Optional physical movement is not required to see any essential detail. Collection navigation and locomotion need their own future scope when another finished exhibit exists.
+
+English narration and captions; Maa names and Kenyan context require appropriate review. Sankofa's Akan origin is named separately. Neither the title nor the griot voice implies that distinct traditions are interchangeable. Visitors need no cultural background, surname, controller or microphone.
 
 | Protect in the candidate | Conditional after the core passes | Outside this iteration |
 |---|---|---|
-| Warm fire; stationary painted entry; two meaningful threads; tangible flour hand-off; visible hospitality outcome; explicit object questions; passive and one-hand paths; truthful kept visits; coherent modern coda | Feeding the fire with a stick; animal approaching a hand; peripheral scenery wings; richer optional echoes; measured adaptive quality control | Live AI conversation; freeform generation; new historical eras; second narration language; MR room mapping; multiplayer; character rigs; universal touch effects; AI-generated music |
+| One gallery setting and framed artwork; warm contextual griot; composition-to-depth entry and return; two meaningful threads; flour hand-off and visible hospitality; object questions; passive and one-hand paths; explicit kept visits; coherent modern coda | Animal approaching a hand; peripheral scenery wings; richer optional echoes; measured adaptive quality control | Additional gallery exhibits; collection browser/marketplace; avatar navigation; live AI conversation; freeform generation; new historical eras; second language; MR room mapping; multiplayer; character rigs; universal touch effects; AI-generated music |
 
-Authored personalisation means selecting different scenes, revelations and their order from reviewed content. It is not generated family history. No ancestry is inferred or requested. The experience must remain enjoyable without knowing the cultural background or using a controller.
+Authored personalisation means selecting different scenes, revelations and their order from reviewed content. It is not generated family history. The gallery must not imply that a contemporary generated composition is a historical painting or that all painted details are documented. Exact replay and alternate perspective are visibly different actions.
 
 ## Current foundation and missing work
 
-The inspected build already has the fire, stationary transitions, a three-layer illustrated encounter, two cast columns with three poses each, tangible flour and bead, authored questions, accepted/passive outcomes, a local kept-visit store, replay and a modern continuation. Recent work added visible sheep, painted props, palm alignment during turns/recentering, acknowledgement, better hand-off timing and input grace. The latest code is later than the last documented review APK; rebuild before distributing it.
+The inspected build has the fire, stationary transitions, three-layer illustrated encounter, two cast columns with three poses each, tangible flour and bead, authored questions, accepted/passive outcomes, a local kept-visit store, replay and a modern continuation. Recent work added visible sheep, painted props, palm alignment during turns/recentering, acknowledgement, better hand-off timing and input grace. The latest code is later than the last documented review APK; rebuild before distribution.
 
-Missing from this scope: selecting a meaningful thread, the two vignette beats, direct questions on scene objects, a milk hospitality outcome, painted hearth/coda continuity, the new entry treatment, and the revised physical keep flow. Hardware, cultural review, participant acceptance and release access remain unverified. Existing procedural sheep is sufficient for the first probe; replacing it is an art decision after visual review, not a prerequisite.
+The gallery/frame, exhibit preview, composition-matched entry/return, meaningful thread selection, two vignettes, direct scene questions, milk hospitality, painted modern coda and exhibit-side physical Keep remain to be built. Hardware, cultural, participant and release acceptance remain unverified. The procedural sheep is enough for the first probe.
 
-The implementation should extend the existing engine, package and scene builder. Keep the baseline `Hearth` scene as a comparison record; do not build another application or duplicate the visit store for each route.
+Extend the existing application, story package and editor builders. Retain the original `Hearth` scene as a comparison record. Gallery presentation replaces the current lobby/closing presentation in the candidate; it does not create a second application, visit store or mandatory intermediate hearth room.
+
+## Gallery and exhibit structure
+
+The gallery needs one beautiful, readable viewing position: a forward-facing framed painting, a restrained architectural surround, a small accessible ledge for controls and a kept memento, and enough quiet space for the work to stand out. Palette, light and material choices are tested against the painting. No long corridors, empty locked frames, reception desk, virtual visitors or introductory navigation tour.
+
+The placard names *What We Carry*, its setting and its status as an imagined encounter. Accurate production credits and review details are available through About this artwork. Essential actions are close to the seated visitor; the visitor never has to reach the distant wall. Labels remain legible without leaning.
+
+The framed composition uses the same figures, objects and scenic layers as the world inside it. The viewer recognizes the riverbank, the gourd, the sheep and both women after entering. There is no substitute promotional cinematic. Idle firelight or a small glance can invite interest, but no unplayed plot reveal animates automatically. On return the canonical painting is restored. Personal memory appears as a separate kept memento and concise recollection beside it; it does not silently repaint the source artwork.
+
+The modern river is a continuation within this same exhibit, selected beside the retained work. It is not advertised as a second independent painting. Future exhibits may reuse the gallery/entry contract, but a generic catalogue CMS is outside the first build.
 
 ## Visitor journey
 
-Timing below is a design budget to verify against recorded audio, not measured runtime. A first visit should take about 7–9 minutes without optional questions; the complete passive route should remain within the ten-minute target. The alternate thread takes about 6–8 minutes with onboarding skipped. The modern continuation takes about 3–4 minutes. Questions may extend a visit; pause and leave remain available throughout.
+Times are design budgets to verify against recorded audio. Browsing the gallery may take as long as the visitor wants. From explicit Enter, target 7–9 minutes without optional questions and under ten minutes for the passive route. The alternate thread takes about 6–8 minutes with tutorial skipped; the modern continuation about 3–4 minutes. Pause and leave remain available throughout.
 
-| Time from Begin | Visitor experience | What the application does |
+| Moment | Visitor experience | What the application does |
 |---|---|---|
-| 0:00–0:20 | “Come. Sit with me.” An open palm catches the warmth and a few embers | Immediate local response, no saved choice, no required gesture; caption/recenter/pause controls available |
-| 0:20–0:50 | Two small painted motifs rest on the hearth stone: a gourd and a bead. The visitor chooses what to follow | Deliberate selection chooses a route. A nearby named control provides the same choice. After an announced quiet wait, the fire begins the gourd thread without claiming it was chosen |
-| 0:50–1:10 | Brief reconstruction disclosure, then the ember paints a riverbank around the seated visitor | Existing ember hand-off retained; far, middle and near layers reveal in sequence; no camera motion |
-| 1:10–2:20 | The cool water, the two paths, and Wambui's arrival | Names and needs become clear. Water touch is optional. Gourd thread receives its first specific revelation here |
-| 2:20–4:40 | Receive flour, hear the admission, set it between the women, hear Naserian's memory | Thread-specific beats surround a shared dramatic spine. Questions about the agreement remain unavailable until revealed |
-| 4:40–5:40 | The agreement is made. Naserian makes room for the visitor to stay | Helping changes how the milk is offered; watching receives an equally warm, differently staged welcome |
-| 5:40–6:40 | The bead is offered; the women depart | Accepted and passive placements remain truthful; no forced collection task |
-| 6:40–8:30 | Return to the same painted hearth, one concise recollection, a choice to keep | An explicit save action persists the visit. The unplayed thread and modern river are offered when available; leaving never saves implicitly |
+| Gallery preview, visitor-paced | One painting, two women by the water, a quiet fire within it. The griot offers “Come. Sit with me.” | Show Enter and optional perspective controls within reach; subtle local attention response; no automatic entry or saved choice |
+| 0:00–0:25 after Enter | An ember responds to an open palm. The chosen perspective is acknowledged, then the reconstruction disclosure is spoken | Enter uses the transparent default thread; a perspective control enters that selected thread. Ember acceptance remains optional |
+| 0:25–0:40 | The familiar composition opens into depth around the seat | Firelight guides the far, middle and near layers out of their flat arrangement; no camera travel; only one entry transition |
+| 0:40–2:10 | The cool water, two paths and Wambui's arrival | The griot supplies place/material context. Water touch is optional. The gourd thread receives its specific revelation here |
+| 2:10–4:40 | Receive flour, hear the admission, set it between the women, hear Naserian's memory | Thread beats surround a shared dramatic spine; no answer or caption reveals an unreached turn |
+| 4:40–5:40 | Agreement, then hospitality | Actual help changes how milk is offered; watching receives an equally warm, differently staged welcome |
+| 5:40–6:40 | The bead is offered and the women depart | Accepted/passive placements remain truthful; no forced collection task |
+| 6:40–8:30 | The world resolves back into its frame. You see the same painting differently | Griot gives one concise recollection; explicit Keep, alternate perspective, continuation and exit are available beside the exhibit |
 
-Do not add these durations to every existing line. Edit repeated exposition and idle waits to make room. Preserve the pause before the agreement. The opening needs one successful interaction grammar, not a series of tutorials. The optional stick-feeding ritual is deferred until the opening fits this budget and novices understand it.
+Edit repeated exposition and idle waits to make room; do not add these stages to every existing line. Preserve the silence before the agreement. Remove the proposed stick-feeding tutorial from this release: the ember and first exhibit interaction already teach receiving. On subsequent visits the gallery is brief if desired; a saved memento provides direct replay or a new perspective.
 
-### Opening selection without false ownership
+### Entry and perspective selection
 
-The hearth gourd and bead are small illuminated motifs or miniatures of the story's objects. They are not the actual gourd or the keepsake later offered by a character. The fire can say, as draft copy: “The gourd follows what Wambui brings. The bead follows what Naserian remembers.” This is one brief explanation, with readable labels, not a repeated spoken menu.
+The nearby ledge offers **Enter painting** as the primary action. Two optional painted motifs expose specific perspectives: gourd, “What she brings”; bead, “What she remembers.” Choosing a motif deliberately selects that thread and enters; Enter alone uses the gourd default, with “Let us begin with what Wambui brings.” It records default provenance rather than claiming a personal preference. There is no second selection screen or timer forcing someone out of gallery browsing.
 
-Receiving/touching a highlighted motif or selecting its nearby control commits that thread. A highlight or glance alone does not. Freeze the chosen route before the disclosure and ember transition. A quiet visitor hears “Let us begin with what Wambui brings”; the default is recorded as automatic, never as their expressed interest. Proposed choice wait: 10 seconds after the explanation; pause, settings and tracking loss suspend it. Actual timing follows the first listening and device tests.
+The motifs are miniatures or interface representations, not the character's real gourd or gifted keepsake. A glance highlights, a deliberate touch or nearby pinch control selects. The fire may briefly explain what each thread follows without saying what it reveals. Disclosure and route confirmation occur before the composition unfolds. The existing 15-second auto-start behavior is retired for the gallery preview. After an explicit entry, fully passive progress remains supported through every story invitation.
+
+## The griot as contextual narrator
+
+The griot remains a personality, not an encyclopaedic voice-over. It welcomes you from the painting, introduces place and people, supplies unfamiliar terms when needed, marks a remembered time clearly, answers available explicit questions, and helps you recognize the ending. In *What We Carry*, voice, flame and light share one authored performance. No humanoid narrator, microphone or live model is needed for this role.
+
+| Story position | Useful contextual guidance | Preserve for the drama |
+|---|---|---|
+| Gallery preview | Title, Kenyan setting, two people meeting, invitation to enter | The shortfall, what was left at home, earlier waiting, final agreement |
+| River and arrival | Enkare Nairobi, who is arriving, what a visible vessel carries, specific sourced regional context | Why Wambui made her decision, how Naserian will respond |
+| Admission | Clarify what has just been said or the object being handled | “Last time, you waited for me,” the recollection and sheep decision |
+| After the route vignette/agreement | Explain the revealed action, clarify invented versus documented context | Unique visual details from the other thread and any unplayed continuation |
+| Return to gallery | Briefly connect the visitor's actual participation to the painting | Promises about future events that no shipped scene answers |
+
+**Rule:** the narrator knows only what it is permitted to tell at the current beat, even when an author knows the full plot. Maintain a revealed-fact set or equivalent explicit question availability map per route and beat. Audit narration, captions, question labels, hints, placard text and idle animations for spoilers. A question marked available must have a safe recorded answer for that point; otherwise keep it unavailable until its reveal. The current trust/friendship answers need review because they can disclose earlier waiting.
+
+Use short authored context lines at deliberate pauses or first appearances; one explanatory sentence should normally suffice. Only one voice owns the audio turn. Do not speak because the visitor happened to look at something, repeat context already heard, narrate every gesture or explain an emotional beat immediately after it lands. Essential context is available to passive visitors. Additional detail comes through the explicit object questions. Narrated character dialogue may use the same performer with restrained differentiation; it does not add live character agents.
+
+An optional question can clarify a source or a word without becoming an options list. The gallery placard and About this artwork carry reference details; the griot keeps its conversational warmth. Each thread's reveal remains understandable to outsiders without an advance explanation of its meaning. Review scripts both in isolation and in the actual order heard on every route.
 
 ## Two threads with one agreement
 
@@ -128,40 +162,41 @@ Core production is limited to: responsive palm/fire embers; a restrained flour m
 
 Painting ripples, universal touch behavior, animal approach and decorative echo interaction are deferred. Keep the existing water touch because it belongs to the scene and teaches a simple action.
 
-## The fire paints a coherent world
+## The painting becomes the world
 
-Entry is authored choreography, independent of network or runtime image generation:
+The framed composition, spatial reveal and return are one presentation contract. The fire motivates the change from within the painting; it does not lead through another lobby first. Use existing scene layers and deterministic authored effects, independent of network or runtime image generation.
 
-1. The ember and fire share a brief brightening.
-2. A small number of sparks travel toward the far layer; a painted reveal mask exposes the horizon.
-3. The middle bank appears, then near reeds and cast. Sound broadens from the hearth to water and distant environment.
-4. The final near object resolves in full depth and the first story line begins.
+1. Hold the composition long enough to recognize its people and objects. The fire within it brightens and offers the ember through the frame toward reachable space.
+2. After disclosure and optional ember receipt, reveal painted depth far to near. Preserve landmark correspondences while the surround dims and the canvas fills the story's view.
+3. The bank, reeds and cast resolve around the stationary visitor. Spatial sound broadens from the frame's fire to the water beside the seat.
+4. The frame leaves the central story view once orientation is clear. Full-depth objects retain their painted origins; Wambui's later gourd hand-off completes the visual promise.
+5. On return, the layers settle back into the same framed composition. The gallery's orientation, ledge and controls return consistently. The actual bead remains temporarily within reach for an explicit keep decision.
 
-Target 6–10 seconds within the journey budget; test rather than assume spectacle needs more time. Never translate, rotate or zoom the camera. Maintain a stable ground reference and avoid a full-view white flash. Hands or a clear temporary interaction state remain visible. Essential story information stays forward; side wings are decorative and conditional. Reduced motion uses a 2–3 second dissolve with the same event completion semantics.
+Target 6–10 seconds for the main reveal and a restrained reverse transition. Do not physically zoom, rotate or translate the camera toward the wall. “Step inside” describes the experience; it must work from the seat. Prototype a shared render/layout source for the flat preview and spatial presentation, or a derived static composition with controlled registration. Do not build an always-rendering second 3D world just for the preview without profiling its cost. Hands and essential controls retain a clear interaction state. Reduced motion uses a 2–3 second composition-matched dissolve; pause, cancellation and early return share normal flow semantics.
 
-Use the same material family for the opening hearth, story, vignettes, modern river and return. The current solid sheep can remain if its silhouette and style pass review; budget at most a simple replacement with standing/head-turn poses. Do not generate high-resolution cast blindly: first inspect one final-scale face and palm on the target device, then decide resolution and compression.
+Use one material family across the gallery/frame, first artwork, vignettes and modern continuation. Preserve the quieter gallery and warmer story lighting without switching illustration styles. The current sheep can remain if its silhouette and style pass review. Inspect one face and hand at final scale on the target device before deciding cast resolution/compression. Test that the visitor recognizes the work after returning; no extra decoration can substitute for that recognition.
 
 ### Asset and narration budget
 
 | Deliverable | Maximum planned production | Dependency |
 |---|---|---|
-| Hearth surround | Two illustrated layers; reuse existing fire/log geometry with compatible materials | Provider/rights record and first lighting sample |
+| Gallery and exhibit preview | One restrained surround, frame, accessible ledge and placard; composition derived from existing encounter art; replaces the planned external hearth layers | Preview/world alignment, legibility, provider/rights record |
 | Historical cast | Existing two figures, corrected dress/expression; up to two added poses each, for notice and milk staging | Cultural feedback and stable hand anchors |
 | Thread vignettes | Two small layer sets; object detail plus at most two extra cast cells reused where possible | Story comprehension before art |
 | Modern river | Two or three coherent layers around retained gate/bead interaction | Preserve documented restoration context and imagined garden distinction |
 | Sheep | Existing solid animal initially; one simple art replacement only if needed | Visual comparison, no new locomotion project |
-| Narration | Budget 30–40 changed/new short clips across opening, two vignettes, hospitality, return and questions | Locked text, source checks, listening review |
+| Narration | Budget 30–40 changed/new short clips across gallery welcome, two vignettes, hospitality, return and safe context/questions | Locked text, source and spoiler checks, listening review |
 | Effects | One reveal treatment, restrained sparks, three local feedback sounds | Worst-case device cost and sound balance |
 
-The narration count is a production ceiling to track, not a guarantee. Rough allocation: opening/thread 5–7; gourd vignette 4–5; bead vignette 5–7; hospitality/outcomes 6–8; closing/return 5–7; source/question corrections 3–6. Total 28–40. Reuse unchanged recordings. Changed words receive new versioned audio keys; retain older assets required by kept plans. English captions follow every released line and sound mix is checked at quiet and louder headset volume.
+The narration count is a production ceiling to track, not a guarantee. Rough allocation: gallery welcome/thread 5–7; gourd vignette 4–5; bead vignette 5–7; hospitality/outcomes 6–8; closing/return 5–7; context/question corrections 3–6. Total 28–40. Reuse unchanged recordings. Changed words receive new versioned audio keys; retain older assets required by kept plans. English captions follow every released line and sound mix is checked at quiet and louder headset volume.
 
 Keep asset-generation attempts bounded to two review rounds per set before simplifying the brief. Record provider, actual model if recoverable, dated terms, prompts, source images, output files and alterations. Never fill a missing model name by guessing. Approve style on one face, one palm and one prop before producing sheets.
 
 ## Keeping and returning
 
-The visit ends completely before an invitation to return. No cliffhanger about whether Wambui later paid unless a real authored scene answering it ships. Proposed hook after the gourd route: “You have seen what she brought. Another time, we can sit with what Naserian remembered.” After the bead route, invite the visitor to see what Wambui left at home. These are drafts; avoid wording that falsely claims a default thread was their selection.
+The story ends completely before it returns to the gallery and invites another visit. No cliffhanger about whether Wambui later paid unless a real authored scene answering it ships. Proposed hook after the gourd route: “You have seen what she brought. Another time, we can sit with what Naserian remembered.” After the bead route, invite the visitor to see what Wambui left at home. These are drafts; avoid wording that falsely claims a default thread was their selection.
 
-The modern river is a separate continuation, not the payoff for an unfulfilled historical promise. Its pleasure is recognizing the same water in today's city, seeing documented restoration reflected in an explicitly imagined garden, and deciding what to carry onward. It is available immediately after a kept visit; no artificial day lock or streak. The other historical thread is also available without forcing a save, but personal recall requires one.
+The modern river is a continuation of this exhibit, not a second gallery work or the payoff for an unfulfilled historical promise. Its pleasure is recognizing the same water in today's city, seeing documented restoration reflected in an explicitly imagined garden, and deciding what to carry onward. It is available immediately after a kept visit; no artificial day lock or streak. The other historical thread is also available without forcing a save, but personal recall requires one.
 
 | Returning option | Behavior |
 |---|---|
@@ -170,9 +205,9 @@ The modern river is a separate continuation, not the payoff for an unfulfilled h
 | Visit the water today | New child visit with truthful parent recall and optional bead placement |
 | Forget | Remove the kept visit and linked persisted memory according to explicit deletion semantics |
 
-The shelf should present one primary next invitation and nearby alternatives; it should not become an achievement grid. A prototype must test whether people understand “replay” versus “another part of the story.” The alternate route initially reuses the full shared encounter; if repeat exposition feels laborious, shorten transitions and already-known setup through authored return variants. A separate abridged episode is outside the initial budget.
+The exhibit ledge should present one primary next invitation and nearby alternatives; it should not become an achievement grid. A prototype must test whether people understand “replay” versus “another part of the story.” The alternate route initially reuses the full shared encounter; if repeat exposition feels laborious, shorten transitions and already-known setup through authored return variants. A separate abridged episode is outside the initial budget.
 
-**Physical Keep:** use a dedicated hearth recess with a clear “Keep this visit” label and one warm invitation. The historical character's bead gift never constitutes save consent. Require deliberate release/selection in the recess; a resting bead, incidental contact, automatic placement or tracking loss cannot save. The hand panel remains equivalent. On save failure, retain the visit in memory and show retry; do not light a permanent shelf object or say it was saved. Forget and local retention remain discoverable. Declining to receive the story bead does not prevent explicit saving later.
+**Physical Keep:** use a dedicated recess in the exhibit ledge with a clear “Keep this visit” label and one warm invitation. The historical character's bead gift never constitutes save consent. Require deliberate release/selection in the recess; a resting bead, incidental contact, automatic placement or tracking loss cannot save. The hand panel remains equivalent. On save failure, retain the visit in memory and show retry; do not light a permanent shelf object or say it was saved. Forget and local retention remain discoverable. Declining to receive the story bead does not prevent explicit saving later.
 
 The present-day gate placement and its recall need a saved continuation outcome, not only the initial encounter record. If the visitor leaves without keeping that continuation, future visits cannot claim the bead is still on the gate. No real-world location anchor or room data is required.
 
@@ -182,7 +217,7 @@ Separate three questions in review: Is the documented context supported? Is the 
 
 Preserve the pre-entry reconstruction disclosure, spoken Enkare Nairobi with Maa delivery reviewed, specific Kikuyu/Maasai identities, and separate Akan naming context. Review household food allocation, the milk invitation, dress, bead, sheep and invented recollection together. If a reviewer challenges a prop or gesture, revise its staging and language before regenerating all related art.
 
-Provide “About this telling” from the hearth and questions panel: concise distinctions between sourced place/material context and invented characters, actions and dialogue. No whole-object gold truth glow. Exact sources stay linked at claim level in content/review records; public source presentation and identifiable-name handling must follow the final entry review. The narrator does not read the bibliography mid-scene.
+Provide “About this artwork” from the gallery placard and questions panel: concise distinctions between sourced place/material context and invented characters, actions and dialogue. No whole-object gold truth glow. Exact sources stay linked at claim level in content/review records; public source presentation and identifiable-name handling must follow the final entry review. The narrator does not read the bibliography mid-scene.
 
 Nothing collected for review authorises publishing a reviewer name, private family account or recording. The user controls external outreach. The production tools can prepare packets and incorporate supplied notes without waiting for permission to draft.
 
@@ -193,12 +228,14 @@ Follow [the modular architecture](../architecture.md). Proposed identifiers belo
 | Owner | Existing foundation | Change required |
 |---|---|---|
 | Story core | `StoryModel`, `PlanComposer`, `StoryRun`, package/plan validators | Two stable route IDs, shared beats and distinct vignette order; legal hospitality conditions; no route logic in shaders |
-| Application flow | `VisitFlow`, `FlowCues` | Thread selection/default, question suspension, owned-object transitions, correct follow-up choices and explicit save outcome |
+| Application flow | `VisitFlow`, `FlowCues` | Gallery preview, explicit entry, thread default/selection, question suspension, owned objects, reframed return and explicit save outcome |
 | Input | `PointerSelect`, palm/touch gestures, `PointerSource`, `HandSource` | Object question chips, action arbitration, one-hand alternatives, tracking-loss safety |
-| Stage | `IllustratedTheatre`, `IllustratedFigure`, `StoryTransition` | Vignette layout, notice/milk poses, stationary reveals, matching reduced motion and recenter |
-| Narration | `NarrationPlayer`, current generation/manifest pipeline | Versioned clips, one audio owner, safe resume and question spoiler gating |
+| Stage | `IllustratedTheatre`, `IllustratedFigure`, `StoryTransition` | Shared preview/world composition, frame reveal/return, vignette layout, notice/milk poses, reduced motion and recenter |
+| Narration | `NarrationPlayer`, current generation/manifest pipeline | Beat-safe contextual griot, versioned clips, one audio owner, heard-context tracking, safe resume and spoiler gating |
 | Persistence | `SavedVisit`, `FileVisitStore` | Preserve selected/default route origin if recalled; continuation compatibility for both routes; save continuation outcomes; legacy replay/deletion behavior |
 | Authoring/build | Theatre layout and editor builders | Scene-keyed presentation layouts in one active package; source-only checks; generate scenes/materials through editor |
+
+Gallery metadata needs only a stable exhibit ID, title, placard/credit references, preview/layout reference, supported routes and continuation mapping. Resolve the saved visit's package/route back to its exhibit; preserve fallback behavior for older records without that mapping. A separate catalogue service, new account system and gallery-specific copy of the store are unnecessary. The candidate flow is GalleryPreview → Entering → Story/Question → Reframing → ExhibitClosing; pause can overlay these states, and a new route returns through Entering. Internal class names may remain compatible with the current engine; the display contract must reflect the gallery. Returning mid-story offers exit/restart honestly rather than recording a completed visit.
 
 **Known integration constraint:** `PlanComposer` currently allows a continuation to follow one exact parent route, and `SavedVisit.Next` is a single next route. Two historical threads plus a modern continuation cannot be wired by changing menu labels alone. Prefer a small validated route-eligibility table that accepts the two historical parents for the coda, while deriving the alternate thread from package metadata. Preserve the legacy single-parent reading path. Do not silently accept arbitrary parents or introduce a general branching framework.
 
@@ -216,9 +253,9 @@ Quest access is an open dependency. Seek a borrowed device, collaborator or exte
 
 Run three hardware rounds: baseline reach/depth/input; complete new threads and worst-case transition; warm release candidate with independent installation. A remote tester should provide device/model, build hash, full hands-only recording, performance log and structured observations. Such evidence cannot substitute for every comfort review, but it is actual device evidence.
 
-Measure CPU/GPU frame timing, dropped frames, memory, load/transition stalls and warm-session behavior. Test fire plus hands/captions, maximum card overlap, the vignette, question while holding, and return. Record chosen refresh rate and matching frame budget; for example, 72 Hz gives about 13.9 ms. The competition's stated 60 fps floor does not establish our device target. See the [official judging guidance](https://start-developer-competition-26.devpost.com/details/judging).
+Measure CPU/GPU frame timing, dropped frames, memory, load/transition stalls and warm-session behavior. Test gallery preview/frame transition plus fire/hands/captions, maximum card overlap, the vignette, question while holding, and return. Record chosen refresh rate and matching frame budget; for example, 72 Hz gives about 13.9 ms. The competition's stated 60 fps floor does not establish our device target. See the [official judging guidance](https://start-developer-competition-26.devpost.com/details/judging).
 
-Start with conservative static settings. Profile before choosing silhouette trimming, alpha-to-coverage or MSAA changes. Check transparent edges in both eyes and at actual scale. An adaptive tier may later reduce decorative particles or other measured costs, with conservative thresholds, hysteresis and logs. Do not switch repeatedly during the emotional reveal or reduce readable captions/essential cues. Measuring the first ten hearth seconds is not a full-scene profile, and a governor cannot close a hardware gate.
+Start with conservative static settings. Profile before choosing silhouette trimming, alpha-to-coverage or MSAA changes. Check transparent edges in both eyes and at actual scale. An adaptive tier may later reduce decorative particles or other measured costs, with conservative thresholds, hysteresis and logs. Do not switch repeatedly during the emotional reveal or reduce readable captions/essential cues. Measuring the first ten gallery seconds is not a full-scene profile, and a governor cannot close a hardware gate.
 
 If hardware remains unavailable, software/art work can proceed with bounded investment, but technical and comfort gates stay open. Do not convert unavailable evidence into a pass or use simulator novice sessions to claim hands/depth acceptance.
 
@@ -228,22 +265,24 @@ These targets are formative product gates, not probabilities of winning. Use obs
 
 | ID | User story | Observable acceptance |
 |---|---|---|
-| IT-01 | As a first visitor, I know I am welcome and can begin without learning controls | First local hand response within 20 s; useful thread action within 60 s; silent route still completes; no forced speech |
+| IT-01 | As a first visitor, I understand that this painting can be entered | Enter/perspective controls available on gallery readiness; preview never auto-enters; first local hand response within 20 s after entry; passive story completes |
 | IT-02 | I can follow a question that interests me | Each thread includes its own visible vignette and different revelation/order before the ending; either route alone makes the bargain understandable |
 | IT-03 | I can ask about what is in front of me | A labelled object question invokes exactly one correct answer; no accidental receive; unavailable reveals are not spoiled; narration resumes coherently |
 | IT-04 | Helping changes how I am included | Visitor can point to the changed milk staging; the same agreement and hospitality remain on passive paths |
 | IT-05 | I can simply watch | No timeout claims I acted, chose an interest or refused friendship; objects remain readable and the ending complete |
-| IT-06 | I feel the story unfold around me comfortably | No camera movement, stable orientation, readable captions/hands, reduced-motion equivalent; on-device comfort findings recorded |
+| IT-06 | I recognize the painting becoming a world and returning to its frame | Same composition landmarks before/inside/after; no camera movement; readable hands/captions and reduced-motion equivalent; device findings recorded |
 | IT-07 | I understand what is imagined | After a visit, testers distinguish fictional women/bargain from sourced regional context without implying all rendered details are documented |
 | IT-08 | I can keep a visit and return to something worthwhile | Relaunch retains only explicitly saved records; alternate thread reveals another scene; coda recalls correct parent and saved placement |
 | IT-09 | I can pause, recover and use one hand | Both routes and coda complete hands-only with either hand; tracking loss, recenter, focus loss and failed save cause no false action |
 | IT-10 | I trust the submission's promises | Candidate build, guide, footage, coverage and source/rights records agree; independent install and device evidence recorded |
+| IT-11 | The griot helps me understand without spoiling the story | Safe context at first need; no premature reveal in narration, hints, questions or captions; quiet beats remain; passive visitors understand the conflict |
+| IT-12 | The painting means something different after my visit | In review, visitors identify a previously seen detail and explain its changed meaning; source artwork stays canonical and saved memory is clearly personal |
 
-Prototype evaluation: three unfamiliar readers/viewers see temporary-art paired paths. At least two can explain the conflict, what participation changes, and one thing that differs between threads. This is a cheap iteration gate, not final validation.
+Prototype evaluation: three unfamiliar readers/viewers see the framed work, temporary-art entry/return and paired paths. At least two understand how to enter without walking, recognize the composition inside, explain a detail differently afterward, and distinguish the two story threads. Also check conflict and participation comprehension. This is a cheap iteration gate, not final validation.
 
 Final formative evaluation: five first-time visitors, counterbalanced initial thread where practical. Target at least four completing unassisted and explaining a visible consequence. Ask “What happened?”, “What did you change?”, “What was imagined?”, and “What would you return for?” before prompting about features. At least three try the second thread in a later session and identify new information without being told it. Record device versus desktop conditions and individual failures; this small sample supports design decisions, not broad statistical claims.
 
-Automated coverage: both thread defaults/selections; accepted and default outcomes including receiving flour without placing it; milk acceptance/default under both earlier outcomes; pause/question/recenter during offers; obsolete question callbacks; save fail/retry; old/new replay; both parent routes reaching the coda; deletion; all captions and audio references. Enumerate legal outcome combinations in core tests and use representative risk paths for Unity/device visits. Target ten complete hardware visits across the release paths, including passive and one-hand runs; do not confuse that with ten distinct participants.
+Automated coverage: preview never auto-enters or saves; entry/reframe cancellation; exhibit identity after relaunch; frame/scene registration under recenter; spoiler eligibility by beat/route; both thread defaults/selections; accepted and default outcomes including receiving flour without placing it; milk acceptance/default under both earlier outcomes; pause/question/recenter during offers; obsolete question callbacks; save fail/retry; old/new replay; both parent routes reaching the coda; deletion; all captions and audio references. Enumerate legal outcome combinations in core tests and use representative risk paths for Unity/device visits. Target ten complete hardware visits across the release paths, including passive and one-hand runs; do not confuse that with ten distinct participants.
 
 ## Work sequence and effort
 
@@ -251,13 +290,13 @@ Assume 12–15 focused user hours/week until confirmed. Planning separates human
 
 | Sprint | Dates | Deliverable | User hours | Engineering effort | Exit gate |
 |---|---|---|---:|---:|---|
-| 1 Prove the behavior | Oct 13–19 | Paired greybox milk outcomes; direct question; rough painted entry; two vignette scripts/storyboards; baseline APK/tester and review packets | 9–11 | 12–18 h | Three-person comprehension probe, documented implementation estimate, hardware access path or explicit unresolved blocker |
-| 2 Build the complete telling | Oct 20–26 | Thread selection/composition, two vignettes, reviewed narration, hospitality, matched hearth/cast; device round two begins | 12–15 | 20–30 h | Both historical routes complete with meaningful differences; no ownership/input ambiguity; review corrections staged |
-| 3 Make the return complete | Oct 27–Nov 2 | Painted modern coda, alternate-route offer, physical Keep, saved compatibility/recall; coherent entry/return art and sound | 10–13 | 18–26 h | Save/relaunch/replay/alternate/coda/forget all work; ending matches opening quality; content freeze for new features |
+| 1 Prove the gallery promise | Oct 13–19 | One framed work, rough entry/return and gourd crossing; paired milk outcomes; question/context probe; vignette scripts; hardware/review preparation | 10–12 | 15–23 h | Three-person entry/composition/comprehension probe; revised estimate; hardware path or explicit blocker |
+| 2 Build the first exhibit | Oct 20–26 | Gallery entry and route selection, two vignettes, context-aware griot, hospitality, matched frame/cast; second device round begins | 13–17 | 23–35 h | Both perspectives complete; meaningful differences and safe reveals; no input/ownership ambiguity |
+| 3 Complete the gallery return | Oct 27–Nov 2 | Reframed ending, exhibit-side Keep/replay/alternate, painted modern coda, legacy compatibility and truthful recall | 10–13 | 18–26 h | Gallery → exhibit → gallery plus saved return pass; modern continuation coherent; feature freeze |
 | 4 Verify and simplify | Nov 3–9 | Novice/device sessions, profile-driven optimization, accessibility/recovery, final cultural/audio fixes | 12–14 | 18–26 h | Formative targets assessed, ten device visits, major faults closed, rights and release access ready |
 | 5 Present and release | Nov 10–16 | Frozen candidate, independent install, demonstration, adaptation copy and completed submission package | 9–12 | 8–12 h | Guide matches build, user accepts release materials, submission completed when authorised |
 
-Totals: **52–65 user hours plus 10 hours contingency = 62–75 hours**; **76–112 hours of engineering effort**, substantially assisted but requiring integration/review. At exactly 12 user hours/week the low estimate already exceeds a 60-hour envelope by two hours; remove optional work or add capacity rather than pretend it fits. Re-estimate after Sprint 1. Current dates reserve November 17–18 for access/submission problems, not planned feature work. Internal target November 16; official deadline November 18 at noon Pacific / 3 p.m. Eastern, checked October 13. [Official rules](https://start-developer-competition-26.devpost.com/rules)
+Totals: **54–68 user hours plus 10 hours contingency = 64–78 hours**; **82–122 hours of engineering effort**, substantially assisted but requiring integration/review. The gallery adds a net 2–3 user hours and 6–10 engineering hours for composition matching, preview/navigation and return integration, while replacing the external hearth art rather than adding another room. The low estimate exceeds a 60-hour envelope by four hours; the high estimate exceeds 75 hours by three. Simplify nonessential art/effects or add capacity after the probe; do not consume the ten-hour reserve silently. Sprint 2 may require redistribution into lighter weeks. Re-estimate after Sprint 1. Current dates reserve November 17–18 for access/submission problems, not planned feature work. Internal target November 16; official deadline November 18 at noon Pacific / 3 p.m. Eastern, checked October 13. [Official rules](https://start-developer-competition-26.devpost.com/rules)
 
 The estimate includes core art/narration review, testing and submission production. Reviewer availability, device shipping/access and approval lead time are external dependencies. Paid asset/tool/API spending has no approved numerical budget; prototype with current assets first, then record cost and terms before paid production. Art generation and editing can be assisted; only the user/reviewers can provide their acceptance, cultural feedback, account decisions and external access.
 
@@ -265,15 +304,15 @@ The estimate includes core art/narration review, testing and submission producti
 
 | Ticket | Implementation boundary | Depends on | Done when |
 |---|---|---|---|
-| IT-P01 | Greybox proof: reveal, object ask and milk consequence | Existing build | Paired captures and comprehension notes identify whether each behavior is understandable |
-| IT-P02 | Draft two vignette scripts, claim map and review packet | Current source/story | Neither route spoils the other; complete passive story; specific reviewer questions prepared |
+| IT-P01 | Gallery proof: frame → depth → gourd → frame, contextual question and paired milk consequence | Existing build | Viewers understand entry, recognize the composition and see their consequence; no full gallery architecture needed |
+| IT-P02 | Draft exhibit placard, griot context/reveal map, two vignette scripts and review packet | Current source/story | No premature reveal; complete passive story; sources/fiction legible and specific reviewer questions prepared |
 | IT-P03 | Hardware baseline and release identity preparation | Current APK, human access | Findings tied to hash/device; signing/app-id choices recorded securely; no credentials committed |
-| IT-P04 | Route metadata, thread selection and continuation eligibility | P01, P02 | Both route plans validate; default origin truthful; one package; legacy fixtures pass |
+| IT-P04 | Exhibit metadata, explicit gallery entry, route selection and continuation eligibility | P01, P02 | Preview cannot commit accidentally; both plans validate; default origin truthful; legacy fixtures pass |
 | IT-P05 | Object questions, pause/resume and input arbitration | P01 | No double action, no spoiler or stale answer, one-hand alternatives pass |
 | IT-P06 | Hospitality ownership, staging and recorded lines | P02, P04 | Four milk combinations and mixed flour outcomes pass; guest treatment remains warm |
 | IT-P07 | Vignette art/layout/audio and cast responses | P02, P04, first asset review | Two distinct scenes in complete runs; no new rigs/environments needed |
-| IT-P08 | Unified hearth/coda, reveal and local sound | P01, art/rights sample | Coherent first-to-last frames; reduced motion; worst-case hardware profile |
-| IT-P09 | Explicit physical Keep, alternate thread and coda memory | P04, P06 | Relaunch, failed save, legacy replay, both parent routes and deletion pass |
+| IT-P08 | Gallery/frame composition, world reveal/reframe, painted coda and local sound | P01, art/rights sample | Same artwork recognized before/after; coherent style, reduced motion and worst-case profile |
+| IT-P09 | Exhibit-side physical Keep, gallery navigation, alternate thread and coda memory | P04, P06 | Correct work/memento after relaunch; failed save, legacy replay, both parents and deletion pass |
 | IT-P10 | Device/user/content acceptance and optimization | P05–P09 | Recorded failures fixed or scope reduced; no substituted evidence |
 | IT-P11 | Build, access, adaptation and demonstration | P03, P10 | Frozen artifact installed independently; materials faithfully show candidate |
 
@@ -281,7 +320,7 @@ P02 and preparation for P03 can proceed while P01 is built. Final art waits for 
 
 ### Cut order and stop conditions
 
-First remove stick feeding, sheep approach, peripheral wings, decorative echo interactions and automatic quality tiers. Next simplify vignette art, reveal particles and extra cast poses while preserving the distinct scenes and clear acknowledgement. Retain a simpler coherent modern painting rather than a mismatched 3D coda. Cut redundant narration instead of the silence that makes the agreement land.
+Do not add stick feeding, another lobby or catalogue browsing. First cut sheep approach, peripheral wings, decorative echo interactions and automatic quality tiers. Next simplify vignette art, reveal particles and extra cast poses while preserving the distinct scenes and clear acknowledgement. Retain a simpler coherent modern painting rather than a mismatched 3D coda. Cut redundant narration instead of the silence that makes the agreement land.
 
 If the two-thread structure still does not fit after the first probe, explicitly choose a one-thread release and narrow the claim; do not ship two cosmetic choices advertised as meaningful personalisation. If the milk difference fails comprehension, revise the gesture or choose another small hospitality event before adding more branches. If hardware finds reach or frame problems, simplify effects before adding content. If cultural review disputes the premise, revise the story before commissioning its final art.
 
@@ -289,24 +328,8 @@ Never spend the release/testing reserve to add an untested system. No numerical 
 
 ## Submission story and immediate next work
 
-The adaptation case is specific: web Sankofa's illustrated, narrated storytelling becomes a seated spatial theatre with physical objects, authored perspective selection, contextual questions and remembered participation. Preserve the original project's provenance and assess any actual code/asset reuse separately. Recorded questions are not live conversation, and two authored threads are not open-ended generation.
+The adaptation case is specific: web Sankofa's illustrated, narrated storytelling becomes a living gallery. Its first artwork opens into a seated spatial encounter with physical objects, authored perspectives, a contextual griot and remembered participation. The painting gains meaning through the visit and frames its return. Preserve the original project's provenance and assess any actual code/asset reuse separately. Recorded questions are not live conversation, and two authored threads are not open-ended generation.
 
-Prepare a 2:30–2:45 demonstration: a real gourd crossing from paint into reach; the fire painting the scene; two glimpses of different revelations; one paired hospitality consequence; then the keepsake and coherent return. Show implemented runtime behavior and label simulator footage. The final video must not hide an unfinished in-app ending. Release access/signing, eligibility and rights remain independently verified before submission. Do not contact reviewers, publish or submit without the user's authorization for those external actions.
+Prepare a 2:30–2:45 demonstration: establish the framed painting, show the same composition opening into depth and the gourd crossing into reach; show two different revelations and one paired hospitality consequence; then return to the framed work with an explicit kept memento. Make the gallery promise legible in the first few seconds. Show implemented runtime behavior and label simulator footage. The final video must not hide an unfinished in-app ending. Release access/signing, eligibility and rights remain independently verified before submission. Do not contact reviewers, publish or submit without the user's authorization for those external actions.
 
-**Next implementation increment:** P01 and P02. Produce a rough 60–90-second diagnostic sequence using existing art, plus the two vignette scripts and a paired outcome capture. Reuse the current application and question pipeline, keep it behind an explicit prototype configuration, and review it before expanding final asset production. No new paid generation or complete chapter rebuild is necessary to answer that first product question.
-
-## Gallery framing exploration
-
-After this scope was drafted, the user proposed Sankofa as an art gallery whose paintings can be entered and experienced, with this encounter as its first artwork. This is a framing proposal under discussion, not an implemented gallery or an approved expansion to the estimates above.
-
-Working promise: **“Step inside the painting. Discover the story within.”** The gallery makes the catalogue understandable; the fire supplies the warmth and voice inside each telling. The existing two-thread encounter becomes the first complete exhibit, provisionally titled *What We Carry*. The framed image should correspond to the actual encounter rather than advertise a different cinematic treatment.
-
-The smallest experiment is one painting in a restrained gallery setting: notice a detail, deliberately select Enter, and see the flat image separate into its spatial layers around the stationary visitor. The familiar gourd then crosses from a painted hand into reach. On return, the work becomes a framed painting again; a nearby explicitly kept memento can lead to replay or the alternate perspective. No mandatory walking, camera zoom or artificial travel is needed to express stepping inside. Optional movement is not a condition of use.
-
-This framing could replace the opening selection presentation rather than add another tutorial before the hearth. Preserve the fire's welcome, reconstruction disclosure and invitation grammar. Compare a framed painting at the hearth with a spare gallery foyer before deciding whether a separate room adds enough value to justify its art and transition costs. The existing fire-painted entry and the frame-to-depth transition should form one authored sequence, not two spectacles in succession.
-
-Only one complete artwork is in the proposed first release. Avoid empty locked wings, a collection browser, avatar navigation, a marketplace or claims of a catalogue that does not exist. Artworks can become reusable content packages later; this iteration only needs one coherent entry, experience and return. The two authored threads remain the concrete meaning of adaptation, not unrestricted live-generated plot.
-
-Presentation should identify the piece as contemporary authored work imagining a historical encounter, with its actual production and review status. It should not imply that the generated composition is a historical painting or that invented actions are documented events. Existing cultural and provenance review applies inside the gallery frame as it does at the hearth.
-
-Test before revising the scope: does the frame make entry clearer; does seeing the same composition acquire depth strengthen the reveal; does returning to it make visitors notice a detail differently; and do they still understand the characters and their own influence? If it passes, update IT-P01, opening/return staging and asset estimates together. Keep the detailed story, hands, saved-visit and acceptance work above as the first exhibit's foundation.
+**Next implementation increment:** P01 and P02. Produce a rough 60–90-second gallery → painting → gourd → gallery sequence using existing art, plus safe-context/vignette scripts and a paired hospitality capture. The gallery is the selected direction; compare staging treatments within it rather than retesting whether the product should be a gallery. Reuse the current application and question pipeline, keep it behind an explicit prototype configuration, and review it before expanding final asset production. No new paid generation or complete chapter rebuild is necessary to answer that first product question.

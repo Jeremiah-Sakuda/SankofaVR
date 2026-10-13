@@ -1,28 +1,28 @@
 # Sankofa — delivery and validation plan
 
-Updated October 13, 2026 · Current sprint proposal for the illustrated-theatre direction
+Updated October 13, 2026 · Current sprint plan for the selected living-gallery direction
 
-The [PRD](prd.md) records the broader product requirements; the [backlog](../backlog.md#current-illustrated-theatre-sprints) contains sprint tickets. The schedule below follows the detailed illustrated theatre scope for planning from the current build. The September baseline is preserved later in this file as history, not a description of the present repository.
+The [PRD](prd.md) records the broader product requirements; the [backlog](../backlog.md#current-illustrated-theatre-sprints) contains sprint tickets. The schedule below follows the detailed living gallery scope for planning from the current build. The September baseline is preserved later in this file as history, not a description of the present repository.
 
 ## Current sprint plan
 
-October 13: the [illustrated theatre product scope](illustrated-theatre-scope.md) is the current detailed proposal. It supersedes the October 11 allocation and the later [first-place proposal](first-place-plan.md). It preserves hardware, cultural, participant and release gates. The original PRD remains the broader contract; this narrower authored candidate does not complete generated planning, live conversation or additional-language requirements.
+October 13: the [living gallery product scope](illustrated-theatre-scope.md) reflects the user-selected direction: Sankofa is the gallery and *What We Carry* is its first exhibit. Implementation details remain proposed. It supersedes the October 11 allocation and the later [first-place proposal](first-place-plan.md). It preserves hardware, cultural, participant and release gates. The original PRD remains the broader contract; this narrower authored candidate does not complete generated planning, live conversation or additional-language requirements.
 
-**Starting point:** package v0.3.0 plus the October 12–13 illustrated polish and interaction fixes. The encounter, questions, passive paths, saved replay and contemporary continuation exist in software. New perspective threads, milk hospitality, painted bookends/coda and physical Keep are proposed work. Rebuild the latest source before testing or distributing: the last recorded APK predates the latest interaction changes.
+**Starting point:** package v0.3.0 plus the October 12–13 illustrated polish and interaction fixes. The encounter, questions, passive paths, saved replay and contemporary continuation exist in software. Gallery/frame entry and return, new perspective threads, reveal-aware griot context, milk hospitality, painted coda and exhibit-side Keep are proposed work. Rebuild the latest source before testing or distributing: the last recorded APK predates the latest interaction changes.
 
-**Recommendation:** prove the painted entry, direct object question and visible hospitality consequence with current assets, then build two short authored revelations around the existing agreement. Preserve one complete silent route, one-hand use and a coherent ending. See the scope for journey timing, storyboards, interaction/state rules, asset limits, user stories and test cases.
+**Next step:** prove gallery → framed painting → spatial encounter → framed return with current assets, alongside a safe contextual question and visible hospitality consequence. Then build two short authored revelations around the existing agreement. Preserve one complete silent route, one-hand use and a coherent ending. See the scope for journey timing, storyboards, interaction/state rules, asset limits, user stories and test cases.
 
 ### Scope and capacity
 
-Provisional capacity remains 12–15 focused user hours/week. The revised estimate is **52–65 user hours plus 10 hours contingency**, or **62–75 hours**, and **76–112 hours of assisted engineering effort**. Engineering effort includes integration/testing and is not an unattended-cycle promise; some review time overlaps the two columns. At 12 hours/week, trim at least two hours from the low plan or add capacity. Re-estimate after the first probe. Hardware and reviewer lead times remain independent dependencies.
+Provisional capacity remains 12–15 focused user hours/week. The revised estimate is **54–68 user hours plus 10 hours contingency**, or **64–78 hours**, and **82–122 hours of assisted engineering effort**. Engineering effort includes integration/testing and is not an unattended-cycle promise; some review time overlaps the two columns. The gallery replaces external hearth art but adds an estimated 2–3 user hours and 6–10 engineering hours for frame/world continuity and navigation. The low plan exceeds 60 hours by four; the high plan exceeds 75 by three. Simplify nonessential production or add capacity while preserving the reserve. Re-estimate after the first probe. Hardware and reviewer lead times remain independent dependencies.
 
 ### Sprint calendar and exit gates
 
 | Sprint | Dates | User hours | Result and gate |
 |---|---|---:|---|
-| 1 Prove the behavior | Oct 13–19 | 9–11 | Paired prototype, two vignette scripts, three-person comprehension check, baseline device/access findings and review packets |
-| 2 Build the complete telling | Oct 20–26 | 12–15 | Both threads have distinct revelations; invitation/question ownership is clear; reviewed art/audio and milk outcomes work |
-| 3 Make the return complete | Oct 27–Nov 2 | 10–13 | Painted coda, physical Keep, alternate thread, both-parent continuation and legacy replay/forget pass |
+| 1 Prove the gallery promise | Oct 13–19 | 10–12 | Frame/entry/return prototype, paired outcomes, safe context/vignette scripts, three-person comprehension probe and hardware/review preparation |
+| 2 Build the first exhibit | Oct 20–26 | 13–17 | Both perspectives have distinct revelations; contextual griot preserves surprises; entry and ask/receive ownership are clear |
+| 3 Complete the gallery return | Oct 27–Nov 2 | 10–13 | Same painting reframes; exhibit-side Keep/alternate/coda and both-parent/legacy persistence pass |
 | 4 Verify and simplify | Nov 3–9 | 12–14 | Formative novice targets assessed, ten complete device visits, meaningful profile/recovery evidence and review corrections |
 | 5 Present and release | Nov 10–16 | 9–12 | Frozen candidate installed independently; real-runtime demo and accurate materials; submission when authorised |
 
@@ -32,7 +32,7 @@ Internal target remains November 16. November 17–18 is contingency, with the o
 
 The current ticket sequence is IT-P01–IT-P11 in the [backlog](../backlog.md#current-illustrated-theatre-sprints). Critical path: prototype and story → route/interaction integration → kept return → user/device acceptance → release. Review and hardware preparation proceed alongside development; a quality governor or simulator cannot close their gates.
 
-Cut optional stick feeding, animal approach, peripheral scenery and decorative effects first. Simplify vignette art before deleting its unique revelation. Preserve the illustrated modern ending, hospitality without penalty, truthful passive outcomes, cultural review and device testing. If only one thread fits, record that reduction and narrow the product claim explicitly. Do not consume the acceptance/submission reserve to disguise overruns.
+Stick feeding, a second lobby and a catalogue browser are outside this release. Cut animal approach, peripheral scenery and decorative effects first. Simplify vignette art before deleting its unique revelation. Preserve recognizable frame/world continuity, the illustrated modern ending, spoiler-safe context, hospitality without penalty, truthful passive outcomes, cultural review and device testing. If only one thread fits, record that reduction and narrow the product claim explicitly. Do not consume the acceptance/submission reserve to disguise overruns.
 
 A checked software ticket is not a cultural, participant or device pass. Save concise evidence tied to build/commit and retain private raw material outside Git. No purchases, reviewer messages or public submissions are authorised merely by this plan.
 

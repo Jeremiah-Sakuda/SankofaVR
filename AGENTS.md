@@ -18,7 +18,8 @@ Follow [the modular architecture](docs/architecture.md). Keep story rules indepe
 
 ## Product direction
 
-- The fire is the griot: a warm voice, expressive fire states and stationary transitions into spatial stories. A humanoid narrator is not required.
+- Sankofa is a living gallery; *What We Carry* is its first exhibit. Follow the [current scope](docs/product/illustrated-theatre-scope.md): a framed painting becomes a spatial story and returns to the same frame. This selected direction is not yet implemented.
+- The griot remains a warm contextual narrator, with fire as its presence in the first artwork. Narration and questions respect beat/route reveal boundaries; do not explain a story turn before it happens. A humanoid host is not required.
 - Personalisation must change observable story content. A fixed film or cosmetic name substitution does not satisfy the PRD.
 - All essential flows work with hands; voice is optional. Include passive progression, one-hand alternatives, captions, reduced motion and recovery.
 - No AI-generated music. Generated story, narration and visual assets are proposed tools, subject to actual quality, rights and device evidence.
@@ -27,7 +28,7 @@ Follow [the modular architecture](docs/architecture.md). Keep story rules indepe
 - Application state owns timing and permitted actions. Validate plans against source claims and available assets, cancel stale responses, and save realised content for exact replay.
 - Full seated VR is the baseline. MR hearth placement is conditional on meaningful room behaviour and reliable fallbacks. Head direction is not eye tracking or consent.
 - Provide local interaction feedback and a full bundled story when services are unavailable; label fallback capability accurately.
-- Saving is explicit. Keep story history separate from room placement, minimise stored personal data and verify provider retention before promising privacy behaviour.
+- Saving is explicit. Keep memories beside their gallery exhibit without rewriting the canonical painting. Keep story history separate from room placement, minimise stored personal data and verify provider retention before promising privacy behaviour.
 
 ## Current workspace boundaries
 

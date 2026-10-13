@@ -1,8 +1,10 @@
 # SankofaVR
 
-**Sankofa — a story that notices what you notice.**
+**Sankofa — Step inside the story.**
 
-A hands-first storytelling experience for Meta Quest. You sit at a night fire, and the fire is the griot. It welcomes you, asks when you would like to go, and brings a history into the space around you without moving you. You enter through its flame. People emerge in firelight; you carry, receive and touch things, and the story changes with what you did. You return to the hearth with a keepsake and a thread to follow next time.
+The selected direction is a living art gallery for Meta Quest: encounter a painting, enter its composition, experience a story that responds to your perspective and actions, then return to the same work understanding it differently. **What We Carry** is the first exhibit. The griot supplies context without revealing the story ahead of time; the fire remains its presence inside the artwork. Entry and exploration work while seated.
+
+The [living gallery product scope](docs/product/illustrated-theatre-scope.md) specifies the frame-to-world journey, two authored perspectives, contextual narration and exhibit-side memories. **The current build is still the illustrated-theatre prototype described below.** Gallery entry/return and those new story features are planned, not yet implemented.
 
 The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. Fictional encounters draw on the regional history of Kikuyu–Maasai trade. The baseline package visits two eras and today:
 

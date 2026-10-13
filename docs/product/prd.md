@@ -1,21 +1,22 @@
 # Sankofa — product requirements
 
-Version 1.0 · September 30, 2026 · Product direction selected; implementation and validation pending
+Version 1.1 · October 13, 2026 · Living gallery direction selected; implementation and validation pending
 
-**October 13 release-planning note:** the [illustrated theatre product scope](illustrated-theatre-scope.md) is the current detailed proposal: two authored perspectives, tangible hospitality, explicit contextual questions and a coherent kept return. The existing v0.3.0 build implements an authored encounter and saved continuation, not those proposed additions. Generated plans, freeform requests, live conversation and additional-language acceptance below remain broader requirements and are not fulfilled by this narrower candidate. The scope does not silently mark SK-03/04, SK-06 or SK-09 complete.
+**October 13 direction update:** the user selected Sankofa as a living gallery, with *What We Carry* as its first artwork, and retained the griot as a narrator who fills contextual gaps without revealing the story ahead of time. The [living gallery scope](illustrated-theatre-scope.md) defines the current candidate: frame-to-world entry, two authored perspectives, tangible hospitality, contextual questions and a meaningful return to the painting. The v0.3.0 runtime remains the theatre prototype; these gallery additions are not implemented. Generated plans, freeform input, live conversation and additional-language acceptance remain broader requirements below, unfulfilled by this narrower candidate.
 
-**A story that notices what you notice.**
+**Sankofa — Step inside the story.**
 
-Sankofa welcomes you around a living fire, listens to the histories and questions that brought you there, and brings a personalised story into the space around you. The fire is the griot: its voice, movement, light and pauses create the sense of someone being present. You enter its stories through the flame and return to the same hearth carrying something that now has meaning.
+Sankofa is an art gallery whose paintings become experiences. Visitors encounter a work, enter its composition without needing to walk, follow a story shaped by their interests and actions, and return to the same painting understanding it differently. The griot welcomes and supplies context at the moment it is useful, leaving motives and decisions to unfold. In the first exhibit the fire is its visible presence. A memento beside the framed work can preserve an explicitly kept visit and offer another perspective.
 
-This is the current product contract. It supersedes the Nafasi concert proposal. The [delivery plan](delivery-plan.md), [backlog](../backlog.md) and [decision record](../decisions.md) distinguish proposed work from evidence. Existing music code and research remain preserved in the previous Nafasi workspace. A first Unity slice with a placeholder story now exists in software; no on-device result exists yet.
+This is the current product contract. It supersedes the Nafasi concert proposal. The [delivery plan](delivery-plan.md), [backlog](../backlog.md) and [decision record](../decisions.md) distinguish proposed work from evidence. Existing music code and research remain preserved in the previous Nafasi workspace. The authored illustrated encounter exists in software; the gallery shell and on-device acceptance remain pending.
 
 ## 1. Product decisions and planning assumptions
 
 | Item | Status |
 |---|---|
 | Product name: **Sankofa** | User selected |
-| Fire as the warm storyteller; entering stories through the fire | User-selected direction developed in this PRD |
+| Living gallery; *What We Carry* as first exhibit; same painting before and after the visit | User selected October 13; replaces the standalone hearth lobby/closing framing |
+| Griot as contextual narrator; fire as its presence in the first artwork | User retained October 13; reveal-aware guidance and optional questions |
 | Personalised stories based on visitor input; immersive surroundings | Core product requirement |
 | Broad histories, backgrounds, familiar voices and languages | Long-term ambition; supported coverage must be explicit |
 | No AI-generated music | User constraint; applies to production experiments and shipped content |
@@ -24,7 +25,7 @@ This is the current product contract. It supersedes the Nafasi concert proposal.
 | Unity; standalone Quest 3 as initial test device | Planning baseline; no headset validation or new package choice implied |
 | Seated, hands-first, voice optional; full VR story scenes | Competition baseline |
 | Room-aware MR hearth | Conditional extension; a complete experience cannot depend on a table, wall or room permission |
-| One deeply supported setting, three story routes, two narration languages | Proposed competition scope; reviewed location/era and second language remain to be selected |
+| Current candidate: one gallery exhibit, two authored perspectives and a modern continuation, English narration | Detailed in the living gallery scope; broader generated-route and second-language requirements remain open |
 | Solo, part-time; new to VR | User-confirmed capacity profile; weekly hours, budget and current headset access unresolved |
 
 The user authorised this PRD. Quantities, timings, language candidates and gates below are planning defaults, not independently approved or measured facts. Revising them must retain the core promise or explicitly revise the product claim.
@@ -46,11 +47,12 @@ The desired outcome is a complete, emotionally legible encounter: the visitor un
 - **Specificity earns familiarity.** Language, voice, historical context and visual design need separate review.
 - **Evidence remains distinguishable from imagination.** Immersion must not manufacture certainty about the past.
 - **Silence is a complete way to participate.** Hands can complete the entire flow; optional invitations never trap a passive listener.
-- **The hearth offers continuity.** A session ends at a familiar place and leaves a meaningful route back.
+- **Return changes how the painting is seen.** The same framed work offers continuity, a kept memento and another perspective.
+- **Context preserves discovery.** The griot makes unfamiliar details understandable without pre-explaining unreached story turns.
 
 ## 3. Ambitious end state and competition scope
 
-The long-term product is a growing collection of histories that the fire can tell through different voices, languages and perspectives. Visitors can bring interests and permitted personal material, revisit threads, and discover connections across places and periods. New content expands what the world can represent. Shared visits and contributor tools may follow after the solo experience works.
+The long-term product is an explorable gallery of artworks with distinct voices, languages, histories and perspectives. Each opens into an experience and returns to its recognizable frame. Visitors can bring interests and permitted personal material, revisit threads, and discover connections across places and periods. New content expands what the world can represent. Shared visits and contributor tools may follow after the solo experience works.
 
 "All backgrounds" is an inclusion goal, not a claim of universal historical or language coverage. Every released context has a declared place, period, source base, visual inventory and review status. An unfamiliar context is never silently mapped to a nearby country or a generic culture.
 
@@ -59,15 +61,15 @@ The long-term product is a growing collection of histories that the fire can tel
 | Setting and stories | One reviewed place/period, at least two interest themes, at least three materially different scene plans, one complete closing beat per plan | A second distinct cultural setting is P1; universal historical coverage is a roadmap goal |
 | Personalisation | Freeform voice request within supported coverage; equivalent hands-based context/theme choices; generated wording and selection of compatible scene beats | Arbitrary worlds and unrestricted plot invention |
 | Languages | English plus one reviewed narration language, with English subtitles; English live conversation initially | Second-language live conversation and code-switching require separate acceptance; broader language catalogue later |
-| Narrator | One fire persona with coherent voice and expressive states | Voice catalogue and multiple storyteller traditions |
-| Visuals | One polished hearth, one fire-entry transition, a reusable scene kit, two inspectable story objects, one consequential hand moment | Crowds, complex humanoid performances, live generation of new geometry |
+| Narrator | Contextual griot with a coherent voice; fire presence within the first artwork; explicit reveal boundaries | Voice catalogue and distinct narrators for later artworks |
+| Visuals | One gallery setting and framed composition, a matched entry/return, reusable scene kit, two inspectable objects and a consequential hand moment | More exhibits, crowds, complex humanoid performances, live geometry generation |
 | Return | Local visit memory, one meaningful continuation, explicit replay and deletion | Accounts, cloud sync, social visits, genealogy services |
 | Reliability | Complete bundled story and hands path without network; transparent recovery from generation failure | Offline generative model |
 | Presentation | Full immersive seated story; adjustable forward placement and reduced-motion transition | MR hearth with meaningful room behaviour, after device proof |
 
-**Initial content candidate:** a specific Swahili-coast place and period, with English and Kiswahili narration. This is a proposal because of the existing East African context and earlier language discussion. Choose the actual place, era and language pair after checking sources, reviewer availability, voice quality and asset feasibility. Do not treat an entire coast or language community as one uniform setting.
+**First exhibit:** *What We Carry*, the Enkare Nairobi encounter with fictional Wambui and Naserian, plus the modern river continuation. The earlier Swahili-coast candidate is superseded. Cultural/material review and Maa delivery remain pending. English is the scoped first-release narration; the second-language requirement above remains open.
 
-One authored demonstration remains useful for visual testing, but it cannot by itself satisfy the personalisation requirement. The release needs genuinely different generated performances inside supported boundaries.
+The scope's two authored perspectives must change scenes and revelations before the ending. They do not satisfy the broader requirement for generated performances from freeform requests. Claims and release acceptance must distinguish those capabilities.
 
 ## 4. Experience and journey
 
@@ -75,21 +77,20 @@ One authored demonstration remains useful for visual testing, but it cannot by i
 
 | Moment | Visitor experience | Product behaviour |
 |---|---|---|
-| Arrive | A fire, close crackling, space to settle; “Come. Sit with me.” | Local assets start immediately; no network or room scan needed to see the hearth |
-| Settle | Adjust placement, captions, language and sound; use a simple nearby control | Hands tutorial is one meaningful interaction; one-hand path available |
-| Bring a question | Choose a context and interest, or optionally speak | Show what the system understood; ask only for missing essentials; keep ancestry and language choices independent |
-| Gather the story | Shapes hint at the supported setting in smoke or embers | Prepare and validate the story; display a clear waiting state and an immediate bundled-story option |
-| Enter | Fire grows into a soft curtain of light; an ember becomes a light in the story | Scene transforms around a stationary viewpoint; narration and sound remain continuous |
-| Discover | Observe, inspect an object, ask a question, or accept an invitation | Respond locally to hands immediately; adapt a permitted next beat to explicit interest |
-| Become consequential | Receive, place or hold an object with a clear narrative consequence | Confirm intent; show the consequence and preserve it in story state |
-| Understand differently | An earlier object or scene gains new significance | Deliver a coherent reveal grounded in what actually occurred |
-| Return | The world folds into the hearth; a keepsake remains | Offer save, replay, a specific next thread or leave; no account needed |
+| Encounter the artwork | One framed painting, the two women by the water, firelight and a welcoming voice | Gallery renders locally; title/context and nearby Enter controls; browsing does not auto-enter |
+| Choose a perspective | Enter the default telling, or deliberately follow the gourd or bead motif | Same essential hands/one-hand path; do not infer interest from a glance |
+| Receive the invitation | Ember, concise reconstruction disclosure and any needed place context | One optional gesture; no second lobby/tutorial; narrator preserves unrevealed motives |
+| Enter the composition | Familiar landmarks separate into depth around the seat | One stationary frame-to-world transition; reduced-motion equivalent |
+| Discover | Inspect, ask explicitly or accept an invitation | Griot offers safe contextual guidance and questions at the appropriate beat; short vignettes differ by route |
+| Become consequential | Carry flour and see how hospitality responds | Resolve deliberate actions once; passive visitors remain welcome |
+| Understand differently | An earlier object or scene gains significance | Characters make their own agreement; the reveal earns its meaning |
+| Return to the artwork | World settles back into the same frame | Explicit keep/replay/other thread/continuation beside the work; no account or automatic save |
 
-The baseline visit targets 5–8 minutes without extended questions, with a satisfying stopping point by 10 minutes. Visitor-controlled pauses are excluded from this timing. A return visit can skip the welcome monologue. The original web intro's timing is a reference; the VR introduction continues through interaction rather than imposing a fixed 98-second gate.
+The scoped first exhibit targets 7–9 minutes from Enter without extended questions, with a complete passive visit within ten minutes. Gallery browsing and visitor-controlled pauses are excluded. Repeat visits skip the first-use introduction. The web intro is an inspiration, not a fixed time gate.
 
 ### Returning visit
 
-The fire recalls a chosen object or question only when it was saved. The keepsake offers **Replay this visit** and **Follow this thread** as different actions. A continuation introduces a new perspective, fact or consequence tied to that saved interest. An empty shelf offers a new beginning without claiming a prior relationship.
+The gallery restores the exhibit and only explicitly retained personal mementos. **Replay this visit**, **Follow the other thread** and **Visit the water today** are distinct actions. The griot recalls only saved events and does not claim that browsing selected a perspective. A new visit is clearly different from replay. The canonical framed painting remains unchanged; its meaning changes through the visitor's experience. Deletion removes retained personal memory without deleting the artwork.
 
 ### Optional MR hearth
 
@@ -107,26 +108,27 @@ All stories below are planned; none is marked implemented by inclusion in this d
 | US-04 | my choices to change the places, objects and moments I encounter | the story feels relevant to me | P0 | SK-04, SK-08 |
 | US-05 | to know when a requested setting is unsupported | I can choose a supported experience knowingly | P0 | SK-03, SK-05 |
 | US-06 | narration in a familiar language with clear subtitles | I can understand and connect with the story | P0 | SK-06 |
-| US-07 | to enter the story while remaining comfortably seated | the transformation feels inviting | P0 | SK-07, SK-15 |
+| US-07 | to enter the painting while remaining comfortably seated | I recognize the artwork becoming a world around me | P0 | SK-07, SK-15 |
 | US-08 | to inspect something and see a meaningful response | my physical participation matters | P0 | SK-08, SK-10 |
 | US-09 | to interrupt with a question and resume naturally | exploration does not lose the narrative | P0, in accepted live languages | SK-09, SK-10 |
 | US-10 | to simply listen when I choose | I can enjoy the story without performing tasks | P0 | SK-02, SK-08 |
 | US-11 | to understand what is documented or imagined | I can enjoy the story without confusing reconstruction with fact | P0 | SK-05 |
-| US-12 | to return to an unfinished interest | a later visit offers meaningful continuity | P0 | SK-12 |
+| US-12 | to return to the same artwork with a new understanding and another perspective to follow | a later visit offers meaningful continuity | P0 | SK-12 |
 | US-13 | to replay a saved experience | I can revisit what happened without it being rewritten | P0 | SK-12, SK-13 |
 | US-14 | to pause, recover or continue when a service fails | a technical interruption does not strand me | P0 | SK-10, SK-13, SK-14 |
 | US-15 | to control what is saved or sent | personal exploration remains under my control | P0 | SK-16 |
 | US-16 | to adjust motion, text, reach and audio | I can find a comfortable way to participate | P0 | SK-02, SK-06, SK-15 |
 | US-17 | the fire to fit my actual room | its physical presence feels grounded | P1 | SK-17 |
 | US-18 | different histories to have their own visual and storytelling specificity | expansion feels respectful and substantial | P0 in released coverage; broader P1 | SK-05, SK-06, SK-11 |
+| US-19 | the narrator to clarify unfamiliar context without giving away the story | I understand the setting while discovering its turns myself | P0 | SK-01, SK-05, SK-09, SK-10 |
 
 ## 6. Functional requirements and acceptance
 
-### SK-01 — Fire presence and opening
+### SK-01 — Gallery welcome and contextual griot
 
-The fire is the narrator. No humanoid host is required. Its states include welcoming, listening, gathering, telling, holding for a question, transitioning and resting. Voice, light and motion share explicit cues. The opening line is preserved in English; approved equivalents serve other narration languages.
+The gallery welcomes visitors through its first artwork. The griot remains warm and restrained, with fire as its visible presence inside *What We Carry*. A humanoid host is unnecessary. Voice, firelight and narrative pauses share cues. Context is introduced when needed, and optional questions respect what has been revealed. A glance may produce acknowledgement but never an unrequested explanation or automatic entry.
 
-**Accept when:** the hearth starts without network; welcome, listen and tell states are recognisable in review; the visitor can act during the opening; repeated visits can skip it; no state requires a humanoid animation or cloud call to animate the fire.
+**Accept when:** the gallery and welcome work offline; Enter and perspective controls work seated; the narrator makes names/materials/context legible without spoiling motives or turns; no duplicate welcome intervenes between frame and story; a quiet visitor can complete the story after explicit entry.
 
 ### SK-02 — Hands and onboarding
 
@@ -148,7 +150,7 @@ Generate a structured story from confirmed intent, retrieved approved facts and 
 
 ### SK-05 — Historical integrity
 
-Preserve three distinct evidence states: documented context with source references; visitor-provided accounts labelled as such; and imaginative reconstruction. Cultural statements also require sources and specificity. A model-applied label is not verification. Maintain claim-level evidence links, the reviewed source version and uncertainty in the plan. Offer a concise introduction to reconstruction and an optional hands-accessible source/details view.
+Preserve three distinct evidence states: documented context with source references; visitor-provided accounts labelled as such; and imaginative reconstruction. Cultural statements also require sources and specificity. A model-applied label is not verification. Maintain claim-level evidence links, the reviewed source version and uncertainty in the plan. Offer a concise introduction to reconstruction and an optional hands-accessible source/details view through the artwork placard or questions panel. The contemporary composition is not presented as a historical painting.
 
 **Accept when:** no output asserts a specific ancestor's actions from a surname or location; historical claims in the release evaluation link to reviewed evidence; fictional people/dialogue are labelled reconstruction; unsupported claims are removed, qualified or returned for review. A realistic image never changes an uncertain claim into a documented one.
 
@@ -160,11 +162,11 @@ English subtitles must accompany non-English competition content, including dyna
 
 **Accept when:** fluent reviewers approve the released second-language sample and interface text; captions accurately follow all release paths; unsupported live languages have clear hands-based question options; the app never switches language or voice silently on error.
 
-### SK-07 — Entering and leaving through fire
+### SK-07 — Entering the painting and returning to its frame
 
-The signature transition expands light, smoke and scene scale around a stationary viewpoint. One element crosses the transition coherently: an ember becomes a lantern, a pattern becomes a landscape feature, or another content-approved correspondence. Preserve hand visibility or clear interaction status during transitions. Include a restrained dissolve alternative, pause and return-to-hearth control.
+The first work's framed composition opens into its spatial scene. Firelight and the ember motivate the transformation; characters, objects and landmarks keep recognizable identities. The visitor's camera never translates, rotates or accelerates. Return restores the same exhibit orientation and canonical composition, with personal mementos beside it. Preserve hands or a clear interaction state, a reduced-motion dissolve, pause and early return.
 
-**Accept when:** no mandatory camera translation, acceleration or rotation is used; a visitor can interrupt and return safely to the hearth; both transition variants preserve the same story state and spatial orientation; users recognise a shared element on both sides.
+**Accept when:** first-time viewers recognize the painting inside the story and on return; a tangible object crosses from a painted palm into reach; normal and reduced-motion variants preserve state/orientation; cancellation returns to the correct exhibit without saving or completing unseen events.
 
 ### SK-08 — Attention and consequence
 
@@ -176,13 +178,13 @@ Every release plan has at least one observable consequence tied to a deliberate 
 
 ### SK-09 — Interruptible conversation
 
-In supported live languages, visitors can interrupt narration, ask about the current scene, and resume. Questions are answered using the current objects, revealed facts and story position. The narrator avoids spoilers, acknowledges uncertainty and redirects unrelated requests gracefully. The fire supplies local listening feedback before remote speech arrives.
+In supported live languages, visitors can interrupt narration, ask about the current scene, and resume. Questions are answered using the current objects, revealed facts and story position. The narrator avoids spoilers, acknowledges uncertainty and redirects unrelated requests gracefully. The authored first exhibit uses a beat/route context and revealed-fact map for narration, hints, question prompts and answers; the same disclosure boundaries apply to any later live adapter. The fire supplies local listening feedback before remote speech arrives.
 
 **Accept when:** interruption stops the current speech promptly; a reply about a selected object refers to the correct instance; resume does not repeat a completed consequence or skip an unheard reveal; a delayed answer from an earlier scene is discarded. Equivalent contextual questions are available by hand.
 
 ### SK-10 — Runtime story control
 
-The application owns state, timing and permitted scene actions. Model output is a proposal validated against available assets, current beat and evidence permissions. Use explicit story, beat, object and request identifiers. Permit bounded actions such as reveal object, illuminate target, offer object, choose next beat and return to hearth. Models cannot execute arbitrary code, load arbitrary URLs or overwrite confirmed history.
+The application owns state, timing and permitted scene actions. Model output is a proposal validated against available assets, current beat and evidence permissions. Use explicit story, beat, object and request identifiers. Permit bounded actions such as reveal object, illuminate target, offer object, choose next beat and return to the exhibit in the gallery. Models cannot execute arbitrary code, load arbitrary URLs or overwrite confirmed history.
 
 **Accept when:** malformed, unavailable, contradictory, stale and duplicate actions fail without changing the world; only one narrator owns the audio turn; interrupted speech cannot later cause a queued visual reveal; validated story assets are ready before the corresponding line is spoken.
 
@@ -196,7 +198,7 @@ No AI-generated music is used. Human-made music is optional and needs a concrete
 
 ### SK-12 — Memory, replay and return
 
-With save enabled, store the visitor's accepted choices, realised story plan, asset/content versions, narration/captions required for replay, chosen language, consequence history and next thread. Exact replay refers to the saved realised visit and does not regenerate wording. A follow-up is a new child visit, labelled as such, which can acknowledge a retained interest without fabricating memory.
+With explicit save, store the visitor's accepted choices, realised story plan, asset/content versions, narration/captions required for replay, chosen language, consequence history and next thread. Resolve each kept visit to its exhibit so gallery relaunch restores the correct memento and work without altering the canonical painting. Exact replay refers to the saved realised visit and does not regenerate wording. A follow-up is a new child visit, labelled as such, which can acknowledge a retained interest without fabricating memory.
 
 **Accept when:** a second visit offers a genuinely new perspective tied to the first; replay preserves the earlier content; missing cached content is reported and cannot silently become a new version; deletion removes the keepsake and the local remembered thread.
 
@@ -210,7 +212,7 @@ Pause audio, scene progression and pending input together. Save at stable beat b
 
 Bundle a complete authored story, narration, captions, hand interactions and ending. Live personalisation may use a service; the fallback clearly explains when that capability is unavailable. Local interaction feedback and already-loaded story playback do not wait for inference. Provide a visible escape from loading from the outset; one failed generation cannot trigger an unbounded retry loop.
 
-**Accept when:** offline cold start reaches the hearth and a full story; failure during a question returns to the current beat; incomplete or invalid generation cannot enter the stage; users can retry or select the bundled story without losing confirmed preferences. Do not describe the bundled path as a newly generated personal story.
+**Accept when:** offline cold start reaches the gallery and a full exhibit; failure during a question returns to the current beat; incomplete or invalid generation cannot enter the stage; users can retry or select the bundled story without losing confirmed preferences. Do not describe the bundled path as a newly generated personal story.
 
 ### SK-15 — Comfort, accessibility and performance
 
@@ -246,7 +248,7 @@ The target is material richness and coherent depth: convincing fire, textured ob
 
 | Layer | Production approach | Acceptance focus |
 |---|---|---|
-| Hearth and fire | Authored Unity geometry, effects, lighting and recorded/procedural ambience | Warm presence, legible states, restrained smoke/transparency cost |
+| Gallery, frame and fire | Modest authored gallery/ledge, matched painting preview, fire and local ambience within the exhibit | Recognizable composition before/inside/after, accessible labels, warm narrator, restrained cost |
 | Setting | Reviewed reference art; editable mesh kit; generated spatial background only if qualified | Correct context, near/far consistency, stable depth during head movement |
 | Story objects | Modelled/scanned assets or image-to-3D candidates cleaned up in Blender | All sides, pivots, scale, handling, identity across scenes |
 | Story people | Limited authored or licensed performances where needed | Appropriate clothing, posture and timing; no untested crowd dependency |
@@ -261,13 +263,14 @@ Proposed flow: **confirmed intent → approved context and capability inventory 
 
 The planner is constrained by what the application can stage. It can vary focus, sequence, point of view, permitted relationships and narration. Historical facts remain fixed by reviewed evidence. Scene composition must be validated before narration describes visible objects or actions. Deep research or new-world generation occurs outside the live critical path.
 
-At runtime, a small state machine owns Hearth, Preparing, Ready, Entering, Story, Question, Paused, Returning and Closing. Errors return to a recoverable state. Playback uses explicit narrative cues tied to audio completion; translated audio duration is measured rather than reusing English timestamps. Word-level timing is not assumed from a provider unless verified.
+The planned gallery flow owns GalleryPreview, Entering, Story, Question, Paused, Reframing and ExhibitClosing. Preparation states remain necessary only for later generated content. This is a target behavior contract, not a claim that current classes already use these states. Errors return to a recoverable state. Playback uses explicit narrative cues tied to audio completion; translated audio duration is measured rather than reusing English timestamps. Word-level timing is not assumed from a provider unless verified.
 
 The minimum proposed data contract is:
 
 | Record | Necessary information |
 |---|---|
 | Visitor intent | Confirmed context, period, themes, language, input mode and save preference |
+| Exhibit | Stable identity, title, accurate placard/credits, preview/layout references, routes and continuation mapping |
 | Context package | Coverage limits, claim/source IDs, cultural review, terminology and asset inventory version |
 | Story plan | Stable IDs, beats, assets, facts/reconstruction markers, legal actions, reveals, endings and continuation |
 | Narration | Text, locale, voice/version, audio, captions and scene cues |
@@ -282,7 +285,7 @@ These are proposed targets to test, not achieved results or statistically valida
 
 | Measure | Initial acceptance target | Evidence |
 |---|---|---|
-| Local cold start | Interactive hearth within 10 seconds on test hardware | 10 cold starts with device/build recorded |
+| Local cold start | Interactive gallery and Enter control within 10 seconds on test hardware | 10 cold starts with device/build recorded |
 | First participation | A meaningful hands action available within 30 seconds after readiness | Observed first-time sessions |
 | Generation wait | Valid story ready within 20 seconds at p95 on the selected test network; at 20 seconds offer explicit recovery | At least 30 requests, timing boundaries and network conditions recorded; revise provider/scope if unmet |
 | Live response | Local acknowledgement within 150 ms; first meaningful reply audio within 2 seconds median and 4 seconds p95 after confirmed end of input | At least 30 turns; distinguish speech detection, provider time and playback |
@@ -326,7 +329,7 @@ The adaptation narrative is the change from a web-based heritage narrative with 
 
 ## 12. Completion definition and next work
 
-The competition build is complete only when a new visitor can enter the hearth, supply an interest by hands or supported speech, experience a coherent personalised spatial story, recognise a consequence of participation, return with a keepsake, and revisit a remembered thread. It must also complete its documented fallback, accessibility, privacy and recovery paths, with device and content evidence.
+The competition build is complete only when a new visitor can encounter and enter the artwork, supply an interest by hands or supported speech, experience a coherent personalised spatial story, recognise a consequence of participation, return to the same painting with a keepsake, and revisit a remembered thread. The scoped candidate uses authored perspectives; the broader generated-input acceptance remains open. It must also complete its documented fallback, accessibility, privacy and recovery paths, with device and content evidence.
 
 First prove the fire and transition in a 30–45-second visual slice. Separately, prove structured personalisation using two contrasting inputs and approved scene capabilities. Combine them before expanding content.
 

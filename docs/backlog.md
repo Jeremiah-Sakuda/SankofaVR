@@ -6,17 +6,17 @@ A checked item means the named artifact exists. It does not imply device, conten
 
 ## Current illustrated-theatre sprints
 
-October 13: use the [detailed product scope](product/illustrated-theatre-scope.md) and [current delivery plan](product/delivery-plan.md#current-sprint-plan). This is a scoped implementation proposal; the items below are not yet implemented or accepted. The earlier S1–S5 tickets remain as historical evidence below and are not an additional workload. Generated planning, live conversation and additional narration language remain open in the broader PRD.
+October 13: use the [detailed product scope](product/illustrated-theatre-scope.md) and [current delivery plan](product/delivery-plan.md#current-sprint-plan). The user selected the living gallery framing: *What We Carry* is the first exhibit, with a contextual griot. The items below are not yet implemented or accepted. The earlier S1–S5 tickets remain as historical evidence below and are not an additional workload. Generated planning, live conversation and additional narration language remain open in the broader PRD.
 
-- [ ] IT-P01 — Prove painted entry, direct object question and paired hospitality outcomes with current assets and a three-person comprehension check.
-- [ ] IT-P02 — Write two short vignette scripts/storyboards and claim map; prepare and incorporate specific cultural/editorial review.
+- [ ] IT-P01 — Prove gallery → framed painting → depth → gourd → gallery, direct question and paired hospitality with current assets and three-person comprehension.
+- [ ] IT-P02 — Write exhibit placard, two vignette scripts, griot context/reveal map and claim map; incorporate cultural/editorial review without spoilers.
 - [ ] IT-P03 — Obtain current-build hardware baseline; prepare release identity/signing and independent access with human account decisions.
-- [ ] IT-P04 — Add validated thread selection, default provenance, shared beats and both-parent continuation eligibility; preserve legacy saved routes.
+- [ ] IT-P04 — Add exhibit metadata, explicit gallery entry, validated thread/default selection and both-parent continuation; preserve legacy saved routes.
 - [ ] IT-P05 — Implement explicit object question chips and question/invitation arbitration, cancellation and resume with one-hand alternatives.
 - [ ] IT-P06 — Stage milk hospitality from the actual flour placement outcome; test accepted/default milk on both paths and single-object ownership.
 - [ ] IT-P07 — Produce and integrate the two bounded vignettes, reviewed cast responses and versioned narration.
-- [ ] IT-P08 — Match painted hearth, historical encounter and modern coda; integrate stationary reveal, reduced motion and restrained local sound; profile on hardware.
-- [ ] IT-P09 — Add explicit physical Keep, alternate thread and saved coda outcomes; test relaunch, failed save, legacy replay and forget.
+- [ ] IT-P08 — Match gallery/frame composition, historical encounter and modern coda; integrate stationary reveal/reframe, reduced motion and local sound; profile on hardware.
+- [ ] IT-P09 — Add exhibit-side Keep, gallery return/navigation, alternate thread and coda outcomes; test work/memento identity, relaunch, failed save, legacy replay and forget.
 - [ ] IT-P10 — Run formative users, cultural/listening review and hardware recovery/performance checks; fix observed failures.
 - [ ] IT-P11 — Freeze and independently install the candidate; prepare honest demonstration, adaptation copy and submission materials; publish only when authorised.
 
