@@ -20,6 +20,28 @@ namespace Sankofa.Runtime.Narration
         bool usingClip;
         double elapsed;
         double duration;
+        float volume = 1;
+        float authoredVolume = 1;
+        void Awake() { if (voice != null) authoredVolume = voice.volume; }
+        /// <summary>Zero selects a silent caption timeline using the same recording length, without starting audio.</summary>
+        public float Volume
+        {
+            get => volume;
+            set
+            {
+                volume = Mathf.Clamp01(value);
+                if (voice == null) return;
+                voice.volume = authoredVolume * volume;
+                if (token == 0 || voice.clip == null) return;
+                if (volume == 0 && usingClip) { voice.Stop(); usingClip = false; }
+                else if (volume > 0 && !usingClip && elapsed < duration)
+                {
+                    voice.time = (float)elapsed;
+                    voice.pitch = Mathf.Max(0.01f, Time.timeScale);
+                    voice.Play(); usingClip = true;
+                }
+            }
+        }
 
         public event Action<int> Finished;
         public event Action<int, double> DurationMeasured;
@@ -38,22 +60,22 @@ namespace Sankofa.Runtime.Narration
             var clip = line.Audio != null ? Resources.Load<AudioClip>(ResourceFolder + line.Audio) : null;
             if (line.Audio != null && clip == null)
                 Debug.LogWarning($"[Sankofa] Narration clip '{line.Audio}' for {line.Id} is missing; using caption timing.");
-            usingClip = clip != null && voice != null;
+            duration = clip != null ? clip.length : line.Seconds;
+            if (clip != null) DurationMeasured?.Invoke(lineToken, clip.length);
+            if (voice != null) { voice.clip = clip; voice.volume = authoredVolume * volume; }
+            usingClip = clip != null && voice != null && volume > 0;
             if (usingClip)
             {
                 voice.clip = clip;
                 // Speech follows the time scale, as everything else does; in the experience it is always 1.
                 voice.pitch = Mathf.Max(0.01f, Time.timeScale);
                 voice.Play();
-                duration = clip.length;
-                DurationMeasured?.Invoke(lineToken, clip.length);
             }
-            else duration = line.Seconds;
         }
 
         public void Stop()
         {
-            if (voice != null && voice.isPlaying) voice.Stop();
+            if (voice != null) { voice.Stop(); voice.clip = null; }
             token = 0;
             Level = 0;
         }
@@ -65,11 +87,13 @@ namespace Sankofa.Runtime.Narration
             bool done;
             if (usingClip)
             {
+                voice.pitch = Mathf.Max(0.01f, Time.timeScale);
                 voice.GetOutputData(samples, 0);
                 var sum = 0f;
                 for (var i = 0; i < samples.Length; i++) sum += samples[i] * samples[i];
                 Level = Mathf.Clamp01(Mathf.Sqrt(sum / samples.Length) * 6f);
-                done = !voice.isPlaying && elapsed > 0.1;
+                // A disabled audio device or muted batch process must not collapse the story into 100 ms lines.
+                done = elapsed >= duration;
             }
             else
             {
@@ -79,6 +103,7 @@ namespace Sankofa.Runtime.Narration
             if (!done) return;
             var finished = token;
             token = 0;
+            if (voice != null) { voice.Stop(); voice.clip = null; }
             Level = 0;
             Finished?.Invoke(finished);
         }

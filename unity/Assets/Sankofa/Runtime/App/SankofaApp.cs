@@ -40,9 +40,14 @@ namespace Sankofa.Runtime.App
         [SerializeField] PokePanel controls;
         [Tooltip("Choices and the nearby alternatives to gestures, raised into view where the visitor will see them.")]
         [SerializeField] PokePanel choicesPanel;
+        [SerializeField] Transform choicesStoryAnchor;
+        [SerializeField] TMPro.TMP_Text controlHint;
         [SerializeField] PokePanel questionsPanel;
         [SerializeField] ObjectQuestions objectQuestions;
         [SerializeField] PokePanel settingsPanel;
+        [SerializeField] Transform settingsModalAnchor;
+        [SerializeField] TMPro.TMP_Text settingsHeading;
+        [SerializeField] TMPro.TMP_Text settingsInfo;
         [SerializeField] StoryStage stage;
         [Tooltip("Optional authored acting in the living gallery; comparison scenes use their existing presentation.")]
         [SerializeField] GalleryPerformance performance;
@@ -68,6 +73,12 @@ namespace Sankofa.Runtime.App
         // The settings fold behind one plaque, so the lap holds pause and return and little else.
         bool settingsOpen;
         bool settingsOwnPause, settingsResumePending;
+        bool creditsOpen;
+        string[] creditPages;
+        Vector3 settingsRestPosition;
+        Quaternion settingsRestRotation;
+        Vector3 choicesRestPosition;
+        Quaternion choicesRestRotation;
         int creditsPage;
         StageObject invited;
         HandSource acceptingHand;
@@ -91,6 +102,10 @@ namespace Sankofa.Runtime.App
             OVRManager.useDynamicFoveatedRendering = true;
 #endif
             settings = ExperienceSettings.Load();
+            settingsRestPosition = settingsPanel.transform.localPosition;
+            settingsRestRotation = settingsPanel.transform.localRotation;
+            choicesRestPosition = choicesPanel.transform.localPosition;
+            choicesRestRotation = choicesPanel.transform.localRotation;
             flow = LoadFlow();
             foreach (var hand in hands)
             {
@@ -325,6 +340,7 @@ namespace Sankofa.Runtime.App
                 {
                     case Cue.PhaseChanged p:
                         StageClock.Paused = p.Phase == VisitPhase.Paused;
+                        if (settingsOpen) ShowSettings();
                         if (p.Phase == VisitPhase.Paused) captions.SetCaption("Paused");
                         // The question about returning goes once the visitor has answered it, either way.
                         else if (askedReturn)
@@ -405,6 +421,17 @@ namespace Sankofa.Runtime.App
                     case Cue.Controls c:
                         // Pause and return stay at the lap; every choice comes up into view.
                         var entry = gallery != null && flow.Menu == ChoiceMenu.Interests && (flow.Phase == VisitPhase.Choosing || flow.Phase == VisitPhase.Welcome);
+                        if (controlHint != null) controlHint.enabled = entry && !settingsOpen;
+                        if (choicesStoryAnchor != null)
+                        {
+                            if (flow.Phase == VisitPhase.Story || flow.Phase == VisitPhase.Paused)
+                                choicesPanel.transform.SetPositionAndRotation(choicesStoryAnchor.position, choicesStoryAnchor.rotation);
+                            else
+                            {
+                                choicesPanel.transform.localPosition = choicesRestPosition;
+                                choicesPanel.transform.localRotation = choicesRestRotation;
+                            }
+                        }
                         var lap = c.Options.Where(IsStoryControl).Select(o => (ControlId(o), ControlLabel(o))).ToList();
                         if (entry) lap.Add((ControlKind.Leave.ToString(), "Leave"));
                         controls.Show(lap);
@@ -480,6 +507,7 @@ namespace Sankofa.Runtime.App
         void ApplyModalVisibility()
         {
             controls.Hidden = settingsOpen;
+            if (controlHint != null && settingsOpen) controlHint.enabled = false;
             choicesPanel.Hidden = settingsOpen || (gallery != null && flow?.Phase == VisitPhase.Closing && flow.CurrentLine != null);
             var hideQuestions = settingsOpen || receiver.Open || toucher.Open;
             questionsPanel.Hidden = hideQuestions;
@@ -657,12 +685,15 @@ namespace Sankofa.Runtime.App
                     settingsResumePending = false;
                     settingsOwnPause = flow != null && started && flow.Phase != VisitPhase.Paused && flow.Pause("settings");
                     if (flow != null) Dispatch();
+                    captions.Clear();
+                    captions.ClearNotice();
                     ApplyModalVisibility();
                     ShowSettings();
                     return;
                 case "done":
                     if (!settingsOpen) return;
                     settingsOpen = false;
+                    creditsOpen = false;
                     if (settingsOwnPause)
                     {
                         if (flow.Phase == VisitPhase.Paused) flow.Resume();
@@ -685,6 +716,12 @@ namespace Sankofa.Runtime.App
                 case "ambience":
                     settings.Ambience = (settings.Ambience + 1) % 3;
                     break;
+                case "narration":
+                    settings.Narration = (settings.Narration + 1) % 3;
+                    break;
+                case "reach":
+                    settings.Reach = (settings.Reach + 1) % 3;
+                    break;
                 case "height":
                     // Middle, higher, lower, and round again.
                     settings.Height = settings.Height == 0 ? 1 : settings.Height == 1 ? -1 : 0;
@@ -693,11 +730,19 @@ namespace Sankofa.Runtime.App
                     anchor.Place();
                     break;
                 case "credits":
-                    // The credits come a page at a time, one page per press.
                     if (credits == null) return;
-                    var pages = credits.text.Replace("\r", "").Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    captions.Notice(pages[creditsPage % pages.Length].Trim(), 20);
-                    creditsPage++;
+                    creditPages = CreditPages(credits.text);
+                    creditsOpen = true;
+                    creditsPage = 0;
+                    ShowSettings();
+                    return;
+                case "credits-next":
+                    if (creditPages != null && creditPages.Length > 0) creditsPage = (creditsPage + 1) % creditPages.Length;
+                    ShowSettings();
+                    return;
+                case "credits-back":
+                    creditsOpen = false;
+                    ShowSettings();
                     return;
             }
             settings.Save();
@@ -712,15 +757,33 @@ namespace Sankofa.Runtime.App
             transition.ReducedMotion = settings.ReducedMotion;
             fire.Mode = settings.FireMode;
             ambience.Level = settings.AmbienceLevel;
+            narration.Volume = settings.NarrationLevel;
             foreach (var a in storyAmbience) a.Level = settings.AmbienceLevel;
             anchor.HeightOffset = settings.HeightOffset;
+            anchor.ReachOffset = settings.ReachOffset;
         }
 
         void ShowSettings()
         {
+            if (settingsHeading != null)
+            {
+                settingsHeading.enabled = settingsOpen;
+                settingsHeading.text = creditsOpen ? "Credits" : flow?.Phase == VisitPhase.Transitioning ? "Settings · pause after entry" : "Settings · story paused";
+            }
+            if (settingsInfo != null) settingsInfo.enabled = settingsOpen && creditsOpen;
             if (!settingsOpen)
             {
+                settingsPanel.transform.localPosition = settingsRestPosition;
+                settingsPanel.transform.localRotation = settingsRestRotation;
                 settingsPanel.Show(new List<(string, string)> { ("settings", "Settings") });
+                return;
+            }
+            if (settingsModalAnchor != null) settingsPanel.transform.SetPositionAndRotation(settingsModalAnchor.position, settingsModalAnchor.rotation);
+            if (creditsOpen)
+            {
+                if (settingsInfo != null) settingsInfo.text = creditPages[creditsPage] + $"\n\n{creditsPage + 1} / {creditPages.Length}";
+                else captions.Notice(creditPages[creditsPage], 60);
+                settingsPanel.Show(new List<(string, string)> { ("done", "Done"), ("credits-back", "Back to settings"), ("credits-next", "Next page") }, primaryFirst: true);
                 return;
             }
             var items = new List<(string, string)>
@@ -729,12 +792,30 @@ namespace Sankofa.Runtime.App
                 ("captions", "Text: " + settings.CaptionSize),
                 ("motion", settings.ReducedMotion ? "Motion: reduced" : "Motion: full"),
                 ("ambience", "Ambience: " + settings.AmbienceName),
+                ("narration", "Voice: " + settings.NarrationName),
                 ("height", "Height: " + settings.HeightName),
+                ("reach", "Reach: " + settings.ReachName),
                 ("recenter", "Recenter"),
                 ("credits", "Credits"),
             };
             if (fireComparison && Debug.isDebugBuild) items.Add(("fire", "Fire: " + settings.FireMode.ToString().ToLowerInvariant()));
-            settingsPanel.Show(items);
+            settingsPanel.Show(items, primaryFirst: true);
+        }
+
+        static string[] CreditPages(string text)
+        {
+            var pages = new List<string>();
+            foreach (var paragraph in text.Replace("\r", "").Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var page = "";
+                foreach (var word in paragraph.Split(new[] { ' ', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (page.Length > 0 && page.Length + word.Length + 1 > 240) { pages.Add(page); page = ""; }
+                    page += (page.Length > 0 ? " " : "") + word;
+                }
+                if (page.Length > 0) pages.Add(page);
+            }
+            return pages.Count == 0 ? new[] { "No credits are available in this package." } : pages.ToArray();
         }
 
         void OnHeadsetRemoved() => PauseFor("headset removed");

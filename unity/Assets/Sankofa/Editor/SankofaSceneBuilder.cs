@@ -90,6 +90,14 @@ namespace Sankofa.EditorTools
             var choices = BuildPanel(world, art, "Choices", new Vector3(-0.28f, 0.95f, 0.42f), 2);
             var questions = BuildPanel(world, art, "Questions", new Vector3(0.33f, 0.98f, 0.42f), 1);
             var settings = BuildPanel(world, art, "Settings", new Vector3(-0.5f, 0.7f, 0.2f), 2);
+            var settingsModal = Point(world, "Settings modal anchor", new Vector3(0, 1.22f, 0.54f));
+            settingsModal.localRotation = FacingVisitor(settingsModal.localPosition);
+            Set(settings, "buttonSize", new Vector2(0.24f, 0.064f));
+            Set(settings, "labelSize", 0.23f);
+            var settingsHeading = GalleryText(settings.transform, "Settings heading", "Settings", new Vector3(0, 0.09f, 0), 0.20f, 0.56f);
+            var settingsInfo = GalleryText(settings.transform, "Credits page", "", new Vector3(0, -0.26f, 0), 0.17f, 0.49f);
+            settingsInfo.alignment = TextAlignmentOptions.TopLeft;
+            settingsInfo.rectTransform.sizeDelta = new Vector2(0.49f, 0.26f);
             var startScreen = BuildStartScreen(world);
             BuildPointers(rig, art, new[] { controls, choices, questions, settings });
             var curtain = BuildCurtain(rig.Head, art);
@@ -134,6 +142,9 @@ namespace Sankofa.EditorTools
             Set(app, "choicesPanel", choices);
             Set(app, "questionsPanel", questions);
             Set(app, "settingsPanel", settings);
+            Set(app, "settingsModalAnchor", settingsModal);
+            Set(app, "settingsHeading", settingsHeading);
+            Set(app, "settingsInfo", settingsInfo);
             Set(app, "stage", stage);
             Set(app, "transition", transition);
             Set(app, "receiver", receiver);

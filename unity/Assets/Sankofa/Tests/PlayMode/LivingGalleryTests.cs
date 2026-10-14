@@ -491,6 +491,57 @@ namespace Sankofa.Tests
             finally {Application.logMessageReceived-=watch;}
         }
 
+        [UnityTest] public IEnumerator SilentNarrationAndReachPreferencesPersistWithoutShorteningALine()
+        {
+            yield return Open();
+            var panel=GameObject.Find("Settings panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.35f);
+            for(var i=0;i<2;i++){panel.PressFromPointer("narration");yield return new WaitForSecondsRealtime(0.35f);}
+            panel.PressFromPointer("reach");yield return new WaitForSecondsRealtime(0.35f);
+            var world=Object.FindFirstObjectByType<WorldAnchor>();
+            Assert.That(ExperienceSettings.Load().Narration,Is.EqualTo(2));Assert.That(ExperienceSettings.Load().Reach,Is.EqualTo(1));
+            Assert.That(world.ReachOffset,Is.EqualTo(-0.06f));
+            panel.PressFromPointer("recenter");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(world.transform.position.z,Is.EqualTo(-0.06f).Within(0.001f));
+            panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
+            app.Begin();var player=Object.FindFirstObjectByType<Sankofa.Runtime.Narration.NarrationPlayer>();
+            var line=app.Flow.CurrentLine;Assert.That(line.Id,Is.EqualTo("gallery.sit"));
+            Assert.That(player.CaptionOnly,Is.True);Assert.That(player.Volume,Is.Zero);
+            yield return new WaitForSeconds(0.4f);
+            Assert.That(app.Flow.CurrentLine.Id,Is.EqualTo(line.Id),"caption mode does not finish a recorded line in 100 ms");
+            Assert.That(player.Speaking,Is.True);
+            Assert.That(player.GetComponent<AudioSource>().isPlaying,Is.False);
+            Capture("14-caption-only");Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+        [UnityTest] public IEnumerator SettingsAndCreditsRemainInTheForwardViewWithoutStoryControlsCompeting()
+        {
+            yield return Open();var panel=GameObject.Find("Settings panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
+            var eye=Camera.main;eye.fieldOfView=70;eye.aspect=4f/3f;
+            foreach(var p in new[]{panel,GameObject.Find("Controls panel").GetComponent<Sankofa.Runtime.UI.PokePanel>()})
+                foreach(var id in p.Ids)
+                {
+                    var viewport=eye.WorldToViewportPoint(p.transform.Find("Button "+id).position);
+                    Assert.That(viewport.x,Is.InRange(0.03f,0.97f));Assert.That(viewport.y,Is.InRange(0.03f,0.97f));
+                }
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().Hidden,Is.True);
+            Assert.That(GameObject.Find("Settings heading").GetComponent<TMPro.TMP_Text>().enabled,Is.True);
+            foreach(var id in panel.Ids)
+            {
+                var viewport=eye.WorldToViewportPoint(panel.transform.Find("Button "+id).position);
+                Assert.That(viewport.x,Is.InRange(0.03f,0.97f));Assert.That(viewport.y,Is.InRange(0.03f,0.97f));
+            }
+            Capture("15-settings");panel.PressFromPointer("credits");yield return new WaitForSecondsRealtime(0.35f);
+            var info=GameObject.Find("Credits page").GetComponent<TMPro.TMP_Text>();info.ForceMeshUpdate();
+            Assert.That(info.enabled,Is.True);Assert.That(info.text,Is.Not.Empty);
+            Assert.That(info.textBounds.size.y,Is.LessThan(info.rectTransform.rect.height+0.005f),"a credits page fits its reading area");
+            Assert.That(panel.Ids,Is.EqualTo(new[]{"done","credits-back","credits-next"}));
+            Capture("16-credits");panel.PressFromPointer("credits-back");yield return new WaitForSecondsRealtime(0.35f);
+            panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(info.enabled,Is.False);Assert.That(panel.transform.localPosition.y,Is.EqualTo(0.88f).Within(0.001f));
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
         IEnumerator MovieSegment(string name,int frames)
         {
             var speed=Time.timeScale;Time.timeScale=1;

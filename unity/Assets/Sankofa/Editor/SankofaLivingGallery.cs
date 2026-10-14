@@ -27,6 +27,8 @@ namespace Sankofa.EditorTools
         [MenuItem("Sankofa/Build Living Gallery")]
         public static void BuildLivingGallery()
         {
+            // The gallery derives from the authored comparison builder, never an out-of-date generated scene.
+            BuildScenes();
             BuildIllustratedTheatre();
             if (!AssetDatabase.IsValidFolder(GalleryFolder)) AssetDatabase.CreateFolder(SankofaArt.Folder, "Gallery");
             var stage = Object.FindFirstObjectByType<StoryStage>();
@@ -66,6 +68,7 @@ namespace Sankofa.EditorTools
             }
             GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(0,3.07f,3.16f),0.85f,3.0f);
             GalleryText(surroundings,"Gallery purpose","Stories time nearly left behind",new Vector3(0,2.88f,3.16f),0.42f,3.8f);
+            GalleryText(surroundings,"Title origin","Sankofa · an Akan word from Ghana: go back and get it",new Vector3(0,0.45f,3.16f),0.30f,4f);
             GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.68f,3.16f),0.68f,3.8f);
             GalleryText(surroundings,"Exhibit placard","Enkare Nairobi · before the railway\nAn imagined meeting · draft for cultural review",new Vector3(0,0.28f,3.16f),0.42f,4f);
             var gallery=world.gameObject.AddComponent<LivingGallery>();
@@ -117,11 +120,24 @@ namespace Sankofa.EditorTools
             world.Find("Rest point").localPosition=new Vector3(0.28f,0.77f,0.5f);
             world.Find("Keepsake shown point").localPosition=new Vector3(0.19f,0.94f,0.48f);
             var choices=world.Find("Choices panel");
-            choices.localPosition=new Vector3(0,0.94f,0.58f);
+            choices.localPosition=new Vector3(0,1.05f,0.58f);
             choices.localRotation=FacingVisitor(choices.localPosition);
             Set(choices.GetComponent<PokePanel>(),"buttonSize",new Vector2(0.24f,0.060f));
             Set(choices.GetComponent<PokePanel>(),"labelSize",0.25f);
             Set(choices.GetComponent<PokePanel>(),"gap",0.012f);
+            var storyChoices=Marker(world,"Story choice anchor",new Vector3(0,0.94f,0.58f));
+            storyChoices.localRotation=FacingVisitor(storyChoices.localPosition);Set(app,"choicesStoryAnchor",storyChoices);
+            var controlPanel=world.Find("Controls panel");controlPanel.localPosition=new Vector3(-0.08f,0.88f,0.50f);
+            controlPanel.localRotation=FacingVisitor(controlPanel.localPosition);
+            Set(controlPanel.GetComponent<PokePanel>(),"buttonSize",new Vector2(0.18f,0.064f));
+            Set(controlPanel.GetComponent<PokePanel>(),"labelSize",0.21f);
+            var settingsPanel=world.Find("Settings panel");settingsPanel.localPosition=new Vector3(0.24f,0.88f,0.46f);
+            settingsPanel.localRotation=FacingVisitor(settingsPanel.localPosition);
+            var panelPigment=GalleryPigment("Gallery plaques",new Color(0.36f,0.25f,0.16f));
+            foreach(var panel in new[]{choices,controlPanel,settingsPanel})
+            {Set(panel.GetComponent<PokePanel>(),"buttonMaterial",panelPigment);Set(panel.GetComponent<PokePanel>(),"glow",0f);}
+            var controlHint=GalleryText(world,"Control hint","Touch a plaque, or point and pinch.\nPause and Settings stay below.",new Vector3(0,0.78f,0.94f),0.20f,0.72f);
+            controlHint.transform.localRotation=FacingVisitor(controlHint.transform.localPosition);Set(app,"controlHint",controlHint);
             home.Sky=new Color(0.08f,0.075f,0.065f); home.FogStart=30; home.FogEnd=60;
             home.AmbientSky=new Color(0.33f,0.29f,0.25f); home.AmbientGround=new Color(0.13f,0.12f,0.1f);
             home.Grade=new Vector4(1.25f,0.85f,0.1f,0.1f);
