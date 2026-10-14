@@ -1,4 +1,28 @@
-# Gallery candidate — October 14 completion pass
+# Gallery candidate — current v0.7 production iteration
+
+Current review APK built from clean source **eaf0354** after [production hardening](../reviews/2026-10-14-production-iteration.md). This supersedes the artifact identity in the historical v0.6 record below.
+
+| Identity | Current local artifact |
+|---|---|
+| Output | `artifacts/Sankofa-LivingGallery.apk` |
+| Android package/version | `com.sankofa.quest` / `0.1.0+eaf0354` / code 1 |
+| Story package | v0.7.0 |
+| Architecture | ARM64 / IL2CPP |
+| Size | 84,142,000 bytes (80.24 MiB) |
+| SHA-256 | `454068fba15c9c9ceec80fa9c63ecf6ce96e901c7d21d42350f646c991f48c32` |
+| Build | Succeeded, zero errors and one reported warning (optional OpenXR input-polling preference) |
+
+**Verification:** 306 core checks, 31/31 final editor checks and 46/46 final functional runtime checks pass. Eight focused readability/placement/recenter checks also pass. Integrity verifies 31 declared inputs and 92 line fingerprints. No skipped final runtime cases, simulator or sound playback. The build guard verifies captured local development credentials absent; 0 archive-name matches for private brief/reference/LocalOnly/credential material is a narrower filename check, not a complete arbitrary-data audit. Editor-only settings and version are restored after build.
+
+The refreshed preview is **41 seconds with no audio stream**, edited Unity desktop captures with synthetic input and measured capture timestamps. Both memories and accepted/passive hospitality are shown. It is not qualifying headset/emulator footage or real-hand evidence. Review packets remain offline drafts; their responsive/label/no-autoplay checks are software evidence, not completed reviews.
+
+No device was connected during inventory. No installation, listening/pronunciation/cultural/participant acceptance, applicable asset/contributor contract confirmation, eligibility/account confirmation, Competition upload, independent judge installation or public submission was performed. Source/APK/packet existence does not close those gates. Follow the [evidence protocol](../testing/gallery-next-evidence-session.md), [rights review](rights-review.md) and [access handoff](access-handoff.md).
+
+Raw current build log: `artifacts/logs/production-build.log`; identity: `artifacts/release/gallery-apk.json`. The standard BuildMain / Build APK target is LivingGallery. Historical comparison builds are explicitly named.
+
+---
+
+# Earlier v0.6 completion-pass record
 
 Package **0.6.0**, LivingGallery. This pass follows the remaining [judging findings](../reviews/2026-10-13-independent-gallery-panel.md). It does not claim new judge scores or a winning outcome.
 
