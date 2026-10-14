@@ -103,7 +103,8 @@ namespace Sankofa.Tests
             yield return Open();Time.timeScale=10;
             var panel=GameObject.Find("Settings panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
             panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.4f);
-            panel.PressFromPointer("motion");yield return null;
+            panel.PressFromPointer("motion");yield return new WaitForSecondsRealtime(0.35f);
+            panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
             var transition=stage.GetComponent<StoryTransition>();
             Assert.That(ExperienceSettings.Load().ReducedMotion,Is.True);Assert.That(transition.ReducedMotion,Is.True);
             var eye=Camera.main.transform;var position=eye.position;var rotation=eye.rotation;
@@ -403,6 +404,91 @@ namespace Sankofa.Tests
             Assert.That(app.Flow.Keep(),Is.True);app.Flow.BeginAgain();
             yield return MovieSegment("07-returning-memory",40);
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator ActualSelectionAndReplayCarriesRemainProtectedAtEveryCaptionSize()
+        {
+            yield return Open();Time.timeScale=12;app.Begin();
+            yield return Until(()=>app.Flow.OpenInvitation?.Id=="receive-flour");
+            GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().PressFromPointer("Accept:receive-flour");
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="gallery.portions.divide");
+            yield return CheckFallbackCarry("12-selection-caption");
+            Time.timeScale=15;yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,150);
+            Assert.That(app.KeepVisit(),Is.True);app.Flow.BeginAgain();Assert.That(app.Flow.Replay(),Is.True);
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="gallery.portions.divide");
+            yield return CheckFallbackCarry("13-replay-caption");
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+        IEnumerator CheckFallbackCarry(string capture)
+        {
+            Time.timeScale=1;var gourd=stage.Find("gourd.flour");
+            var board=Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>();
+            var placement=board.GetComponent<Sankofa.Runtime.UI.GalleryCaptionPlacement>();
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(gourd.IsCarried,Is.True);Assert.That(gourd.CarriedBy,Is.Null);
+            foreach(var size in new[]{Sankofa.Runtime.UI.CaptionSize.Small,Sankofa.Runtime.UI.CaptionSize.Medium,Sankofa.Runtime.UI.CaptionSize.Large})
+            {
+                board.Size=size;yield return null;placement.LayoutNow();
+                foreach(var surface in gourd.Surfaces.Where(r=>r.enabled))
+                    Assert.That(Sankofa.Runtime.UI.GalleryCaptionPlacement.Overlap(placement.CaptionRect,
+                        Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,surface.bounds)),Is.LessThan(0.00005f),size.ToString());
+            }
+            Capture(capture);
+            var carry=GameObject.Find("Carry point").transform;var before=carry.position;
+            var world=Object.FindFirstObjectByType<WorldAnchor>();world.HeightOffset+=0.08f;
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(Vector3.Distance(gourd.transform.position,carry.position),Is.LessThan(0.02f),"fallback follows world adjustment");
+            Assert.That(Vector3.Distance(before,carry.position),Is.GreaterThan(0.05f));
+            world.HeightOffset-=0.08f;
+        }
+        [UnityTest] public IEnumerator ModalSettingsProtectTheInvitationAndRespectVisitorAndSystemPauses()
+        {
+            yield return Open();Time.timeScale=12;app.Begin();
+            yield return Until(()=>app.Flow.OpenInvitation?.Id=="receive-milk"&&app.Flow.CurrentLine==null);
+            var panel=GameObject.Find("Settings panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(app.Flow.Phase,Is.EqualTo(VisitPhase.Paused));var clock=app.Flow.Clock;
+            yield return new WaitForSeconds(12);
+            Assert.That(app.Flow.Clock,Is.EqualTo(clock));Assert.That(app.Flow.Journal.Outcomes.ContainsKey("receive-milk"),Is.False);
+            Assert.That(GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().Hidden,Is.True);
+            panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(app.Flow.Phase,Is.EqualTo(VisitPhase.Story));
+            Assert.That(app.Flow.OpenInvitation?.Id,Is.EqualTo("receive-milk"));
+            app.Flow.Pause("visitor");yield return null;
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.35f);panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(app.Flow.Phase,Is.EqualTo(VisitPhase.Paused),"Done does not undo a pre-existing pause");
+            app.Flow.Resume();yield return null;
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.35f);
+            app.SendMessage("OnFocusLost");panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(app.Flow.Phase,Is.EqualTo(VisitPhase.Paused),"system interruption owns the pause");
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+        [UnityTest] public IEnumerator ClosingSettingsBeforeATransitionLandsDoesNotLeaveADeferredPause()
+        {
+            yield return Open();Time.timeScale=12;app.Begin();
+            yield return Until(()=>app.Flow.Phase==VisitPhase.Transitioning);Time.timeScale=1;
+            var panel=GameObject.Find("Settings panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.35f);panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
+            yield return Until(()=>app.Flow.Phase==VisitPhase.Story,15);
+            Assert.That(app.SettingsOpen,Is.False);Assert.That(StageClock.Paused,Is.False);
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+        [UnityTest] public IEnumerator UnkeptAndForgottenVisitsDoNotWriteAnInteractionTrailToLogs()
+        {
+            var messages=new List<string>();Application.LogCallback watch=(s,stack,type)=>messages.Add(s);
+            Application.logMessageReceived+=watch;
+            try
+            {
+                yield return Open();Time.timeScale=15;app.Begin();
+                yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,150);
+                Assert.That(app.Flow.KeptVisit,Is.Null);Assert.That(Directory.Exists(folder)&&Directory.GetFiles(folder).Length>0,Is.False);
+                Assert.That(app.KeepVisit(),Is.True);app.Flow.BeginAgain();yield return null;
+                Assert.That(app.Flow.Forget(),Is.True);Assert.That(app.Flow.ConfirmForget(),Is.True);yield return null;
+                Assert.That(app.Flow.KeptVisit,Is.Null);
+                Assert.That(messages.Any(m=>m.Contains("Journal of visit")||m.Contains("head direction")||m.Contains("receive-flour")),Is.False,string.Join("\n",messages));
+                Assert.That(problems,Is.Empty,string.Join("\n",problems));
+            }
+            finally {Application.logMessageReceived-=watch;}
         }
 
         IEnumerator MovieSegment(string name,int frames)

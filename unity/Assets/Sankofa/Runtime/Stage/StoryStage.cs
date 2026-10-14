@@ -256,18 +256,14 @@ namespace Sankofa.Runtime.Stage
         {
             // Taken before it left the painted palms: the visitor's hand owns it now.
             if (o.IllustratedHolder != null) o.IllustratedHolder.CancelOffer(o);
-            if (hand == null)
-            {
-                o.MoveTo(carryPoint.position, 0.8f);
-                return;
-            }
             o.Carry(hand, () =>
             {
-                if (!hand.Tracked) return carryPoint.position;
+                // Selection and replay carry too. A live anchor also preserves this state across recentering.
+                if (hand == null || !hand.Tracked) return carryPoint.position;
                 var sample = hand.Sample;
                 var cradled = HandGeometry.Openness(sample) >= 1.3f && System.Numerics.Vector3.Dot(HandGeometry.PalmNormal(sample), System.Numerics.Vector3.UnitY) >= 0.3f;
                 return cradled ? hand.PalmCenter + Vector3.up * 0.06f : carryPoint.position;
-            });
+            }, hand == null ? 0.8f : 0.18f);
         }
 
         /// <summary>Both live and replayed outcomes select the same illustration. Looking never commits a choice.</summary>

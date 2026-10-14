@@ -67,6 +67,7 @@ namespace Sankofa.Runtime.App
         ExperienceSettings settings;
         // The settings fold behind one plaque, so the lap holds pause and return and little else.
         bool settingsOpen;
+        bool settingsOwnPause, settingsResumePending;
         int creditsPage;
         StageObject invited;
         HandSource acceptingHand;
@@ -76,6 +77,7 @@ namespace Sankofa.Runtime.App
         public VisitFlow Flow => flow;
         public string LoadProblem { get; private set; }
         public ExperienceSettings Settings => settings;
+        public bool SettingsOpen => settingsOpen;
         public string StoreFolder { get; private set; }
         /// <summary>The start screen is showing: the hearth is placed and the visitor has not begun.</summary>
         public bool AtStart => flow != null && placed && !started;
@@ -222,7 +224,7 @@ namespace Sankofa.Runtime.App
 
         public bool EnterExhibit(string route, bool useDefault = false)
         {
-            if (gallery == null || flow == null) return false;
+            if (settingsOpen || gallery == null || flow == null) return false;
             if (flow.Phase == VisitPhase.Closing) flow.BeginAgain();
             if (flow.Menu == ChoiceMenu.Returning) flow.NewStory();
             var entered = useDefault ? flow.BeginDefault(route) : flow.Choose(route);
@@ -237,6 +239,12 @@ namespace Sankofa.Runtime.App
             // A hitch or a resumed process must not leap story time; an invitation never expires in one frame.
             // Scaled time, so tests can run a visit faster; the experience itself always runs at a time scale of 1.
             flow.Tick(Mathf.Min(Time.deltaTime, MaxStep * Mathf.Max(1f, Time.timeScale)));
+            // Settings may close before a transition lands. Only undo the pause it owns.
+            if (settingsResumePending && !settingsOpen && flow.Phase == VisitPhase.Paused)
+            {
+                settingsResumePending = false;
+                flow.Resume();
+            }
             Dispatch();
             fire.SpeechLevel = narration.Level;
             ambience.Duck = narration.Speaking;
@@ -245,10 +253,10 @@ namespace Sankofa.Runtime.App
             if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
             if (gallery != null)
             {
-                choicesPanel.Hidden = flow.Phase == VisitPhase.Closing && flow.CurrentLine != null;
                 if (flow.Phase == VisitPhase.Closing && flow.CurrentLine == null && captions.Caption.Length > 0) captions.Clear();
             }
             NudgeWaitingChoice();
+            ApplyModalVisibility();
         }
 
         readonly FrameTiming[] timing = new FrameTiming[1];
@@ -312,7 +320,7 @@ namespace Sankofa.Runtime.App
         {
             foreach (var cue in flow.DrainCues())
             {
-                Debug.Log($"[Sankofa] {cue} at {flow.Clock:0.00}s");
+                // No interaction trail in logs: a visit is retained only through explicit Keep.
                 switch (cue)
                 {
                     case Cue.PhaseChanged p:
@@ -327,7 +335,6 @@ namespace Sankofa.Runtime.App
                         else if (captions.Caption == "Paused") captions.Clear();
                         if (p.Phase == VisitPhase.Ended)
                         {
-                            LogJournal();
                             // A word from the fire before the app closes, rather than a cut to black.
                             captions.SetCaption("Until the next fire.");
                             StartCoroutine(QuitAfter(2.5f));
@@ -343,7 +350,7 @@ namespace Sankofa.Runtime.App
                         break;
                     case Cue.VisitStarted v:
                         stage.ClearEchoes();
-                        var mode = v.Mode == VisitMode.Continued ? "Continuing a kept visit" : v.Mode == VisitMode.Replayed ? "Replay of a kept visit, as it was" : null;
+                        var mode = v.Mode == VisitMode.Continued ? "Continuing a kept visit" : v.Mode == VisitMode.Replayed ? "Replay: kept telling and actions · current staging" : null;
                         captions.SetStatus(string.Join(" · ", new[] { mode, gallery != null ? "" : baseStatus }.Where(s => !string.IsNullOrEmpty(s))));
                         break;
                     case Cue.Speak s:
@@ -427,7 +434,6 @@ namespace Sankofa.Runtime.App
                         if (n.QuestionId != null) {questionsPanel.Pulse("q:" + n.QuestionId);objectQuestions?.Pulse("q:"+n.QuestionId);}
                         break;
                     case Cue.Closed c:
-                        LogJournal();
                         stage.Settle();
                         if (c.Completed && gallery == null) captions.Notice(WhatYouDid(), 14, true);
                         break;
@@ -471,10 +477,13 @@ namespace Sankofa.Runtime.App
             acceptingHand = null;
         }
 
-        void LogJournal()
+        void ApplyModalVisibility()
         {
-            if (flow.Journal != null)
-                Debug.Log($"[Sankofa] Journal of visit {flow.Journal.VisitNumber} ({flow.Journal.Route}, {flow.Journal.Mode}):\n" + string.Join("\n", flow.Journal.Entries));
+            controls.Hidden = settingsOpen;
+            choicesPanel.Hidden = settingsOpen || (gallery != null && flow?.Phase == VisitPhase.Closing && flow.CurrentLine != null);
+            var hideQuestions = settingsOpen || receiver.Open || toucher.Open;
+            questionsPanel.Hidden = hideQuestions;
+            if (objectQuestions != null) objectQuestions.Hidden = hideQuestions;
         }
 
         static string StoreMessage(StoreOperation operation)
@@ -520,6 +529,7 @@ namespace Sankofa.Runtime.App
 
         void OnControl(string id)
         {
+            if (settingsOpen) return;
             if (id == "gallery-enter") { Begin(); return; }
             if (id == "gallery-other" && gallery != null && flow?.KeptVisit != null)
             {
@@ -582,13 +592,14 @@ namespace Sankofa.Runtime.App
 
         void OnQuestion(string id)
         {
-            if (flow == null || !id.StartsWith("q:")) return;
+            if (settingsOpen || flow == null || !id.StartsWith("q:")) return;
             flow.Ask(id.Substring(2));
             Dispatch();
         }
 
         void OnReceived(string invitationId, HandSource hand)
         {
+            if (settingsOpen) return;
             acceptingHand = hand;
             if (!flow.Accept(invitationId)) acceptingHand = null;
             Dispatch();
@@ -633,7 +644,7 @@ namespace Sankofa.Runtime.App
 
         void OnNoticed(string objectId)
         {
-            if (flow != null && flow.Notice(objectId)) Dispatch();
+            if (!settingsOpen && flow != null && flow.Notice(objectId)) Dispatch();
         }
 
         void OnSetting(string id)
@@ -641,11 +652,25 @@ namespace Sankofa.Runtime.App
             switch (id)
             {
                 case "settings":
+                    if (settingsOpen) return;
                     settingsOpen = true;
+                    settingsResumePending = false;
+                    settingsOwnPause = flow != null && started && flow.Phase != VisitPhase.Paused && flow.Pause("settings");
+                    if (flow != null) Dispatch();
+                    ApplyModalVisibility();
                     ShowSettings();
                     return;
                 case "done":
+                    if (!settingsOpen) return;
                     settingsOpen = false;
+                    if (settingsOwnPause)
+                    {
+                        if (flow.Phase == VisitPhase.Paused) flow.Resume();
+                        else if (flow.Phase == VisitPhase.Transitioning) settingsResumePending = true;
+                    }
+                    settingsOwnPause = false;
+                    if (flow != null) Dispatch();
+                    ApplyModalVisibility();
                     ShowSettings();
                     return;
                 case "captions":
@@ -722,6 +747,8 @@ namespace Sankofa.Runtime.App
 
         void PauseFor(string reason)
         {
+            // A system interruption takes ownership; closing preferences must not resume behind it.
+            settingsOwnPause = settingsResumePending = false;
             if (flow != null && started && flow.Pause(reason)) Dispatch();
         }
 

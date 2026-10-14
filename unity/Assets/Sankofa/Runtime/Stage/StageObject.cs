@@ -259,14 +259,14 @@ namespace Sankofa.Runtime.Stage
         }
 
         /// <summary>Carried in a hand: follows its anchor, holding position while the anchor is unavailable.</summary>
-        public void Carry(HandSource hand, Func<Vector3?> anchor)
+        public void Carry(HandSource hand, Func<Vector3?> anchor, float settleSeconds = 0.18f)
         {
             LeaveHolder();
             Initialise();
             follow = anchor;
             CarriedBy = hand;
             moveTarget = null;
-            smoothTime = 0.06f;
+            smoothTime = Mathf.Max(0.05f, settleSeconds / 3f);
         }
 
         /// <summary>Fades out after a while, wherever it is going.</summary>
