@@ -12,6 +12,25 @@ namespace Sankofa.Tests
     {
         static PlayablePackage Package() => Playable(StoryReader.ReadPackage(File.ReadAllText(RepositoryFile("unity/Assets/Sankofa/Content/living-gallery.json"))));
         static readonly string[] Invitations = { "receive-ember", "touch-water", "receive-flour", "offer-flour", "receive-milk", "receive-bead" };
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EntryRetainsWhetherAPerspectiveWasChosenOrDefaulted(bool useDefault)
+        {
+            var store = new MemoryStore();
+            var flow = new VisitFlow(Package(), new FlowSettings { SingleStoryWait = 0 }, store);
+            var view = new FakePresentation(flow);flow.Start(true);
+            Assert.That(flow.BeginDefault("today.from-1850s"), Is.False, "default entry cannot bypass continuation eligibility");
+            Assert.That(useDefault ? flow.BeginDefault("era.1850s") : flow.Choose("era.1850s"), Is.True);
+            var selection = useDefault ? PerspectiveSelection.Default : PerspectiveSelection.Explicit;
+            Assert.That(flow.Journal.Selection, Is.EqualTo(selection));
+            Finish(flow, view, new string[0]);Assert.That(flow.Keep(), Is.True);
+            var roundTrip = Core.Visits.SavedVisitCodec.Read(Core.Visits.SavedVisitCodec.Write(flow.KeptVisit));
+            Assert.That(roundTrip.Selection, Is.EqualTo(selection));
+            flow.BeginAgain();Assert.That(flow.Replay(), Is.True);
+            Assert.That(flow.Journal.Selection, Is.EqualTo(selection));
+            Assert.That(flow.BeginDefault("era.1850s"), Is.False, "entry cannot replace a playing visit");
+        }
         static void Finish(VisitFlow flow, FakePresentation view, IEnumerable<string> accepted)
         {
             var ids = new HashSet<string>(accepted);

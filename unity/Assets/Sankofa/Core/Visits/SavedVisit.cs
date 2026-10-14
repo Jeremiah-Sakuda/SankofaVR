@@ -22,6 +22,7 @@ namespace Sankofa.Core.Visits
         public string Version { get; internal set; }
         public string Locale { get; internal set; }
         public string Route { get; internal set; }
+        public PerspectiveSelection Selection { get; internal set; }
         public string Label { get; internal set; }
         /// <summary>The kept visit this one continued, or null.</summary>
         public string Parent { get; internal set; }
@@ -65,6 +66,7 @@ namespace Sankofa.Core.Visits
                 Version = plan.Version,
                 Locale = plan.Locale,
                 Route = plan.Route,
+                Selection = journal.Selection,
                 Label = plan.Label,
                 Parent = plan.Parent,
                 Next = plan.Next,
@@ -93,6 +95,8 @@ namespace Sankofa.Core.Visits
                 .Add("locale", visit.Locale)
                 .Add("route", visit.Route)
                 .Add("label", visit.Label);
+            if (visit.Selection != PerspectiveSelection.Unknown)
+                o.Add("perspective_selection", visit.Selection == PerspectiveSelection.Default ? "default" : "explicit");
             if (visit.Parent != null) o.Add("parent", visit.Parent);
             if (visit.Next != null) o.Add("next", visit.Next);
             if (visit.Keepsake != null) o.Add("keepsake", visit.Keepsake);
@@ -120,7 +124,7 @@ namespace Sankofa.Core.Visits
                 throw new StoryFormatException("$", e.Message);
             }
             var r = new StoryReader.Fields(root, "$");
-            r.Only("schema", "kind", "id", "saved_at", "package", "version", "locale", "route", "label", "parent", "next", "keepsake", "outcomes", "asked", "heard", "lingered", "plan");
+            r.Only("schema", "kind", "id", "saved_at", "package", "version", "locale", "route", "label", "perspective_selection", "parent", "next", "keepsake", "outcomes", "asked", "heard", "lingered", "plan");
             var schema = r.Int("schema");
             if (schema != SavedVisit.CurrentSchema) throw new StoryFormatException("$.schema", $"unsupported kept-visit schema {schema}; expected {SavedVisit.CurrentSchema}");
             if (r.String("kind") != "kept-visit") throw new StoryFormatException("$.kind", "expected a kept visit");
@@ -143,6 +147,7 @@ namespace Sankofa.Core.Visits
                 Version = r.String("version"),
                 Locale = r.String("locale"),
                 Route = r.String("route"),
+                Selection = ReadSelection(r.OptionalString("perspective_selection")),
                 Label = r.String("label"),
                 Parent = r.OptionalString("parent"),
                 Next = r.OptionalString("next"),
@@ -161,6 +166,14 @@ namespace Sankofa.Core.Visits
                 visit.PlanProblem = "plan" + e.Message.Substring(1);
             }
             return visit;
+        }
+
+        static PerspectiveSelection ReadSelection(string value)
+        {
+            if (value == null) return PerspectiveSelection.Unknown;
+            if (value == "explicit") return PerspectiveSelection.Explicit;
+            if (value == "default") return PerspectiveSelection.Default;
+            throw new StoryFormatException("$.perspective_selection", "expected explicit or default");
         }
     }
 

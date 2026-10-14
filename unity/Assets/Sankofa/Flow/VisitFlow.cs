@@ -163,11 +163,18 @@ namespace Sankofa.Flow
 
         /// <summary>Begins a first story by interest. The visitor may choose while the fire is still speaking.</summary>
         public bool Choose(string routeId)
+            => BeginRoute(routeId, PerspectiveSelection.Explicit);
+
+        /// <summary>Explicit entry with an authored default route, without claiming a personal perspective preference.</summary>
+        public bool BeginDefault(string routeId)
+            => BeginRoute(routeId, PerspectiveSelection.Default);
+
+        bool BeginRoute(string routeId, PerspectiveSelection selection)
         {
             if (!AtChoice(ChoiceMenu.Interests)) return false;
             var route = package.Route(routeId);
             if (route == null || route.IsContinuation) return false;
-            return BeginVisit(package.Compose(route.Id), VisitMode.Chosen, null, null);
+            return BeginVisit(package.Compose(route.Id), VisitMode.Chosen, null, null, selection);
         }
 
         /// <summary>Continues the kept visit's thread: a new, labelled child visit that recalls only what was kept.</summary>
@@ -185,7 +192,7 @@ namespace Sankofa.Flow
         public bool Replay()
         {
             if (!AtChoice(ChoiceMenu.Returning) || !CanReplay) return false;
-            return BeginVisit(KeptVisit.Plan, VisitMode.Replayed, KeptVisit.Id, KeptVisit.Outcomes);
+            return BeginVisit(KeptVisit.Plan, VisitMode.Replayed, KeptVisit.Id, KeptVisit.Outcomes, KeptVisit.Selection);
         }
 
         public bool NewStory()
@@ -615,7 +622,7 @@ namespace Sankofa.Flow
             var routes = package.FirstRoutes.Take(2).ToList();
             if (routes.Count != 1) return false;
             choiceIdle += deltaSeconds;
-            return choiceIdle >= settings.SingleStoryWait && Choose(routes[0].Id);
+            return choiceIdle >= settings.SingleStoryWait && BeginDefault(routes[0].Id);
         }
 
         bool AtChoice(ChoiceMenu menu) => (Phase == VisitPhase.Welcome || Phase == VisitPhase.Choosing) && Menu == menu;
@@ -648,7 +655,7 @@ namespace Sankofa.Flow
             UpdateControls();
         }
 
-        bool BeginVisit(StoryPlan candidate, VisitMode mode, string related, IReadOnlyDictionary<string, Outcome> replay)
+        bool BeginVisit(StoryPlan candidate, VisitMode mode, string related, IReadOnlyDictionary<string, Outcome> replay, PerspectiveSelection? selection = null)
         {
             echoOnEntry = null;
             var playable = PlanValidator.Accept(candidate, out var report, inventory);
@@ -666,7 +673,7 @@ namespace Sankofa.Flow
             visitActive = true;
             keptThisVisit = false;
             visitNumber++;
-            Journal = new VisitJournal(visitNumber, plan.Plan, mode, related);
+            Journal = new VisitJournal(visitNumber, plan.Plan, mode, related, selection);
             Journal.Started(Clock);
             run = new StoryRun(plan);
             Scene = plan.Hearth;

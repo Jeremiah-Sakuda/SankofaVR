@@ -200,7 +200,7 @@ namespace Sankofa.Runtime.App
         {
             if (gallery != null)
             {
-                EnterExhibit(gallery.DefaultRoute);
+                EnterExhibit(gallery.DefaultRoute, useDefault: true);
                 return;
             }
             if (!AtStart) return;
@@ -218,12 +218,12 @@ namespace Sankofa.Runtime.App
             return kept;
         }
 
-        public bool EnterExhibit(string route)
+        public bool EnterExhibit(string route, bool useDefault = false)
         {
             if (gallery == null || flow == null) return false;
             if (flow.Phase == VisitPhase.Closing) flow.BeginAgain();
             if (flow.Menu == ChoiceMenu.Returning) flow.NewStory();
-            var entered = flow.Choose(route);
+            var entered = useDefault ? flow.BeginDefault(route) : flow.Choose(route);
             Dispatch();
             return entered;
         }

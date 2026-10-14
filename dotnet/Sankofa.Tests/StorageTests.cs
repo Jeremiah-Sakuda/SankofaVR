@@ -38,8 +38,17 @@ namespace Sankofa.Tests
             Assert.That(PlanValidator.Validate(read.Plan).IsValid, Is.True);
             Assert.That(Sankofa.Core.Json.JsonText.ParseObject(json).Keys, Is.EqualTo(new[]
             {
-                "schema", "kind", "id", "saved_at", "package", "version", "locale", "route", "label", "next", "keepsake", "outcomes", "asked", "heard", "plan",
+                "schema", "kind", "id", "saved_at", "package", "version", "locale", "route", "label", "perspective_selection", "next", "keepsake", "outcomes", "asked", "heard", "plan",
             }), "story choices and content only: no name, voice, room or hand data");
+        }
+
+        [Test] public void LegacyPerspectivePreferenceIsUnknownRatherThanInferred()
+        {
+            var json = SavedVisitCodec.Write(Visit("legacy", 1)).Replace("  \"perspective_selection\": \"explicit\",\n", "");
+            var read = SavedVisitCodec.Read(json);
+            Assert.That(read.Selection, Is.EqualTo(PerspectiveSelection.Unknown));
+            Assert.That(SavedVisitCodec.Write(read), Is.EqualTo(json));
+            Assert.Throws<StoryFormatException>(() => SavedVisitCodec.Read(json.Replace("\"label\":", "\"perspective_selection\": \"inferred\", \"label\":")));
         }
 
         [Test]

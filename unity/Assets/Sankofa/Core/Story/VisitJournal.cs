@@ -13,6 +13,9 @@ namespace Sankofa.Core.Story
     /// <summary>How a visit began: chosen by interest, continuing a kept visit, or replaying one exactly.</summary>
     public enum VisitMode { Chosen, Continued, Replayed }
 
+    /// <summary>Whether the visitor selected a perspective or entered an authored default. Older records are unknown.</summary>
+    public enum PerspectiveSelection { Unknown, Explicit, Default }
+
     /// <summary>One thing that actually happened, at visit time (seconds, excluding pauses).</summary>
     public sealed class JournalEntry
     {
@@ -52,13 +55,14 @@ namespace Sankofa.Core.Story
         readonly List<string> noticedInOrder = new List<string>();
         readonly Dictionary<string, int> looks = new Dictionary<string, int>();
 
-        public VisitJournal(int visitNumber, StoryPlan plan, VisitMode mode, string relatedVisit = null)
+        public VisitJournal(int visitNumber, StoryPlan plan, VisitMode mode, string relatedVisit = null, PerspectiveSelection? selection = null)
         {
             VisitNumber = visitNumber;
             Package = plan.Package;
             Version = plan.Version;
             Route = plan.Route;
             Mode = mode;
+            Selection = selection ?? (mode == VisitMode.Chosen ? PerspectiveSelection.Explicit : PerspectiveSelection.Unknown);
             RelatedVisit = relatedVisit;
         }
 
@@ -67,6 +71,7 @@ namespace Sankofa.Core.Story
         public string Version { get; }
         public string Route { get; }
         public VisitMode Mode { get; }
+        public PerspectiveSelection Selection { get; }
         /// <summary>The kept visit this one continues or replays, or null.</summary>
         public string RelatedVisit { get; }
         public IReadOnlyList<JournalEntry> Entries => entries;
@@ -85,7 +90,7 @@ namespace Sankofa.Core.Story
 
         public void Started(double at)
         {
-            var how = Mode == VisitMode.Chosen ? "chosen" : Mode == VisitMode.Continued ? "continues kept visit " + RelatedVisit : "exact replay of kept visit " + RelatedVisit;
+            var how = Mode == VisitMode.Chosen ? (Selection == PerspectiveSelection.Default ? "authored default; no perspective preference inferred" : "chosen") : Mode == VisitMode.Continued ? "continues kept visit " + RelatedVisit : "exact replay of kept visit " + RelatedVisit;
             Add(at, JournalKind.Started, Route, $"{Package} {Version}; {how}");
         }
 
