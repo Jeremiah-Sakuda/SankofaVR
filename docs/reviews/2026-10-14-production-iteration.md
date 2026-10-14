@@ -29,7 +29,13 @@ The animal now uses [ewe-v1.png](../../unity/Assets/Sankofa/Art/IllustratedTheat
 
 The first complete functional runtime run passed **43/44** checks; its only failure was the selection carry clipping the narrower view. After the placement/focus correction, **8/8 focused checks** pass, covering that case, memories/named animal/controls, preferences, simulated eye heights and all recenter checks. The earlier final core run passed **306**, editor run **31/31** before the last layout adjustment, and asset integrity currently verifies **31 declared inputs / 92 narration fingerprints** with zero problems.
 
-The complete final runtime recheck, updated editor verification, silent preview and clean-source APK are in progress. Raw reports/captures remain ignored. Desktop/synthetic footage is a review artifact; it does not replace actual Quest or qualifying emulator footage. Preview metadata separates encoded frame rate from actual capture timing. No sound is played or simulator launched.
+Final verification passes **46/46 functional runtime checks**, with no skipped cases, and **31/31 editor checks** after the final layout/binding changes. The unchanged core/content/shader checks pass **306**. Asset integrity verifies **31 inputs and 92 line fingerprints**, with zero problems. The first failing runtime report remains a local artifact; it is not counted as passing evidence.
+
+The refreshed **41-second silent preview** shows actual Unity frame expansion, tangible gourd handling, the two memories being played, independent agreement, return and separate accepted/passive hospitality excerpts. It uses synthetic input and edited desktop captures, not real tracked hands or qualifying Quest/emulator footage. Each segment now records capture timestamps; the encoded 10 fps is not presented as measured sampling or hardware performance.
+
+Both offline review packets were regenerated without new synthesis/export/playback or messages to reviewers. A muted headless check at 375, 812 and 1280 px found no overflow, unlabelled response fields, autoplay, playing audio or external requests. These are layout checks, not human feedback.
+
+Raw results: `artifacts/tests/production-core/production-core.trx`, `production-editmode-final.xml`, `production-runtime-final.xml`, `readability-final.xml`, and the ignored release/review/demo manifests. No simulator or sound playback occurred. The device inventory returned no connected Quest. The clean-source APK identity is recorded in the [candidate record](../release/candidate.md).
 
 ## External acceptance
 
