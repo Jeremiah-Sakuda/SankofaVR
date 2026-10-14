@@ -2,7 +2,7 @@
   "schema": 2,
   "kind": "package",
   "id": "enkare-nairobi.illustrated-mvp",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "title": "Sankofa — What We Carry",
   "locale": "en",
   "status": "draft",
@@ -325,7 +325,7 @@
   "routes": [
     {
       "id": "era.1850s",
-      "label": "What she brings",
+      "label": "Wambui · before her journey",
       "beats": [
         "gather.1850s",
         "offer",
@@ -348,22 +348,17 @@
       "keepsake": "bead.kept",
       "next": "today.from-1850s",
       "returning_beats": [
-        "gather.1850s",
-        "gallery.context",
-        "gallery.revisit.encounter",
+        "gallery.revisit.context",
+        "gallery.revisit.stage",
         "e1.portions",
-        "gallery.revisit.shortfall",
-        "e1.turn-intro",
         "e1.turn",
-        "e1.gift",
-        "e1.dusk",
-        "gallery.revisit.back",
-        "gallery.revisit.home"
+        "gallery.revisit.gift",
+        "gallery.revisit.back"
       ]
     },
     {
       "id": "era.1850s.remembered",
-      "label": "What she remembers",
+      "label": "Naserian · their earlier meeting",
       "beats": [
         "gather.1850s",
         "offer",
@@ -374,6 +369,7 @@
         "e1.offer",
         "e1.turn-intro",
         "e1.waiting",
+        "gallery.remember.answer",
         "e1.turn",
         "e1.after",
         "gallery.shared-landscape",
@@ -386,17 +382,13 @@
       "keepsake": "bead.kept",
       "next": "today.from-remembered",
       "returning_beats": [
-        "gather.1850s",
-        "gallery.context",
-        "gallery.revisit.encounter",
-        "gallery.revisit.shortfall",
-        "e1.turn-intro",
+        "gallery.revisit.context",
+        "gallery.revisit.stage",
         "e1.waiting",
+        "gallery.remember.answer",
         "e1.turn",
-        "e1.gift",
-        "e1.dusk",
-        "gallery.revisit.back",
-        "gallery.revisit.home"
+        "gallery.revisit.gift",
+        "gallery.revisit.back"
       ]
     },
     {
@@ -1539,17 +1531,6 @@
             "R1"
           ],
           "audio": "enkare-nairobi.illustrated-v2/e1.promise"
-        },
-        {
-          "id": "e1.remember",
-          "text": "Naserian answers, 'Last time, you waited for me.'",
-          "seconds": 6.8,
-          "pause_after": 2.2,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "audio": "enkare-nairobi.illustrated-v2/e1.remember"
         }
       ]
     },
@@ -1862,6 +1843,162 @@
             "R1"
           ],
           "audio": "enkare-nairobi.illustrated-v3/e1.paths"
+        }
+      ]
+    },
+    {
+      "id": "gallery.remember.answer",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.remember",
+          "text": "Naserian answers, 'Last time, you waited for me.'",
+          "seconds": 6.8,
+          "pause_after": 2.2,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.remember"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.context",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "revisit.context.disclosure",
+          "text": "Kikuyu and Maasai people traded across this region. Wambui and Naserian, their words and their gifts, are imagined for this story.",
+          "seconds": 17.44,
+          "pause_after": 0.25,
+          "fire": "gathering",
+          "claims": [
+            "C6",
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.gather"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.stage",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "revisit.e1.listen",
+          "text": "Listen. That is the water.",
+          "seconds": 4.72,
+          "pause_after": 1.2,
+          "fire": "gathering",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "water.spill"
+            },
+            {
+              "do": "reveal",
+              "object": "figure.wambui"
+            },
+            {
+              "do": "reveal",
+              "object": "figure.naserian"
+            },
+            {
+              "do": "reveal",
+              "object": "gourd.flour"
+            },
+            {
+              "do": "reveal",
+              "object": "hide"
+            },
+            {
+              "do": "reveal",
+              "object": "figure.ewe"
+            }
+          ],
+          "audio": "enkare-nairobi/e1.listen"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.gift",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "revisit.e1.bead",
+          "text": "“For the road,” Naserian says. “Open your hand.” She offers you a bead to remember this meeting.",
+          "seconds": 11.8,
+          "fire": "holding",
+          "claims": [
+            "R1"
+          ],
+          "actions": [
+            {
+              "do": "offer",
+              "object": "bead"
+            }
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/e1.bead"
+        }
+      ],
+      "invitation": {
+        "id": "receive-bead",
+        "kind": "receive",
+        "object": "bead",
+        "alternative": "Take the bead",
+        "wait_seconds": 12,
+        "accepted": [
+          {
+            "id": "revisit.e1.bead.yes",
+            "text": "The bead rests in your hand. Something small to carry home.",
+            "seconds": 8.24,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.bead.yes"
+          }
+        ],
+        "default": [
+          {
+            "id": "revisit.e1.bead.no",
+            "text": "Naserian sets it beside you, within reach. 'For whenever you go.'",
+            "seconds": 8.56,
+            "pause_after": 1.0,
+            "fire": "welcoming",
+            "actions": [
+              {
+                "do": "place",
+                "object": "bead"
+              }
+            ],
+            "claims": [
+              "R1"
+            ],
+            "audio": "enkare-nairobi.illustrated-v2/e1.bead.no"
+          }
+        ]
+      },
+      "questions": [
+        {
+          "id": "q.e1.bead",
+          "label": "What does the bead mean?",
+          "about": "bead",
+          "lines": [
+            {
+              "id": "revisit.q.e1.bead.answer",
+              "text": "A way to remember an afternoon by the water. This gift is our invention; its colour carries no traditional meaning in this telling.",
+              "seconds": 15.16,
+              "pause_after": 0.6,
+              "fire": "telling",
+              "claims": [
+                "R1"
+              ],
+              "audio": "enkare-nairobi.illustrated-v3/q.e1.bead.answer"
+            }
+          ]
         }
       ]
     }

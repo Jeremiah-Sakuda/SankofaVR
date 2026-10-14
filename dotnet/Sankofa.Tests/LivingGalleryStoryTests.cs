@@ -112,7 +112,8 @@ namespace Sankofa.Tests
             Assert.That(flow.Choose(route), Is.True);Finish(flow,view,new string[0]);
             Assert.That(flow.Journal.Heard.Contains("gallery.portions.enter"),Is.EqualTo(route=="era.1850s"));
             Assert.That(flow.Journal.Heard.Contains("gallery.waiting.enter"),Is.EqualTo(route!="era.1850s"));
-            Assert.That(flow.Journal.Heard, Does.Contain("e1.remember").And.Contain("e1.rest"));
+            Assert.That(flow.Journal.Heard, Does.Contain("e1.rest"));
+            Assert.That(flow.Journal.Heard.Contains("e1.remember"),Is.EqualTo(route=="era.1850s.remembered"),"the earlier favour is revealed in Naserian's perspective");
             Assert.That(flow.Journal.Outcomes.Values, Is.All.EqualTo(Outcome.Default));
         }
         static IEnumerable<TestCaseData> Paths => new[]{"era.1850s","era.1850s.remembered"}.SelectMany(route=>Enumerable.Range(0,64).Select(mask=>new TestCaseData(route,mask)));
@@ -175,6 +176,29 @@ namespace Sankofa.Tests
             Assert.That(p.Beats.Single(b=>b.Id=="e1.naserian").Questions.Select(q=>q.Id),Does.Not.Contain("q.e1.friends"));
             foreach(var r in p.Routes.Where(r=>!r.IsContinuation))
                 Assert.That(r.Beats.IndexOf("e1.after"),Is.GreaterThan(r.Beats.IndexOf("e1.turn")));
+        }
+
+        [TestCase("era.1850s", "e1.portions")]
+        [TestCase("era.1850s.remembered", "e1.waiting")]
+        public void FocusedReturnReachesItsMemoryWithinThirtySecondsAndSpendsTimeOnNewMaterial(string route,string memory)
+        {
+            var p=Package().Package;var r=p.Routes.Single(x=>x.Id==route);
+            double Duration(Beat b)=>b.Lines.Sum(l=>l.Seconds+l.PauseAfter)+(b.Invitation==null?0:b.Invitation.WaitSeconds+b.Invitation.Default.Sum(l=>l.Seconds+l.PauseAfter));
+            var beats=r.ReturningBeats.Select(id=>p.Beats.Single(b=>b.Id==id)).ToArray();
+            var before=beats.TakeWhile(b=>b.Id!=memory).Sum(Duration);var total=beats.Sum(Duration);
+            Assert.That(before,Is.LessThan(30));Assert.That(total,Is.LessThan(140));
+            Assert.That(Duration(beats.Single(b=>b.Id==memory))/total,Is.GreaterThan(0.28));
+            Assert.That(beats.First().Scene,Is.EqualTo("hearth"));
+            Assert.That(beats.First().Lines.Single().Text,Does.Contain("imagined"),"return visits still disclose reconstruction before entry");
+        }
+
+        [Test]
+        public void DefaultPerspectiveDoesNotExplainTheEarlierReversalBeforeTheOtherMemory()
+        {
+            var p=Package();var first=p.Compose("era.1850s");var other=p.Compose("era.1850s.remembered");
+            Assert.That(first.Beats.SelectMany(b=>b.Lines).Select(l=>l.Id),Does.Not.Contain("e1.remember").And.Not.Contain("gallery.waiting.short"));
+            var lines=other.Beats.SelectMany(b=>b.Lines).Select(l=>l.Id).ToList();
+            Assert.That(lines.IndexOf("e1.remember"),Is.GreaterThan(lines.IndexOf("gallery.waiting.return")));
         }
     }
     static class GalleryListExtensions
