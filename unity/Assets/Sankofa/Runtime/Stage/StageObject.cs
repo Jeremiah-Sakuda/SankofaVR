@@ -75,6 +75,7 @@ namespace Sankofa.Runtime.Stage
         public float Feedback { get; set; }
         /// <summary>The hand carrying it, if any; carried objects cross into their counterparts in that hand.</summary>
         public HandSource CarriedBy { get; private set; }
+        public bool IsCarried => follow != null;
         public FigureMotion Holder => holder;
         public IllustratedFigure IllustratedHolder => illustratedHolder;
         public Mesh EchoMesh => echoMesh;

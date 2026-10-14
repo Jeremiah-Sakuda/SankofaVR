@@ -4,7 +4,7 @@ October 14, 2026. Evidence inventory and unresolved decisions, not blanket relea
 
 ## Verified provenance
 
-Run `python3 scripts/audit_gallery_assets.py`. Its ignored `artifacts/release/gallery-asset-integrity.json` records package/source identity, current speech fingerprints and actual input hashes. This pass verified **27 declared illustration/texture/recording inputs and 86 current package lines with zero integrity problems**. The report includes legacy inputs, so inclusion in the report does not imply inclusion in the gallery scene. Unity Resources retains older narration for saved plans.
+Run `python3 scripts/audit_gallery_assets.py`. Its ignored `artifacts/release/gallery-asset-integrity.json` records package/source identity, current speech fingerprints and actual input hashes. This pass verified **30 declared illustration/texture/recording/font inputs and 86 current package lines with zero integrity problems**. The report includes legacy inputs, so inclusion in the report does not imply inclusion in the gallery scene. Unity Resources retains older narration for saved plans.
 
 Illustrations record their prompts, references, provider and hashes. The original cast and its additional expressions are fictional composites; no real-person portraits were supplied. The model identifier is unavailable and is not invented. The canonical painting is an editor render of these inputs and native geometry. Newly refined fleece, hooves, gourds, bead and gate are project-authored theatrical props, not validated cultural artefact reconstructions.
 

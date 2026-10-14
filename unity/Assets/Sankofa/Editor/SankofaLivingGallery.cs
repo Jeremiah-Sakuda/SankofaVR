@@ -91,6 +91,7 @@ namespace Sankofa.EditorTools
             var questionChips=Enumerable.Range(0,3).Select(i=>BuildPanel(world,SankofaArt.Ensure(),"Object question "+i,Vector3.zero,1)).ToArray();
             foreach(var chip in questionChips) { Set(chip,"buttonSize",new Vector2(0.28f,0.067f));Set(chip,"labelSize",0.3f); }
             Set(objectQuestions,"stage",stage);Set(objectQuestions,"head",GameObject.Find("CenterEyeAnchor").transform);
+            Set(objectQuestions,"fallbackPanel",GameObject.Find("Questions panel").GetComponent<PokePanel>());
             SetArray(objectQuestions,"panels",questionChips.Cast<Object>().ToArray());Set(app,"objectQuestions",objectQuestions);
             foreach(var pointer in Object.FindObjectsByType<PointerSource>(FindObjectsSortMode.None))
             {
@@ -128,6 +129,9 @@ namespace Sankofa.EditorTools
             captions.transform.localPosition=new Vector3(0,0.84f,1.5f);
             captions.transform.localRotation=FacingVisitor(captions.transform.localPosition);
             Set(captions,"width",1.08f);
+            var placement=captions.gameObject.AddComponent<GalleryCaptionPlacement>();
+            Set(placement,"board",captions);Set(placement,"stage",stage);Set(placement,"app",app);
+            Set(placement,"eye",GameObject.Find("CenterEyeAnchor").GetComponent<Camera>());
             Set(captions.GetComponent<LazyFollow>(),"verticalSlack",24f);
             Set(app,"fireComparison",false);
             // Put the living flame at the painted fire, inside the work; it remains the visible narrator.
@@ -192,6 +196,16 @@ namespace Sankofa.EditorTools
             foreach(var r in root.GetComponentsInChildren<Renderer>(true))
                 if(!near.Contains(r)&&r.name!="Ground")r.enabled=false;
             foreach(var traffic in root.GetComponentsInChildren<Traffic>(true))traffic.enabled=false;
+            // The street recording has not been reviewed for incidental music. Exclude the layer from this candidate.
+            var ambience=root.GetComponentInChildren<Sankofa.Runtime.Audio.StoryAmbience>(true);
+            var soundData=new SerializedObject(ambience);var layers=soundData.FindProperty("layers");
+            for(var i=layers.arraySize-1;i>=0;i--)
+            {
+                var source=layers.GetArrayElementAtIndex(i).FindPropertyRelative("Source").objectReferenceValue as AudioSource;
+                if(source!=null&&source.clip!=null&&source.clip.name=="matatu")
+                {layers.DeleteArrayElementAtIndex(i);Object.DestroyImmediate(source.gameObject);}
+            }
+            soundData.ApplyModifiedPropertiesWithoutUndo();
             var path=GalleryFolder+"/Modern river illustration.mat";
             var material=AssetDatabase.LoadAssetAtPath<Material>(path);
             if(material==null){material=new Material(Shader.Find("Sankofa/Gallery Canvas"));AssetDatabase.CreateAsset(material,path);}
@@ -201,8 +215,8 @@ namespace Sankofa.EditorTools
             foreach(var id in new[]{"gate","soil","bead.today"})
                 foreach(var r in stage.Find(id).Surfaces)
                     {
-                        r.sharedMaterial=GalleryPigment("Modern "+id,id=="gate"?new Color(0.36f,0.42f,0.30f):id=="soil"?new Color(0.30f,0.20f,0.13f):new Color(0.65f,0.34f,0.20f));
-                        if(id=="gate")r.sharedMaterial.SetFloat("_VertexTint",1);
+                        r.sharedMaterial=GalleryPigment("Modern "+id,id=="gate"?new Color(0.60f,0.58f,0.43f):id=="soil"?new Color(0.30f,0.20f,0.13f):new Color(0.78f,0.88f,1));
+                        if(id=="gate"||id=="bead.today")r.sharedMaterial.SetFloat("_VertexTint",1);
                     }
         }
 

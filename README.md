@@ -4,15 +4,17 @@
 
 Sankofa focuses on stories time nearly left behind: everyday lives and relationships, made legible through specific cultural context and honest imaginative telling. Its living art gallery for Meta Quest lets you encounter a painting, enter its composition, experience a story that responds to your perspective and actions, then return to the same work understanding it differently. **What We Carry** is the first exhibit. The griot supplies context without revealing the story ahead of time; the fire remains its presence inside the artwork. Entry and exploration work while seated.
 
-The [living gallery product scope](docs/product/illustrated-theatre-scope.md) guides the implementation. The new **LivingGallery** scene plays package v0.5.0: a framed view of the actual encounter, stationary entry/return, two authored revelations, explicit object questions, milk hospitality and a physical keepsake deposit. A saved visit offers a focused memory revisit, exact replay or the painted modern river continuation. Narration cues now perform concern, divided provisions and remembered waiting; physical replacement saving requires a warning and second deposit. New narration is recorded and bundled. This is software/desktop evidence; device comfort/performance, cultural review and final art/listening acceptance remain open.
+The [living gallery product scope](docs/product/illustrated-theatre-scope.md) guides the implementation. The new **LivingGallery** scene plays package v0.6.0: a framed view of the actual encounter, stationary entry/return, two authored revelations, explicit object questions, milk hospitality and a physical keepsake deposit. A saved visit offers a focused memory revisit, exact replay or the painted modern river continuation. Narration cues now perform concern, divided provisions and remembered waiting; physical replacement saving requires a warning and second deposit. Existing narration is recorded and bundled. This is software/desktop evidence; device comfort/performance, cultural review and final art/listening acceptance remain open.
 
 Open `unity/Assets/Sankofa/Scenes/LivingGallery.unity`. Scene generation and the review APK use `SankofaSceneBuilder.BuildLivingGallery` and `SankofaBuild.BuildLivingGallery`. The earlier theatre and 3D scenes below remain comparison records. There is no runtime story generation or live AI conversation.
 
+The [October 14 completion pass](docs/release/candidate.md) brings the passive agreement into the first five minutes of authored timing, refines focal props and protects captions from offered/carried objects. Current review packets, asset integrity evidence, Quest collection helper and an honest submission draft are prepared. External acceptance remains open; no sound playback or simulator is used in this pass.
+
 ![Sankofa living gallery: What We Carry, waiting for deliberate entry](docs/media/living-gallery.jpg)
 
-[Before the journey](docs/media/gallery-brings.jpg) · [Remembered-meeting vignette](docs/media/gallery-remembered.jpg) · [Keep guidance](docs/media/gallery-keep-guide.jpg) · [Modern river continuation](docs/media/gallery-modern-river.jpg). These October 13 captures are muted desktop batch renders, not headset footage. The memory windows now reuse the painted scenery and cast, with readable time cues and labels. Vignette art remains a prototype; cast, garments, narration and cultural context still need review. The modern scene uses a draft OpenAI-generated painting with [exact prompt and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json).
+[Before the journey](docs/media/gallery-brings.jpg) · [Remembered-meeting vignette](docs/media/gallery-remembered.jpg) · [Keep guidance](docs/media/gallery-keep-guide.jpg) · [Modern river continuation](docs/media/gallery-modern-river.jpg). These October 14 v0.6 captures are muted desktop batch renders, not headset footage. The memory windows reuse painted scenery and cast, with time cues and labels. [Caption clearance](docs/media/gallery-caption.jpg), [the named sheep](docs/media/gallery-sheep.jpg) and [a bead review close-up](docs/media/gallery-bead-detail.jpg) show this pass’s focal work. The close-up uses a review camera, not the seated view. Vignette art remains a prototype; cast, garments, narration and cultural context still need review. The modern scene uses a draft OpenAI-generated painting with [exact prompt and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json).
 
-The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. Fictional encounters draw on the regional history of Kikuyu–Maasai trade. The baseline package visits two eras and today:
+The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. Fictional encounters draw on the regional history of Kikuyu–Maasai trade. The historical baseline package below visits two eras and today; the gallery candidate uses the first encounter with two memories and the modern coda:
 
 - before the railway, in the 1850s;
 - when the railway came, in 1899;
@@ -61,7 +63,7 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 
 ![The same 1899 journey view before and after the character and lighting revision](docs/media/figures-comparison.jpg)
 
-*Left: polish round 12 (`e3788de`). Right: the current scene, including the character, foliage and environment revisions. Both are actual desktop journey captures with the same camera framing.*
+*Left: polish round 12 (`e3788de`). Right: the historical 3D comparison scene, including the character, foliage and environment revisions. Both are actual desktop journey captures with the same camera framing.*
 
 | Standing | Kneeling | Sharing |
 |---|---|---|

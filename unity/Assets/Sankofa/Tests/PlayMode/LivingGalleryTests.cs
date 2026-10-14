@@ -258,6 +258,14 @@ namespace Sankofa.Tests
             var chips=Object.FindFirstObjectByType<Sankofa.Runtime.UI.ObjectQuestions>();
             yield return null;
             var chip=chips.Panels.First(p=>!p.Hidden&&p.Ids.Contains("q:q.e1.milk"));
+            var active=Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None).Where(p=>!p.Hidden).SelectMany(p=>p.Ids).Where(id=>id.StartsWith("q:")).ToArray();
+            Assert.That(active.Distinct().Count(),Is.EqualTo(active.Length),"a contextual question is not duplicated on the central panel");
+            var household=chips.Panels.First(p=>!p.Hidden&&p.Ids.Contains("q:q.gallery.household"));
+            Assert.That(Vector3.Distance(chip.transform.position,household.transform.position),Is.GreaterThan(0.09f),"questions about one object occupy separate rows");
+            var milk=stage.Find("gourd.milk");milk.Hide();yield return null;
+            Assert.That(GameObject.Find("Questions panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().Ids,Does.Contain("q:q.e1.milk"),"unavailable object chips retain the accessible central question");
+            milk.Reveal();yield return null;
+            chip=chips.Panels.First(p=>!p.Hidden&&p.Ids.Contains("q:q.e1.milk"));
             var outcomes=app.Flow.Journal.Outcomes.Count;
             chip.PressFromPointer("q:q.e1.milk");
             yield return Until(()=>app.Flow.Answering?.Id=="q.e1.milk",5);
@@ -296,6 +304,127 @@ namespace Sankofa.Tests
             hand.Simulated=()=>Palm(point,true);yield return Until(()=>received,3);
             receiver.Close();hand.Simulated=null;Object.Destroy(target);
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator CaptionsAvoidTheCarriedGourdAndHoldTheirPlacementForTheLine()
+        {
+            yield return Open();app.enabled=false;
+            foreach(var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None))panel.Hidden=true;
+            yield return gallery.Transition("story.water.1850s",new Continuity[0],true);
+            var board=Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>();
+            var placement=board.GetComponent<Sankofa.Runtime.UI.GalleryCaptionPlacement>();
+            Assert.That(placement,Is.Not.Null);
+            var gourd=stage.Find("gourd.flour");
+            stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,gourd.Id));
+            var anchor=new GameObject("Synthetic caption obstruction");
+            anchor.transform.position=board.transform.position+Camera.main.transform.forward*0.08f;
+            gourd.Carry(null,()=>anchor.transform.position);
+            board.Size=Sankofa.Runtime.UI.CaptionSize.Large;
+            board.SetCaption("You have it. Keep it steady.");
+            yield return new WaitForSeconds(1.5f);placement.LayoutNow();
+            Assert.That(board.ContentOffset,Is.Not.EqualTo(Vector2.zero));
+            foreach(var surface in gourd.Surfaces.Where(s=>s.enabled))
+                Assert.That(Sankofa.Runtime.UI.GalleryCaptionPlacement.Overlap(placement.CaptionRect,
+                    Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,surface.bounds)),Is.LessThan(0.00005f));
+            var held=board.ContentOffset;placement.LayoutNow();Assert.That(board.ContentOffset,Is.EqualTo(held));
+            Assert.That(placement.CaptionRect.yMin,Is.GreaterThanOrEqualTo(0.04f));
+            Assert.That(placement.CaptionRect.yMax,Is.LessThanOrEqualTo(0.93f));
+            Capture("08-caption-clearance");
+            foreach(var size in new[]{Sankofa.Runtime.UI.CaptionSize.Medium,Sankofa.Runtime.UI.CaptionSize.Large})
+            {
+                board.Size=size;board.SetCaption("The gourd rests in your hand. 'Thank you. I nearly turned back,' Wambui says.");
+                yield return null;placement.LayoutNow();
+                foreach(var surface in gourd.Surfaces.Where(s=>s.enabled))
+                    Assert.That(Sankofa.Runtime.UI.GalleryCaptionPlacement.Overlap(placement.CaptionRect,
+                        Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,surface.bounds)),Is.LessThan(0.00005f),"long recorded caption avoids the carried object at both text sizes");
+            }
+            var backing=board.transform.Find("Caption backing");
+            Assert.That(Mathf.Abs(backing.localPosition.y-board.CaptionText.transform.localPosition.y),Is.LessThan(0.12f));
+            board.Clear();placement.LayoutNow();Assert.That(board.ContentOffset,Is.EqualTo(Vector2.zero));
+            gourd.ResetToStart();Object.Destroy(anchor);Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator TheSheepIsVisibleWhenNamedAndFocalPropsHaveReviewCaptures()
+        {
+            yield return Open();app.enabled=false;
+            foreach(var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None))panel.Hidden=true;
+            Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>().Clear();
+            yield return gallery.Transition("story.water.1850s",new Continuity[0],true);
+            foreach(var id in new[]{"figure.wambui","figure.naserian","figure.ewe","gourd.flour","gourd.milk","hide"})
+                stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,id));
+            yield return new WaitForSeconds(1.8f);
+            var ewe=stage.Find("figure.ewe");
+            var rect=Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,ewe.Surfaces.First().bounds);
+            Assert.That(rect.xMin,Is.GreaterThan(0));Assert.That(rect.xMax,Is.LessThan(1));
+            Assert.That(ewe.GetComponent<FigureMotion>().Walking,Is.False,"the illustrated scene does not inherit the distant rigged arrival");
+            Capture("09-named-sheep");
+            var eye=Camera.main.transform;var position=eye.position;var rotation=eye.rotation;
+            eye.position=ewe.transform.position+new Vector3(-0.75f,0.65f,0.85f);eye.LookAt(ewe.transform.position+Vector3.up*0.45f);
+            Capture("10-sheep-detail");
+            var bead=stage.Find("bead");stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,bead.Id));yield return new WaitForSeconds(1.2f);
+            eye.position=bead.transform.position+new Vector3(0,0.018f,-0.065f);eye.LookAt(bead.transform.position);
+            var near=Camera.main.nearClipPlane;Camera.main.nearClipPlane=0.01f;Capture("11-bead-detail");Camera.main.nearClipPlane=near;
+            eye.position=position;eye.rotation=rotation;
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator RecordMutedSoftwarePreviewWhenExplicitlyRequested()
+        {
+            if(Environment.GetEnvironmentVariable("SANKOFA_DEMO")!="1")yield break;
+            yield return Open();yield return MovieSegment("01-frame",40);
+            var hand=Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h=>!h.IsLeft);
+            Assert.That(app.EnterExhibit("era.1850s"),Is.True);Time.timeScale=8;
+            var recorded=new HashSet<string>();var deadline=Time.realtimeSinceStartup+220;
+            while(app.Flow.Phase!=VisitPhase.Closing||app.Flow.CurrentLine!=null)
+            {
+                Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));
+                var line=app.Flow.CurrentLine?.Id;
+                if(line=="gallery.portions.divide"&&recorded.Add(line))yield return MovieSegment("03-memory",40);
+                if(line=="e1.rest"&&recorded.Add(line))yield return MovieSegment("05-agreement",40);
+                var inv=app.Flow.OpenInvitation;
+                if(inv!=null&&inv.Id=="receive-flour"&&recorded.Add("receive-flour"))
+                {
+                    Time.timeScale=1;var item=stage.Find("gourd.flour");
+                    var at=item.transform.position;hand.Simulated=()=>Palm(item.CarriedBy==hand?at:item.transform.position,true);
+                    yield return Until(()=>item.CarriedBy==hand,8);
+                    at=new Vector3(0.13f,0.92f,0.38f);yield return new WaitForSeconds(0.5f);
+                    yield return MovieSegment("02-gourd-received",40);hand.Simulated=null;Time.timeScale=8;
+                }
+                else if(inv!=null)
+                {
+                    if(inv.Id=="offer-flour"&&recorded.Add("offer-flour"))
+                    {app.Flow.Accept(inv.Id);yield return MovieSegment("04-flour-placement",30);}
+                    else app.Flow.Accept(inv.Id);
+                }
+                yield return null;
+            }
+            Assert.That(app.Flow.Journal.Outcomes["receive-flour"],Is.EqualTo(Core.Story.Outcome.Accepted));
+            yield return MovieSegment("06-same-frame",40);
+            Assert.That(app.Flow.Keep(),Is.True);app.Flow.BeginAgain();
+            yield return MovieSegment("07-returning-memory",40);
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        IEnumerator MovieSegment(string name,int frames)
+        {
+            var speed=Time.timeScale;Time.timeScale=1;
+            var directory=Path.GetFullPath(Path.Combine(Application.dataPath,"..","..","artifacts","gallery-demo",name));Directory.CreateDirectory(directory);
+            var eye=GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();eye.fieldOfView=70;
+            var target=new RenderTexture(960,720,24){antiAliasing=4};var previous=eye.targetTexture;var active=RenderTexture.active;
+            var frame=new Texture2D(960,720,TextureFormat.RGB24,false);
+            try
+            {
+                for(var i=0;i<frames;i++)
+                {
+                    yield return new WaitForSecondsRealtime(0.1f);
+                    eye.targetTexture=target;eye.Render();RenderTexture.active=target;
+                    frame.ReadPixels(new Rect(0,0,960,720),0,0);frame.Apply();
+                    File.WriteAllBytes(Path.Combine(directory,i.ToString("D4")+".jpg"),frame.EncodeToJPG(88));
+                    eye.targetTexture=previous;RenderTexture.active=active;
+                }
+            }
+            finally
+            {eye.targetTexture=previous;RenderTexture.active=active;Object.Destroy(frame);target.Release();Object.Destroy(target);Time.timeScale=speed;}
         }
 
         static Sankofa.Interaction.HandSample Palm(Vector3 point,bool open)

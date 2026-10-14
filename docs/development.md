@@ -65,3 +65,19 @@ Keep approved runtime assets with source provenance in the [asset register](asse
 ## Secrets and external services
 
 Commit only deliberately empty/example configuration. Actual credentials belong in ignored local configuration or the appropriate deployment secret store. Provider access, costs, retention and output rights remain decisions in the [PRD](product/prd.md). Creating this repository does not provision or deploy services.
+
+## Gallery evidence preparation
+
+After regenerating and silently verifying the current gallery, run these local-only helpers:
+
+```sh
+python3 scripts/audit_gallery_assets.py
+python3 scripts/make_gallery_review_packet.py
+python3 scripts/quest_evidence.py
+```
+
+The first verifies declared asset hashes/current narration fingerprints; the second creates separate cultural and blind-comprehension folders/ZIPs with no autoplay, upload or automatic notes storage; the third inventories connected devices without launching anything. Their reports and reviewer material stay under ignored `artifacts/`. Review packet audio is existing speech arranged as a read-through, not a recording of interactive timing.
+
+For an explicitly requested silent software preview, run the gallery PlayMode checks with `SANKOFA_CAPTURE=1 SANKOFA_DEMO=1` and the usual `-batchmode -noaudio` flags. Then run `python3 scripts/make_gallery_demo.py` with Node, ffmpeg and a local Playwright installation available; set `PLAYWRIGHT_MODULE` to its package path when it is outside normal module resolution, and `CHROME_EXECUTABLE` when needed. Its edited desktop/synthetic footage carries an explicit label and no audio stream. It is not actual Quest footage or a qualifying submission demonstration.
+
+See the [candidate release record](release/candidate.md), [rights review](release/rights-review.md) and [human/device protocol](testing/gallery-next-evidence-session.md). Prepared scripts and empty review forms do not count as actual reviewer, device or account-access acceptance.

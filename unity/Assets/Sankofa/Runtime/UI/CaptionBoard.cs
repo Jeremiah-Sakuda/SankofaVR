@@ -36,6 +36,18 @@ namespace Sankofa.Runtime.UI
         float shownAt;
         CaptionSize size = CaptionSize.Large;
         string captionText = "";
+        Vector2 contentOffset;
+        bool prominentNotice;
+        public Vector2 ContentOffset => contentOffset;
+        public void PlaceContent(Vector2 offset)
+        {
+            contentOffset=offset;
+            if(caption==null)return;
+            caption.transform.localPosition=new Vector3(offset.x,offset.y,0);
+            status.transform.localPosition=new Vector3(offset.x,offset.y-0.15f,0);
+            notice.transform.localPosition=new Vector3(offset.x,offset.y+(prominentNotice?0.21f:0.15f),0);
+            FitBacking();
+        }
 
         public string Caption => captionText;
         public string Status => status != null ? status.text : "";
@@ -138,7 +150,8 @@ namespace Sankofa.Runtime.UI
         {
             notice.text = text ?? "";
             notice.fontSize = FontSize(size) * (prominent ? 0.85f : 0.75f);
-            notice.transform.localPosition = new Vector3(0, prominent ? 0.21f : 0.15f, 0);
+            prominentNotice=prominent;
+            notice.transform.localPosition = new Vector3(contentOffset.x, contentOffset.y+(prominent ? 0.21f : 0.15f), 0);
             noticeUntil = Time.unscaledTime + (seconds > 0 ? seconds : noticeSeconds);
         }
 
@@ -149,7 +162,7 @@ namespace Sankofa.Runtime.UI
             if (!backing.enabled) return;
             caption.ForceMeshUpdate();
             var bounds = caption.textBounds;
-            backing.transform.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0.004f);
+            backing.transform.localPosition = caption.transform.localPosition + new Vector3(bounds.center.x, bounds.center.y, 0.004f);
             backing.transform.localScale = new Vector3(bounds.size.x + 0.07f, bounds.size.y + 0.045f, 1f);
         }
 

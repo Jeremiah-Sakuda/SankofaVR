@@ -4,6 +4,8 @@ Updated October 13, 2026 · Current sprint plan for the selected living-gallery 
 
 The [PRD](prd.md) records the broader product requirements; the [backlog](../backlog.md#current-illustrated-theatre-sprints) contains sprint tickets. The schedule below follows the detailed living gallery scope for planning from the current build. The September baseline is preserved later in this file as history, not a description of the present repository.
 
+Current completion checkpoint (October 14): the [v0.6 candidate](../release/candidate.md) implements the remaining pacing/focal-art/caption work and prepares reviewer, hardware, rights and submission materials. The sprint calendar remains an acceptance schedule; hardware and reviewer results are still required. The d0a17bd APK noted below is historical.
+
 ## Current sprint plan
 
 October 13: the [living gallery product scope](illustrated-theatre-scope.md) reflects the user-selected direction: Sankofa is the gallery and *What We Carry* is its first exhibit. The authored software candidate is implemented; the acceptance gates and remaining refinements below remain open. It supersedes the October 11 allocation and the later [first-place proposal](first-place-plan.md). It preserves hardware, cultural, participant and release gates. The original PRD remains the broader contract; this narrower authored candidate does not complete generated planning, live conversation or additional-language requirements.

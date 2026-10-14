@@ -20,6 +20,8 @@ def main():
     data=json.loads((ASSETS/'Art/Scanned/sources.json').read_text())
     for item in data['assets']:
         for filename,info in item['files'].items():check(ASSETS/'Art/Scanned'/item['id']/filename,info['sha256'],'scanned texture',item['license'],item['page'])
+    fonts=ASSETS/'Art/Fonts/AtkinsonHyperlegible';data=json.loads((fonts/'sources.json').read_text())
+    for filename,expected in data['files'].items():check(fonts/filename,expected,'font/notice',data['license'],data['source'])
     package=json.loads((ASSETS/'Content/living-gallery.json').read_text());manifests={};speech=[]
     for line in lines(package):
         namespace,key=line['audio'].split('/',1)
@@ -30,6 +32,6 @@ def main():
         if not ok:problems.append(line['id'])
     report={'package_version':package['version'],'package_sha256':sha(ASSETS/'Content/living-gallery.json'),'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'integrity_problems':problems,'inputs':entries,'current_narration':speech,'limits':['Integrity and provenance audit, not legal or cultural acceptance.','All declared recordings are checked, including legacy assets not used by this candidate.','Unity Resources contains legacy narration for saved visits; this list describes current package speech only.','Unity engine, Meta SDK and font distribution licences remain separate from generated-output rights.','Applicable user/provider account agreements and original project contributor permissions remain unconfirmed.']}
     out=ROOT/'artifacts/release/gallery-asset-integrity.json';out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(report,indent=2))
-    print(f'{len(entries)} declared art/recording/texture inputs; {len(speech)} current speech lines; {len(problems)} integrity problems. Report: {out}')
+    print(f'{len(entries)} declared art/recording/texture/font inputs; {len(speech)} current speech lines; {len(problems)} integrity problems. Report: {out}')
     if problems:raise SystemExit(1)
 if __name__=='__main__':main()

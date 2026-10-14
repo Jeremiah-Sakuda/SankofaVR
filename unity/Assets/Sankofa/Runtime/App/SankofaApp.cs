@@ -415,8 +415,8 @@ namespace Sankofa.Runtime.App
                         choicesPanel.Show(options, primaryFirst: entry);
                         break;
                     case Cue.Questions q:
-                        objectQuestions?.Show(q.Available);
-                        questionsPanel.Show(q.Available.Select(x => ("q:" + x.Id, x.Label)).ToList());
+                        if(objectQuestions!=null)objectQuestions.Show(q.Available);
+                        else questionsPanel.Show(q.Available.Select(x => ("q:" + x.Id, x.Label)).ToList());
                         break;
                     case Cue.QuestionAsked _:
                         fire.Acknowledge();
@@ -424,7 +424,7 @@ namespace Sankofa.Runtime.App
                     case Cue.Noticed n:
                         stage.Find(n.ObjectId)?.Pulse();
                         stage.AnswerLook(n.ObjectId);
-                        if (n.QuestionId != null) questionsPanel.Pulse("q:" + n.QuestionId);
+                        if (n.QuestionId != null) {questionsPanel.Pulse("q:" + n.QuestionId);objectQuestions?.Pulse("q:"+n.QuestionId);}
                         break;
                     case Cue.Closed c:
                         LogJournal();

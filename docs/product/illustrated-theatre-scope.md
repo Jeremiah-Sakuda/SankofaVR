@@ -16,6 +16,8 @@ October 13: the new `LivingGallery` scene and v0.4.0 authored package implement 
 
 October 14: v0.5.0 adds authored acting, animated miniatures, earlier ember input, a focused shorter memory revisit, clearer physical replacement and guarded pointer/transition recovery. See the [panel implementation map](../reviews/2026-10-14-panel-implementation.md) for tradeoffs and evidence. These changes do not close the external acceptance gates.
 
+October 14 completion pass: v0.6.0 tightens the full encounter, moves optional explanatory context off the critical path, refines focal props and adds bounded caption avoidance. Review packets, integrity audit and release drafts are prepared. See the [current candidate](../release/candidate.md) for exact timing, checks and remaining gates. These are software refinements, not accepted human/device evidence.
+
 ## Product promise and boundaries
 
 **Working public description:** “A living gallery for stories time nearly left behind. Step into a painting and discover the lives within it.” The gallery is the product; the illustrated theatre is how its first artwork performs. “A story that notices what you notice” remains an interaction test: readable acknowledgement of attention, deliberate choices, and truthful consequences. It does not imply eye tracking or unrestricted conversation.

@@ -59,5 +59,16 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<Camera>(FindObjectsSortMode.None).Any(c=>c.targetTexture!=null),Is.False,"preview does not render a second live scene");
             Assert.That(Vector3.Distance(GameObject.Find("Choices panel").transform.position,new Vector3(0,1.15f,0)),Is.LessThan(0.65f));
         }
+        [Test] public void FocalArtIsCandidateSpecificAndUncheckedStreetAudioIsExcluded()
+        {
+            EditorSceneManager.OpenScene("Assets/Sankofa/Scenes/LivingGallery.unity");
+            var stage=Object.FindFirstObjectByType<StoryStage>();
+            var head=stage.Find("figure.ewe").transform.Find("Neck/Head");
+            Assert.That(head.GetComponent<MeshFilter>().sharedMesh.colors.All(c=>c.r>0.5f),Is.True,"new head has pigment instead of the legacy black mask");
+            Assert.That(AssetDatabase.GetAssetPath(head.GetComponent<Renderer>().sharedMaterial),Does.Contain("/Gallery/"));
+            foreach(var id in new[]{"bead","bead.kept","bead.today","gate"})
+                Assert.That(AssetDatabase.GetAssetPath(stage.Find(id).Surfaces.First().GetComponent<MeshFilter>().sharedMesh),Does.Contain("/Gallery/"));
+            Assert.That(Object.FindObjectsByType<AudioSource>(FindObjectsInactive.Include,FindObjectsSortMode.None).Any(a=>a.clip!=null&&a.clip.name=="matatu"),Is.False);
+        }
     }
 }

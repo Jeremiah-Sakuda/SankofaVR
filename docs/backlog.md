@@ -144,3 +144,7 @@ Broad global coverage, community contribution tools, actual family-history mater
 
 
 October 14 panel response: [implementation map](reviews/2026-10-14-panel-implementation.md) records v0.5 acting, moving memories, shorter revisits and input/save/recovery fixes. [Next evidence session](testing/gallery-next-evidence-session.md) is prepared; actual participant, device, listening and cultural acceptance remains open.
+
+## October 14 v0.6 acceptance preparation
+
+The [candidate record](release/candidate.md) adds software pacing and focal-art/caption refinements. Current cultural/first-time packets, asset integrity audit, read-only Quest collector, silent software demo draft and submission copy are prepared. This progresses IT-P03/10/11 preparation; those tickets remain open for real participant, device, cultural/listening, applicable rights and account-access evidence. No reviewer response, device pass, upload or public submission is implied by these deliverables.

@@ -6,6 +6,7 @@ it is a script read-through, not a recording of a live visit.
 """
 import hashlib, html, json, shutil, subprocess, zipfile
 from pathlib import Path
+from generate_narration import lines as all_lines
 ROOT=Path(__file__).resolve().parent.parent
 ASSETS=ROOT/'unity/Assets/Sankofa'
 PACKAGE=ASSETS/'Content/living-gallery.json'
@@ -44,18 +45,25 @@ def build_audio(folder,name,lines):
 def main():
     OUT.mkdir(parents=True,exist_ok=True);p=json.loads(PACKAGE.read_text());cultural=OUT/'cultural';novice=OUT/'first-time'
     for folder in [cultural,novice]:folder.mkdir(parents=True,exist_ok=True)
-    scripts=[];word_rows=[]
+    scripts=[];word_rows=[];included=set()
     for route in p['routes'][:2]:
         for mode in ['default','accepted']:
-            name=route['id'].replace('.','-')+'-'+mode;lines=list(resolved(p,route,mode));timeline=build_audio(cultural,name,lines)
+            name=route['id'].replace('.','-')+'-'+mode;lines=list(resolved(p,route,mode));timeline=build_audio(cultural,name,lines);included.update(l['id'] for l in lines)
             (cultural/f'{name}.json').write_text(json.dumps(timeline,indent=2))
             scripts.append(f'<h2>{e(route["label"])} — {e(mode)}</h2><audio controls preload="none" src="{name}.mp3"></audio><p>Sequential recorded lines; waiting and transitions omitted. Accepted path assumes every offered act occurred. Passive path assumes none occurred. Both are scripted review paths, not human sessions.</p>'+''.join(f'<div class="line"><code>{row["seconds"]:.1f}s · {e(row["id"])}</code><br>{e(row["text"])}<small>Claims: {e(", ".join(row["claims"])) or "Authored connective dialogue; see reconstruction claims"}</small></div>' for row in timeline))
             for word in WORDS:
                 first=next((r for r in timeline if word.lower() in r['text'].lower()),None)
                 if first:word_rows.append(f'<li>{e(word)} — {e(name)}, {first["seconds"]:.1f}s, {e(first["id"])}</li>')
+    extras=[l for l in all_lines(p) if l['id'] not in included]
+    timeline=build_audio(cultural,'isolated-context-and-questions',extras)
+    (cultural/'isolated-context-and-questions.json').write_text(json.dumps(timeline,indent=2))
+    scripts.append('<h2>Other recorded context, questions and modern alternatives</h2><p>Isolated lines for wording/pronunciation review. Mutually exclusive alternatives appear here together; this is not a single playable route.</p><audio controls preload="none" src="isolated-context-and-questions.mp3"></audio>'+''.join(f'<div class="line"><code>{row["seconds"]:.1f}s · {e(row["id"])}</code><br>{e(row["text"])}</div>' for row in timeline))
+    for word in WORDS:
+        first=next((r for r in timeline if word.lower() in r['text'].lower()),None)
+        if first:word_rows.append(f'<li>{e(word)} — isolated-context-and-questions, {first["seconds"]:.1f}s, {e(first["id"])}</li>')
     passive='era-1850s-default.mp3';shutil.copyfile(cultural/passive,novice/'story.mp3')
     pictures=[]
-    for name,label in [('01-gallery','Before entry'),('02-what-she-brings','First memory'),('03-what-she-remembers','Other memory'),('07-shortfall','Encounter'),('05-modern-river','Modern continuation'),('08-caption-clearance','Synthetic caption obstruction check')]:
+    for name,label in [('01-gallery','Before entry'),('02-what-she-brings','First memory'),('03-what-she-remembers','Other memory'),('07-shortfall','Encounter'),('05-modern-river','Modern continuation'),('08-caption-clearance','Synthetic caption obstruction check'),('09-named-sheep','The sheep in the encounter'),('10-sheep-detail','Sheep model review camera'),('11-bead-detail','Bead model review camera')]:
         src=ROOT/'artifacts/living-gallery'/f'{name}.png'
         if not src.is_file():raise ValueError(f'Missing current capture {src}')
         shutil.copyfile(src,cultural/src.name);pictures.append(f'<figure><img loading="lazy" src="{src.name}" alt="{e(label)}"><figcaption>{e(label)}. Muted desktop capture; not Quest or participant evidence.</figcaption></figure>')

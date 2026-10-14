@@ -3,11 +3,15 @@
 Default lists devices; --serial selects a consenting connected device and collects build/display/log evidence.
 Frame timings in logs are observations, not proof of sustained performance or stereo comfort.
 """
-import argparse,hashlib,json,subprocess,time
+import argparse,hashlib,json,subprocess,time,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent.parent
 ADB='/Applications/Unity/Hub/Editor/6000.3.25f1/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb'
-def run(args):return subprocess.run([ADB]+args,check=True,text=True,capture_output=True,timeout=30).stdout
+def run(args):
+    try:return subprocess.run([ADB]+args,check=True,text=True,capture_output=True,timeout=30).stdout
+    except (subprocess.CalledProcessError,subprocess.TimeoutExpired,OSError) as error:
+        print('ADB read failed. Check the SDK path, local ADB socket permission and USB authorisation.',file=sys.stderr)
+        raise SystemExit(1) from error
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--serial');p.add_argument('--out',type=Path,default=ROOT/'artifacts/quest-evidence');a=p.parse_args()
