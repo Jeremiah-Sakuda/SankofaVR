@@ -2,7 +2,7 @@
   "schema": 2,
   "kind": "package",
   "id": "enkare-nairobi.illustrated-mvp",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "title": "Sankofa — What We Carry",
   "locale": "en",
   "status": "draft",
@@ -338,6 +338,7 @@
         "e1.turn-intro",
         "e1.turn",
         "e1.after",
+        "gallery.shared-landscape",
         "e1.milk-rest",
         "e1.gift",
         "e1.dusk",
@@ -375,6 +376,7 @@
         "e1.waiting",
         "e1.turn",
         "e1.after",
+        "gallery.shared-landscape",
         "e1.milk-rest",
         "e1.gift",
         "e1.dusk",
@@ -433,14 +435,6 @@
       "id": "offer",
       "scene": "hearth",
       "lines": [
-        {
-          "id": "offer.light",
-          "text": "Every story I tell begins with a little of my light.",
-          "seconds": 6.92,
-          "pause_after": 0.6,
-          "fire": "telling",
-          "audio": "enkare-nairobi/offer.light"
-        },
         {
           "id": "offer.hand",
           "text": "Hold out your open hand, palm up, and I will give you an ember to carry.",
@@ -522,17 +516,6 @@
           "audio": "enkare-nairobi/e1.listen"
         },
         {
-          "id": "e1.paths",
-          "text": "Imagine the paths that lead here: past millet fields and hives at the forest edge; out across the plain, where cattle graze. They meet at the water.",
-          "seconds": 18.12,
-          "pause_after": 1,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "audio": "enkare-nairobi.illustrated-v3/e1.paths"
-        },
-        {
           "id": "e1.touch",
           "text": "Put your hand in the water.",
           "seconds": 3.64,
@@ -545,7 +528,7 @@
         "kind": "touch",
         "object": "water.spill",
         "alternative": "Touch the water",
-        "wait_seconds": 12,
+        "wait_seconds": 8,
         "accepted": [
           {
             "id": "e1.water.felt",
@@ -614,7 +597,7 @@
           "id": "e1.wambui.arrives",
           "text": "Here is Wambui, a Kikuyu trader. She has walked since morning with flour for Naserian.",
           "seconds": 11.28,
-          "pause_after": 0.6,
+          "pause_after": 0.25,
           "fire": "telling",
           "actions": [
             {
@@ -630,17 +613,6 @@
             "R1"
           ],
           "audio": "enkare-nairobi.illustrated-v2/e1.wambui.arrives"
-        },
-        {
-          "id": "e1.flour",
-          "text": "Banana flour: green bananas dried, then pounded. The gourd has travelled with her all morning.",
-          "seconds": 12.48,
-          "pause_after": 0.6,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "audio": "enkare-nairobi.gallery-v4/e1.flour"
         },
         {
           "id": "e1.carry",
@@ -664,7 +636,7 @@
         "kind": "receive",
         "object": "gourd.flour",
         "alternative": "Carry the flour",
-        "wait_seconds": 12,
+        "wait_seconds": 8,
         "accepted": [
           {
             "id": "e1.carry.yes",
@@ -727,7 +699,7 @@
           "id": "e1.naserian.arrives",
           "text": "Naserian, a Maasai trader, has brought the sheep she agreed to exchange for the flour, and a gourd of milk.",
           "seconds": 11.48,
-          "pause_after": 0.4,
+          "pause_after": 0.25,
           "fire": "telling",
           "actions": [
             {
@@ -747,23 +719,6 @@
             "R1"
           ],
           "audio": "enkare-nairobi.illustrated-v2/e1.naserian.arrives"
-        },
-        {
-          "id": "e1.milk",
-          "text": "She needs the flour for her household. She also needs a promise she can count on.",
-          "seconds": 9.84,
-          "pause_after": 0.6,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "actions": [
-            {
-              "do": "illuminate",
-              "object": "gourd.milk"
-            }
-          ],
-          "audio": "enkare-nairobi.illustrated-v2/e1.milk"
         },
         {
           "id": "e1.price",
@@ -806,6 +761,30 @@
               "audio": "enkare-nairobi.illustrated-v3/q.e1.milk.answer"
             }
           ]
+        },
+        {
+          "id": "q.gallery.household",
+          "label": "What was she counting on?",
+          "about": "gourd.milk",
+          "lines": [
+            {
+              "id": "q.gallery.household.answer",
+              "text": "She needs the flour for her household. She also needs a promise she can count on.",
+              "seconds": 9.84,
+              "pause_after": 0.6,
+              "fire": "telling",
+              "claims": [
+                "R1"
+              ],
+              "actions": [
+                {
+                  "do": "illuminate",
+                  "object": "gourd.milk"
+                }
+              ],
+              "audio": "enkare-nairobi.illustrated-v2/e1.milk"
+            }
+          ]
         }
       ]
     },
@@ -814,10 +793,16 @@
       "scene": "story.water.1850s",
       "lines": [
         {
-          "id": "e1.hide",
-          "text": "A hide waits within reach. There is room to set down the flour before it goes between the women.",
-          "seconds": 12.24,
-          "fire": "holding",
+          "id": "e1.offer.carried",
+          "text": "“Set it here, beside me,” Wambui says. Touch the hide.",
+          "seconds": 6.72,
+          "pause_after": 0.25,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "when": "receive-flour:accepted",
+          "audio": "enkare-nairobi.illustrated-v3/e1.offer.carried",
           "actions": [
             {
               "do": "reveal",
@@ -833,35 +818,35 @@
               "object": "figure.naserian",
               "at": "hide"
             }
-          ],
-          "claims": [
-            "R1"
-          ],
-          "audio": "enkare-nairobi.gallery-v4/e1.hide"
-        },
-        {
-          "id": "e1.offer.carried",
-          "text": "“Set it here, beside me,” Wambui says. Touch the hide.",
-          "seconds": 6.72,
-          "pause_after": 0.6,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "when": "receive-flour:accepted",
-          "audio": "enkare-nairobi.illustrated-v3/e1.offer.carried"
+          ]
         },
         {
           "id": "e1.offer.beside",
           "text": "Wambui glances at the gourd beside you. “Help me set it here.” Touch the hide.",
           "seconds": 10.68,
-          "pause_after": 0.6,
+          "pause_after": 0.25,
           "fire": "telling",
           "claims": [
             "R1"
           ],
           "when": "receive-flour:default",
-          "audio": "enkare-nairobi.illustrated-v3/e1.offer.beside"
+          "audio": "enkare-nairobi.illustrated-v3/e1.offer.beside",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "hide"
+            },
+            {
+              "do": "move",
+              "object": "figure.wambui",
+              "at": "hide"
+            },
+            {
+              "do": "move",
+              "object": "figure.naserian",
+              "at": "hide"
+            }
+          ]
         }
       ],
       "invitation": {
@@ -869,7 +854,7 @@
         "kind": "touch",
         "object": "hide",
         "alternative": "Offer the flour",
-        "wait_seconds": 12,
+        "wait_seconds": 8,
         "accepted": [
           {
             "id": "e1.offer.yes",
@@ -1235,30 +1220,6 @@
       "id": "home.1850s",
       "scene": "hearth",
       "lines": [
-        {
-          "id": "home.trade.helped",
-          "text": "You helped bring the flour between them. What happened next was their agreement to make.",
-          "seconds": 9.68,
-          "pause_after": 0.6,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "when": "offer-flour:accepted",
-          "audio": "enkare-nairobi.illustrated-v2/home.trade.helped"
-        },
-        {
-          "id": "home.trade.quiet",
-          "text": "You were there while they worked it out. Their meeting had room for a quiet guest.",
-          "seconds": 9.28,
-          "pause_after": 0.6,
-          "fire": "telling",
-          "claims": [
-            "R1"
-          ],
-          "when": "offer-flour:default",
-          "audio": "enkare-nairobi.illustrated-v2/home.trade.quiet"
-        },
         {
           "id": "home.bead.held",
           "text": "The bead you received carries that meeting home with you.",
@@ -1747,7 +1708,7 @@
           "id": "gallery.where",
           "text": "We are going to what is now Kenya, before Nairobi became a city.",
           "seconds": 9.08,
-          "pause_after": 0.7,
+          "pause_after": 0.25,
           "fire": "telling",
           "claims": [
             "C1"
@@ -1758,7 +1719,7 @@
           "id": "e1.gather",
           "text": "Kikuyu and Maasai people traded across this region. Wambui and Naserian, their words and their gifts, are imagined for this story.",
           "seconds": 17.44,
-          "pause_after": 0.8,
+          "pause_after": 0.25,
           "fire": "gathering",
           "claims": [
             "C6",
@@ -1884,6 +1845,23 @@
             "R1"
           ],
           "audio": "enkare-nairobi.illustrated-v2/e1.problem"
+        }
+      ]
+    },
+    {
+      "id": "gallery.shared-landscape",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "e1.paths",
+          "text": "Imagine the paths that lead here: past millet fields and hives at the forest edge; out across the plain, where cattle graze. They meet at the water.",
+          "seconds": 18.12,
+          "pause_after": 1,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v3/e1.paths"
         }
       ]
     }

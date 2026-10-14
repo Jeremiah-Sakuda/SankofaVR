@@ -54,6 +54,27 @@ namespace Sankofa.Tests
             Assert.That(PackageValidator.Validate(p).IsValid,Is.False);
         }
 
+        [TestCase("era.1850s")][TestCase("era.1850s.remembered")]
+        public void PassiveGuestReachesTheAgreementAndHospitalityWithinTheFirstFiveMinutes(string route)
+        {
+            var plan=Package().Compose(route);var elapsed=0.0;var agreement=-1.0;var hospitality=-1.0;
+            foreach(var beat in plan.Beats)
+            {
+                foreach(var line in beat.Lines)
+                {
+                    if(line.When!=null&&line.When.Outcome!=Outcome.Default)continue;
+                    if(line.Id=="e1.rest")agreement=elapsed;
+                    if(line.Id=="e1.witness.quiet")hospitality=elapsed;
+                    elapsed+=line.Seconds+line.PauseAfter;
+                }
+                if(beat.Invitation!=null)elapsed+=beat.Invitation.WaitSeconds+beat.Invitation.Default.Sum(l=>l.Seconds+l.PauseAfter);
+            }
+            Assert.That(agreement,Is.InRange(1.0,260.0));Assert.That(hospitality,Is.InRange(1.0,280.0));
+            Assert.That(plan.Beats.SelectMany(b=>b.Lines).Select(l=>l.Id),Does.Contain("e1.paths"));
+            Assert.That(plan.Beats.First(b=>b.Id=="gallery.shared-landscape").Lines[0].Claims,Does.Contain("R1"));
+            Assert.That(plan.Beats.Select(b=>b.Id).ToList().IndexOf("gallery.shared-landscape"),Is.GreaterThan(plan.Beats.Select(b=>b.Id).ToList().IndexOf("e1.after")));
+        }
+
         [TestCase(true)]
         [TestCase(false)]
         public void EntryRetainsWhetherAPerspectiveWasChosenOrDefaulted(bool useDefault)
