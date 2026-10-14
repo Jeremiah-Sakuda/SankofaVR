@@ -2,6 +2,8 @@
 
 Package **0.6.0**, LivingGallery. This pass follows the remaining [judging findings](../reviews/2026-10-13-independent-gallery-panel.md). It does not claim new judge scores or a winning outcome.
 
+**Subsequent audit:** the [current-experience audit](../reviews/2026-10-14-current-experience-audit.md) reproduced caption overlap through the actual selection-button carry, interaction-journal logging without Keep, and invitation expiry while Settings is open. The verification below remains a record of the tested paths; it is not acceptance of those uncovered paths. No production fixes were made in that audit.
+
 ## Product changes
 
 The passive agreement now arrives at **250.85 seconds** in *What she brings* and **253.75 seconds** in *What she remembers*. Hospitality arrives at **267.61 / 270.51 seconds**. Full passive telling schedules are **432.03 / 434.93 seconds**, down from 499.04 / 501.94. These calculations include narration, pauses and default invitation waits, excluding transitions, questions, interruptions and visitor pauses. They are not observed session lengths.
