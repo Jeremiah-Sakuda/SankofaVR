@@ -16,7 +16,7 @@ Record their actual words, confusion, assistance and route/outcomes. Do not prom
 
 ## Cultural/art review
 
-Show the two new expression rows, both memory miniatures, the sheep/gourds/bead, the admission/promise lines and the disclosure. Ask about individuality, dignity, clothing, props, pronunciation and distinctions between Kikuyu, Maasai/Maa and Akan context. Invite corrections to specifics rather than asking for blanket endorsement. Record reviewer remit and consent; no family or individual speaks for every community. Update attribution/evidence labels and regenerate draft art when required. Keep applicable model/service terms and collaborator permissions as separate release evidence.
+Show the registered expression poses, both memory miniatures, the painted ewe and tangible gourds/bead, the admission/promise lines and the disclosure. Ask about individuality, dignity, clothing, props, pronunciation and distinctions between Kikuyu, Maasai/Maa and Akan context. Invite corrections to specifics rather than asking for blanket endorsement. Record reviewer remit and consent; no family or individual speaks for every community. Update attribution/evidence labels and regenerate draft art when required. Keep applicable model/service terms and collaborator permissions as separate release evidence.
 
 ## Quest visit
 

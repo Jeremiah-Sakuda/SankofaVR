@@ -26,7 +26,7 @@ Controllers are optional. Waiting through an invitation is a complete, truthful 
 
 ## First visit
 
-1. Before entering, open **Settings** if needed. Choose text size, reduced motion, voice/ambience, height/reach or recenter. **Voice: captions only** does not start narration audio and retains its recorded timing. **About this artwork** explains the Akan title, Kenyan encounter, fiction/context and replay boundary. **Credits** provides paged attribution. Done closes preferences.
+1. Before entering, open **Settings** if needed. Placement follows your seated eye height. Choose text size, reduced motion, voice/ambience, height/reach or recenter. **Voice: captions only** does not start narration audio and retains its recorded timing. **About this artwork** explains the Akan title, Kenyan encounter, fiction/context and replay boundary. **Credits** provides paged attribution. Done closes preferences.
 2. Select **Enter painting** for the default route, or explicitly choose **Wambui · before her journey** or **Naserian · their earlier meeting**. The narrator welcomes you, offers an ember and discloses the reconstruction before the painting opens. Your viewpoint stays stationary.
 3. At the water, receive Wambui's flour or watch. Wambui's perspective shows what she divided before leaving. Naserian's perspective reveals whose promise fell short at their earlier meeting. The two women make their agreement on every path.
 4. Touch the hide to help place the flour, or wait. Helping changes how Naserian addresses you and offers milk. Waiting receives a different, equally warm welcome. You may receive or leave the milk on either path.
@@ -35,7 +35,7 @@ Controllers are optional. Waiting through an invitation is a complete, truthful 
 
 ## Return, replay and forgetting
 
-**Back to the artwork** offers the other memory, **Replay saved telling**, the modern river continuation and Forget. The focused other-memory visit retains disclosure, agreement, bead and return while omitting repeated introductory gestures. Its authored passive speech/wait schedule is about 2:06 / 2:15; neither is an observed participant duration.
+**Back to the artwork** offers the other memory, **Replay saved telling**, the modern river continuation and Forget. The focused other-memory visit retains disclosure, agreement, bead and return while omitting repeated introductory gestures. Its authored passive speech/wait schedule is about 2:03 / 2:15; neither is an observed participant duration.
 
 Replay retains the realised words, recordings and resolved actions, using the current presentation. It does not regenerate wording, repeat questions or reproduce interruption timing. A continuation is a new child visit, not a replay. In the imagined modern garden, touch the gate to leave the bead or let it stay with you.
 

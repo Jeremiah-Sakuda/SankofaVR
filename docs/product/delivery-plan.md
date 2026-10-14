@@ -187,3 +187,7 @@ October 11, 2026, voice pass: v0.3.0 restores the fire's conversational invitati
 
 
 October 14 panel response: the v0.5 candidate adds authored acting and memory actions, focused revisits and bounded input/save/recovery fixes. The [implementation map](../reviews/2026-10-14-panel-implementation.md) separates delivered software changes from the [next human/device evidence](../testing/gallery-next-evidence-session.md). Sprint acceptance remains open where it depends on hardware, participants, cultural review, listening or release terms.
+
+## October 14 production hardening checkpoint
+
+The [production iteration](../reviews/2026-10-14-production-iteration.md) records v0.7: corrected carry/logging/modal preferences, eye-relative placement and comfort controls, shorter memory returns, registered painted performance and animal, protected caption focus, current default gallery commands and refreshed review materials. Its software results do not close the hardware, cultural/language/listening, participant or release-access gates above.
