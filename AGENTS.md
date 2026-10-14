@@ -18,7 +18,7 @@ Follow [the modular architecture](docs/architecture.md). Keep story rules indepe
 
 ## Product direction
 
-- Sankofa is a living gallery; *What We Carry* is its first exhibit. Follow the [current scope](docs/product/illustrated-theatre-scope.md): a framed painting becomes a spatial story and returns to the same frame. The `LivingGallery` scene implements this direction with a draft authored v0.6 package in software; device/content acceptance remains open.
+- Sankofa is a living gallery; *What We Carry* is its first exhibit. Follow the [current scope](docs/product/illustrated-theatre-scope.md): a framed painting becomes a spatial story and returns to the same frame. The `LivingGallery` scene implements this direction with a draft authored v0.7 package in software; device/content acceptance remains open. Read the [production iteration](docs/reviews/2026-10-14-production-iteration.md) for current fixes and verification. BuildMain targets LivingGallery; Hearth and IllustratedTheatre are comparison records.
 - The griot remains a warm contextual narrator, with fire as its presence in the first artwork. Narration and questions respect beat/route reveal boundaries; do not explain a story turn before it happens. A humanoid host is not required.
 - Personalisation must change observable story content. A fixed film or cosmetic name substitution does not satisfy the PRD.
 - All essential flows work with hands; voice is optional. Include passive progression, one-hand alternatives, captions, reduced motion and recovery.

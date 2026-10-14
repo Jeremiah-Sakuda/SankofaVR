@@ -1,6 +1,6 @@
 # Next evidence session: What We Carry
 
-Prepared from the [panel implementation pass](../reviews/2026-10-14-panel-implementation.md). This is a protocol, not completed evidence. Record the exact source/build, device, participant mode and results before closing a gate. Raw personal recordings/notes belong in ignored local artifacts with appropriate consent, not the repository.
+Current build changes are recorded in the [production iteration](../reviews/2026-10-14-production-iteration.md). This is a protocol, not completed evidence. Record the exact source/build, device, participant mode and results before closing a gate. Raw personal recordings/notes belong in ignored local artifacts with appropriate consent, not the repository.
 
 ## First-time comprehension
 
@@ -22,7 +22,7 @@ Show the two new expression rows, both memory miniatures, the sheep/gourds/bead,
 
 Hands only, seated: entry → ember → water → gourd → flour placed between women → milk response → bead → same frame → explicit Keep → relaunch → other memory → replacement warning and second deposit → relaunch/replay → modern continuation → forget. Also run a one-hand visit and a fully passive visit.
 
-Observe reach and readable feedback, asking versus receiving, off-button pinch release, tracking loss near controls, save failure/retry, pause/recenter during a memory, reduced-mode stationary entry and motion-free miniature changes. Verify the earlier save survives cancellation of replacement and that skipped revisit gestures are never recalled as acts.
+Observe whether first-time visitors find the forward Pause/Settings row. Test Settings during an open invitation and after system pause; verify voice/caption-only, height/reach and every credits/context page. Check the received object remains visible through selection and replay. Observe reach and readable feedback, asking versus receiving, off-button pinch release, tracking loss near controls, save failure/retry, pause/recenter during a memory, reduced-mode stationary entry and motion-free miniature changes. Verify the earlier save survives cancellation of replacement and that skipped revisit gestures are never recalled as acts.
 
 Record sustained on-device frame timing and thermal behavior, stereo/cutout edge comfort, caption/return-guide legibility, near reeds, sheep visibility and prop handling. Check the narration/mix/voice placement only during a separately agreed listening session. Current development restriction remains **no sound playback and no simulator**; this protocol does not override it.
 
@@ -30,7 +30,7 @@ Record sustained on-device frame timing and thermal behavior, stereo/cutout edge
 
 After device evidence, capture a short sequence showing the frame becoming a spatial scene, a real hand taking the painted-palm gourd, the physical flour crossing into the painting, the changed hospitality and the return to the same image. Show the passive comparison and the shorter memory as distinct paths. Label desktop/synthetic footage accordingly. A staged camera render is not proof of successful hand tracking, stereo depth or Quest frame rate.
 
-## Prepared v0.6 materials and result record
+## Prepared current materials and result record
 
 The [candidate completion record](../release/candidate.md) distinguishes prepared deliverables from finished reviews. Generate current packets with `python3 scripts/make_gallery_review_packet.py`. The cultural ZIP contains exact read-throughs for both memories on helping/passive paths, art and pronunciation locations. The first-time ZIP offers one unprimed read-through or caption transcript and neutral questions. These desktop/audio checks are narrower than actual interactive visits. Do not coach a participant toward the intended interpretation or count synthetic QA notes as responses.
 

@@ -19,7 +19,7 @@ The closing memento can be kept by the existing panel or by receiving it, holdin
 
 ```sh
 "/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildLivingGallery
-"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildLivingGallery
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildMain
 ```
 
 `artifacts/Sankofa-LivingGallery.apk` is a local review build. Generation and muted batch tests do not launch the XR Simulator. The frame image is generated from the actual historical scene; the modern background is draft generated art, with [prompt and provenance](Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json). No headset or cultural acceptance is implied. Audio files are bundled for product use; they were not played during this iteration at the user's request.
@@ -45,11 +45,11 @@ Assets/Oculus, Assets/XR, Assets/Resources, Assets/Plugins/Android
 
 The engine-free folders are also compiled and tested outside Unity by [../dotnet](../dotnet). Unity enforces their dependency direction through assembly definitions: the core references nothing, the flow references only the core, and nothing engine-free references Unity.
 
-`Hearth.unity` and the materials and meshes in `Art/Generated` are produced by code. Change `SankofaSceneBuilder`, `SankofaWaterScenes` or `SankofaArt` and regenerate rather than editing them by hand.
+`LivingGallery.unity`, the historical comparison scenes and the materials and meshes in `Art/Generated` are produced by code. Change `SankofaSceneBuilder`, `SankofaWaterScenes` or `SankofaArt` and regenerate rather than editing them by hand.
 
 ## Commands
 
-The illustrated-theatre MVP is a separate scene and build. It reuses the first historical story and its continuation, with a separate local saved-visit shelf. Open **Sankofa > Build Illustrated Theatre MVP**, then Play, or use **Sankofa > Play Illustrated Theatre in XR Simulator**. **Sankofa > Build Illustrated Theatre APK** writes `artifacts/Sankofa-IllustratedTheatre.apk`. The baseline `Hearth` scene remains available for comparison.
+**Build APK / SankofaBuild.BuildMain targets LivingGallery.** `BuildHearth` writes the explicitly named historical comparison APK. The illustrated-theatre MVP is a separate comparison scene and build. It reuses the first historical story and its continuation, with a separate local saved-visit shelf. Open **Sankofa > Build Illustrated Theatre MVP**, then Play, or use **Sankofa > Play Illustrated Theatre in XR Simulator**. **Sankofa > Build Illustrated Theatre APK** writes `artifacts/Sankofa-IllustratedTheatre.apk`. The baseline `Hearth` scene remains available for comparison.
 
 Both APKs use `com.sankofa.quest`, so installing one replaces the other application build. Their saved-visit folders are separate.
 
@@ -173,7 +173,7 @@ The simulator starts with controllers: aim with the mouse and click to pull the 
 Installing a development build needs a Quest in developer mode, which needs a Meta developer account set up by the owner. Unity's Android support includes `adb` at `/Applications/Unity/Hub/Editor/6000.3.25f1/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb` if it is not on your path.
 
 ```sh
-adb install -r artifacts/Sankofa.apk
+adb install -r artifacts/Sankofa-LivingGallery.apk
 ```
 
 Sit down before launching: the hearth is placed in front of where your head is when tracking settles, and **Recenter** places it again.

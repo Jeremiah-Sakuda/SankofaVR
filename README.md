@@ -4,11 +4,11 @@
 
 Sankofa focuses on stories time nearly left behind: everyday lives and relationships, made legible through specific cultural context and honest imaginative telling. Its living art gallery for Meta Quest lets you encounter a painting, enter its composition, experience a story that responds to your perspective and actions, then return to the same work understanding it differently. **What We Carry** is the first exhibit. The griot supplies context without revealing the story ahead of time; the fire remains its presence inside the artwork. Entry and exploration work while seated.
 
-The [living gallery product scope](docs/product/illustrated-theatre-scope.md) guides the implementation. The new **LivingGallery** scene plays package v0.6.0: a framed view of the actual encounter, stationary entry/return, two authored revelations, explicit object questions, milk hospitality and a physical keepsake deposit. A saved visit offers a focused memory revisit, exact replay or the painted modern river continuation. Narration cues now perform concern, divided provisions and remembered waiting; physical replacement saving requires a warning and second deposit. Existing narration is recorded and bundled. This is software/desktop evidence; device comfort/performance, cultural review and final art/listening acceptance remain open.
+The [living gallery product scope](docs/product/illustrated-theatre-scope.md) guides the implementation. The new **LivingGallery** scene plays package v0.7.0: a framed view of the actual encounter, stationary entry/return, two authored revelations, explicit object questions, milk hospitality and a physical keepsake deposit. A saved visit offers a focused memory revisit, replay of the saved telling or the painted modern river continuation. Narration cues now perform concern, divided provisions and remembered waiting; physical replacement saving requires a warning and second deposit. Existing narration is recorded and bundled. This is software/desktop evidence; device comfort/performance, cultural review and final art/listening acceptance remain open.
 
 Open `unity/Assets/Sankofa/Scenes/LivingGallery.unity`. Scene generation and the review APK use `SankofaSceneBuilder.BuildLivingGallery` and `SankofaBuild.BuildLivingGallery`. The earlier theatre and 3D scenes below remain comparison records. There is no runtime story generation or live AI conversation.
 
-The [October 14 completion pass](docs/release/candidate.md) brings the passive agreement into the first five minutes of authored timing, refines focal props and protects captions from offered/carried objects. Current review packets, asset integrity evidence, Quest collection helper and an honest submission draft are prepared. External acceptance remains open; no sound playback or simulator is used in this pass.
+The [October 14 production iteration](docs/reviews/2026-10-14-production-iteration.md) addresses carry state, logging, settings, return pacing and cast registration. The earlier [completion pass](docs/release/candidate.md) brought the passive agreement into the first five minutes of authored timing, refines focal props and protects captions from offered/carried objects. Current review packets, asset integrity evidence, Quest collection helper and an honest submission draft are prepared. External acceptance remains open; no sound playback or simulator is used in this pass.
 
 ![Sankofa living gallery: What We Carry, waiting for deliberate entry](docs/media/living-gallery.jpg)
 
@@ -23,6 +23,33 @@ The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. F
 Its facts come from a [source register](docs/content/enkare-nairobi/sources.md). Its people are fictional composites.
 
 **SankofaVR** is the repository name; **Sankofa** is the product.
+
+## Current status and source entry points
+
+| Piece | LivingGallery candidate |
+|---|---|
+| Story | One draft Kenyan encounter, Wambui's morning and Naserian's earlier meeting, plus a modern river coda; authored English recordings |
+| Participation | Open-palm receive, touch, fingertip or point-and-pinch selection; truthful passive alternatives |
+| Comfort | Visible pause/settings controls; modal preferences stop story time; text size, reduced motion, separate voice/ambience, caption-only narration, height/reach and recenter |
+| Memory | Explicit local Keep with replacement confirmation, focused other-memory visit, replay and Forget; no per-action/journal logging |
+| Presentation | Layered painted scenery/cast, registered poses and offered palms, tangible focal objects and miniature memories |
+| Acceptance | Software/desktop evidence only; actual Quest, novice, cultural, pronunciation/listening and applicable rights/release acceptance remain open |
+
+Replay preserves the saved realised text, retained recordings and resolved actions. It uses the current stage art/choreography; questions and interruption timing are excluded. It never generates replacement narration.
+
+Open **`unity/Assets/Sankofa/Scenes/LivingGallery.unity`**. The standard **Build APK** command now builds the gallery. For silent source verification/building from the repository root:
+
+```sh
+dotnet test dotnet/Sankofa.Tests
+python3 scripts/check_workspace.py --competition
+python3 scripts/audit_gallery_assets.py
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildLivingGallery
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildMain
+```
+
+The generated APK is `artifacts/Sankofa-LivingGallery.apk`, kept local. Follow the [Unity guide](unity/README.md) for editor/runtime tests and the [device protocol](docs/testing/gallery-next-evidence-session.md) for actual hardware acceptance. The planned entry remains Adapted / Significantly Updated Entertainment; account/division confirmation is pending.
+
+The sections below are **historical comparison experiences**, not the shipped gallery status or default launch instructions.
 
 ## Earlier illustrated-theatre MVP
 
@@ -90,40 +117,6 @@ Desktop renders from the seated eye, made by the capture test. They are not head
 ![Camp stores beneath a simple awning beside the tents](docs/media/camp-stores.jpg)
 
 *A seated view toward the camp's stores, staged in the runtime with story objects and captions hidden for environment inspection. This is a presentation study, not visitor or device evidence.*
-
-## Status
-
-The full slice runs in software: a Unity project for Quest and an engine-free story core.
-
-| Piece | State |
-|---|---|
-| Story | Both eras and today are written, validated on every route, and narrated in 85 pre-rendered lines |
-| Interaction | Hands throughout: an open palm, touch, fingertip presses, or point and pinch. Touch controllers are optional |
-| Visits | A start screen, passive progression, questions and pause. Visits are kept only by explicit choice, and can replay the same path and outcomes, continue to today or be forgotten; questions and interruption timing are not replayed |
-| Figures | Complete skinned tops and wraps, calibrated walking with stance-foot correction, kneeling rest, coordinated gourd sharing, held-object finger poses, blinks, and a glance when your attention rests on them |
-| Sound | Field recordings (CC0 and CC BY, credited in the app). Nothing is synthesised, and there is no music |
-
-Not yet established:
-- **Hardware:** nothing has run on a headset or in the simulator with hand tracking, and no participant has tried it.
-- **Review:** the stories have not been reviewed by family or community, and some claims are held back until verified.
-- **Language:** a second language is not chosen.
-
-The planned entry is Adapted / Significantly Updated Entertainment. AI-generated music is excluded.
-
-## Try it
-
-On a headset, follow the [testing guide](docs/product/testing-guide.md): a ten-minute walkthrough with hands. From source, run these from the repository root. The Unity commands need Unity 6000.3.25f1 through Unity Hub; full details are in the [Unity README](unity/README.md).
-
-```sh
-# Story core, flow, gestures and storage, with no Unity needed (.NET 10 SDK)
-dotnet test dotnet/Sankofa.Tests
-
-# Play the hearth in the Meta XR Simulator (aim with the mouse and click to choose)
-"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayHearth
-
-# Documentation links and local-only exclusions
-python3 scripts/check_workspace.py
-```
 
 ## Repository map
 

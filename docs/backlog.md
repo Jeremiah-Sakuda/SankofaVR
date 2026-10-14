@@ -148,3 +148,7 @@ October 14 panel response: [implementation map](reviews/2026-10-14-panel-impleme
 ## October 14 v0.6 acceptance preparation
 
 The [candidate record](release/candidate.md) adds software pacing and focal-art/caption refinements. Current cultural/first-time packets, asset integrity audit, read-only Quest collector, silent software demo draft and submission copy are prepared. This progresses IT-P03/10/11 preparation; those tickets remain open for real participant, device, cultural/listening, applicable rights and account-access evidence. No reviewer response, device pass, upload or public submission is implied by these deliverables.
+
+## October 14 production iteration
+
+The [production iteration](reviews/2026-10-14-production-iteration.md) implements the audit's carry/logging/modal-settings fixes, forward controls, caption-only narration/reach, stronger and shorter return, pose/palm registration, painted animal cohesion and clearer replay/default entry points. Software checks and current captures are being completed there. IT-P03/10/11 and the cultural/device/listening portions of the other packages remain open; prepared packets and synthetic checks do not close those gates.

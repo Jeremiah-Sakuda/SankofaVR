@@ -198,7 +198,7 @@ No AI-generated music is used. Human-made music is optional and needs a concrete
 
 ### SK-12 — Memory, replay and return
 
-With explicit save, store the visitor's accepted choices, realised story plan, asset/content versions, narration/captions required for replay, chosen language, consequence history and next thread. Resolve each kept visit to its exhibit so gallery relaunch restores the correct memento and work without altering the canonical painting. Exact replay refers to the saved realised visit and does not regenerate wording. A follow-up is a new child visit, labelled as such, which can acknowledge a retained interest without fabricating memory.
+With explicit save, store the visitor's accepted choices, realised story plan, asset/content versions, narration/captions required for replay, chosen language, consequence history and next thread. Resolve each kept visit to its exhibit so gallery relaunch restores the correct memento and work without altering the canonical painting. Replay preserves the saved realised text, retained audio and resolved outcomes without regenerating wording. It uses the current presentation assets/choreography; questions and interruption timing are excluded. The interface states that boundary. Archived visual performances are outside this candidate, so "exact" must not imply identical rendering. A follow-up is a new child visit, labelled as such, which can acknowledge a retained interest without fabricating memory.
 
 **Accept when:** a second visit offers a genuinely new perspective tied to the first; replay preserves the earlier content; missing cached content is reported and cannot silently become a new version; deletion removes the keepsake and the local remembered thread.
 
@@ -221,6 +221,8 @@ Provide adjustable reach/placement, caption size and contrast, separate voice/am
 Profile actual supported standalone hardware through a complete warm session, including fire, transition and worst-case simultaneous audio/interaction. Select and record the display refresh target and matching frame budget; the contest's stated minimum is a floor, not a substitute for a stable chosen refresh rate.
 
 **Accept when:** all supported devices have recorded frame, memory and sustained-session evidence; no mandatory travel or uncomfortable reach remains; tested users can find pause and return; performance and comfort failures are resolved before adding P1 effects.
+
+Current gallery controls expose separate narration/ambience levels, a caption-only narration timeline, text size, reduced motion, height/reach and recenter. Modal Settings suspends story/input, restores only its own pause and preserves visitor/system interruptions. Caption-only mode uses the recording duration without starting voice playback. Release diagnostics retain no interaction journal or per-action cue trail. These behaviours require runtime checks; physical reach and listening acceptance remain device/reviewer gates.
 
 ### SK-16 — Data and permissions
 

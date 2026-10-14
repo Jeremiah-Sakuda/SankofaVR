@@ -12,7 +12,7 @@ Sankofa is a living gallery. Its first artwork, *What We Carry*, imagines a meet
 
 A warm voice invites you closer. The painting opens into layered scenery around your seat. A gourd leaves an illustrated palm and comes within reach. You can receive it and help set down the flour, or remain a guest and watch. The women make their own agreement; your participation changes their hospitality and what the experience later remembers about your visit.
 
-Two memories reveal different sides of the same encounter. Returning to the unchanged painting gives it a new meaning. An explicit keepsake records the visit beside its exhibit. You can revisit the other memory in a shorter telling, replay what actually happened, or follow the water into an imagined contemporary garden.
+Two memories reveal different sides of the same encounter. Returning to the unchanged painting gives it a new meaning. An explicit keepsake records the visit beside its exhibit. You can revisit the other memory in a shorter telling, replay the kept telling and actions in the current staging, or follow the water into an imagined contemporary garden.
 
 The story distinguishes documented context from theatrical reconstruction before entry. The women, their bargain and the bead are fictional. The Akan origin of the name Sankofa is acknowledged separately from the Kenyan setting. Cultural and pronunciation review must be completed before this draft describes the content as reviewed.
 
@@ -42,7 +42,7 @@ Unity 6000.3.25f1, Meta XR Core, OpenXR, TextMeshPro and an engine-independent C
 
 ## Judge instructions draft
 
-Launch into the gallery while seated. Choose *What she brings*. Follow the open-palm invitation when the gourd approaches; touch the trading hide when invited. You may also let any invitation pass. After the final line, deliberately Keep beside the exhibit. Begin again to see the other memory; the previous visit is replaced only after the disclosed second deposit. Follow the water for the modern continuation. Settings provide captions, reduced motion, sound controls, pause and recenter.
+Launch into the gallery while seated. Choose *Wambui · before her journey*. Follow the open-palm invitation when the gourd approaches; touch the trading hide when invited. You may also let any invitation pass. After the final line, deliberately Keep beside the exhibit. Begin again to see the other memory; the previous visit is replaced only after the disclosed second deposit. Follow the water for the modern continuation. Pause and Settings remain visible below the story. Settings pause progression and provide text size, reduced motion, separate voice/ambience, caption-only narration, height/reach and recenter. No-Keep visits leave neither saved visits nor diagnostic interaction journals.
 
 No microphone, cloud account or server credential is required for the bundled experience. First-launch permission behavior, fully hands-only use and independent installation must be verified on the release device.
 
