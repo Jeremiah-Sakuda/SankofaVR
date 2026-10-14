@@ -10,6 +10,9 @@ Shader "Sankofa/Illustration"
         _Unfold ("Paint reveal", Range(0, 1)) = 1
         _Highlight ("Attention invitation", Range(0, 1)) = 0
         _Selection ("Accepted hand response", Range(0, 1)) = 0
+        _Cutoff ("Cutout threshold", Range(0, 1)) = 0.22
+        _BottomTrim ("Atlas cell lower trim", Range(0, 0.1)) = 0
+        _TopTrim ("Atlas cell upper trim", Range(0.9, 1)) = 1
     }
     SubShader
     {
@@ -28,6 +31,7 @@ Shader "Sankofa/Illustration"
             float4 _MainTex_TexelSize;
             float4 _FrameA, _FrameB;
             float _PoseBlend, _Visibility, _Unfold, _Highlight, _Selection;
+            float _Cutoff, _BottomTrim, _TopTrim;
             float4 _SankofaLightPos, _SankofaLightColor;
             struct appdata { float4 vertex : POSITION; float2 uv : TEXCOORD0; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct v2f { float4 position : SV_POSITION; float2 uv : TEXCOORD0; float3 world : TEXCOORD1; UNITY_VERTEX_OUTPUT_STEREO };
@@ -55,7 +59,9 @@ Shader "Sankofa/Illustration"
                 float4 frame = _PoseBlend < 0.5 ? _FrameA : _FrameB;
                 fixed4 texel = tex2D(_MainTex, AtlasUV(i.uv, frame));
                 half dip = 1 - abs(_PoseBlend * 2 - 1);
-                clip(texel.a - 0.22);
+                clip(texel.a - _Cutoff);
+                clip(i.uv.y - _BottomTrim);
+                clip(_TopTrim - i.uv.y);
                 // Stable object-space grain works identically for both eyes and writes depth; no transparent sorting.
                 float grain = frac(sin(dot(floor(i.uv * 280), float2(12.9898, 78.233))) * 43758.5453);
                 clip(_Visibility - grain * 0.98 - 0.001);

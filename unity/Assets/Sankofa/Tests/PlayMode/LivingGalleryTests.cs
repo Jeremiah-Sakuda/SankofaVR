@@ -542,6 +542,39 @@ namespace Sankofa.Tests
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
 
+        [UnityTest] public IEnumerator RegisteredPosesKeepFeetAndPalmsStableAndAttentionNeverAcceptsAnInvitation()
+        {
+            yield return Open();app.enabled=false;
+            foreach(var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None))panel.Hidden=true;
+            yield return gallery.Transition("story.water.1850s",new Continuity[0],true);
+            foreach(var id in new[]{"figure.wambui","figure.naserian","figure.ewe","gourd.flour","gourd.milk"})
+                stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,id));
+            foreach(var id in new[]{"figure.wambui","figure.naserian"})
+            {
+                var figure=stage.Find(id).GetComponent<IllustratedFigure>();Assert.That(figure.RegisteredPoseCount,Is.EqualTo(5));
+                var ground=figure.transform.position;
+                for(var pose=0;pose<5;pose++)
+                {
+                    figure.SetPose(pose);yield return new WaitForSeconds(0.8f);
+                    Assert.That(Vector3.Distance(figure.PaintedFoot,ground),Is.LessThan(0.005f),id+" pose "+pose);
+                    Assert.That(figure.Surface.sharedMaterial.GetFloat("_Cutoff"),Is.EqualTo(0.5f));
+                }
+                figure.SetPose(0);yield return new WaitForSeconds(0.8f);figure.Glance(Camera.main.transform.position,1.2f);
+                yield return new WaitForSeconds(0.8f);
+                Assert.That(figure.Pose,Is.Zero,"reaction keeps the authored pose separate");Assert.That(figure.DisplayPose,Is.EqualTo(2));
+                yield return new WaitForSeconds(1.3f);Assert.That(figure.DisplayPose,Is.Zero,"reaction returns to the narrative pose");
+                figure.SetPose(3);yield return new WaitForSeconds(0.8f);figure.Glance(Camera.main.transform.position,1);
+                yield return new WaitForSeconds(0.8f);Assert.That(figure.DisplayPose,Is.EqualTo(3),"concern is not replaced by a smile");
+            }
+            Assert.That(app.Flow.Journal,Is.Null,"presentation has not begun or chosen a visit");
+            var giver=stage.Find("figure.wambui").GetComponent<IllustratedFigure>();var gourd=stage.Find("gourd.flour");
+            Assert.That(gourd.transform.parent,Is.SameAs(giver.transform.parent),"resting vessel belongs on the bank, not a downturned hand");
+            stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Offer,gourd.Id));
+            yield return Until(()=>giver.DisplayPose==1,3);yield return new WaitForSeconds(0.1f);
+            Assert.That(Vector3.Distance(gourd.transform.position,giver.GiftOrigin),Is.LessThan(0.01f));
+            Capture("17-registered-offer");Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
         IEnumerator MovieSegment(string name,int frames)
         {
             var speed=Time.timeScale;Time.timeScale=1;

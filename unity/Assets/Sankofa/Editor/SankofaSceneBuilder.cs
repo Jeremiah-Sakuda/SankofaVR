@@ -94,10 +94,11 @@ namespace Sankofa.EditorTools
             settingsModal.localRotation = FacingVisitor(settingsModal.localPosition);
             Set(settings, "buttonSize", new Vector2(0.24f, 0.064f));
             Set(settings, "labelSize", 0.23f);
-            var settingsHeading = GalleryText(settings.transform, "Settings heading", "Settings", new Vector3(0, 0.09f, 0), 0.20f, 0.56f);
-            var settingsInfo = GalleryText(settings.transform, "Credits page", "", new Vector3(0, -0.26f, 0), 0.17f, 0.49f);
+            var settingsHeading = GalleryText(settings.transform, "Settings heading", "Settings", new Vector3(0, 0.09f, -0.012f), 0.20f, 0.56f);
+            var settingsInfo = GalleryText(settings.transform, "Credits page", "", new Vector3(0, -0.26f, -0.012f), 0.17f, 0.49f);
             settingsInfo.alignment = TextAlignmentOptions.TopLeft;
             settingsInfo.rectTransform.sizeDelta = new Vector2(0.49f, 0.26f);
+            var settingsBackdrop = Prim(settings.transform, "Settings backing", PrimitiveType.Quad, new Vector3(0, -0.14f, 0.012f), new Vector3(0.55f, 0.62f, 1), art.Plaque).GetComponent<Renderer>();
             var startScreen = BuildStartScreen(world);
             BuildPointers(rig, art, new[] { controls, choices, questions, settings });
             var curtain = BuildCurtain(rig.Head, art);
@@ -145,6 +146,7 @@ namespace Sankofa.EditorTools
             Set(app, "settingsModalAnchor", settingsModal);
             Set(app, "settingsHeading", settingsHeading);
             Set(app, "settingsInfo", settingsInfo);
+            Set(app, "settingsBackdrop", settingsBackdrop);
             Set(app, "stage", stage);
             Set(app, "transition", transition);
             Set(app, "receiver", receiver);

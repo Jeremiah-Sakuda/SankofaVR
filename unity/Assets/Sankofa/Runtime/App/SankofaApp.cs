@@ -48,6 +48,7 @@ namespace Sankofa.Runtime.App
         [SerializeField] Transform settingsModalAnchor;
         [SerializeField] TMPro.TMP_Text settingsHeading;
         [SerializeField] TMPro.TMP_Text settingsInfo;
+        [SerializeField] Renderer settingsBackdrop;
         [SerializeField] StoryStage stage;
         [Tooltip("Optional authored acting in the living gallery; comparison scenes use their existing presentation.")]
         [SerializeField] GalleryPerformance performance;
@@ -771,6 +772,7 @@ namespace Sankofa.Runtime.App
                 settingsHeading.text = creditsOpen ? "Credits" : flow?.Phase == VisitPhase.Transitioning ? "Settings · pause after entry" : "Settings · story paused";
             }
             if (settingsInfo != null) settingsInfo.enabled = settingsOpen && creditsOpen;
+            if (settingsBackdrop != null) settingsBackdrop.enabled = settingsOpen;
             if (!settingsOpen)
             {
                 settingsPanel.transform.localPosition = settingsRestPosition;

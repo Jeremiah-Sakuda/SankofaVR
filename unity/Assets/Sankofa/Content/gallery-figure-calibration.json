@@ -1,0 +1,89 @@
+{
+  "note": "Manual UV registration of fictional draft cast: feet, silhouette height and offered palm. Positions are presentation calibration, not cultural authentication. UV values are approximate review measurements.",
+  "figures": [
+    {
+      "id": "figure.wambui",
+      "anchorX": -0.84,
+      "bodyHeight": 1.74,
+      "poses": [
+        {
+          "footU": 0.61,
+          "footV": 0.044,
+          "topV": 0.984,
+          "palmU": 0.75,
+          "palmV": 0.49
+        },
+        {
+          "footU": 0.63,
+          "footV": 0.047,
+          "topV": 0.986,
+          "palmU": 0.837,
+          "palmV": 0.638
+        },
+        {
+          "footU": 0.59,
+          "footV": 0.044,
+          "topV": 0.982,
+          "palmU": 0.84,
+          "palmV": 0.56
+        },
+        {
+          "footU": 0.61,
+          "footV": 0.036,
+          "topV": 0.974,
+          "palmU": 0.69,
+          "palmV": 0.61
+        },
+        {
+          "footU": 0.61,
+          "footV": 0.037,
+          "topV": 0.974,
+          "palmU": 0.86,
+          "palmV": 0.635
+        }
+      ]
+    },
+    {
+      "id": "figure.naserian",
+      "anchorX": 0.94,
+      "bodyHeight": 1.76,
+      "poses": [
+        {
+          "footU": 0.4,
+          "footV": 0.044,
+          "topV": 0.984,
+          "palmU": 0.48,
+          "palmV": 0.49
+        },
+        {
+          "footU": 0.4,
+          "footV": 0.047,
+          "topV": 0.984,
+          "palmU": 0.24,
+          "palmV": 0.611
+        },
+        {
+          "footU": 0.43,
+          "footV": 0.044,
+          "topV": 0.984,
+          "palmU": 0.23,
+          "palmV": 0.7
+        },
+        {
+          "footU": 0.41,
+          "footV": 0.036,
+          "topV": 0.974,
+          "palmU": 0.48,
+          "palmV": 0.49
+        },
+        {
+          "footU": 0.43,
+          "footV": 0.037,
+          "topV": 0.974,
+          "palmU": 0.33,
+          "palmV": 0.625
+        }
+      ]
+    }
+  ]
+}

@@ -45,7 +45,7 @@ namespace Sankofa.EditorTools
                 foreach(var m in new[]{vessel,dark,strap})Object.DestroyImmediate(m);
                 var pigment=GalleryCopy(item.Surfaces.First().sharedMaterial,"Gallery "+id+" pigment");
                 item.Surfaces.First().sharedMaterial=pigment;
-                pigment.SetColor("_Color",new Color(0.83f,0.66f,0.45f));pigment.SetFloat("_InkWidth",0.17f);pigment.SetFloat("_VertexTint",1);
+                pigment.SetColor("_Color",new Color(0.58f,0.37f,0.20f));pigment.SetFloat("_InkWidth",0.17f);pigment.SetFloat("_VertexTint",1);
                 EditorUtility.SetDirty(pigment);Set(item,"echoMesh",mesh);
             }
             RefineGallerySheep(stage);
@@ -76,7 +76,8 @@ namespace Sankofa.EditorTools
         static void RefineGallerySheep(StoryStage stage)
         {
             var ewe=stage.Find("figure.ewe");var body=ewe.transform.Find("Body").GetComponent<MeshFilter>();
-            ewe.transform.localPosition=new Vector3(0.38f,0,1.85f);
+            ewe.transform.localPosition=new Vector3(0.10f,0,2.85f);
+            ewe.transform.localRotation=Quaternion.Euler(0,-12,0);
             var motion=new SerializedObject(ewe.GetComponent<FigureMotion>());
             motion.FindProperty("entryPath").arraySize=0;motion.FindProperty("delay").floatValue=0;motion.ApplyModifiedPropertiesWithoutUndo();
             var parts=new List<CombineInstance>();var centre=new Vector3(0,0.52f,0);var radius=new Vector3(0.18f,0.18f,0.34f);
@@ -92,6 +93,7 @@ namespace Sankofa.EditorTools
             Rounded(parts,new Vector3(0,0.49f,-0.34f),new Vector3(0.035f,0.07f,0.035f),new Color(0.8f,0.75f,0.64f),6510);
             SaveGalleryMesh(Join("Gallery sculpted ewe fleece",parts),body);
             body.GetComponent<Renderer>().sharedMaterial=GalleryCopy(body.GetComponent<Renderer>().sharedMaterial,"Gallery ewe fleece pigment");
+            body.GetComponent<Renderer>().sharedMaterial.SetColor("_Color",new Color(0.58f,0.54f,0.47f));
             var facePigment=GalleryCopy(ewe.transform.Find("Neck/Head").GetComponent<Renderer>().sharedMaterial,"Gallery ewe face pigment");
             var head=ewe.transform.Find("Neck/Head").GetComponent<MeshFilter>();
             var headMesh=Object.Instantiate(head.sharedMesh);headMesh.name="Gallery ewe head";
@@ -101,6 +103,7 @@ namespace Sankofa.EditorTools
             {
                 var filter=leg.GetComponentInChildren<MeshFilter>();parts=new List<CombineInstance>();
                 var shaft=Object.Instantiate(filter.sharedMesh);shaft.colors=Enumerable.Repeat(new Color(0.95f,0.87f,0.75f),shaft.vertexCount).ToArray();
+                shaft.vertices=shaft.vertices.Select(v=>new Vector3(v.x*1.35f,v.y,v.z*1.35f)).ToArray();shaft.RecalculateNormals();shaft.RecalculateBounds();
                 parts.Add(new CombineInstance{mesh=shaft,transform=Matrix4x4.identity});
                 foreach(var side in new[]{-1f,1f})Rounded(parts,new Vector3(side*0.008f,-0.407f,0.013f),new Vector3(0.015f,0.024f,0.032f),new Color(0.28f,0.22f,0.17f),6520+(int)side);
                 SaveGalleryMesh(Join("Gallery ewe hoof "+leg.name,parts),filter);

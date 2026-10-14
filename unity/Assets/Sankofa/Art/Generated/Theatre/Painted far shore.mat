@@ -29,9 +29,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _BottomTrim: 0
+    - _Cutoff: 0.22
     - _Highlight: 0
     - _PoseBlend: 1
     - _Selection: 0
+    - _TopTrim: 1
     - _Unfold: 1
     - _Visibility: 1
     m_Colors:

@@ -13,13 +13,16 @@ namespace Sankofa.EditorTools
     /// </summary>
     public static class SankofaBuild
     {
-        public const string OutputName = "Sankofa.apk";
+        public const string OutputName = "Sankofa-LivingGallery.apk";
 
         [MenuItem("Sankofa/Build APK")]
         public static void BuildMain()
         {
-            Build(SankofaSceneBuilder.HearthScene, OutputName);
+            Build(SankofaSceneBuilder.GalleryScene, OutputName);
         }
+
+        [MenuItem("Sankofa/Comparison/Build Hearth APK")]
+        public static void BuildHearth() => Build(SankofaSceneBuilder.HearthScene, "Sankofa-Hearth-Comparison.apk");
 
         [MenuItem("Sankofa/Build Illustrated Theatre APK")]
         public static void BuildIllustratedTheatre()

@@ -3,6 +3,12 @@ using UnityEngine;
 
 namespace Sankofa.Runtime.Stage
 {
+    [System.Serializable] public sealed class PaintedPoseRegistration
+    {
+        public Vector3 Offset, Hand;
+        public Vector2 Foot;
+        public float Scale = 1;
+    }
     /// <summary>Authored acting and resolved invitations share a small pose vocabulary; neither creates visitor choices.</summary>
     [RequireComponent(typeof(StageObject))]
     public sealed class IllustratedFigure : MonoBehaviour, IGlancer
@@ -11,6 +17,7 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Vector4[] frames;
         [SerializeField] Texture2D expressionAtlas;
         [SerializeField] Vector4[] expressionFrames;
+        [SerializeField] PaintedPoseRegistration[] registrations;
         Texture originalAtlas;
         [SerializeField] Transform giftOrigin;
         [SerializeField] Vector3 waitingHand;
@@ -29,6 +36,8 @@ namespace Sankofa.Runtime.Stage
         Matrix4x4 glanceFrame;
         float glanceFor, glanceWeight;
         int previousPose, pose;
+        int authoredPose;
+        bool reaction;
         float blend = 1;
         StageObject offering;
         StoryStage offeringStage;
@@ -37,7 +46,18 @@ namespace Sankofa.Runtime.Stage
         int ShownPose => blend < 0.5f ? previousPose : pose;
         /// <summary>The gift waiting to be given, shown in the palms once they are painted, then sent across.</summary>
         public StageObject Offering => offering;
-        public int Pose => pose;
+        public int Pose => authoredPose;
+        public int DisplayPose => ShownPose;
+        public int RegisteredPoseCount => registrations?.Length ?? 0;
+        public Vector3 PaintedFoot
+        {
+            get
+            {
+                var bounds = surface.GetComponent<MeshFilter>().sharedMesh.bounds;
+                var foot = registrations[ShownPose].Foot;
+                return surface.transform.TransformPoint(new Vector3(bounds.min.x + bounds.size.x * foot.x, bounds.min.y + bounds.size.y * foot.y, 0));
+            }
+        }
         public float PoseBlend => blend;
         public Vector3 GiftOrigin => giftOrigin.position;
         public Renderer Surface => surface;
@@ -67,6 +87,13 @@ namespace Sankofa.Runtime.Stage
             glanceAt = at;
             glanceFrame = transform.parent != null ? transform.parent.localToWorldMatrix : Matrix4x4.identity;
             glanceFor = seconds;
+            // A small authored open-handed acknowledgement, then return to the narrative pose. Never smile
+            // through the shortfall or interrupt a gift in the painted palm. Looking resolves no invitation.
+            if (offering == null && authoredPose != 1 && authoredPose < 3)
+            {
+                reaction = true;
+                SetVisualPose(2);
+            }
             if (TryGetComponent<StageObject>(out var staged)) staged.Pulse();
         }
 
@@ -74,13 +101,21 @@ namespace Sankofa.Runtime.Stage
         {
             glanceFor = glanceWeight = 0;
             offering = null;
-            previousPose = pose = 0;
+            previousPose = pose = authoredPose = 0;
+            reaction = false;
             blend = 1;
             Turn(0);
             Apply();
         }
 
         public void SetPose(int value)
+        {
+            reaction = false;
+            SetVisualPose(value);
+            authoredPose = pose;
+        }
+
+        void SetVisualPose(int value)
         {
             if (frames == null || frames.Length == 0) return;
             value = Mathf.Clamp(value, 0, frames.Length + (expressionAtlas != null && expressionFrames != null ? expressionFrames.Length : 0) - 1);
@@ -160,6 +195,11 @@ namespace Sankofa.Runtime.Stage
             blend = Mathf.MoveTowards(blend, 1, StageClock.DeltaTime / Mathf.Max(0.05f, dissolveSeconds));
             if (transition != null && transition.ReducedMotion) { previousPose = pose; blend = 1; }
             glanceFor = Mathf.Max(0, glanceFor - StageClock.DeltaTime);
+            if (reaction && glanceFor <= 0)
+            {
+                reaction = false;
+                SetVisualPose(authoredPose);
+            }
             glanceWeight = Mathf.MoveTowards(glanceWeight, glanceFor > 0 ? 1 : 0, StageClock.DeltaTime / 0.5f);
             Turn(Mathf.SmoothStep(0, 1, glanceWeight));
             Give(StageClock.DeltaTime);
@@ -187,12 +227,14 @@ namespace Sankofa.Runtime.Stage
             }
             var turn = Quaternion.Euler(0, yaw, 0);
             card.localRotation = turn;
-            card.localPosition = turn * surfaceRest;
+            var registration = registrations != null && ShownPose < registrations.Length ? registrations[ShownPose] : null;
+            card.localPosition = turn * (registration != null ? registration.Offset : surfaceRest);
+            card.localScale = Vector3.one * (registration != null ? registration.Scale : 1);
             // The painted palm and its physical gift must turn together until the gift leaves the hand.
             if (giftOrigin != null)
             {
                 var shownPose = blend < 0.5f ? previousPose : pose;
-                giftOrigin.localPosition = turn * (shownPose == 1 ? offeringHand : waitingHand);
+                giftOrigin.localPosition = turn * (registration != null ? registration.Hand : shownPose == 1 ? offeringHand : waitingHand);
                 giftOrigin.localRotation = turn;
             }
         }

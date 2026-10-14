@@ -34,6 +34,9 @@ namespace Sankofa.EditorTools
             var stage = Object.FindFirstObjectByType<StoryStage>();
             var world = Object.FindFirstObjectByType<WorldAnchor>().transform;
             PolishGalleryObjects(stage);
+            BuildVignettes(stage);
+            BuildGalleryPerformance(stage);
+            CalibrateGalleryCast(stage);
             var painting = CaptureComposition(stage, "story.water.1850s", "What We Carry");
             BuildModernIllustration(stage);
             var home = stage.Scenes.Single(s => s.IsHearth);
@@ -75,8 +78,6 @@ namespace Sankofa.EditorTools
             Set(gallery,"painting",work); Set(gallery,"canvas",canvas); Set(gallery,"stage",stage);
             SetArray(gallery,"frame",edges.Cast<Object>().ToArray());
             Set(stage.GetComponent<StoryTransition>(),"gallery",gallery);
-            BuildVignettes(stage);
-            BuildGalleryPerformance(stage);
             var unused=stage.Scenes.Single(x=>x.Id=="story.water.1899");
             SetArray(stage,"objects",stage.Objects.Where(x=>x.Scene!="story.water.1899").Cast<Object>().ToArray());
             var stageData=new SerializedObject(stage);var scenes=stageData.FindProperty("scenes");
@@ -86,8 +87,7 @@ namespace Sankofa.EditorTools
             Object.DestroyImmediate(unused.Root);
             var milk=stage.Find("gourd.milk");
             var naserian=stage.Find("figure.naserian").GetComponent<IllustratedFigure>();
-            milk.transform.SetParent(naserian.transform.Find("Hands"), false);
-            milk.transform.localPosition=new Vector3(0.12f,-0.12f,-0.04f);
+            RestGalleryVessel(milk, naserian);
             Set(milk,"holder",null);Set(milk,"illustratedHolder",naserian);Set(milk,"handOver",null);
             var app=Object.FindFirstObjectByType<SankofaApp>();
             var objectQuestions=world.gameObject.AddComponent<ObjectQuestions>();
@@ -357,8 +357,8 @@ namespace Sankofa.EditorTools
             foreach(var o in stage.Objects.Where(o=>o.Scene==id))
                 foreach(var r in o.Surfaces)
                 {
-                    r.enabled=includeObjects;
-                    if(!includeObjects)continue;
+                    r.enabled=includeObjects && !o.Id.StartsWith("memory.");
+                    if(!r.enabled)continue;
                     var b=new MaterialPropertyBlock();
                     b.SetFloat("_Visibility",1);b.SetFloat("_Unfold",1);b.SetFloat("_PoseBlend",1);
                     if(o.TryGetComponent<IllustratedFigure>(out var f))
