@@ -456,6 +456,8 @@ namespace Sankofa.Tests
             flow.Choose("travellers");
             view.RunUntil(() => flow.Phase == VisitPhase.Closing, 2000);
             Assert.That(flow.Journal.Completed, Is.True);
+            Assert.That(view.Of<Cue.RecoverTransition>().Count(),Is.EqualTo(2));
+            Assert.That(view.Of<Cue.RecoverTransition>().Select(c=>c.Change.To.Id),Is.EqualTo(view.Of<Cue.Transition>().Select(c=>c.To.Id)));
         }
 
         [Test]

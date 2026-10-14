@@ -88,6 +88,7 @@ namespace Sankofa.Flow
         double transitionElapsed;
         double choiceIdle;
         SceneDef transitionTarget;
+        Cue.Transition pendingTransition;
         Continuation afterTransition;
         bool pauseAfterTransition;
         List<string> echoOnEntry;
@@ -168,6 +169,15 @@ namespace Sankofa.Flow
         /// <summary>Explicit entry with an authored default route, without claiming a personal perspective preference.</summary>
         public bool BeginDefault(string routeId)
             => BeginRoute(routeId, PerspectiveSelection.Default);
+
+        /// <summary>A shorter authored telling requires a completed kept visit; it saves its realised plan as usual.</summary>
+        public bool ChooseReturning(string routeId)
+        {
+            if (!AtChoice(ChoiceMenu.Returning) || KeptVisit == null) return false;
+            var route = package.Route(routeId);
+            if (route == null || route.IsContinuation || route.ReturningBeats.Count == 0) return false;
+            return BeginVisit(package.Compose(route.Id, returning: true), VisitMode.Chosen, null, null, PerspectiveSelection.Explicit);
+        }
 
         bool BeginRoute(string routeId, PerspectiveSelection selection)
         {
@@ -605,7 +615,11 @@ namespace Sankofa.Flow
                     break;
                 case Activity.Transitioning:
                     transitionElapsed += deltaSeconds;
-                    if (transitionElapsed > settings.TransitionTimeout) TransitionFinished(transitionToken);
+                    if (transitionElapsed > settings.TransitionTimeout)
+                    {
+                        Emit(new Cue.RecoverTransition(pendingTransition));
+                        TransitionFinished(transitionToken);
+                    }
                     break;
             }
         }
@@ -898,7 +912,8 @@ namespace Sankofa.Flow
             var crossed = staging.Cross(plan.CorrespondencesBetween(from.Id, to.Id)).Select(c => new Continuity(c.From, c.To)).ToList();
             SetPhase(VisitPhase.Transitioning);
             Emit(new Cue.Fire(FireState.Transitioning));
-            Emit(new Cue.Transition(transitionToken, from, to, to.Kind == SceneKind.Hearth ? TransitionKind.Return : TransitionKind.Enter, crossed));
+            pendingTransition = new Cue.Transition(transitionToken, from, to, to.Kind == SceneKind.Hearth ? TransitionKind.Return : TransitionKind.Enter, crossed);
+            Emit(pendingTransition);
             UpdateControls();
         }
 

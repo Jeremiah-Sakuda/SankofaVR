@@ -134,13 +134,14 @@ namespace Sankofa.Core.Story
 
         static Route ReadRoute(Fields f)
         {
-            f.Only("id", "label", "follows", "beats", "keepsake", "next");
+            f.Only("id", "label", "follows", "beats", "keepsake", "next", "returning_beats");
             return new Route
             {
                 Id = f.String("id"),
                 Label = f.String("label"),
                 Follows = f.OptionalString("follows"),
                 Beats = f.Strings("beats"),
+                ReturningBeats = f.OptionalStrings("returning_beats"),
                 Keepsake = f.OptionalString("keepsake"),
                 Next = f.OptionalString("next"),
             };

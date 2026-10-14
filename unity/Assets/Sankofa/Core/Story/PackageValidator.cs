@@ -26,7 +26,7 @@ namespace Sankofa.Core.Story
         public IEnumerable<Route> FirstRoutes => Package.Routes.Where(r => !r.IsContinuation);
         public Route Route(string id) => id != null && routes.TryGetValue(id, out var r) ? r : null;
 
-        public StoryPlan Compose(string routeId, ParentVisit parent = null) => PlanComposer.Compose(Package, routeId, parent);
+        public StoryPlan Compose(string routeId, ParentVisit parent = null, bool returning = false) => PlanComposer.Compose(Package, routeId, parent, returning);
     }
 
     /// <summary>
@@ -73,8 +73,9 @@ namespace Sankofa.Core.Story
                 else if (!routes.ContainsKey(r.Id)) routes.Add(r.Id, r);
                 else Error("id.duplicate", path, $"duplicate route id '{r.Id}'");
                 if (string.IsNullOrWhiteSpace(r.Label)) Error("route.label", path + ".label", $"route '{r.Id}' needs a label for its choice");
+                if (r.IsContinuation && r.ReturningBeats.Count > 0) Error("route.returning", path, "a continuation cannot define a returning telling");
                 if (r.Beats.Count == 0) Error("route.beats", path + ".beats", $"route '{r.Id}' has no beats");
-                foreach (var beat in r.Beats)
+                foreach (var beat in r.Beats.Concat(r.ReturningBeats))
                     if (!pool.Contains(beat)) Error("route.beat", path + ".beats", $"route '{r.Id}' uses unknown beat '{beat}'");
             }
             if (!package.Routes.Any(r => !r.IsContinuation)) Error("routes.first", "$.routes", "at least one route must be a first story that continues nothing");
@@ -87,7 +88,7 @@ namespace Sankofa.Core.Story
                 if (r.Next != null && (!routes.TryGetValue(r.Next, out var next) || next.Follows != r.Id))
                     Error("route.next", path + ".next", $"route '{r.Id}' continues with '{r.Next}', which must be a route that follows it");
             }
-            var used = new HashSet<string>(package.Routes.SelectMany(r => r.Beats));
+            var used = new HashSet<string>(package.Routes.SelectMany(r => r.Beats.Concat(r.ReturningBeats)));
             for (var i = 0; i < package.Beats.Count; i++)
                 if (!used.Contains(package.Beats[i].Id)) Warning("beat.unused", $"$.beats[{i}]", $"beat '{package.Beats[i].Id}' is not used by any route");
 
@@ -98,6 +99,10 @@ namespace Sankofa.Core.Story
                 var r = package.Routes[i];
                 var path = $"$.routes[{i}]";
                 if (!CheckRecalls(package, r, routes, path, Error)) continue;
+                if (r.ReturningBeats.Count > 0)
+                    foreach (var issue in PlanValidator.Validate(PlanComposer.Compose(package, r.Id, returning: true), inventory).Issues)
+                        if (issue.Code != "content.unreviewed")
+                            Add(new ValidationIssue(issue.Severity, issue.Code, path + "(returning)" + issue.Path.Substring(1), issue.Message));
                 foreach (var parent in Parents(package, r, routes))
                 {
                     var plan = PlanComposer.Compose(package, r.Id, parent);
@@ -146,7 +151,7 @@ namespace Sankofa.Core.Story
         {
             var ok = true;
             var parentInvitations = route.IsContinuation ? Invitations(package, routes[route.Follows]) : new HashSet<string>();
-            foreach (var beatId in route.Beats)
+            foreach (var beatId in route.Beats.Concat(route.ReturningBeats).Distinct())
             {
                 var beat = package.Beats.First(b => b.Id == beatId);
                 foreach (var line in beat.Lines.Where(l => l.Recall != null))

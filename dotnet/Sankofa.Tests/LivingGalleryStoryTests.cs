@@ -13,6 +13,47 @@ namespace Sankofa.Tests
         static PlayablePackage Package() => Playable(StoryReader.ReadPackage(File.ReadAllText(RepositoryFile("unity/Assets/Sankofa/Content/living-gallery.json"))));
         static readonly string[] Invitations = { "receive-ember", "touch-water", "receive-flour", "offer-flour", "receive-milk", "receive-bead" };
 
+        [Test]
+        public void FirstHandInvitationPrecedesContextButDisclosurePrecedesSpatialEntry()
+        {
+            var p=Package().Compose("era.1850s");
+            Assert.That(p.Beats[0].Lines.Select(l=>l.Id),Is.EqualTo(new[]{"gallery.sit"}));
+            Assert.That(p.Beats[1].Invitation.Id,Is.EqualTo("receive-ember"));
+            Assert.That(p.Beats[0].Lines.Concat(p.Beats[1].Lines).Sum(l=>l.Seconds+l.PauseAfter),Is.LessThan(24));
+            Assert.That(p.Beats[2].Scene,Is.EqualTo("hearth"));
+            Assert.That(p.Beats[2].Lines.Select(l=>l.Id),Does.Contain("e1.gather"));
+            Assert.That(p.Beats[3].Scene,Is.EqualTo("story.water.1850s"));
+        }
+
+        [TestCase("era.1850s",true)][TestCase("era.1850s",false)]
+        [TestCase("era.1850s.remembered",true)][TestCase("era.1850s.remembered",false)]
+        public void ReturningTellingRequiresKeptVisitAndReplaysItsShortRealisedPlan(string route,bool receiveBead)
+        {
+            var package=Package();var store=new MemoryStore();var flow=new VisitFlow(package,store:store);var view=new FakePresentation(flow);
+            flow.Start(true);Assert.That(flow.ChooseReturning(route),Is.False);
+            flow.Choose(route=="era.1850s"?"era.1850s.remembered":"era.1850s");Finish(flow,view,new string[0]);
+            flow.Keep();flow.BeginAgain();Assert.That(flow.ChooseReturning(route),Is.True);
+            var realised=flow.Plan.Plan;
+            Assert.That(realised.Beats.Count,Is.LessThan(package.Compose(route).Beats.Count));
+            Assert.That(realised.Beats.SelectMany(b=>b.Lines).Any(l=>l.Id.StartsWith(route=="era.1850s"?"gallery.portions.":"gallery.waiting.")),Is.True);
+            Finish(flow,view,receiveBead?new[]{"receive-bead"}:new string[0]);
+            Assert.That(flow.Journal.Heard,Does.Contain("e1.rest").And.Contain("e1.kin"));
+            Assert.That(flow.Journal.Outcomes.ContainsKey("touch-water"),Is.False);
+            flow.Keep();flow.BeginAgain();Assert.That(flow.Replay(),Is.True);
+            Assert.That(flow.Plan.Plan.Beats.Select(b=>b.Id),Is.EqualTo(realised.Beats.Select(b=>b.Id)));
+            Finish(flow,view,new string[0]);Assert.That(flow.Journal.Outcomes["receive-bead"],Is.EqualTo(receiveBead?Outcome.Accepted:Outcome.Default));
+            flow.BeginAgain();Assert.That(flow.Follow(),Is.True);Finish(flow,view,new string[0]);
+            Assert.That(flow.Journal.Heard,Does.Contain(receiveBead?"again.bead.held":"again.bead.left"));
+            Assert.That(flow.Journal.Heard,Does.Not.Contain("again.trade.helped").And.Not.Contain("again.trade.quiet"),"the shortened telling never recalls skipped invitations");
+        }
+
+        [Test]
+        public void InvalidShortTellingCannotBypassPackageValidation()
+        {
+            var p=Package().Package;p.Routes[0].ReturningBeats=new[]{"home.1850s"};
+            Assert.That(PackageValidator.Validate(p).IsValid,Is.False);
+        }
+
         [TestCase(true)]
         [TestCase(false)]
         public void EntryRetainsWhetherAPerspectiveWasChosenOrDefaulted(bool useDefault)

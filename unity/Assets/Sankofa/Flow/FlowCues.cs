@@ -185,6 +185,13 @@ namespace Sankofa.Flow
             public override string ToString() => $"Transition #{Token} {Kind} {From.Id}->{To.Id} [{string.Join(", ", Continuities)}]";
         }
 
+        /// <summary>Stop a late transition and settle its presentation before story cues continue.</summary>
+        public sealed class RecoverTransition : Cue
+        {
+            internal RecoverTransition(Transition transition) => Change = transition;
+            public Transition Change { get; }
+        }
+
         public sealed class Controls : Cue
         {
             internal Controls(IReadOnlyList<ControlOption> options) => Options = options;

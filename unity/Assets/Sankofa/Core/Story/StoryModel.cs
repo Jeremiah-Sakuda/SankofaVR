@@ -77,6 +77,8 @@ namespace Sankofa.Core.Story
         public IReadOnlyList<string> Beats { get; internal set; } = Array.Empty<string>();
         /// <summary>Hearth object the visitor brings home, if any.</summary>
         public string Keepsake { get; internal set; }
+        /// <summary>Optional authored shorter telling, offered only after a completed kept visit.</summary>
+        public IReadOnlyList<string> ReturningBeats { get; internal set; } = Array.Empty<string>();
         public string Next { get; internal set; }
         public bool IsContinuation => Follows != null;
     }

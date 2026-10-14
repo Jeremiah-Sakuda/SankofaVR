@@ -2,7 +2,7 @@
   "schema": 2,
   "kind": "package",
   "id": "enkare-nairobi.illustrated-mvp",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "title": "Sankofa — What We Carry",
   "locale": "en",
   "status": "draft",
@@ -329,6 +329,7 @@
       "beats": [
         "gather.1850s",
         "offer",
+        "gallery.context",
         "e1.water",
         "e1.wambui",
         "e1.portions",
@@ -344,7 +345,20 @@
         "home.1850s"
       ],
       "keepsake": "bead.kept",
-      "next": "today.from-1850s"
+      "next": "today.from-1850s",
+      "returning_beats": [
+        "gather.1850s",
+        "gallery.context",
+        "gallery.revisit.encounter",
+        "e1.portions",
+        "gallery.revisit.shortfall",
+        "e1.turn-intro",
+        "e1.turn",
+        "e1.gift",
+        "e1.dusk",
+        "gallery.revisit.back",
+        "gallery.revisit.home"
+      ]
     },
     {
       "id": "era.1850s.remembered",
@@ -352,6 +366,7 @@
       "beats": [
         "gather.1850s",
         "offer",
+        "gallery.context",
         "e1.water",
         "e1.wambui",
         "e1.naserian",
@@ -367,7 +382,20 @@
         "home.1850s"
       ],
       "keepsake": "bead.kept",
-      "next": "today.from-remembered"
+      "next": "today.from-remembered",
+      "returning_beats": [
+        "gather.1850s",
+        "gallery.context",
+        "gallery.revisit.encounter",
+        "gallery.revisit.shortfall",
+        "e1.turn-intro",
+        "e1.waiting",
+        "e1.turn",
+        "e1.gift",
+        "e1.dusk",
+        "gallery.revisit.back",
+        "gallery.revisit.home"
+      ]
     },
     {
       "id": "today.from-1850s",
@@ -472,29 +500,6 @@
           "pause_after": 1.2,
           "fire": "welcoming",
           "audio": "enkare-nairobi.gallery-v4/gallery.sit"
-        },
-        {
-          "id": "gallery.where",
-          "text": "We are going to what is now Kenya, before Nairobi became a city.",
-          "seconds": 9.08,
-          "pause_after": 0.7,
-          "fire": "telling",
-          "claims": [
-            "C1"
-          ],
-          "audio": "enkare-nairobi.gallery-v4/gallery.where"
-        },
-        {
-          "id": "e1.gather",
-          "text": "Kikuyu and Maasai people traded across this region. Wambui and Naserian, their words and their gifts, are imagined for this story.",
-          "seconds": 17.44,
-          "pause_after": 0.8,
-          "fire": "gathering",
-          "claims": [
-            "C6",
-            "R1"
-          ],
-          "audio": "enkare-nairobi.illustrated-v2/e1.gather"
         }
       ]
     },
@@ -1731,6 +1736,154 @@
             }
           ],
           "audio": "enkare-nairobi.gallery-v4/gallery.milk.rest"
+        }
+      ]
+    },
+    {
+      "id": "gallery.context",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "gallery.where",
+          "text": "We are going to what is now Kenya, before Nairobi became a city.",
+          "seconds": 9.08,
+          "pause_after": 0.7,
+          "fire": "telling",
+          "claims": [
+            "C1"
+          ],
+          "audio": "enkare-nairobi.gallery-v4/gallery.where"
+        },
+        {
+          "id": "e1.gather",
+          "text": "Kikuyu and Maasai people traded across this region. Wambui and Naserian, their words and their gifts, are imagined for this story.",
+          "seconds": 17.44,
+          "pause_after": 0.8,
+          "fire": "gathering",
+          "claims": [
+            "C6",
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.gather"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.home",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "revisit.home.bead",
+          "text": "Wambui arrived worried about what she owed. Naserian remembered what they had already given each other.",
+          "seconds": 11.76,
+          "pause_after": 1.5,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/home.bead"
+        },
+        {
+          "id": "revisit.home.next",
+          "text": "Keep this visit if you want to return. Another part of the painting waits for you, and the same water has a story in the city of today.",
+          "seconds": 13.28,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "audio": "enkare-nairobi.gallery-v4/home.next"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.back",
+      "scene": "hearth",
+      "lines": [
+        {
+          "id": "revisit.home.back.ember",
+          "text": "The water settles into paint again. Here is the same picture, with the meeting still inside it.",
+          "seconds": 11.4,
+          "pause_after": 0.8,
+          "fire": "welcoming",
+          "audio": "enkare-nairobi.gallery-v4/home.back.ember"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.encounter",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "revisit.e1.wambui.arrives",
+          "text": "Here is Wambui, a Kikuyu trader. She has walked since morning with flour for Naserian.",
+          "seconds": 11.28,
+          "pause_after": 0.6,
+          "fire": "telling",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "figure.wambui"
+            },
+            {
+              "do": "reveal",
+              "object": "gourd.flour"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.wambui.arrives"
+        },
+        {
+          "id": "revisit.e1.naserian.arrives",
+          "text": "Naserian, a Maasai trader, has brought the sheep she agreed to exchange for the flour, and a gourd of milk.",
+          "seconds": 11.48,
+          "pause_after": 0.4,
+          "fire": "telling",
+          "actions": [
+            {
+              "do": "reveal",
+              "object": "figure.naserian"
+            },
+            {
+              "do": "reveal",
+              "object": "figure.ewe"
+            },
+            {
+              "do": "reveal",
+              "object": "gourd.milk"
+            }
+          ],
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.naserian.arrives"
+        }
+      ]
+    },
+    {
+      "id": "gallery.revisit.shortfall",
+      "scene": "story.water.1850s",
+      "lines": [
+        {
+          "id": "revisit.e1.price",
+          "text": "Wambui speaks first. 'It is less than I promised. I have no more to bring today.'",
+          "seconds": 9.92,
+          "pause_after": 1.0,
+          "fire": "telling",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.price"
+        },
+        {
+          "id": "revisit.e1.problem",
+          "text": "'And I walked here counting on it,' Naserian answers. For a moment, neither woman speaks.",
+          "seconds": 11.0,
+          "pause_after": 3.0,
+          "fire": "holding",
+          "claims": [
+            "R1"
+          ],
+          "audio": "enkare-nairobi.illustrated-v2/e1.problem"
         }
       ]
     }

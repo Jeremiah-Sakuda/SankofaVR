@@ -27,7 +27,7 @@ namespace Sankofa.Core.Story
     /// </summary>
     public static class PlanComposer
     {
-        public static StoryPlan Compose(StoryPackage package, string routeId, ParentVisit parent = null)
+        public static StoryPlan Compose(StoryPackage package, string routeId, ParentVisit parent = null, bool returning = false)
         {
             if (package == null) throw new ArgumentNullException(nameof(package));
             var route = package.Routes.FirstOrDefault(r => r.Id == routeId) ?? throw new ArgumentException($"Unknown route '{routeId}'", nameof(routeId));
@@ -38,10 +38,12 @@ namespace Sankofa.Core.Story
             }
             else if (parent != null) throw new ArgumentException($"Route '{route.Id}' is a first story and continues nothing", nameof(parent));
 
+            if (returning && (route.IsContinuation || route.ReturningBeats.Count == 0))
+                throw new ArgumentException($"Route '{route.Id}' has no returning telling", nameof(returning));
             var pool = new Dictionary<string, Beat>();
             foreach (var b in package.Beats)
                 if (b.Id != null && !pool.ContainsKey(b.Id)) pool.Add(b.Id, b);
-            var beats = route.Beats.Select(id => pool.TryGetValue(id, out var beat) ? Resolve(beat, parent) : throw new ArgumentException($"Route '{route.Id}' uses unknown beat '{id}'")).ToList();
+            var beats = (returning ? route.ReturningBeats : route.Beats).Select(id => pool.TryGetValue(id, out var beat) ? Resolve(beat, parent) : throw new ArgumentException($"Route '{route.Id}' uses unknown beat '{id}'")).ToList();
 
             var sceneIds = new HashSet<string>(beats.Select(b => b.Scene));
             foreach (var s in package.Scenes)
