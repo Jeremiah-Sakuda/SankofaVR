@@ -34,3 +34,12 @@ Core verification: **303 .NET checks passed**, including passive agreement/hospi
 The asset integrity audit now covers **30 declared inputs** including the original font files/notices, and **86 current narration lines**, with no integrity problems. Offline packet layout and local export were checked at 375, 812 and 1280 px in a muted headless browser, with no autoplay, unlabelled fields, horizontal overflow or external requests. Synthetic QA notes are not participant findings. The source generator and recorded read-throughs use no new provider calls.
 
 Early editor attempts exposed a shared comparison material and a wrong demo-test anchor API; both were corrected. The first runtime pass exposed test-anchor cleanup that disrupted subsequent cases; the anchor is released before destruction and later checks run cleanly. These failed reports remain local artifacts and are not counted as accepted checks.
+
+
+## Review APK identity
+
+Built from clean committed source **da85045**. Package `com.sankofa.quest`, version `0.1.0+da85045`, version code 1, ARM64/IL2CPP, story package v0.6.0. The local output is `artifacts/Sankofa-LivingGallery.apk`: **84,335,456 bytes (80.43 MiB)**, SHA-256 `f3d189ec76b67be60b82798dcb2af40be2ef58a0547341821d1672291d234b8e`. Build succeeded with **zero errors and one reported warning** (optional OpenXR input-polling latency preference). Log: `artifacts/logs/finish-build.log`; structured identity: `artifacts/release/gallery-apk.json`.
+
+The build privacy guard verified captured local development credentials absent and restored editor-only settings. Archive-name checks found no private brief/reference/LocalOnly/credential/key filename matches; those name checks are not a complete arbitrary-data audit. The private competition file and raw references remain Git-ignored and outside runtime assets. The working tree was clean after the build. The APK was not installed, uploaded or submitted.
+
+Current deliverables: `artifacts/gallery-review/cultural.zip` and `first-time.zip`, their offline `index.html` pages, and `artifacts/gallery-demo/Sankofa-software-preview.mp4` (**27 seconds, no audio stream**). Packet and preview manifests identify source/content/capture limits. The preview uses edited synthetic-input desktop excerpts and does not show a complete real-hand visit or qualifying headset/emulator demonstration. Actual human/device/release gates remain open as stated above.
