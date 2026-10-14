@@ -141,3 +141,6 @@ The following October 11 tickets preserve prior progress and acceptance gaps. Cu
 ## Later product work
 
 Broad global coverage, community contribution tools, actual family-history material after policy/privacy design, shared visits, accounts/cloud sync and newly generated environments prepared for later visits remain roadmap work. Arbitrary live-world generation and a humanoid narrator are not dependencies of the current competition claim. AI-generated music remains excluded.
+
+
+October 14 panel response: [implementation map](reviews/2026-10-14-panel-implementation.md) records v0.5 acting, moving memories, shorter revisits and input/save/recovery fixes. [Next evidence session](testing/gallery-next-evidence-session.md) is prepared; actual participant, device, listening and cultural acceptance remains open.

@@ -42,7 +42,7 @@ namespace Sankofa.Runtime.Input
         public bool Tracked => Simulated != null || tracked;
         /// <summary>True while tracking has dropped for a moment and the hand is held at its last confident pose.</summary>
         public bool Holding => Simulated == null && tracked && !live;
-        public Vector3? Fingertip => Simulated != null ? V(Simulated().IndexTip) : tracked ? V(Sample.IndexTip) : (Vector3?)null;
+        public Vector3? Fingertip => Simulated != null ? V(Simulated().IndexTip) : tracked && live ? V(Sample.IndexTip) : (Vector3?)null;
         public Vector3 PalmCenter => Simulated != null ? V(HandGeometry.PalmCenter(Simulated())) : tracked ? (V(Sample.Wrist) + V(Sample.MiddleProximal)) * 0.5f : Vector3.zero;
 
         public HandSample Sample => Simulated != null ? WithTracking(Simulated()) : !tracked ? new HandSample { IsLeft = left } : live ? Live() : last;

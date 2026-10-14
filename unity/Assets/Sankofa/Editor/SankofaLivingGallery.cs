@@ -17,6 +17,12 @@ namespace Sankofa.EditorTools
     {
         public const string GalleryScene = "Assets/Sankofa/Scenes/LivingGallery.unity";
         public const string GalleryPackage = "Assets/Sankofa/Content/living-gallery.json";
+        [System.Serializable] sealed class GalleryPerformanceData
+        {
+            public string expressionAtlas;
+            public GalleryPoseData[] poses;
+        }
+        [System.Serializable] sealed class GalleryPoseData { public string line, figure; public int pose; }
         const string GalleryFolder = "Assets/Sankofa/Art/Generated/Gallery";
         [MenuItem("Sankofa/Build Living Gallery")]
         public static void BuildLivingGallery()
@@ -25,6 +31,7 @@ namespace Sankofa.EditorTools
             if (!AssetDatabase.IsValidFolder(GalleryFolder)) AssetDatabase.CreateFolder(SankofaArt.Folder, "Gallery");
             var stage = Object.FindFirstObjectByType<StoryStage>();
             var world = Object.FindFirstObjectByType<WorldAnchor>().transform;
+            PolishGalleryObjects(stage);
             var painting = CaptureComposition(stage, "story.water.1850s", "What We Carry");
             BuildModernIllustration(stage);
             var home = stage.Scenes.Single(s => s.IsHearth);
@@ -66,6 +73,7 @@ namespace Sankofa.EditorTools
             SetArray(gallery,"frame",edges.Cast<Object>().ToArray());
             Set(stage.GetComponent<StoryTransition>(),"gallery",gallery);
             BuildVignettes(stage);
+            BuildGalleryPerformance(stage);
             var unused=stage.Scenes.Single(x=>x.Id=="story.water.1899");
             SetArray(stage,"objects",stage.Objects.Where(x=>x.Scene!="story.water.1899").Cast<Object>().ToArray());
             var stageData=new SerializedObject(stage);var scenes=stageData.FindProperty("scenes");
@@ -133,6 +141,44 @@ namespace Sankofa.EditorTools
             AssetDatabase.SaveAssets();
             Debug.Log("[Sankofa] Living gallery built: "+GalleryScene);
         }
+        static void BuildGalleryPerformance(StoryStage stage)
+        {
+            var data=JsonUtility.FromJson<GalleryPerformanceData>(File.ReadAllText("Assets/Sankofa/Content/gallery-performance.json"));
+            var atlas=ImportAtlas(data.expressionAtlas);
+            foreach(var id in new[]{"figure.wambui","figure.naserian"})
+            {
+                var actor=stage.Find(id).GetComponent<IllustratedFigure>();
+                var column=id=="figure.wambui"?0:1;
+                Set(actor,"expressionAtlas",atlas);
+                var so=new SerializedObject(actor);var frames=so.FindProperty("expressionFrames");frames.arraySize=2;
+                for(var i=0;i<2;i++)frames.GetArrayElementAtIndex(i).vector4Value=new Vector4(column*0.5f,(1-i)*0.5f,0.5f,0.5f);
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+            var performance=stage.gameObject.AddComponent<GalleryPerformance>();
+            var serialized=new SerializedObject(performance);var poses=serialized.FindProperty("poses");poses.arraySize=data.poses.Length;
+            for(var i=0;i<data.poses.Length;i++)
+            {
+                var pose=poses.GetArrayElementAtIndex(i);pose.FindPropertyRelative("Line").stringValue=data.poses[i].line;
+                pose.FindPropertyRelative("Figure").objectReferenceValue=stage.Find(data.poses[i].figure).GetComponent<IllustratedFigure>();
+                pose.FindPropertyRelative("Pose").intValue=data.poses[i].pose;
+            }
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            SetArray(performance,"memories",stage.Objects.Select(o=>o.GetComponent<MemoryPerformance>()).Where(m=>m!=null).Cast<Object>().ToArray());
+            Set(Object.FindFirstObjectByType<SankofaApp>(),"performance",performance);
+        }
+
+        static void MemoryMoment(SerializedProperty moment,string line,Transform[] targets,Vector3[] positions,Vector3[] scales,float seconds)
+        {
+            moment.FindPropertyRelative("Line").stringValue=line;moment.FindPropertyRelative("Seconds").floatValue=seconds;
+            foreach(var name in new[]{"Targets","Positions","Scales"})moment.FindPropertyRelative(name).arraySize=targets.Length;
+            for(var i=0;i<targets.Length;i++)
+            {
+                moment.FindPropertyRelative("Targets").GetArrayElementAtIndex(i).objectReferenceValue=targets[i];
+                moment.FindPropertyRelative("Positions").GetArrayElementAtIndex(i).vector3Value=positions[i];
+                moment.FindPropertyRelative("Scales").GetArrayElementAtIndex(i).vector3Value=scales[i];
+            }
+        }
+
         static void BuildModernIllustration(StoryStage stage)
         {
             // The provenance-recorded river illustration supplies distance; the near garden is tangible.
@@ -154,7 +200,10 @@ namespace Sankofa.EditorTools
             card.transform.localPosition=new Vector3(0,-6.725f,7.5f);
             foreach(var id in new[]{"gate","soil","bead.today"})
                 foreach(var r in stage.Find(id).Surfaces)
-                    r.sharedMaterial=GalleryPigment("Modern "+id,id=="gate"?new Color(0.22f,0.36f,0.25f):id=="soil"?new Color(0.30f,0.20f,0.13f):new Color(0.65f,0.34f,0.20f));
+                    {
+                        r.sharedMaterial=GalleryPigment("Modern "+id,id=="gate"?new Color(0.36f,0.42f,0.30f):id=="soil"?new Color(0.30f,0.20f,0.13f):new Color(0.65f,0.34f,0.20f));
+                        if(id=="gate")r.sharedMaterial.SetFloat("_VertexTint",1);
+                    }
         }
 
         static void BuildVignettes(StoryStage stage)
@@ -174,11 +223,18 @@ namespace Sankofa.EditorTools
                     surfaces.Add(Prim(go,"Memory frame stile",PrimitiveType.Cube,new Vector3(sign*0.418f,0,-0.018f),new Vector3(0.014f,0.57f,0.028f),edge).GetComponent<Renderer>());
                 }
                 surfaces.Add(GalleryText(go,"Memory title",memory=="portions"?"Before the journey":"Another afternoon",new Vector3(0,0.235f,-0.035f),0.38f,0.73f).GetComponent<Renderer>());
+                var actors=new System.Collections.Generic.List<Transform>();
                 if(memory=="portions")
                 {
+                    var atlas=ImportAtlas("Assets/Sankofa/Art/IllustratedTheatre/cast-expressions-v1.png");
+                    var woman=IllustrationCard(go,"Wambui before leaving",0.36f,0.41f,IllustrationMaterial("Morning Wambui",atlas,new Vector4(0,0.5f,0.5f,0.5f)));
+                    woman.transform.localPosition=new Vector3(0,-0.245f,-0.04f);surfaces.Add(woman);
                     foreach(var x in new[]{-0.20f,0.20f})
                     {
-                        surfaces.Add(Prim(go,"Flour bowl",PrimitiveType.Cylinder,new Vector3(x,-0.17f,-0.14f),new Vector3(0.2f,0.012f,0.16f),GalleryPigment("Flour",new Color(0.73f,0.63f,0.43f)),Quaternion.Euler(32,0,0)).GetComponent<Renderer>());
+                        var flourMesh=SankofaMeshes.Stone(x<0?1752:1753,2,0.15f,0.12f);
+                        var flour=Static(go,x<0?"Journey portion":"Home portion",flourMesh,GalleryPigment("Flour",new Color(0.73f,0.63f,0.43f))).GetComponent<Renderer>();
+                        flour.transform.localPosition=new Vector3(x*0.15f,-0.10f,-0.14f);flour.transform.localScale=new Vector3(0.09f,0.04f,0.07f);
+                        surfaces.Add(flour);actors.Add(flour.transform);SaveMeshes(new[]{flour.GetComponent<MeshFilter>()});
                         var source=stage.Find("gourd.flour").Surfaces.First();
                         var vessel=Static(go,"Morning vessel",source.GetComponent<MeshFilter>().sharedMesh,source.sharedMaterial).GetComponent<Renderer>();
                         vessel.transform.localPosition=new Vector3(x,-0.18f,-0.06f);vessel.transform.localScale=Vector3.one*0.70f;surfaces.Add(vessel);
@@ -193,16 +249,44 @@ namespace Sankofa.EditorTools
                     shore.transform.localPosition=new Vector3(0,-0.26f,-0.018f);surfaces.Add(shore);
                     var bank=IllustrationCard(go,"Remembered water",0.79f,0.19f,IllustrationMaterial("Memory water",scenery,new Vector4(0,0.375f,1,0.24f)));
                     bank.transform.localPosition=new Vector3(0,-0.26f,-0.025f);surfaces.Add(bank);
-                    var atlas=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/IllustratedTheatre/cast-atlas.png");
+                    var atlas=ImportAtlas("Assets/Sankofa/Art/IllustratedTheatre/cast-expressions-v1.png");
                     for(var i=0;i<2;i++)
                     {
-                        var card=IllustrationCard(go,"Remembered woman "+i,0.39f,0.46f,IllustrationMaterial("Memory figure "+i,atlas,new Vector4(i*0.5f,2f/3,0.5f,1f/3)));
-                        card.transform.localPosition=new Vector3((i-0.5f)*0.37f,-0.24f,-0.04f);surfaces.Add(card);
+                        var card=IllustrationCard(go,"Remembered woman "+i,0.39f,0.46f,IllustrationMaterial("Memory figure "+i,atlas,new Vector4(i*0.5f,0,0.5f,0.5f)));
+                        card.transform.localPosition=new Vector3(i==0?-0.185f:0.36f,-0.24f,-0.04f);surfaces.Add(card);actors.Add(card.transform);
                     }
                 }
                 var item=go.gameObject.AddComponent<StageObject>();
                 Set(item,"objectId","memory."+memory);Set(item,"sceneId","story.water.1850s");
                 Set(item,"scaleWithVisibility",false);SetArray(item,"surfaces",surfaces.Cast<Object>().ToArray());
+                var performance=go.gameObject.AddComponent<MemoryPerformance>();
+                SetArray(performance,"actors",actors.Cast<Object>().ToArray());Set(performance,"transition",stage.GetComponent<StoryTransition>());
+                var serialized=new SerializedObject(performance);var moments=serialized.FindProperty("moments");moments.arraySize=2;
+                if(memory=="portions")
+                {
+                    MemoryMoment(moments.GetArrayElementAtIndex(0),"gallery.portions.divide",actors.ToArray(),
+                        new[]{new Vector3(-0.20f,-0.12f,-0.14f),new Vector3(0.20f,-0.12f,-0.14f)},
+                        new[]{new Vector3(0.075f,0.026f,0.058f),new Vector3(0.075f,0.026f,0.058f)},3.2f);
+                    MemoryMoment(moments.GetArrayElementAtIndex(1),"gallery.portions.leave",actors.ToArray(),
+                        new[]{new Vector3(-0.20f,-0.12f,-0.14f),new Vector3(0.20f,-0.12f,-0.14f)},
+                        new[]{new Vector3(0.057f,0.017f,0.048f),new Vector3(0.075f,0.026f,0.058f)},2.8f);
+                }
+                else
+                {
+                    MemoryMoment(moments.GetArrayElementAtIndex(0),"gallery.waiting.short",actors.ToArray(),
+                        new[]{new Vector3(-0.185f,-0.24f,-0.04f),new Vector3(0.24f,-0.24f,-0.04f)},
+                        actors.Select(x=>x.localScale).ToArray(),4.2f);
+                    MemoryMoment(moments.GetArrayElementAtIndex(1),"gallery.waiting.stay",actors.ToArray(),
+                        new[]{new Vector3(-0.185f,-0.24f,-0.04f),new Vector3(0.14f,-0.24f,-0.04f)},
+                        actors.Select(x=>x.localScale).ToArray(),3.5f);
+                }
+                if(memory=="waiting")
+                {
+                    var moment=moments.GetArrayElementAtIndex(1);
+                    moment.FindPropertyRelative("Figure").objectReferenceValue=actors[1].GetComponent<Renderer>();
+                    moment.FindPropertyRelative("Frame").vector4Value=new Vector4(0.5f,0.5f,0.5f,0.5f);
+                }
+                serialized.ApplyModifiedPropertiesWithoutUndo();
                 list.Add(item);
             }
             SetArray(stage,"objects",list.ToArray());

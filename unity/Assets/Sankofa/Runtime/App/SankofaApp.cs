@@ -44,6 +44,8 @@ namespace Sankofa.Runtime.App
         [SerializeField] ObjectQuestions objectQuestions;
         [SerializeField] PokePanel settingsPanel;
         [SerializeField] StoryStage stage;
+        [Tooltip("Optional authored acting in the living gallery; comparison scenes use their existing presentation.")]
+        [SerializeField] GalleryPerformance performance;
         [SerializeField] StoryTransition transition;
         [SerializeField] LivingGallery gallery;
         [Tooltip("Optional separate local shelf for a development experience.")]
@@ -241,6 +243,11 @@ namespace Sankofa.Runtime.App
             foreach (var a in storyAmbience) a.Duck = narration.Speaking;
             attention.Listening = flow.Phase == VisitPhase.Story;
             if (invited != null) invited.Feedback = receiver.Open ? receiver.Feedback : toucher.Open ? toucher.Feedback : 0;
+            if (gallery != null)
+            {
+                choicesPanel.Hidden = flow.Phase == VisitPhase.Closing && flow.CurrentLine != null;
+                if (flow.Phase == VisitPhase.Closing && flow.CurrentLine == null && captions.Caption.Length > 0) captions.Clear();
+            }
             NudgeWaitingChoice();
         }
 
@@ -328,7 +335,9 @@ namespace Sankofa.Runtime.App
                         break;
                     case Cue.ResetStage _:
                         CloseReceivers();
+                        transition.Cancel();
                         stage.ResetAll();
+                        performance?.ResetState();
                         gallery?.ResetView();
                         captions.SetStatus(gallery != null ? "" : baseStatus);
                         break;
@@ -338,6 +347,7 @@ namespace Sankofa.Runtime.App
                         captions.SetStatus(string.Join(" · ", new[] { mode, gallery != null ? "" : baseStatus }.Where(s => !string.IsNullOrEmpty(s))));
                         break;
                     case Cue.Speak s:
+                        performance?.Speak(s.Line);
                         narration.Play(s.Token, s.Line);
                         captions.SetCaption(s.Line.Text);
                         break;
@@ -377,6 +387,9 @@ namespace Sankofa.Runtime.App
                         // The story notices what the visitor did: the nearest person of it turns to them.
                         if (c.Outcome == Outcome.Accepted) stage.AcknowledgeVisitor();
                         break;
+                    case Cue.RecoverTransition recovery:
+                        transition.Recover(recovery.Change);
+                        break;
                     case Cue.Transition t:
                         captions.Clear();
                         transition.ReducedMotion = settings.ReducedMotion;
@@ -396,7 +409,8 @@ namespace Sankofa.Runtime.App
                         if (gallery != null && flow.Menu == ChoiceMenu.Returning && flow.KeptVisit != null && flow.Phase == VisitPhase.Choosing)
                         {
                             options.RemoveAll(o => o.Item1 == ControlKind.NewStory.ToString());
-                            options.Insert(0, ("gallery-other", "Follow the other thread"));
+                            var other = gallery.OtherRoute(flow.Package.Route(flow.KeptVisit.Route)?.Follows ?? flow.KeptVisit.Route);
+                            options.Insert(0, ("gallery-other", other == gallery.DefaultRoute ? "Before her journey · shorter telling" : "Their earlier meeting · shorter telling"));
                         }
                         choicesPanel.Show(options, primaryFirst: entry);
                         break;
@@ -510,7 +524,8 @@ namespace Sankofa.Runtime.App
             if (id == "gallery-other" && gallery != null && flow?.KeptVisit != null)
             {
                 var saved = flow.Package.Route(flow.KeptVisit.Route);
-                EnterExhibit(gallery.OtherRoute(saved?.Follows ?? flow.KeptVisit.Route));
+                flow.ChooseReturning(gallery.OtherRoute(saved?.Follows ?? flow.KeptVisit.Route));
+                Dispatch();
                 return;
             }
             if (flow == null || !started)

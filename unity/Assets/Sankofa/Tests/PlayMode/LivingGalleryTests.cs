@@ -15,10 +15,14 @@ namespace Sankofa.Tests
 {
     public class LivingGalleryTests
     {
+        ExperienceSettings originalSettings;
         SankofaApp app; StoryStage stage; LivingGallery gallery; string folder;
         readonly List<string> problems=new List<string>();
         [SetUp] public void Setup()
         {
+            problems.Clear();
+            originalSettings=ExperienceSettings.Load();
+            new ExperienceSettings().Save();
             folder=Path.Combine(Path.GetTempPath(),"sankofa-gallery-"+Guid.NewGuid().ToString("N"));
             SankofaApp.StoreFolderOverride=folder;StageClock.Paused=false;AudioListener.volume=0;
             Application.logMessageReceived+=Watch;LogAssert.ignoreFailingMessages=true;
@@ -27,6 +31,7 @@ namespace Sankofa.Tests
         { if((type==LogType.Error||type==LogType.Exception||type==LogType.Assert)&&(s.Contains("[Sankofa]")||(stack??"").Contains("Sankofa.")))problems.Add(s); }
         [TearDown] public void Cleanup()
         {
+            originalSettings.Save();
             AudioListener.volume=0;Time.timeScale=1;StageClock.Paused=false;SankofaApp.StoreFolderOverride=null;
             Application.logMessageReceived-=Watch;if(Directory.Exists(folder))Directory.Delete(folder,true);
             if(File.Exists(folder))File.Delete(folder);
@@ -73,7 +78,8 @@ namespace Sankofa.Tests
                 {
                     Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));
                     if(app.Flow.OpenInvitation!=null)app.Flow.Accept(app.Flow.OpenInvitation.Id);
-                    if(!captured&&app.Flow.CurrentLine?.Id==(route=="era.1850s"?"gallery.portions.divide":"gallery.waiting.stay"))
+                    if(!captured&&app.Flow.CurrentLine?.Id==(route=="era.1850s"?"gallery.portions.divide":"gallery.waiting.stay")
+                        &&stage.Find(route=="era.1850s"?"memory.portions":"memory.waiting").GetComponent<MemoryPerformance>().Progress>0.95f)
                     { Capture(route=="era.1850s"?"02-what-she-brings":"03-what-she-remembers");captured=true; }
                     yield return null;
                 }
@@ -81,23 +87,30 @@ namespace Sankofa.Tests
                 Assert.That(GameObject.Find("Canonical canvas").GetComponent<Renderer>().sharedMaterial.mainTexture,Is.SameAs(original));
                 Assert.That(app.Flow.Journal.Outcomes["receive-milk"],Is.EqualTo(Core.Story.Outcome.Accepted));
                 Capture("04-return");Assert.That(app.Flow.Keep(),Is.True);app.Flow.BeginAgain();
+                var parent=app.Flow.KeptVisit.Id;
+                Assert.That(app.Flow.Follow(),Is.True);
+                Assert.That(app.Flow.Plan.Plan.Parent,Is.EqualTo(parent));
+                Assert.That(app.Flow.Plan.Plan.Route,Is.EqualTo(route=="era.1850s"?"today.from-1850s":"today.from-remembered"));
+                yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,150);
+                Assert.That(app.Flow.Journal.Completed,Is.True);Assert.That(gallery.Framed,Is.True);
+                app.Flow.BeginAgain();
                 yield return null;
             }
-            Assert.That(app.Flow.Follow(),Is.True);
-            while(app.Flow.Phase!=VisitPhase.Closing||app.Flow.CurrentLine!=null)
-            { if(app.Flow.OpenInvitation!=null)app.Flow.Accept(app.Flow.OpenInvitation.Id);yield return null; }
-            Assert.That(app.Flow.Journal.Completed,Is.True);Assert.That(gallery.Framed,Is.True);
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
         [UnityTest] public IEnumerator PassiveThreadAndReducedMotionKeepTheVisitorStationary()
         {
             yield return Open();Time.timeScale=10;
-            stage.GetComponent<StoryTransition>().ReducedMotion=true;
+            var panel=GameObject.Find("Settings panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
+            panel.PressFromPointer("settings");yield return new WaitForSecondsRealtime(0.4f);
+            panel.PressFromPointer("motion");yield return null;
+            var transition=stage.GetComponent<StoryTransition>();
+            Assert.That(ExperienceSettings.Load().ReducedMotion,Is.True);Assert.That(transition.ReducedMotion,Is.True);
             var eye=Camera.main.transform;var position=eye.position;var rotation=eye.rotation;
             Assert.That(app.EnterExhibit("era.1850s.remembered"),Is.True);
             var deadline=Time.realtimeSinceStartup+150;
             while(app.Flow.Phase!=VisitPhase.Closing||app.Flow.CurrentLine!=null)
-            { Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));yield return null; }
+            { Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));Assert.That(transition.ReducedMotion,Is.True);Assert.That(gallery.Expansion,Is.Zero);yield return null; }
             Assert.That(app.Flow.Journal.Outcomes.Values,Is.All.EqualTo(Core.Story.Outcome.Default));
             Assert.That(Vector3.Distance(eye.position,position),Is.LessThan(0.001f));
             Assert.That(Quaternion.Angle(eye.rotation,rotation),Is.LessThan(0.001f));
@@ -132,6 +145,111 @@ namespace Sankofa.Tests
             Assert.That(Directory.GetFiles(folder).Length,Is.GreaterThan(0));
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
+        [UnityTest] public IEnumerator PhysicalReplacementNeedsDisclosureAndASecondDeliberateDeposit()
+        {
+            yield return Open();Time.timeScale=15;app.Begin();
+            yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,150);
+            Assert.That(app.KeepVisit(),Is.True);var previous=app.Flow.KeptVisit.Id;
+            app.Flow.BeginAgain();Assert.That(app.Flow.ChooseReturning("era.1850s.remembered"),Is.True);
+            yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,150);
+            Time.timeScale=1;yield return Until(()=>GameObject.Find("Keep recess label")!=null,3);
+            var label=GameObject.Find("Keep recess label").GetComponent<TMPro.TMP_Text>();
+            Assert.That(label.text,Does.Contain("replace").And.Contain("previous"));
+            var item=stage.Find(app.Flow.Plan.Plan.Keepsake);
+            var hand=Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h=>!h.IsLeft);
+            var at=item.transform.position;var open=true;hand.Simulated=()=>Palm(at,open);
+            yield return Until(()=>item.CarriedBy==hand,6);
+            at=Object.FindFirstObjectByType<GalleryKeep>().Recess.position+Vector3.up*0.1f;
+            yield return new WaitForSeconds(0.6f);
+            Assert.That(label.text,Does.Contain("removed"));
+            open=false;yield return new WaitForSeconds(0.4f);
+            Assert.That(app.Flow.KeptVisit.Id,Is.EqualTo(previous));Assert.That(item.CarriedBy,Is.SameAs(hand));
+            open=true;yield return new WaitForSeconds(0.6f);open=false;
+            yield return Until(()=>app.Flow.KeptVisit.Id!=previous,6);
+            Assert.That(app.Flow.KeptVisit.Route,Is.EqualTo("era.1850s.remembered"));hand.Simulated=null;
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator PointerSlipGraceSelectsItsOriginalVisibleButtonAndCancelsHiddenOrChangedTargets()
+        {
+            yield return Open();app.enabled=false;
+            var panel=new GameObject("Pointer adapter test panel").AddComponent<Sankofa.Runtime.UI.PokePanel>();
+            panel.transform.position=new Vector3(0,1.15f,1);panel.Show(new[]{("gallery-enter","Enter")});
+            foreach(var p in Object.FindObjectsByType<Sankofa.Runtime.Input.PointerSource>(FindObjectsSortMode.None))p.enabled=false;
+            var pointer=Object.FindFirstObjectByType<Sankofa.Runtime.Input.PointerSource>(FindObjectsInactive.Include);
+            typeof(Sankofa.Runtime.Input.PointerSource).GetField("panels",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).SetValue(pointer,new[]{panel});
+            var button=panel.transform.Find("Button gallery-enter");var origin=Camera.main.transform.position;
+            var hit=new Ray(origin,(button.position-origin).normalized);var off=new Ray(origin,Vector3.up);
+            var pressed=new List<string>();panel.Pressed+=pressed.Add;
+            pointer.ProcessPointer(hit,0,true,3,0.01f);pointer.ProcessPointer(hit,1,true,3,0.01f);
+            pointer.ProcessPointer(off,0,true,3,0.05f);yield return null;
+            Assert.That(pressed,Is.EqualTo(new[]{"gallery-enter"}));pressed.Clear();yield return new WaitForSecondsRealtime(0.4f);
+            pointer.ProcessPointer(hit,1,true,3,0.01f);panel.Hidden=true;
+            pointer.ProcessPointer(off,0,true,3,0.05f);yield return null;Assert.That(pressed,Is.Empty);
+            panel.Hidden=false;pointer.ProcessPointer(hit,1,true,3,0.01f);
+            panel.Show(new[]{("gallery-enter","Changed label" )});pointer.ProcessPointer(off,0,true,3,0.05f);
+            yield return null;Assert.That(pressed,Is.Empty);Object.Destroy(panel.gameObject);
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator AuthoredActingAndMemoryActionsRespectPauseAndReducedMotionWithoutInventingChoices()
+        {
+            yield return Open();app.enabled=false;
+            foreach(var panel in Object.FindObjectsByType<Sankofa.Runtime.UI.PokePanel>(FindObjectsSortMode.None))panel.Hidden=true;
+            yield return gallery.Transition("story.water.1850s",new Continuity[0],true);
+            var performance=Object.FindFirstObjectByType<GalleryPerformance>();
+            var lines=app.Flow.Package.Package.Beats.SelectMany(b=>b.Lines).ToDictionary(l=>l.Id);
+            foreach(var id in new[]{"figure.wambui","figure.naserian","figure.ewe","gourd.flour"})
+                stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,id));
+            performance.Speak(lines["e1.price"]);yield return new WaitForSeconds(1.8f);
+            Assert.That(stage.Find("figure.wambui").GetComponent<IllustratedFigure>().Pose,Is.EqualTo(3));
+            Assert.That(stage.Find("figure.naserian").GetComponent<IllustratedFigure>().Pose,Is.EqualTo(3));
+            Capture("07-shortfall");
+            var portions=stage.Find("memory.portions");stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,portions.Id));
+            var left=portions.transform.Find("Journey portion");var right=portions.transform.Find("Home portion");
+            var before=Vector3.Distance(left.localPosition,right.localPosition);
+            performance.Speak(lines["gallery.portions.divide"]);yield return new WaitForSeconds(1);
+            Assert.That(Vector3.Distance(left.localPosition,right.localPosition),Is.GreaterThan(before));
+            StageClock.Paused=true;var held=left.localPosition;yield return new WaitForSeconds(0.5f);
+            Assert.That(left.localPosition,Is.EqualTo(held));StageClock.Paused=false;
+            yield return new WaitForSeconds(2.8f);
+            Assert.That(left.localPosition.x,Is.EqualTo(-0.2f).Within(0.001f));Assert.That(right.localPosition.x,Is.EqualTo(0.2f).Within(0.001f));
+            Capture("02-what-she-brings");stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Withdraw,portions.Id));
+            var waiting=stage.Find("memory.waiting");stage.Perform(new Core.Story.StoryAction(Core.Story.ActionKind.Reveal,waiting.Id));
+            var patient=waiting.transform.Find("Remembered woman 0");var arrives=waiting.transform.Find("Remembered woman 1");
+            var patientPosition=patient.localPosition;
+            stage.GetComponent<StoryTransition>().ReducedMotion=true;
+            performance.Speak(lines["gallery.waiting.short"]);
+            Assert.That(arrives.localPosition.x,Is.EqualTo(0.24f).Within(0.001f));
+            performance.Speak(lines["gallery.waiting.stay"]);
+            Assert.That(patient.localPosition,Is.EqualTo(patientPosition));Assert.That(arrives.localPosition.x,Is.EqualTo(0.14f).Within(0.001f));
+            var paint=new MaterialPropertyBlock();arrives.GetComponent<Renderer>().GetPropertyBlock(paint);
+            Assert.That(paint.GetVector("_FrameA").y,Is.EqualTo(0.5f),"Naserian lifts her face to listen as they find words");
+            yield return new WaitForSeconds(1.5f);Capture("03-what-she-remembers");
+            Assert.That(app.Flow.Journal,Is.Null,"performance alone never creates a visitor act or visit");
+            performance.ResetState();Assert.That(arrives.localPosition.x,Is.EqualTo(0.36f).Within(0.001f));
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
+        [UnityTest] public IEnumerator RecoveryCancelsTheLateTransitionAndKeepsItsSettledScene()
+        {
+            yield return Open();app.enabled=false;
+            app.Flow.Choose("era.1850s");var cues=app.Flow.DrainCues();
+            // Move the core through the hearth, allowing a transition request without normal presentation.
+            for(var i=0;i<1000&&!cues.OfType<Cue.Transition>().Any();i++)
+            {
+                foreach(var speak in cues.OfType<Cue.Speak>())app.Flow.LineFinished(speak.Token);
+                if(app.Flow.OpenInvitation!=null)app.Flow.Accept(app.Flow.OpenInvitation.Id);
+                app.Flow.Tick(1);cues=app.Flow.DrainCues();
+            }
+            var change=cues.OfType<Cue.Transition>().Single();var transition=stage.GetComponent<StoryTransition>();
+            transition.Play(change.Token,change.To.Id,change.Continuities);yield return null;
+            transition.Recover(change);Assert.That(transition.Busy,Is.False);
+            gallery.ResetView();stage.ShowScene("hearth");yield return new WaitForSeconds(4);
+            Assert.That(stage.ActiveScene,Is.EqualTo("hearth"));Assert.That(gallery.Framed,Is.True);
+            Assert.That(problems,Is.Empty,string.Join("\\n",problems));
+        }
+
         [UnityTest] public IEnumerator AnObjectQuestionAsksOnceWithoutAcceptingAnInvitationOrSpoilingWaiting()
         {
             yield return Open();Time.timeScale=10;app.Begin();

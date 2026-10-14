@@ -14,6 +14,8 @@ This is the current planning reference. The user selected the gallery as the org
 
 October 13: the new `LivingGallery` scene and v0.4.0 authored package implement the gallery/frame journey, two vignette routes, explicit object question chips, milk hospitality, contextual narration, a painted modern background and a physical kept memento. The older theatre remains a comparison. Core route/outcome/legacy-replay and muted Unity checks establish software behavior only; device, cultural, participant and final art/listening acceptance are still open. See the [decision record](../decisions.md) for exact checks and artifacts. The sections below remain the intended acceptance contract, not a declaration that the full PRD or all eleven work packages have passed.
 
+October 14: v0.5.0 adds authored acting, animated miniatures, earlier ember input, a focused shorter memory revisit, clearer physical replacement and guarded pointer/transition recovery. See the [panel implementation map](../reviews/2026-10-14-panel-implementation.md) for tradeoffs and evidence. These changes do not close the external acceptance gates.
+
 ## Product promise and boundaries
 
 **Working public description:** “A living gallery for stories time nearly left behind. Step into a painting and discover the lives within it.” The gallery is the product; the illustrated theatre is how its first artwork performs. “A story that notices what you notice” remains an interaction test: readable acknowledgement of attention, deliberate choices, and truthful consequences. It does not imply eye tracking or unrestricted conversation.

@@ -3,12 +3,15 @@ using UnityEngine;
 
 namespace Sankofa.Runtime.Stage
 {
-    /// <summary>A small vocabulary of illustrated poses. Accepted story actions own all changes.</summary>
+    /// <summary>Authored acting and resolved invitations share a small pose vocabulary; neither creates visitor choices.</summary>
     [RequireComponent(typeof(StageObject))]
     public sealed class IllustratedFigure : MonoBehaviour, IGlancer
     {
         [SerializeField] Renderer surface;
         [SerializeField] Vector4[] frames;
+        [SerializeField] Texture2D expressionAtlas;
+        [SerializeField] Vector4[] expressionFrames;
+        Texture originalAtlas;
         [SerializeField] Transform giftOrigin;
         [SerializeField] Vector3 waitingHand;
         [SerializeField] Vector3 offeringHand;
@@ -49,7 +52,7 @@ namespace Sankofa.Runtime.Stage
             memory.SetPropertyBlock(properties);
         }
 
-        void Awake() { block = new MaterialPropertyBlock(); ResetState(); }
+        void Awake() { block = new MaterialPropertyBlock(); originalAtlas = surface.sharedMaterial.mainTexture; ResetState(); }
 
         public bool CanGlance => surface != null;
         /// <summary>How far, 0 to 1, she is turned toward what she glances at.</summary>
@@ -80,7 +83,7 @@ namespace Sankofa.Runtime.Stage
         public void SetPose(int value)
         {
             if (frames == null || frames.Length == 0) return;
-            value = Mathf.Clamp(value, 0, frames.Length - 1);
+            value = Mathf.Clamp(value, 0, frames.Length + (expressionAtlas != null && expressionFrames != null ? expressionFrames.Length : 0) - 1);
             if (value == pose) return;
             // The light dips, the pose swaps at the bottom, the light returns. Mid-change, keep the brightness
             // continuous: still dimming, carry on into the new pose; already rising, dim the shown pose from there.
@@ -199,8 +202,15 @@ namespace Sankofa.Runtime.Stage
             if (surface == null || frames == null || frames.Length == 0) return;
             if (block == null) block = new MaterialPropertyBlock();
             surface.GetPropertyBlock(block); // Keep StageObject's visibility and attention feedback.
-            block.SetVector("_FrameA", frames[previousPose]);
-            block.SetVector("_FrameB", frames[pose]);
+            // A clean swap at the dimmest point allows a sibling atlas without cross-atlas blending.
+            var shown = ShownPose;
+            var expression = shown >= frames.Length && expressionAtlas != null;
+            var atlas = expression ? expressionAtlas : originalAtlas != null ? originalAtlas : surface.sharedMaterial.mainTexture;
+            block.SetTexture("_MainTex", atlas);
+            block.SetVector("_MainTex_TexelSize", new Vector4(1f/atlas.width, 1f/atlas.height, atlas.width, atlas.height));
+            var frame = expression ? expressionFrames[shown-frames.Length] : frames[shown];
+            block.SetVector("_FrameA", frame);
+            block.SetVector("_FrameB", frame);
             block.SetFloat("_PoseBlend", blend);
             surface.SetPropertyBlock(block);
         }

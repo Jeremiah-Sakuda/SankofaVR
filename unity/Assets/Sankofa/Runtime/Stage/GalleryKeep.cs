@@ -21,8 +21,9 @@ namespace Sankofa.Runtime.Stage
         readonly DepositGesture deposit=new DepositGesture();
         StageObject item;HandSource carrying;
         public Transform Recess => recess;
+        bool replacementConfirmed;
         void Awake(){feedback=new MaterialPropertyBlock();receive=new PalmReceiveGesture[hands.Length];for(var i=0;i<hands.Length;i++)receive[i]=new PalmReceiveGesture();}
-        void ResetGesture(){carrying=null;deposit.Reset();foreach(var g in receive)g.Reset();}
+        void ResetGesture(){replacementConfirmed=false;carrying=null;deposit.Reset();foreach(var g in receive)g.Reset();}
         void Update()
         {
             var flow=app.Flow;
@@ -30,7 +31,13 @@ namespace Sankofa.Runtime.Stage
             if(hint!=null)
             {
                 hint.gameObject.SetActive(available);
-                hint.text=carrying==null?"Receive the keepsake\nto keep this visit":deposit.Armed?"Close your hand\nto keep this visit":"Hold an open palm\nover the gold recess";
+                var replacing=flow.KeptVisit!=null;
+                hint.text=carrying==null
+                    ? replacing?"Receive to replace\nyour previous kept visit":"Receive the keepsake\nto keep this visit"
+                    : deposit.Armed
+                        ? replacing&&!replacementConfirmed?"Close to confirm replacement.\nYour previous visit will be removed."
+                            : replacing?"Open, then close again\nto replace your previous visit":"Close your hand\nto keep this visit"
+                        : replacing&&replacementConfirmed?"Open over the recess;\nclose again to replace":"Hold an open palm\nover the gold recess";
             }
             if(rim!=null){rim.GetPropertyBlock(feedback);feedback.SetFloat("_Highlight",available?deposit.Progress:0);rim.SetPropertyBlock(feedback);}
             if(!available)
@@ -53,6 +60,10 @@ namespace Sankofa.Runtime.Stage
             var open=tracked&&HandGeometry.Openness(carrying.Sample)>=1.3f;
             var near=tracked&&Vector3.Distance(carrying.PalmCenter,recess.position)<0.16f;
             if(!deposit.Update(tracked,near,open,Time.deltaTime))return;
+            // A replacement needs a second deliberate open/dwell/close after the disclosure.
+            // Until then the old record is untouched, and leaving/pause cancels this confirmation.
+            if(flow.KeptVisit!=null&&!replacementConfirmed)
+            { replacementConfirmed=true;deposit.Reset();return; }
             if(app.KeepVisit())
             {
                 item.MoveTo(recess.position,0.5f);

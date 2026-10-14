@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using Sankofa.Core.Story;
 using Sankofa.Runtime.Stage;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 namespace Sankofa.Tests
@@ -26,6 +27,28 @@ namespace Sankofa.Tests
             Assert.That(Object.FindObjectsByType<FigurePresence>(FindObjectsInactive.Include,FindObjectsSortMode.None),Is.Empty);
             var modern=stage.Scenes.Single(s=>s.Id=="story.water.today").Root;
             Assert.That(modern.transform.Find("Illustrated modern river"),Is.Not.Null);
+        }
+        [Test] public void AuthoredPerformanceCuesBindToRecordedLinesAndBothMemoryObjects()
+        {
+            EditorSceneManager.OpenScene("Assets/Sankofa/Scenes/LivingGallery.unity");
+            var package=StoryReader.ReadPackage(File.ReadAllText("Assets/Sankofa/Content/living-gallery.json"));
+            var lines=package.Beats.SelectMany(b=>b.Lines.Concat(b.Invitation==null?new Line[0]:b.Invitation.Accepted.Concat(b.Invitation.Default))).Select(l=>l.Id).ToHashSet();
+            var performance=new SerializedObject(Object.FindFirstObjectByType<GalleryPerformance>());
+            var memories=performance.FindProperty("memories");Assert.That(memories.arraySize,Is.EqualTo(2));
+            var poses=performance.FindProperty("poses");
+            for(var i=0;i<poses.arraySize;i++)
+            {
+                var cue=poses.GetArrayElementAtIndex(i);
+                Assert.That(lines,Does.Contain(cue.FindPropertyRelative("Line").stringValue));
+                Assert.That(cue.FindPropertyRelative("Figure").objectReferenceValue,Is.Not.Null);
+            }
+            for(var i=0;i<memories.arraySize;i++)
+            {
+                var memory=new SerializedObject(memories.GetArrayElementAtIndex(i).objectReferenceValue);
+                var moments=memory.FindProperty("moments");
+                for(var j=0;j<moments.arraySize;j++)
+                    Assert.That(lines,Does.Contain(moments.GetArrayElementAtIndex(j).FindPropertyRelative("Line").stringValue));
+            }
         }
         [Test] public void GalleryUsesAStaticCanonicalImageAndSeatedControls()
         {

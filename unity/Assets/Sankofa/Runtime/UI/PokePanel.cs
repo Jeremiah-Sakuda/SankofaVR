@@ -62,6 +62,7 @@ namespace Sankofa.Runtime.UI
 
         public event Action<string> Pressed;
         public bool FingerNear { get; private set; }
+        public int Revision { get; private set; }
 
         void Awake()
         {
@@ -84,6 +85,8 @@ namespace Sankofa.Runtime.UI
             {
                 if (hidden == value) return;
                 hidden = value;
+                Revision++;
+                pointerPress = pointed = null;
                 foreach (var b in buttons) b.Root.SetActive(!value);
                 foreach (var g in buttons.SelectMany(b => b.Gestures.Values)) g.Lost();
             }
@@ -161,6 +164,8 @@ namespace Sankofa.Runtime.UI
                     same = buttons[i].Id == items[i].Id && buttons[i].Label.text == items[i].Label;
                 if (same) return;
             }
+            Revision++;
+            pointerPress = pointed = null;
             foreach (var b in buttons) Destroy(b.Root);
             buttons.Clear();
             primaryLayout = primaryFirst;

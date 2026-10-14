@@ -1,0 +1,105 @@
+{
+  "expressionAtlas": "Assets/Sankofa/Art/IllustratedTheatre/cast-expressions-v1.png",
+  "poses": [
+    {
+      "line": "e1.wambui.arrives",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "revisit.e1.wambui.arrives",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "e1.carry.yes",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "e1.carry.no",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "e1.naserian.arrives",
+      "figure": "figure.naserian",
+      "pose": 3
+    },
+    {
+      "line": "e1.price",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "e1.price",
+      "figure": "figure.naserian",
+      "pose": 3
+    },
+    {
+      "line": "e1.problem",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "e1.problem",
+      "figure": "figure.naserian",
+      "pose": 3
+    },
+    {
+      "line": "e1.promise",
+      "figure": "figure.wambui",
+      "pose": 4
+    },
+    {
+      "line": "e1.promise",
+      "figure": "figure.naserian",
+      "pose": 3
+    },
+    {
+      "line": "e1.remember",
+      "figure": "figure.naserian",
+      "pose": 4
+    },
+    {
+      "line": "e1.rest",
+      "figure": "figure.naserian",
+      "pose": 2
+    },
+    {
+      "line": "e1.rest",
+      "figure": "figure.wambui",
+      "pose": 4
+    },
+    {
+      "line": "e1.kin",
+      "figure": "figure.wambui",
+      "pose": 2
+    },
+    {
+      "line": "revisit.e1.naserian.arrives",
+      "figure": "figure.naserian",
+      "pose": 3
+    },
+    {
+      "line": "revisit.e1.price",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "revisit.e1.price",
+      "figure": "figure.naserian",
+      "pose": 3
+    },
+    {
+      "line": "revisit.e1.problem",
+      "figure": "figure.wambui",
+      "pose": 3
+    },
+    {
+      "line": "revisit.e1.problem",
+      "figure": "figure.naserian",
+      "pose": 3
+    }
+  ]
+}

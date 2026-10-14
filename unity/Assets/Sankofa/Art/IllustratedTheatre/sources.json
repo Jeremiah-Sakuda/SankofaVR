@@ -32,6 +32,30 @@
         255
       ],
       "review_status": "Generated theatrical draft; no cultural or device acceptance. Provider-output terms require release review."
+    },
+    {
+      "file": "cast-expressions-v1.png",
+      "created": "2026-10-13",
+      "provider": "OpenAI",
+      "tool": "image_gen.imagegen (built-in Codex tool)",
+      "model": "Not exposed by tool; do not infer model identifier",
+      "terms_url": "https://openai.com/policies/terms-of-use/",
+      "terms_status": "Provider public terms reference; applicable account/service contract and release rights not verified",
+      "reference": "cast-atlas.png",
+      "prompt": "Create an additional expression sprite atlas for the two adult women in the reference illustration. Preserve their recognizable faces, proportions, ochre and ivory clothing on left woman, red and indigo clothing on right woman, short hair, bare feet and painterly firelit rendering. This is fictional theatre costume, not a claim of authentic traditional clothing; do not add ethnographic symbols. Output a square 1024x1024 transparent-background atlas in a strict 2 columns by 2 rows grid. Each of the four 512x512 cells has ONE full standing figure centered horizontally, whole body from head to feet safely within cell, aligned baseline, comparable scale to original. NO TEXT, no grid borders, no background, no shadows outside figure, no objects in hands. Top-left: left woman Wambui facing slightly right, solemn restrained worried expression, eyes lowered toward her empty hands held loosely at waist, shoulders lightly tense; no smile. Top-right: right woman Naserian facing slightly left, composed listening expression, mouth closed no smile, arms at sides, slightly hesitant stance. Bottom-left: left woman Wambui facing right, patiently waiting with one relaxed open empty palm, kind but thoughtful small closed-mouth expression. Bottom-right: right woman Naserian facing left, worried at arriving with less than promised, looking down, hands gently gathered, no smile. Emotional subtlety, dignity and warm humanity; avoid exaggerated sadness or caricature. Maintain same painterly depth and light as the reference.",
+      "transparent_background": true,
+      "source": "exec-dc495859-2be3-4d55-867b-cd4c1db90f7e.png",
+      "sha256": "e510109ea1a717fa11ae0693ed0db72bce0361569d708a4e355938053c7e047a",
+      "pixels": [
+        1254,
+        1254
+      ],
+      "review_status": "Generated fictional theatre draft; cultural, device and release review pending."
     }
-  ]
+  ],
+  "provider": "OpenAI, via Codex built-in image_gen",
+  "model": "Model identifier not exposed by the tool",
+  "terms_reference": "https://openai.com/policies/terms-of-use/",
+  "terms_checked": "2026-10-14",
+  "rights_gate": "Public terms were read; applicable account contract, contributor rights and release clearance remain unverified."
 }

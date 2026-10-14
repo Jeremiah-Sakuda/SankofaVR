@@ -48,7 +48,7 @@ The illustrated-theatre MVP implements that presentation replacement for one his
 
 ## Selected gallery direction
 
-October 13: the [living gallery scope](product/illustrated-theatre-scope.md) makes gallery preview, explicit exhibit entry and reframed return the outer journey. The `LivingGallery` candidate now implements that journey with the v0.4.0 authored package; the older theatre remains a comparison. Software checks do not establish device or cultural acceptance.
+October 13: the [living gallery scope](product/illustrated-theatre-scope.md) makes gallery preview, explicit exhibit entry and reframed return the outer journey. The `LivingGallery` candidate now implements that journey with the v0.5.0 authored package; the older theatre remains a comparison. Software checks do not establish device or cultural acceptance.
 
 For the current single exhibit, the editor builder composes title/placard and the canonical scene snapshot; `LivingGallery` holds its two route IDs and presentation references. The story package owns the routes and continuation eligibility. There is no general exhibit catalogue schema yet. The gallery uses the existing kept-visit adapter and illustrated shelf namespace; it does not own a duplicate story engine or store. Application flow owns entry, route/default provenance, cancellation, closing and save. Presentation owns the correspondence between framed composition and spatial layers. Narration/validated content own what context is safe at each revealed beat; the renderer never decides that attention authorises a spoiler or choice. The first artwork uses fire as the griot's visible presence.
 
@@ -57,3 +57,12 @@ Preserve old saved route/package identities when mapping them to the exhibit. A 
 ## Competition context is removable
 
 The tracked agent entry point requires a local competition brief during development. The product runtime never reads that file, and the file is not a feature flag or deployed model prompt. Durable product requirements such as accessible interaction, reliable recovery and accurate content live in the PRD. Prize strategy, current scoring and submission notes remain in the local brief. Changing a future competition profile must not require rewriting the story engine.
+
+
+### Authored memory revisits and performance
+
+The v0.5 gallery package adds optional `returning_beats` to a first route. The package validator checks both full and shorter plans against the same inventory; `ChooseReturning` requires an existing kept visit at the returning menu. The realised shorter plan retains the stable route ID and its actual invitation outcomes. Saving and replay use that plan unchanged. Continuation recall filters skip outcomes the shorter visit never had. This additive package-reader field does not change the saved-plan schema; older readers cannot load a package containing the new field.
+
+`GalleryPerformance` translates authored narration-line cues into cast poses and `MemoryPerformance` movements. It has no invitation or journal authority. The sibling expression atlas extends the original three poses without replacing their assets. Memory transforms use stage time, stop on pause, and settle without movement in reduced mode. The application resets them between visits. `gallery-performance.json` records the cast cues; the editor builder supplies the two bounded miniature choreographies.
+
+A transition watchdog now emits a recovery cue before continuing. The adapter cancels its late coroutine, settles the requested scene and frame, then applies the following narration/actions. Pointer selection resolves the selector's returned panel/button revision rather than its current hover, and last-known hand poses cannot initiate panel input.

@@ -62,6 +62,15 @@ namespace Sankofa.Runtime.Stage
             if (curtain != null) curtain.enabled = false;
         }
 
+        /// <summary>Watchdog recovery stops the coroutine before any late scene swap can occur.</summary>
+        public void Recover(Cue.Transition change)
+        {
+            Cancel();
+            foreach (var c in change.Continuities) stage.Cross(c.From, c.To, change.To.Id);
+            stage.ShowScene(change.To.Id);
+            gallery?.SettleView(change.To.Id);
+        }
+
         IEnumerator Run(int token, string toScene, IReadOnlyList<Continuity> continuities)
         {
             if (gallery != null)

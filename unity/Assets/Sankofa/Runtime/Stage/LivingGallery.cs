@@ -26,6 +26,11 @@ namespace Sankofa.Runtime.Stage
             Framed = true;
             Apply(0, 1);
         }
+        public void SettleView(string scene)
+        {
+            Framed = stage.IsHearth(scene);
+            Apply(0, Framed ? 1 : 0);
+        }
         void Apply(float expansion, float opacity)
         {
             if (block == null) block = new MaterialPropertyBlock();
