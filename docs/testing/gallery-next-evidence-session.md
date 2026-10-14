@@ -29,3 +29,13 @@ Record sustained on-device frame timing and thermal behavior, stereo/cutout edge
 ## Honest demonstration
 
 After device evidence, capture a short sequence showing the frame becoming a spatial scene, a real hand taking the painted-palm gourd, the physical flour crossing into the painting, the changed hospitality and the return to the same image. Show the passive comparison and the shorter memory as distinct paths. Label desktop/synthetic footage accordingly. A staged camera render is not proof of successful hand tracking, stereo depth or Quest frame rate.
+
+## Prepared v0.6 materials and result record
+
+The [candidate completion record](../release/candidate.md) distinguishes prepared deliverables from finished reviews. Generate current packets with `python3 scripts/make_gallery_review_packet.py`. The cultural ZIP contains exact read-throughs for both memories on helping/passive paths, art and pronunciation locations. The first-time ZIP offers one unprimed read-through or caption transcript and neutral questions. These desktop/audio checks are narrower than actual interactive visits. Do not coach a participant toward the intended interpretation or count synthetic QA notes as responses.
+
+For each real session retain package/build hash, route/outcomes, medium (caption read-through, audio, desktop or Quest), assistance, interruptions, verbatim paraphrase, misunderstanding, reported discomfort and proposed correction. Use an anonymous session code, reviewer remit and consent scope. Save raw records locally under ignored artifacts. Publish only approved summaries and credit. Resolve specific errors; do not average away a dignity or historical-context concern.
+
+`python3 scripts/quest_evidence.py` is a read-only inventory/collection helper. A connected authorized device is required for `--serial`. It never starts the application, so it does not override the no-playback instruction. During an independently agreed hands-on run, keep audio muted until listening is authorized. Collect a sustained complete visit, not just a still or a favorable moment: hardware model/OS, APK version/hash, sustained FPS/frame times, thermal observations, tracking failures, touch/receive errors, stereo edges, captions and reach. Missing GPU timings remain missing, not zero-cost rendering. Prefer raw unedited logs plus actual observed results; then rerun after corrections.
+
+No actual reviewer/device results have been collected by the October 14 preparation pass.
