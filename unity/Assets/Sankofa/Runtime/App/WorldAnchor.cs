@@ -4,15 +4,18 @@ using UnityEngine;
 namespace Sankofa.Runtime.App
 {
     /// <summary>
-    /// Places the hearth in front of wherever the visitor sits: on the floor below their head, facing the way they
-    /// face. Placed once head tracking settles, and again on recentre. The camera itself is never moved.
+    /// Places the virtual stage around the seated eye, facing the way the visitor faces. Full VR uses a virtual
+    /// floor: normalising eye height keeps touch controls/gifts within the designed reach for different bodies.
+    /// Placed once tracking settles and again on recenter. The camera itself is never moved.
     /// </summary>
     public sealed class WorldAnchor : MonoBehaviour
     {
         [SerializeField] Transform head;
         [SerializeField] float settleSeconds = 0.4f;
+        [SerializeField] float designedEyeHeight = 1.15f;
 
         float settled;
+        float enabledAt, seatedBaseHeight;
 
         public bool Placed { get; private set; }
 
@@ -37,13 +40,14 @@ namespace Sankofa.Runtime.App
                 heightOffset = value;
                 if (!Placed) return;
                 var p = transform.position;
-                transform.position = new Vector3(p.x, heightOffset, p.z);
+                transform.position = new Vector3(p.x, seatedBaseHeight + heightOffset, p.z);
             }
         }
         public event Action PlacedEvent;
 
         void OnEnable()
         {
+            enabledAt = Time.realtimeSinceStartup;
             if (OVRManager.display != null) OVRManager.display.RecenteredPose += Place;
         }
 
@@ -58,7 +62,7 @@ namespace Sankofa.Runtime.App
             // An untracked head stays exactly at the rig origin; wait for a real pose before placing the world.
             var tracked = head.localPosition.sqrMagnitude > 1e-6f || head.localRotation != Quaternion.identity;
             settled = tracked ? settled + Time.unscaledDeltaTime : 0;
-            if (settled >= settleSeconds || Time.realtimeSinceStartup > 5f) Place();
+            if (settled >= settleSeconds || Time.realtimeSinceStartup - enabledAt > 5f) Place();
         }
 
         public void Place()
@@ -67,7 +71,9 @@ namespace Sankofa.Runtime.App
             forward.y = 0;
             if (forward.sqrMagnitude < 1e-4f) forward = Vector3.forward;
             var p = head.position;
-            transform.SetPositionAndRotation(new Vector3(p.x, heightOffset, p.z) + forward.normalized * reachOffset, Quaternion.LookRotation(forward.normalized, Vector3.up));
+            // Zero-height untracked/editor poses retain the comparison floor until an actual pose is supplied.
+            seatedBaseHeight = p.y > 0.3f ? p.y - designedEyeHeight : 0;
+            transform.SetPositionAndRotation(new Vector3(p.x, seatedBaseHeight + heightOffset, p.z) + forward.normalized * reachOffset, Quaternion.LookRotation(forward.normalized, Vector3.up));
             var first = !Placed;
             Placed = true;
             if (first) PlacedEvent?.Invoke();

@@ -357,7 +357,8 @@ namespace Sankofa.Tests
             var ewe=stage.Find("figure.ewe");
             var rect=Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,ewe.Surfaces.First().bounds);
             Assert.That(rect.xMin,Is.GreaterThan(0));Assert.That(rect.xMax,Is.LessThan(1));
-            Assert.That(ewe.GetComponent<FigureMotion>().Walking,Is.False,"the illustrated scene does not inherit the distant rigged arrival");
+            Assert.That(ewe.GetComponent<FigureMotion>(),Is.Null,"the illustrated animal does not inherit rigged arrival or gait");
+            Assert.That(ewe.GetComponent<IllustratedFigure>().RegisteredPoseCount,Is.EqualTo(1));
             Capture("09-named-sheep");
             var eye=Camera.main.transform;var position=eye.position;var rotation=eye.rotation;
             eye.position=ewe.transform.position+new Vector3(-0.75f,0.65f,0.85f);eye.LookAt(ewe.transform.position+Vector3.up*0.45f);
@@ -380,8 +381,10 @@ namespace Sankofa.Tests
             {
                 Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));
                 var line=app.Flow.CurrentLine?.Id;
+                if(app.Flow.Phase==VisitPhase.Transitioning&&recorded.Add("entry-unfold"))yield return MovieSegment("02-entry-unfold",40);
                 if(line=="gallery.portions.divide"&&recorded.Add(line))yield return MovieSegment("03-memory",40);
                 if(line=="e1.rest"&&recorded.Add(line))yield return MovieSegment("05-agreement",40);
+                if(line=="gallery.milk.held"&&recorded.Add(line))yield return MovieSegment("05-hospitality",30);
                 var inv=app.Flow.OpenInvitation;
                 if(inv!=null&&inv.Id=="receive-flour"&&recorded.Add("receive-flour"))
                 {
@@ -403,6 +406,14 @@ namespace Sankofa.Tests
             yield return MovieSegment("06-same-frame",40);
             Assert.That(app.Flow.Keep(),Is.True);app.Flow.BeginAgain();
             yield return MovieSegment("07-returning-memory",40);
+            GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().PressFromPointer("gallery-other");
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="gallery.waiting.stay"&&stage.Find("memory.waiting").GetComponent<MemoryPerformance>().Progress>0.9f,60);
+            yield return MovieSegment("08-other-memory",40);
+            yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,90);
+            app.Flow.BeginAgain();app.Flow.NewStory();Assert.That(app.EnterExhibit("era.1850s"),Is.True);Time.timeScale=12;
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="e1.witness.quiet",90);
+            yield return MovieSegment("09-passive-hospitality",30);
+            Assert.That(app.Flow.Journal.Outcomes["offer-flour"],Is.EqualTo(Core.Story.Outcome.Default));
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
 
@@ -426,6 +437,10 @@ namespace Sankofa.Tests
             var placement=board.GetComponent<Sankofa.Runtime.UI.GalleryCaptionPlacement>();
             yield return new WaitForSeconds(0.8f);
             Assert.That(gourd.IsCarried,Is.True);Assert.That(gourd.CarriedBy,Is.Null);
+            Camera.main.fieldOfView=60;Camera.main.aspect=4f/3f;
+            var visible=Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,gourd.Surfaces.First().bounds);
+            Assert.That(visible.xMin,Is.GreaterThan(0));Assert.That(visible.xMax,Is.LessThan(1));
+            Assert.That(visible.yMin,Is.GreaterThan(0));Assert.That(visible.yMax,Is.LessThan(1),"selection carry stays visible, not below the forward view");
             foreach(var size in new[]{Sankofa.Runtime.UI.CaptionSize.Small,Sankofa.Runtime.UI.CaptionSize.Medium,Sankofa.Runtime.UI.CaptionSize.Large})
             {
                 board.Size=size;yield return null;placement.LayoutNow();
@@ -536,7 +551,18 @@ namespace Sankofa.Tests
             Assert.That(info.enabled,Is.True);Assert.That(info.text,Is.Not.Empty);
             Assert.That(info.textBounds.size.y,Is.LessThan(info.rectTransform.rect.height+0.005f),"a credits page fits its reading area");
             Assert.That(panel.Ids,Is.EqualTo(new[]{"done","credits-back","credits-next"}));
-            Capture("16-credits");panel.PressFromPointer("credits-back");yield return new WaitForSecondsRealtime(0.35f);
+            Capture("16-credits");
+            var firstPage=info.text;var pages=new HashSet<string>();
+            do
+            {
+                Assert.That(pages.Add(info.text),Is.True);info.ForceMeshUpdate();
+                Assert.That(info.textBounds.size.y,Is.LessThan(info.rectTransform.rect.height+0.005f),"every credits page fits");
+                panel.PressFromPointer("credits-next");yield return new WaitForSecondsRealtime(0.35f);
+            } while(info.text!=firstPage);
+            Assert.That(pages.Count,Is.GreaterThan(3));
+            panel.PressFromPointer("credits-back");yield return new WaitForSecondsRealtime(0.35f);
+            panel.PressFromPointer("context");yield return new WaitForSecondsRealtime(0.35f);
+            Assert.That(info.text,Does.Contain("Akan").And.Contain("Ghana").And.Contain("Kenyan"));
             panel.PressFromPointer("done");yield return new WaitForSecondsRealtime(0.35f);
             Assert.That(info.enabled,Is.False);Assert.That(panel.transform.localPosition.y,Is.EqualTo(0.88f).Within(0.001f));
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
@@ -575,6 +601,52 @@ namespace Sankofa.Tests
             Capture("17-registered-offer");Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
 
+        [UnityTest] public IEnumerator CaptionsPreserveTheMemoryWindowNamedAnimalAndEssentialControls()
+        {
+            yield return Open();Time.timeScale=12;app.Begin();
+            yield return Until(()=>app.Flow.OpenInvitation?.Id=="receive-flour");
+            GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().PressFromPointer("Accept:receive-flour");
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="gallery.portions.divide");Time.timeScale=1;
+            yield return new WaitForSeconds(0.8f);
+            var board=Object.FindFirstObjectByType<Sankofa.Runtime.UI.CaptionBoard>();
+            var layout=board.GetComponent<Sankofa.Runtime.UI.GalleryCaptionPlacement>();
+            foreach(var size in new[]{Sankofa.Runtime.UI.CaptionSize.Small,Sankofa.Runtime.UI.CaptionSize.Medium,Sankofa.Runtime.UI.CaptionSize.Large})
+            {
+                board.Size=size;yield return null;layout.LayoutNow();
+                foreach(var surface in stage.Find("memory.portions").Surfaces.Concat(stage.Find("gourd.flour").Surfaces).Where(r=>r.enabled))
+                    Assert.That(Sankofa.Runtime.UI.GalleryCaptionPlacement.Overlap(layout.CaptionRect,Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,surface.bounds)),Is.LessThan(0.00005f),"memory and carry "+size);
+            }
+            Capture("19-memory-caption");Time.timeScale=12;
+            yield return Until(()=>app.Flow.CurrentLine?.Id=="e1.naserian.arrives");Time.timeScale=1;
+            yield return new WaitForSeconds(0.8f);layout.LayoutNow();
+            foreach(var surface in stage.Find("figure.ewe").Surfaces.Concat(stage.Find("gourd.flour").Surfaces).Where(r=>r.enabled))
+                Assert.That(Sankofa.Runtime.UI.GalleryCaptionPlacement.Overlap(layout.CaptionRect,Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,surface.bounds)),Is.LessThan(0.00005f),"the animal is visible when named");
+            foreach(var name in new[]{"Controls panel","Settings panel"})
+                foreach(var surface in GameObject.Find(name).GetComponentsInChildren<Renderer>().Where(r=>r.enabled))
+                    Assert.That(Sankofa.Runtime.UI.GalleryCaptionPlacement.Overlap(layout.CaptionRect,Sankofa.Runtime.UI.GalleryCaptionPlacement.Project(Camera.main,surface.bounds)),Is.LessThan(0.00005f),"caption does not cover essential controls");
+            Capture("18-named-sheep-caption");Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+        [UnityTest] public IEnumerator SeatedEyeHeightsKeepControlsInTheSameRelativePlaceWithoutMovingTheCamera()
+        {
+            yield return Open();app.enabled=false;
+            var rig=GameObject.Find("OVRCameraRig").transform;var world=Object.FindFirstObjectByType<WorldAnchor>();
+            var eye=Camera.main;eye.fieldOfView=70;eye.aspect=4f/3f;
+            var panel=GameObject.Find("Settings panel").transform;Vector3? reference=null;
+            foreach(var height in new[]{0.85f,1.15f,1.45f})
+            {
+                rig.position=new Vector3(0,height,0);var before=eye.transform.position;world.Place();yield return null;
+                Assert.That(Vector3.Distance(before,eye.transform.position),Is.LessThan(0.001f));
+                var relative=eye.transform.InverseTransformPoint(panel.position);
+                if(reference.HasValue)Assert.That(Vector3.Distance(reference.Value,relative),Is.LessThan(0.001f));else reference=relative;
+                var viewport=eye.WorldToViewportPoint(panel.position);
+                Assert.That(viewport.x,Is.InRange(0.03f,0.97f));Assert.That(viewport.y,Is.InRange(0.03f,0.97f));
+                world.HeightOffset=0.08f;world.Place();
+                Assert.That(eye.transform.InverseTransformPoint(panel.position).y-relative.y,Is.EqualTo(0.08f).Within(0.001f));
+                world.HeightOffset=0;
+            }
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+
         IEnumerator MovieSegment(string name,int frames)
         {
             var speed=Time.timeScale;Time.timeScale=1;
@@ -582,20 +654,25 @@ namespace Sankofa.Tests
             var eye=GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();eye.fieldOfView=70;
             var target=new RenderTexture(960,720,24){antiAliasing=4};var previous=eye.targetTexture;var active=RenderTexture.active;
             var frame=new Texture2D(960,720,TextureFormat.RGB24,false);
+            var timestamps=new List<double>();
             try
             {
                 for(var i=0;i<frames;i++)
                 {
                     yield return new WaitForSecondsRealtime(0.1f);
+                    timestamps.Add(Time.realtimeSinceStartupAsDouble);
                     eye.targetTexture=target;eye.Render();RenderTexture.active=target;
                     frame.ReadPixels(new Rect(0,0,960,720),0,0);frame.Apply();
                     File.WriteAllBytes(Path.Combine(directory,i.ToString("D4")+".jpg"),frame.EncodeToJPG(88));
                     eye.targetTexture=previous;RenderTexture.active=active;
                 }
+                File.WriteAllText(Path.Combine(directory,"timing.json"),JsonUtility.ToJson(new PreviewTiming{timestamps=timestamps.ToArray()},true));
             }
             finally
             {eye.targetTexture=previous;RenderTexture.active=active;Object.Destroy(frame);target.Release();Object.Destroy(target);Time.timeScale=speed;}
         }
+
+        [Serializable] sealed class PreviewTiming { public double[] timestamps; }
 
         static Sankofa.Interaction.HandSample Palm(Vector3 point,bool open)
         {
@@ -614,6 +691,7 @@ namespace Sankofa.Tests
             if(Environment.GetEnvironmentVariable("SANKOFA_CAPTURE")!="1")return;
             var eye=GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();eye.fieldOfView=70;
             var directory=Path.GetFullPath(Path.Combine(Application.dataPath,"..","..","artifacts","living-gallery"));Directory.CreateDirectory(directory);
+            if(!gallery.Framed&&GameObject.Find("Control hint")!=null)GameObject.Find("Control hint").GetComponent<TMPro.TMP_Text>().enabled=false;
             var target=new RenderTexture(1440,1080,24){antiAliasing=4};var previous=eye.targetTexture;var active=RenderTexture.active;
             eye.targetTexture=target;eye.Render();RenderTexture.active=target;
             var image=new Texture2D(1440,1080,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,1440,1080),0,0);image.Apply();

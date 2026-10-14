@@ -48,6 +48,38 @@ namespace Sankofa.EditorTools
             RestGalleryVessel(stage.Find("gourd.milk"), stage.Find("figure.naserian").GetComponent<IllustratedFigure>());
         }
 
+        static void BuildPaintedGallerySheep(StoryStage stage)
+        {
+            var ewe = stage.Find("figure.ewe");
+            UnityEngine.Object.DestroyImmediate(ewe.GetComponent<QuadrupedGait>());
+            UnityEngine.Object.DestroyImmediate(ewe.GetComponent<FigureMotion>());
+            foreach (var child in ewe.transform.Cast<Transform>().ToArray()) UnityEngine.Object.DestroyImmediate(child.gameObject);
+            var at = new Vector3(0.10f, 0, 2.85f); at.y = BoundaryGround(at);
+            ewe.transform.localPosition = at; ewe.transform.localRotation = Quaternion.identity;
+            var material = GalleryCopy(IllustrationMaterial("Painted ewe", ImportAtlas("Assets/Sankofa/Art/IllustratedTheatre/ewe-v1.png"), new Vector4(0, 0, 1, 1)), "Painted gallery ewe");
+            material.SetFloat("_Cutoff", 0.5f);
+            var card = IllustrationCard(ewe.transform, "Painted ewe", 1.02f, 0.756f, material);
+            var offset = new Vector3(-1.02f * 0.07f, -0.756f * 0.035f, 0);
+            card.transform.localPosition = offset;
+            var shade = ContactShade(ewe.transform, "Painted ewe", 0.42f, 0.20f);
+            SetArray(ewe, "surfaces", new UnityEngine.Object[] { card, shade });
+            Set(ewe, "echoMesh", card.GetComponent<MeshFilter>().sharedMesh);
+            Set(ewe, "scaleWithVisibility", false);
+            var actor = ewe.gameObject.AddComponent<IllustratedFigure>();
+            Set(actor, "surface", card); Set(actor, "transition", stage.GetComponent<StoryTransition>());
+            Set(actor, "giftOrigin", Marker(ewe.transform, "Unused gift anchor", new Vector3(0, 0.4f, 0)));
+            var serialized = new SerializedObject(actor);
+            var frames = serialized.FindProperty("frames"); frames.arraySize = 1;
+            frames.GetArrayElementAtIndex(0).vector4Value = new Vector4(0, 0, 1, 1);
+            var profiles = serialized.FindProperty("registrations"); profiles.arraySize = 1;
+            var profile = profiles.GetArrayElementAtIndex(0);
+            profile.FindPropertyRelative("Offset").vector3Value = offset;
+            profile.FindPropertyRelative("Hand").vector3Value = new Vector3(0, 0.4f, 0);
+            profile.FindPropertyRelative("Foot").vector2Value = new Vector2(0.57f, 0.035f);
+            profile.FindPropertyRelative("Scale").floatValue = 1;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         static void RestGalleryVessel(StageObject item, IllustratedFigure owner)
         {
             // A downturned/empty painted hand cannot support a bottle. It rests on the bank until the offering

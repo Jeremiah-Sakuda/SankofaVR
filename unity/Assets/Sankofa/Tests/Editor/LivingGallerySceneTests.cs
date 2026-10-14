@@ -10,6 +10,22 @@ namespace Sankofa.Tests
 {
     public class LivingGallerySceneTests
     {
+        [Test] public void CurrentGalleryBundlesContextAndEveryPoseRegistration()
+        {
+            EditorSceneManager.OpenScene("Assets/Sankofa/Scenes/LivingGallery.unity");
+            var app=new SerializedObject(Object.FindFirstObjectByType<Sankofa.Runtime.App.SankofaApp>());
+            var context=app.FindProperty("artworkContext").objectReferenceValue as TextAsset;
+            Assert.That(context,Is.Not.Null);Assert.That(context.text,Does.Contain("Akan").And.Contain("Kenyan").And.Contain("fiction"));
+            Assert.That(app.FindProperty("settingsModalAnchor").objectReferenceValue,Is.Not.Null);
+            Assert.That(app.FindProperty("settingsInfo").objectReferenceValue,Is.Not.Null);
+            Assert.That(app.FindProperty("choicesStoryAnchor").objectReferenceValue,Is.Not.Null);
+            Assert.That(app.FindProperty("controlHint").objectReferenceValue,Is.Not.Null);
+            var stage=Object.FindFirstObjectByType<StoryStage>();
+            foreach(var id in new[]{"figure.wambui","figure.naserian"})
+                Assert.That(stage.Find(id).GetComponent<IllustratedFigure>().RegisteredPoseCount,Is.EqualTo(5));
+            var origin=new SerializedObject(GameObject.Find("Title origin").GetComponent("TextMeshPro"));
+            Assert.That(origin.FindProperty("m_text").stringValue,Does.Contain("Ghana"));
+        }
         [Test] public void BothPerspectivesAndTheirContinuationsHaveACompleteStage()
         {
             EditorSceneManager.OpenScene("Assets/Sankofa/Scenes/LivingGallery.unity");
@@ -63,9 +79,10 @@ namespace Sankofa.Tests
         {
             EditorSceneManager.OpenScene("Assets/Sankofa/Scenes/LivingGallery.unity");
             var stage=Object.FindFirstObjectByType<StoryStage>();
-            var head=stage.Find("figure.ewe").transform.Find("Neck/Head");
-            Assert.That(head.GetComponent<MeshFilter>().sharedMesh.colors.All(c=>c.r>0.5f),Is.True,"new head has pigment instead of the legacy black mask");
-            Assert.That(AssetDatabase.GetAssetPath(head.GetComponent<Renderer>().sharedMaterial),Does.Contain("/Gallery/"));
+            var ewe=stage.Find("figure.ewe");var painted=ewe.GetComponent<IllustratedFigure>();
+            Assert.That(painted,Is.Not.Null);Assert.That(ewe.GetComponent<FigureMotion>(),Is.Null,"the animal is painted, not a rig hidden behind it");
+            Assert.That(AssetDatabase.GetAssetPath(painted.Surface.sharedMaterial.mainTexture),Does.EndWith("ewe-v1.png"));
+            Assert.That(AssetDatabase.GetAssetPath(painted.Surface.sharedMaterial),Does.Contain("/Gallery/"));
             foreach(var id in new[]{"bead","bead.kept","bead.today","gate"})
                 Assert.That(AssetDatabase.GetAssetPath(stage.Find(id).Surfaces.First().GetComponent<MeshFilter>().sharedMesh),Does.Contain("/Gallery/"));
             Assert.That(Object.FindObjectsByType<AudioSource>(FindObjectsInactive.Include,FindObjectsSortMode.None).Any(a=>a.clip!=null&&a.clip.name=="matatu"),Is.False);

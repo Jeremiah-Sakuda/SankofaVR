@@ -28,6 +28,7 @@ namespace Sankofa.Runtime.App
         [SerializeField] TextAsset packageJson;
         [Tooltip("Credits for the recordings, textures and typeface, shown from the settings.")]
         [SerializeField] TextAsset credits;
+        [SerializeField] TextAsset artworkContext;
         [SerializeField] WorldAnchor anchor;
         [SerializeField] HearthFire fire;
         [SerializeField] NarrationPlayer narration;
@@ -76,6 +77,7 @@ namespace Sankofa.Runtime.App
         bool settingsOwnPause, settingsResumePending;
         bool creditsOpen;
         string[] creditPages;
+        string informationTitle = "Credits";
         Vector3 settingsRestPosition;
         Quaternion settingsRestRotation;
         Vector3 choicesRestPosition;
@@ -218,6 +220,7 @@ namespace Sankofa.Runtime.App
         /// <summary>Leaves the start screen and opens the hearth: the fire's welcome, then the choice.</summary>
         public void Begin()
         {
+            if (settingsOpen) return;
             if (gallery != null)
             {
                 EnterExhibit(gallery.DefaultRoute, useDefault: true);
@@ -342,7 +345,7 @@ namespace Sankofa.Runtime.App
                     case Cue.PhaseChanged p:
                         StageClock.Paused = p.Phase == VisitPhase.Paused;
                         if (settingsOpen) ShowSettings();
-                        if (p.Phase == VisitPhase.Paused) captions.SetCaption("Paused");
+                        if (p.Phase == VisitPhase.Paused && !settingsOpen) captions.SetCaption("Paused");
                         // The question about returning goes once the visitor has answered it, either way.
                         else if (askedReturn)
                         {
@@ -537,7 +540,7 @@ namespace Sankofa.Runtime.App
             {
                 case ControlKind.Choose: return o.Label;
                 case ControlKind.Follow: return o.Label;
-                case ControlKind.Replay: return gallery != null ? "Replay this visit" : "Hear it again";
+                case ControlKind.Replay: return gallery != null ? "Replay saved telling" : "Hear it again";
                 case ControlKind.NewStory: return gallery != null ? "Another perspective" : "Something new";
                 case ControlKind.Back: return "Back";
                 case ControlKind.Forget: return "Forget this visit";
@@ -733,8 +736,16 @@ namespace Sankofa.Runtime.App
                 case "credits":
                     if (credits == null) return;
                     creditPages = CreditPages(credits.text);
+                    informationTitle = "Credits";
                     creditsOpen = true;
                     creditsPage = 0;
+                    ShowSettings();
+                    return;
+                case "context":
+                    if (artworkContext == null) return;
+                    creditPages = CreditPages(artworkContext.text);
+                    informationTitle = "About this artwork";
+                    creditsOpen = true; creditsPage = 0;
                     ShowSettings();
                     return;
                 case "credits-next":
@@ -769,12 +780,13 @@ namespace Sankofa.Runtime.App
             if (settingsHeading != null)
             {
                 settingsHeading.enabled = settingsOpen;
-                settingsHeading.text = creditsOpen ? "Credits" : flow?.Phase == VisitPhase.Transitioning ? "Settings · pause after entry" : "Settings · story paused";
+                settingsHeading.text = creditsOpen ? informationTitle : flow?.Phase == VisitPhase.Transitioning ? "Settings · pause after entry" : "Settings · story paused";
             }
             if (settingsInfo != null) settingsInfo.enabled = settingsOpen && creditsOpen;
             if (settingsBackdrop != null) settingsBackdrop.enabled = settingsOpen;
             if (!settingsOpen)
             {
+                if(flow?.Phase==VisitPhase.Paused)captions.SetCaption("Paused");
                 settingsPanel.transform.localPosition = settingsRestPosition;
                 settingsPanel.transform.localRotation = settingsRestRotation;
                 settingsPanel.Show(new List<(string, string)> { ("settings", "Settings") });
@@ -800,6 +812,7 @@ namespace Sankofa.Runtime.App
                 ("recenter", "Recenter"),
                 ("credits", "Credits"),
             };
+            if (artworkContext != null) items.Add(("context", "About this artwork"));
             if (fireComparison && Debug.isDebugBuild) items.Add(("fire", "Fire: " + settings.FireMode.ToString().ToLowerInvariant()));
             settingsPanel.Show(items, primaryFirst: true);
         }

@@ -51,6 +51,28 @@
         1254
       ],
       "review_status": "Generated fictional theatre draft; cultural, device and release review pending."
+    },
+    {
+      "file": "ewe-v1.png",
+      "created": "2026-10-14",
+      "provider": "OpenAI",
+      "tool": "image_gen.imagegen (built-in Codex tool)",
+      "model": "Not exposed by tool; do not infer model identifier",
+      "terms_url": "https://openai.com/policies/terms-of-use/",
+      "terms_status": "Provider public terms reference; applicable account/service contract and release rights not verified",
+      "prompt": "Use case: illustration-story.\nAsset type: one transparent animal cutout for Sankofa's spatial illustrated theatre, matching mature gouache-and-ink book illustration.\nPrimary request: ONE full-body adult ewe standing calmly in a readable left-facing three-quarter side view, all four anatomically plausible legs and hooves grounded along one baseline. Include whole head, ears, muzzle, body and feet with generous transparent margin. No horns; this is a ewe. Muted warm cream/tan short textured coat, darker brown face and lower legs, kind natural dark eyes. Believable sheep proportions, gentle stance, individual brush marks and nuanced tonal shading; no toy-like circular fleece balls, no cartoon smile. This is a fictional theatrical animal, not a claim about any particular historical breed.\nStyle: tactile editorial gouache, confident ink contours, warm amber firelight on the front/top and restrained cool violet shading beneath. Painterly depth and clean silhouette, cohesive with richly shaded ochre/ivory and red/indigo human cutouts in a dusk riverbank theatre. Avoid photorealism and 3D render.\nComposition: single animal only; quiet side profile reads at small stage scale. Genuine alpha transparency around the silhouette, including gaps between legs. No paper rectangle, scenery, floor, ground shadow, halo, glow cloud, props, text, border or watermark.",
+      "transparent_background": true,
+      "source": "exec-7272b049-4ada-430d-b664-699d751301a5.png",
+      "sha256": "c92cc6bf0c6650fbabbcac52f41c68394034b1646b1f65edc5b38260e39c72b8",
+      "pixels": [
+        1461,
+        1077
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "review_status": "Fictional theatrical animal, not a historical breed claim. Cultural, device and release review pending."
     }
   ],
   "provider": "OpenAI, via Codex built-in image_gen",

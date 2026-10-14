@@ -34,6 +34,7 @@ namespace Sankofa.EditorTools
             var stage = Object.FindFirstObjectByType<StoryStage>();
             var world = Object.FindFirstObjectByType<WorldAnchor>().transform;
             PolishGalleryObjects(stage);
+            BuildPaintedGallerySheep(stage);
             BuildVignettes(stage);
             BuildGalleryPerformance(stage);
             CalibrateGalleryCast(stage);
@@ -71,9 +72,9 @@ namespace Sankofa.EditorTools
             }
             GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(0,3.07f,3.16f),0.85f,3.0f);
             GalleryText(surroundings,"Gallery purpose","Stories time nearly left behind",new Vector3(0,2.88f,3.16f),0.42f,3.8f);
-            GalleryText(surroundings,"Title origin","Sankofa · an Akan word from Ghana: go back and get it",new Vector3(0,0.45f,3.16f),0.30f,4f);
+            GalleryText(surroundings,"Title origin","Sankofa · an Akan word from Ghana: go back and get it",new Vector3(0,0.35f,3.16f),0.55f,4f);
             GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.68f,3.16f),0.68f,3.8f);
-            GalleryText(surroundings,"Exhibit placard","Enkare Nairobi · before the railway\nAn imagined meeting · draft for cultural review",new Vector3(0,0.28f,3.16f),0.42f,4f);
+            GalleryText(surroundings,"Exhibit placard","Enkare Nairobi · before the railway\nAn imagined meeting · draft for cultural review",new Vector3(0,0.18f,3.16f),0.48f,4f);
             var gallery=world.gameObject.AddComponent<LivingGallery>();
             Set(gallery,"painting",work); Set(gallery,"canvas",canvas); Set(gallery,"stage",stage);
             SetArray(gallery,"frame",edges.Cast<Object>().ToArray());
@@ -111,6 +112,7 @@ namespace Sankofa.EditorTools
             Set(deposit,"hint",keepHint);
             Set(deposit,"rim",surroundings.Find("Keep recess rim").GetComponent<Renderer>());
             SetArray(app,"storyAmbience",Object.FindObjectsByType<Sankofa.Runtime.Audio.StoryAmbience>(FindObjectsInactive.Include,FindObjectsSortMode.None).Cast<Object>().ToArray());
+            Set(app,"artworkContext",AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Sankofa/Content/gallery-context.txt"));
             Set(app,"gallery",gallery); Set(app,"packageJson",AssetDatabase.LoadAssetAtPath<TextAsset>(GalleryPackage));
             // Keep the existing shelf: legacy kept plans retain their original routes, content and audio.
             Set(app,"storeNamespace","illustrated-theatre-mvp");
@@ -119,6 +121,7 @@ namespace Sankofa.EditorTools
             world.Find("Keepsake point").localPosition=new Vector3(0.3f,0.84f,0.42f);
             world.Find("Rest point").localPosition=new Vector3(0.28f,0.77f,0.5f);
             world.Find("Keepsake shown point").localPosition=new Vector3(0.19f,0.94f,0.48f);
+            world.Find("Carry point").localPosition=new Vector3(0.24f,1.00f,0.54f);
             var choices=world.Find("Choices panel");
             choices.localPosition=new Vector3(0,1.05f,0.58f);
             choices.localRotation=FacingVisitor(choices.localPosition);
@@ -136,6 +139,7 @@ namespace Sankofa.EditorTools
             var panelPigment=GalleryPigment("Gallery plaques",new Color(0.36f,0.25f,0.16f));
             foreach(var panel in new[]{choices,controlPanel,settingsPanel})
             {Set(panel.GetComponent<PokePanel>(),"buttonMaterial",panelPigment);Set(panel.GetComponent<PokePanel>(),"glow",0f);}
+            settingsPanel.Find("Settings backing").GetComponent<Renderer>().sharedMaterial=GalleryPigment("Settings backing",new Color(0.11f,0.075f,0.045f));
             var controlHint=GalleryText(world,"Control hint","Touch a plaque, or point and pinch.\nPause and Settings stay below.",new Vector3(0,0.78f,0.94f),0.20f,0.72f);
             controlHint.transform.localRotation=FacingVisitor(controlHint.transform.localPosition);Set(app,"controlHint",controlHint);
             home.Sky=new Color(0.08f,0.075f,0.065f); home.FogStart=30; home.FogEnd=60;
@@ -148,6 +152,9 @@ namespace Sankofa.EditorTools
             var placement=captions.gameObject.AddComponent<GalleryCaptionPlacement>();
             Set(placement,"board",captions);Set(placement,"stage",stage);Set(placement,"app",app);
             Set(placement,"eye",GameObject.Find("CenterEyeAnchor").GetComponent<Camera>());
+            SetArray(placement,"alwaysProtect",new Object[]{stage.Find("memory.portions"),stage.Find("memory.waiting")});
+            SetArray(placement,"protectWhenRevealed",new Object[]{stage.Find("figure.ewe")});
+            SetArray(placement,"protectedPanels",new Object[]{controlPanel.GetComponent<PokePanel>(),settingsPanel.GetComponent<PokePanel>()});
             Set(captions.GetComponent<LazyFollow>(),"verticalSlack",24f);
             Set(app,"fireComparison",false);
             // Put the living flame at the painted fire, inside the work; it remains the visible narrator.
@@ -362,7 +369,10 @@ namespace Sankofa.EditorTools
                     var b=new MaterialPropertyBlock();
                     b.SetFloat("_Visibility",1);b.SetFloat("_Unfold",1);b.SetFloat("_PoseBlend",1);
                     if(o.TryGetComponent<IllustratedFigure>(out var f))
-                    {var uv = new Vector4(o.Id == "figure.naserian" ? 0.5f : 0, 2f/3, 0.5f, 1f/3); b.SetVector("_FrameA",uv); b.SetVector("_FrameB",uv);}
+                    {
+                        var uv = new SerializedObject(f).FindProperty("frames").GetArrayElementAtIndex(0).vector4Value;
+                        b.SetVector("_FrameA",uv); b.SetVector("_FrameB",uv);
+                    }
                     r.SetPropertyBlock(b);
                 }
             var cameraObject=new GameObject("Canonical composition camera");var camera=cameraObject.AddComponent<Camera>();

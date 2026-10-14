@@ -48,7 +48,6 @@ namespace Sankofa.EditorTools
                 pigment.SetColor("_Color",new Color(0.58f,0.37f,0.20f));pigment.SetFloat("_InkWidth",0.17f);pigment.SetFloat("_VertexTint",1);
                 EditorUtility.SetDirty(pigment);Set(item,"echoMesh",mesh);
             }
-            RefineGallerySheep(stage);
             RefineGalleryBeads(stage);
             RefineGalleryGate(stage);
         }
@@ -77,7 +76,7 @@ namespace Sankofa.EditorTools
         {
             var ewe=stage.Find("figure.ewe");var body=ewe.transform.Find("Body").GetComponent<MeshFilter>();
             ewe.transform.localPosition=new Vector3(0.10f,0,2.85f);
-            ewe.transform.localRotation=Quaternion.Euler(0,-12,0);
+            ewe.transform.localRotation=Quaternion.Euler(0,-105,0);
             var motion=new SerializedObject(ewe.GetComponent<FigureMotion>());
             motion.FindProperty("entryPath").arraySize=0;motion.FindProperty("delay").floatValue=0;motion.ApplyModifiedPropertiesWithoutUndo();
             var parts=new List<CombineInstance>();var centre=new Vector3(0,0.52f,0);var radius=new Vector3(0.18f,0.18f,0.34f);

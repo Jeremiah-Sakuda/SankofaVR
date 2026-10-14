@@ -14,8 +14,12 @@ namespace Sankofa.Runtime.UI
         [SerializeField] StoryStage stage;
         [SerializeField] SankofaApp app;
         [SerializeField] Camera eye;
+        [SerializeField] StageObject[] alwaysProtect = new StageObject[0];
+        [SerializeField] StageObject[] protectWhenRevealed = new StageObject[0];
+        [SerializeField] PokePanel[] protectedPanels = new PokePanel[0];
         readonly List<Rect> protectedRects=new List<Rect>();
-        static readonly Vector2[] candidates={Vector2.zero,new Vector2(0,-0.18f),new Vector2(0,-0.34f),new Vector2(0,-0.46f),new Vector2(0,0.22f),new Vector2(0,0.40f)};
+        readonly List<Renderer> panelSurfaces=new List<Renderer>();
+        static readonly Vector2[] candidates={Vector2.zero,new Vector2(-0.24f,0),new Vector2(-0.40f,0),new Vector2(-0.50f,0),new Vector2(0,-0.18f),new Vector2(0,-0.34f),new Vector2(0,-0.46f),new Vector2(0,0.22f),new Vector2(0,0.40f),new Vector2(-0.40f,0.22f),new Vector2(-0.50f,0.22f),new Vector2(-0.40f,0.40f),new Vector2(-0.50f,0.40f),new Vector2(0.40f,0.22f),new Vector2(0.40f,0.40f)};
         string lastLine;int lastFocus;
         public Rect CaptionRect => Project(eye,board.CaptionText.GetComponent<Renderer>().bounds);
         void LateUpdate() => LayoutNow();
@@ -24,12 +28,28 @@ namespace Sankofa.Runtime.UI
             if(board.Caption.Length==0){board.PlaceContent(Vector2.zero);lastLine=null;return;}
             protectedRects.Clear();var signature=17;
             var invited=app.Flow?.OpenInvitation?.Object;
+            var line=app.Flow?.CurrentLine;
             foreach(var item in stage.Objects)
             {
-                if(!item.Visible||(!item.IsCarried&&item.Id!=invited))continue;
+                if(!item.gameObject.activeInHierarchy)continue;
+                var named=false;
+                if(line!=null&&System.Array.IndexOf(protectWhenRevealed,item)>=0)
+                    foreach(var action in line.Actions)if(action.Object==item.Id)named=true;
+                if(!item.IsCarried&&item.Id!=invited&&System.Array.IndexOf(alwaysProtect,item)<0&&!named)continue;
+                var drawn=false;foreach(var surface in item.Surfaces)if(surface.enabled)drawn=true;
+                if(!drawn)continue;
                 signature=unchecked(signature*31+item.GetInstanceID());
                 foreach(var surface in item.Surfaces)
                     if(surface.enabled){var rect=Project(eye,surface.bounds);if(rect.width>0)protectedRects.Add(Padded(rect,0.02f));}
+            }
+            foreach(var panel in protectedPanels)
+            {
+                if(panel==null||panel.Hidden)continue;
+                signature=unchecked(signature*31+panel.Revision);
+                panelSurfaces.Clear();panel.GetComponentsInChildren(false,panelSurfaces);
+                foreach(var surface in panelSurfaces)
+                    if(surface.enabled&&surface.gameObject.activeInHierarchy)
+                    {var rect=Project(eye,surface.bounds);if(rect.width>0)protectedRects.Add(Padded(rect,0.008f));}
             }
             signature=unchecked(signature*31+eye.fieldOfView.GetHashCode()+eye.aspect.GetHashCode()+(int)board.Size);
             if(lastLine==board.Caption&&lastFocus==signature)

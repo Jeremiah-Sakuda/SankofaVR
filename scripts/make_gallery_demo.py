@@ -5,7 +5,7 @@ No playback or publication. This draft is not qualifying Quest/emulator submissi
 import hashlib,json,subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent.parent;OUT=ROOT/'artifacts/gallery-demo'
-SEGMENTS=[('01-frame','Sankofa: What We Carry'),('02-gourd-received','A painted palm offers a tangible gourd'),('03-memory','A memory changes the meaning of the encounter'),('04-flour-placement','A guest can help, or remain and watch'),('05-agreement','The women make their own agreement'),('06-same-frame','Return to the same painting'),('07-returning-memory','Keep a visit; discover the other memory')]
+SEGMENTS=[('01-frame','Sankofa: What We Carry'),('02-entry-unfold','The painting becomes a world around the stationary visitor'),('02-gourd-received','A painted palm offers a tangible gourd'),('03-memory','A memory changes the meaning of the encounter'),('04-flour-placement','A guest can help, or remain and watch'),('05-agreement','The women make their own agreement'),('05-hospitality','Helping changes how you are welcomed'),('06-same-frame','Return to the same painting'),('07-returning-memory','Keep a visit; discover the other memory'),('08-other-memory','The other perspective reveals whose promise once fell short'),('09-passive-hospitality','Watching has its own welcome; no invented visitor action')]
 def main():
     OUT.mkdir(parents=True,exist_ok=True);clips=[];metadata=[]
     for name,label in SEGMENTS:
@@ -15,10 +15,12 @@ def main():
         frames=sorted((OUT/name).glob('*.jpg'))
         if not frames or [f.stem for f in frames]!=[f'{i:04d}' for i in range(len(frames))]:raise SystemExit(f'Missing/nonconsecutive frames: {name}')
         clip=OUT/f'{name}.mp4'
-        expected=30 if name=='04-flour-placement' else 40
+        expected=30 if name in ['04-flour-placement','05-hospitality','09-passive-hospitality'] else 40
         if len(frames)!=expected:raise SystemExit(f'Incomplete segment {name}: {len(frames)}/{expected}')
         subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-framerate','10','-i',str(OUT/name/'%04d.jpg'),'-i',str(OUT/f'{name}-label.png'),'-filter_complex','[0:v][1:v]overlay=x=0:y=H-h','-an','-c:v','libx264','-crf','19','-pix_fmt','yuv420p',str(clip)],check=True)
-        clips.append(clip);metadata.append({'segment':name,'description':label,'frames':len(frames),'capture_sample_hz':10,'first_frame_sha256':hashlib.sha256(frames[0].read_bytes()).hexdigest()})
+        timing=json.loads((OUT/name/'timing.json').read_text())['timestamps']
+        if len(timing)!=len(frames) or any(b<=a for a,b in zip(timing,timing[1:])):raise SystemExit(f'Invalid frame timing: {name}')
+        clips.append(clip);metadata.append({'segment':name,'description':label,'frames':len(frames),'encoded_fps':10,'requested_delay_between_captures_seconds':0.1,'actual_capture_span_seconds':timing[-1]-timing[0],'first_frame_sha256':hashlib.sha256(frames[0].read_bytes()).hexdigest()})
     concat=OUT/'preview.ffconcat';concat.write_text('ffconcat version 1.0\n'+''.join("file '"+str(p).replace("'","'\\''")+"'\n" for p in clips))
     video=OUT/'Sankofa-software-preview.mp4'
     subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-f','concat','-safe','0','-i',str(concat),'-an','-c','copy','-movflags','+faststart',str(video)],check=True)
