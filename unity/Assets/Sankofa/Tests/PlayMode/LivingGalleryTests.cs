@@ -29,6 +29,7 @@ namespace Sankofa.Tests
         {
             AudioListener.volume=0;Time.timeScale=1;StageClock.Paused=false;SankofaApp.StoreFolderOverride=null;
             Application.logMessageReceived-=Watch;if(Directory.Exists(folder))Directory.Delete(folder,true);
+            if(File.Exists(folder))File.Delete(folder);
         }
         static IEnumerator Until(Func<bool> ready,float seconds=130)
         {
@@ -49,6 +50,14 @@ namespace Sankofa.Tests
             yield return Open();Time.timeScale=15;yield return new WaitForSeconds(45);
             Assert.That(app.Flow.Phase,Is.EqualTo(VisitPhase.Choosing));Assert.That(app.Flow.Journal,Is.Null);
             Assert.That(gallery.Framed,Is.True);Assert.That(Directory.Exists(folder)&&Directory.GetFiles(folder).Length>0,Is.False);
+            var choices=GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>();
+            Assert.That(choices.Ids,Is.EqualTo(new[]{"gallery-enter","Choose:era.1850s","Choose:era.1850s.remembered"}));
+            Assert.That(GameObject.Find("Controls panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().Ids,Does.Contain("Leave"));
+            Assert.That(GameObject.Find("Keep recess label"),Is.Null,"keep guidance waits for a completed visit");
+            var edge=choices.transform.Find("Button gallery-enter").TransformPoint(new Vector3(-0.21f,0,0));
+            var eye=Camera.main.transform.position;
+            Assert.That(choices.TryHit(new Ray(eye,(edge-eye).normalized),3,out _,out var id),Is.True);
+            Assert.That(id,Is.EqualTo("gallery-enter"),"the primary action keeps its full-width hit target");
             Capture("01-gallery");Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
         [UnityTest] public IEnumerator BothThreadsReturnToTheSamePaintingAndContinueFromKeptOutcomes()
@@ -99,6 +108,8 @@ namespace Sankofa.Tests
             yield return Open();Time.timeScale=12;app.Begin();
             yield return Until(()=>app.Flow.Phase==VisitPhase.Closing&&app.Flow.CurrentLine==null,150);
             Time.timeScale=1;
+            Assert.That(app.Flow.Journal.Selection,Is.EqualTo(Core.Story.PerspectiveSelection.Default));
+            yield return Until(()=>GameObject.Find("Keep recess label")!=null,3);
             var item=stage.Find(app.Flow.Plan.Plan.Keepsake);
             var hand=Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First(h=>!h.IsLeft);
             var at=item.transform.position;var open=true;
@@ -107,7 +118,16 @@ namespace Sankofa.Tests
             at=Object.FindFirstObjectByType<GalleryKeep>().Recess.position+Vector3.up*0.1f;
             yield return new WaitForSeconds(0.6f);
             Assert.That(app.Flow.KeptVisit,Is.Null,"carrying over the recess alone is not saving");
+            Capture("06-keep-guide");
+            File.WriteAllText(folder,"Deliberate local test obstruction");
+            open=false;yield return new WaitForSeconds(0.5f);
+            Assert.That(app.Flow.KeptVisit,Is.Null,"a failed write must not look like a saved deposit");
+            Assert.That(item.CarriedBy,Is.SameAs(hand),"failure leaves the keepsake in the visitor's hand for retry");
+            File.Delete(folder);
+            open=true;yield return new WaitForSeconds(0.6f);
             open=false;yield return Until(()=>app.Flow.KeptVisit!=null,6);
+            yield return Until(()=>GameObject.Find("Keep recess label")==null,3);
+            Assert.That(GameObject.Find("Keep recess label"),Is.Null,"saved visits no longer invite another deposit");
             hand.Simulated=null;
             Assert.That(Directory.GetFiles(folder).Length,Is.GreaterThan(0));
             Assert.That(problems,Is.Empty,string.Join("\n",problems));

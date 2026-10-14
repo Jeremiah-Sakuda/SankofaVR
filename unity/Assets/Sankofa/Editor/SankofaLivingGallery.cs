@@ -95,7 +95,9 @@ namespace Sankofa.EditorTools
             var recess=Marker(world,"Keep recess",new Vector3(0.3f,0.85f,0.42f));Set(deposit,"recess",recess);
             Prim(surroundings,"Keep station",PrimitiveType.Cylinder,new Vector3(0.3f,0.75f,0.42f),new Vector3(0.14f,0.075f,0.14f),wood);
             Prim(surroundings,"Keep recess rim",PrimitiveType.Cylinder,new Vector3(0.3f,0.826f,0.42f),new Vector3(0.17f,0.008f,0.17f),brass);
-            GalleryText(surroundings,"Keep recess label","KEEP THIS VISIT",new Vector3(0.3f,0.94f,0.42f),0.13f,0.28f);
+            var keepHint=GalleryText(surroundings,"Keep recess label","Receive the keepsake\nto keep this visit",new Vector3(0.34f,1.03f,0.52f),0.16f,0.25f);
+            Set(deposit,"hint",keepHint);
+            Set(deposit,"rim",surroundings.Find("Keep recess rim").GetComponent<Renderer>());
             SetArray(app,"storyAmbience",Object.FindObjectsByType<Sankofa.Runtime.Audio.StoryAmbience>(FindObjectsInactive.Include,FindObjectsSortMode.None).Cast<Object>().ToArray());
             Set(app,"gallery",gallery); Set(app,"packageJson",AssetDatabase.LoadAssetAtPath<TextAsset>(GalleryPackage));
             // Keep the existing shelf: legacy kept plans retain their original routes, content and audio.
@@ -106,11 +108,11 @@ namespace Sankofa.EditorTools
             world.Find("Rest point").localPosition=new Vector3(0.28f,0.77f,0.5f);
             world.Find("Keepsake shown point").localPosition=new Vector3(0.19f,0.94f,0.48f);
             var choices=world.Find("Choices panel");
-            choices.localPosition=new Vector3(0,0.90f,0.56f);
+            choices.localPosition=new Vector3(0,0.94f,0.58f);
             choices.localRotation=FacingVisitor(choices.localPosition);
-            Set(choices.GetComponent<PokePanel>(),"buttonSize",new Vector2(0.24f,0.075f));
-            Set(choices.GetComponent<PokePanel>(),"labelSize",0.32f);
-            Set(choices.GetComponent<PokePanel>(),"gap",0.018f);
+            Set(choices.GetComponent<PokePanel>(),"buttonSize",new Vector2(0.24f,0.060f));
+            Set(choices.GetComponent<PokePanel>(),"labelSize",0.25f);
+            Set(choices.GetComponent<PokePanel>(),"gap",0.012f);
             home.Sky=new Color(0.08f,0.075f,0.065f); home.FogStart=30; home.FogEnd=60;
             home.AmbientSky=new Color(0.33f,0.29f,0.25f); home.AmbientGround=new Color(0.13f,0.12f,0.1f);
             home.Grade=new Vector4(1.25f,0.85f,0.1f,0.1f);
@@ -165,6 +167,13 @@ namespace Sankofa.EditorTools
                 go.localRotation=FacingVisitor(go.localPosition);
                 var surfaces=new System.Collections.Generic.List<Renderer>();
                 surfaces.Add(Prim(go,"Memory backing",PrimitiveType.Cube,Vector3.zero,new Vector3(0.82f,0.56f,0.022f),MemoryPaper()).GetComponent<Renderer>());
+                var edge=GalleryPigment("Memory frame",new Color(0.56f,0.39f,0.22f));
+                foreach(var sign in new[]{-1f,1f})
+                {
+                    surfaces.Add(Prim(go,"Memory frame rail",PrimitiveType.Cube,new Vector3(0,sign*0.286f,-0.018f),new Vector3(0.85f,0.014f,0.028f),edge).GetComponent<Renderer>());
+                    surfaces.Add(Prim(go,"Memory frame stile",PrimitiveType.Cube,new Vector3(sign*0.418f,0,-0.018f),new Vector3(0.014f,0.57f,0.028f),edge).GetComponent<Renderer>());
+                }
+                surfaces.Add(GalleryText(go,"Memory title",memory=="portions"?"Before the journey":"Another afternoon",new Vector3(0,0.235f,-0.035f),0.38f,0.73f).GetComponent<Renderer>());
                 if(memory=="portions")
                 {
                     foreach(var x in new[]{-0.20f,0.20f})
@@ -174,9 +183,16 @@ namespace Sankofa.EditorTools
                         var vessel=Static(go,"Morning vessel",source.GetComponent<MeshFilter>().sharedMesh,source.sharedMaterial).GetComponent<Renderer>();
                         vessel.transform.localPosition=new Vector3(x,-0.18f,-0.06f);vessel.transform.localScale=Vector3.one*0.70f;surfaces.Add(vessel);
                     }
+                    foreach(var side in new[]{(-0.20f,"Journey"),(0.20f,"Home")})
+                        surfaces.Add(GalleryText(go,"Portion label",side.Item2,new Vector3(side.Item1,-0.245f,-0.17f),0.30f,0.25f).GetComponent<Renderer>());
                 }
                 else
                 {
+                    var scenery=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/IllustratedTheatre/scenery-atlas.png");
+                    var shore=IllustrationCard(go,"Remembered shore",0.79f,0.41f,IllustrationMaterial("Memory shore",scenery,new Vector4(0,0.615f,1,0.385f)));
+                    shore.transform.localPosition=new Vector3(0,-0.26f,-0.018f);surfaces.Add(shore);
+                    var bank=IllustrationCard(go,"Remembered water",0.79f,0.19f,IllustrationMaterial("Memory water",scenery,new Vector4(0,0.375f,1,0.24f)));
+                    bank.transform.localPosition=new Vector3(0,-0.26f,-0.025f);surfaces.Add(bank);
                     var atlas=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/IllustratedTheatre/cast-atlas.png");
                     for(var i=0;i<2;i++)
                     {
@@ -194,10 +210,10 @@ namespace Sankofa.EditorTools
 
         static Material MemoryPaper()
         {
-            var path=GalleryFolder+"/Memory paper.mat";
-            var material=AssetDatabase.LoadAssetAtPath<Material>(path);
-            if(material==null){material=new Material(Shader.Find("Unlit/Color"));AssetDatabase.CreateAsset(material,path);}
-            material.color=new Color(0.11f,0.125f,0.14f);EditorUtility.SetDirty(material);return material;
+            var existing=AssetDatabase.LoadAssetAtPath<Material>(GalleryFolder+"/Memory paper.mat");
+            if(existing!=null)existing.shader=Shader.Find("Sankofa/Painted Prop");
+            var material=GalleryPigment("Memory paper",new Color(0.31f,0.23f,0.15f));
+            material.shader=Shader.Find("Sankofa/Painted Prop");EditorUtility.SetDirty(material);return material;
         }
 
         static Material GalleryPigment(string name, Color color)
@@ -209,12 +225,13 @@ namespace Sankofa.EditorTools
             m.SetTexture("_Noise",AssetDatabase.LoadAssetAtPath<Texture2D>(SankofaArt.NoisePath));
             EditorUtility.SetDirty(m);return m;
         }
-        static void GalleryText(Transform root,string name,string words,Vector3 at,float size,float width)
+        static TextMeshPro GalleryText(Transform root,string name,string words,Vector3 at,float size,float width)
         {
             var go=Child(root,name);go.localPosition=at;
             var text=go.gameObject.AddComponent<TextMeshPro>();text.font=SankofaText.CaptionFont;
             text.text=words;text.fontSize=size;text.color=new Color(0.92f,0.82f,0.64f);
             text.alignment=TextAlignmentOptions.Center;text.rectTransform.sizeDelta=new Vector2(width,0.3f);
+            return text;
         }
         static Texture2D CaptureComposition(StoryStage stage,string id,string name,bool includeObjects=true)
         {

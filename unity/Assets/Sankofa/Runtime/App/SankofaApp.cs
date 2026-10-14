@@ -384,19 +384,21 @@ namespace Sankofa.Runtime.App
                         break;
                     case Cue.Controls c:
                         // Pause and return stay at the lap; every choice comes up into view.
-                        controls.Show(c.Options.Where(IsStoryControl).Select(o => (ControlId(o), ControlLabel(o))).ToList());
+                        var entry = gallery != null && flow.Menu == ChoiceMenu.Interests && (flow.Phase == VisitPhase.Choosing || flow.Phase == VisitPhase.Welcome);
+                        var lap = c.Options.Where(IsStoryControl).Select(o => (ControlId(o), ControlLabel(o))).ToList();
+                        if (entry) lap.Add((ControlKind.Leave.ToString(), "Leave"));
+                        controls.Show(lap);
                         var options = c.Options.Where(o => !IsStoryControl(o)).Select(o => (ControlId(o), ControlLabel(o))).ToList();
-                        if (gallery != null && flow.Menu == ChoiceMenu.Interests && (flow.Phase == VisitPhase.Choosing || flow.Phase == VisitPhase.Welcome))
+                        if (entry)
                         {
                             options.Insert(0, ("gallery-enter", "Enter painting"));
-                            options.Add((ControlKind.Leave.ToString(), "Leave"));
                         }
                         if (gallery != null && flow.Menu == ChoiceMenu.Returning && flow.KeptVisit != null && flow.Phase == VisitPhase.Choosing)
                         {
                             options.RemoveAll(o => o.Item1 == ControlKind.NewStory.ToString());
                             options.Insert(0, ("gallery-other", "Follow the other thread"));
                         }
-                        choicesPanel.Show(options);
+                        choicesPanel.Show(options, primaryFirst: entry);
                         break;
                     case Cue.Questions q:
                         objectQuestions?.Show(q.Available);

@@ -71,6 +71,7 @@ namespace Sankofa.Runtime.UI
         public void AddFingertip(Func<Vector3?> fingertip) => fingertips.Add(fingertip);
 
         bool hidden;
+        bool primaryLayout;
 
         /// <summary>
         /// Set aside for a while, keeping its buttons: nothing shows and nothing can be pressed. The questions step
@@ -151,9 +152,9 @@ namespace Sankofa.Runtime.UI
 
         /// <summary>Replaces the buttons. Order is kept; ids are returned in <see cref="Pressed"/>.
         /// An identical list leaves the existing buttons alone so a press in progress is not lost.</summary>
-        public void Show(IReadOnlyList<(string Id, string Label)> items)
+        public void Show(IReadOnlyList<(string Id, string Label)> items, bool primaryFirst = false)
         {
-            if (items.Count == buttons.Count)
+            if (items.Count == buttons.Count && primaryLayout == primaryFirst)
             {
                 var same = true;
                 for (var i = 0; i < items.Count && same; i++)
@@ -162,18 +163,23 @@ namespace Sankofa.Runtime.UI
             }
             foreach (var b in buttons) Destroy(b.Root);
             buttons.Clear();
+            primaryLayout = primaryFirst;
             for (var i = 0; i < items.Count; i++)
             {
-                var row = i / columns;
-                var col = i % columns;
+                var first = primaryFirst && i == 0;
+                var index = primaryFirst ? i - 1 : i;
+                var row = first ? 0 : index / columns + (primaryFirst ? 1 : 0);
+                var col = first ? 0 : index % columns;
                 var x = (col - (columns - 1) / 2f) * (buttonSize.x + gap);
+                if (first) x = 0;
                 var y = -row * (buttonSize.y + gap);
-                buttons.Add(CreateButton(items[i].Id, items[i].Label, new Vector3(x, y, 0)));
+                var size = first ? new Vector2(buttonSize.x * columns + gap * (columns - 1), buttonSize.y) : buttonSize;
+                buttons.Add(CreateButton(items[i].Id, items[i].Label, new Vector3(x, y, 0), size));
                 buttons[buttons.Count - 1].Root.SetActive(!hidden);
             }
         }
 
-        Button CreateButton(string id, string label, Vector3 localPosition)
+        Button CreateButton(string id, string label, Vector3 localPosition, Vector2 size)
         {
             var root = new GameObject("Button " + id);
             root.transform.SetParent(transform, false);
@@ -183,7 +189,7 @@ namespace Sankofa.Runtime.UI
             Destroy(face.GetComponent<Collider>());
             face.name = "Face";
             face.transform.SetParent(root.transform, false);
-            face.transform.localScale = new Vector3(buttonSize.x, buttonSize.y, 1f);
+            face.transform.localScale = new Vector3(size.x, size.y, 1f);
             var renderer = face.GetComponent<Renderer>();
             if (buttonMaterial != null) renderer.sharedMaterial = buttonMaterial;
             // Its resting colour from the first frame it is drawn, not the material's own until the next update.
@@ -201,7 +207,7 @@ namespace Sankofa.Runtime.UI
             var text = go.AddComponent<TextMeshPro>();
             if (labelFont != null) text.font = labelFont;
             if (labelMaterial != null) text.fontSharedMaterial = labelMaterial;
-            text.rectTransform.sizeDelta = new Vector2(buttonSize.x * 0.9f, buttonSize.y * 0.86f);
+            text.rectTransform.sizeDelta = new Vector2(size.x * 0.9f, size.y * 0.86f);
             text.alignment = TextAlignmentOptions.Center;
             text.textWrappingMode = TextWrappingModes.Normal;
             text.lineSpacing = -12f;
@@ -211,7 +217,7 @@ namespace Sankofa.Runtime.UI
             text.color = labelColor;
             text.text = label;
 
-            return new Button { Id = id, Root = root, Face = renderer, Label = text, Size = buttonSize };
+            return new Button { Id = id, Root = root, Face = renderer, Label = text, Size = size };
         }
 
         void Update()

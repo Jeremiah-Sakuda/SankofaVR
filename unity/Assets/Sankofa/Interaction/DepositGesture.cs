@@ -7,6 +7,7 @@ namespace Sankofa.Interaction
         double held;
         bool armed, done;
         public bool Armed => armed;
+        public float Progress => (float)System.Math.Min(1, held / 0.45);
         public void Reset() { held=0;armed=done=false; }
         public bool Update(bool tracked,bool inPlace,bool open,double seconds)
         {

@@ -10,7 +10,7 @@ Open `unity/Assets/Sankofa/Scenes/LivingGallery.unity`. Scene generation and the
 
 ![Sankofa living gallery: What We Carry, waiting for deliberate entry](docs/media/living-gallery.jpg)
 
-[Remembered-meeting vignette](docs/media/gallery-remembered.jpg) · [Modern river continuation](docs/media/gallery-modern-river.jpg). These October 13 captures are muted desktop batch renders, not headset footage. Vignette art is a prototype; cast, garments, narration and cultural context still need review. The modern scene uses a draft OpenAI-generated painting with [exact prompt and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json).
+[Before the journey](docs/media/gallery-brings.jpg) · [Remembered-meeting vignette](docs/media/gallery-remembered.jpg) · [Keep guidance](docs/media/gallery-keep-guide.jpg) · [Modern river continuation](docs/media/gallery-modern-river.jpg). These October 13 captures are muted desktop batch renders, not headset footage. The memory windows now reuse the painted scenery and cast, with readable time cues and labels. Vignette art remains a prototype; cast, garments, narration and cultural context still need review. The modern scene uses a draft OpenAI-generated painting with [exact prompt and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json).
 
 The first setting is **Enkare Nairobi**, the water that gave Nairobi its name. Fictional encounters draw on the regional history of Kikuyu–Maasai trade. The baseline package visits two eras and today:
 

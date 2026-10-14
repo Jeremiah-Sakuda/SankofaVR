@@ -47,3 +47,5 @@ Treat model/tool terms, generated-output terms, source-image rights and dataset/
 
 
 The modern river background `Art/IllustratedTheatre/modern-river-v1.png` was generated with the built-in OpenAI image-generation tool and saved in the project. Its exact prompt, hash, provider/tool and unknown model status are in `modern-river-v1.sources.json` and `modern-river-v1.prompt.txt`. The tool did not expose a model name; none is inferred. It depicts an imagined garden, not documentary evidence of a real restoration site. The gate/bead remain separate Unity objects. Cultural review and release output-term review remain open. No new music was produced.
+
+October 13 follow-up: memory-window borders, paper, labels and miniature layouts are project-authored geometry and materials, composed from the existing cast/scenery atlases and gourd mesh. They inherit those inputs’ provenance and draft cultural status; no new generated artwork, recorded narration or external library was added.
