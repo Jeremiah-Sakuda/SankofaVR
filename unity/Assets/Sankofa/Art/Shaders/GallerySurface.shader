@@ -1,4 +1,4 @@
-// Authored architectural surfaces. One opaque pass, no realtime lights, reflection probes or screen effects.
+// Authored architectural surfaces. Opaque at rest; a temporary material blends only during entry/return.
 // Metric object coordinates keep material detail attached when the seated gallery is recentered.
 Shader "Sankofa/Gallery Surface"
 {
@@ -8,11 +8,16 @@ Shader "Sankofa/Gallery Surface"
         _Noise ("Material grain", 2D) = "gray" {}
         [Enum(Plaster,0,Timber,1,Stone,2,Metal,3,Light,4)] _Finish ("Finish", Float) = 0
         _Visibility ("Room presence", Range(0,1)) = 1
+        [HideInInspector] _SrcBlend ("Source blend", Float) = 1
+        [HideInInspector] _DstBlend ("Destination blend", Float) = 0
+        [HideInInspector] _ZWrite ("Depth write", Float) = 1
         _Wash ("Soft wall wash", Range(0,1)) = 0
     }
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        Blend [_SrcBlend] [_DstBlend]
+        ZWrite [_ZWrite]
         Pass
         {
             CGPROGRAM
@@ -40,8 +45,6 @@ Shader "Sankofa/Gallery Surface"
             fixed4 frag(v2f i):SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-                float dissolve=frac(sin(dot(floor(i.metric.xy*130+i.metric.z*53),float2(12.9898,78.233)))*43758.5453);
-                clip(_Visibility-dissolve*0.98-0.001);
                 half3 n=normalize(i.normal);
                 // Object-local triplanar grain: no view-dependent shimmer or random per-frame noise.
                 half3 w=abs(n); w/=max(w.x+w.y+w.z,0.001);
@@ -73,7 +76,7 @@ Shader "Sankofa/Gallery Surface"
                 }
                 if(_Finish>2.5 && _Finish<3.5)colour+=_Color.rgb*0.12;
                 if(_Finish>3.5)colour=_Color.rgb*1.5;
-                return fixed4(SankofaDither(SankofaGrade(colour),i.pos.xy),1);
+                return fixed4(SankofaDither(SankofaGrade(colour),i.pos.xy),_Visibility);
             }
             ENDCG
         }

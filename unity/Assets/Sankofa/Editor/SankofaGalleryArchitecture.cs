@@ -60,7 +60,7 @@ namespace Sankofa.EditorTools
         {
             var art=SankofaArt.Ensure();
             var earth=GallerySurface("Courtyard earth",new Color(0.045f,0.065f,0.055f));
-            Prim(root,"Garden ground",PrimitiveType.Cube,new Vector3(0,-0.20f,0),new Vector3(44,0.14f,44),earth);
+            Prim(root,"Garden ground",PrimitiveType.Cube,new Vector3(0,-0.20f,0),new Vector3(64,0.14f,64),earth);
             var skyPath=GalleryFolder+"/Pavilion dusk.mat";
             var sky=AssetDatabase.LoadAssetAtPath<Material>(skyPath);
             if(sky==null){sky=new Material(art.Sky);AssetDatabase.CreateAsset(sky,skyPath);}
@@ -84,14 +84,14 @@ namespace Sankofa.EditorTools
             var leaves=AssetDatabase.LoadAssetAtPath<Material>(leavesPath);
             if(leaves==null){leaves=new Material(art.TreeCanopy);AssetDatabase.CreateAsset(leaves,leavesPath);}
             leaves.SetColor("_Color",new Color(0.14f,0.25f,0.23f));leaves.SetFloat("_UseBake",0);
-            leaves.SetColor("_Emission",new Color(0.012f,0.022f,0.035f));EditorUtility.SetDirty(leaves);
+            leaves.SetFloat("_Wind",0);leaves.SetColor("_Emission",new Color(0.035f,0.055f,0.055f));EditorUtility.SetDirty(leaves);
             var woodMesh=Static(root,"Courtyard tree trunks",Combine(trunks,"Gallery courtyard trunks"),bark);
             var leafMesh=Static(root,"Courtyard tree leaves",Combine(canopies,"Gallery courtyard leaves"),leaves);
             var shrubs=new List<CombineInstance>();
             for(var i=0;i<48;i++)
             {
                 var sign=i<24?-1f:1f;var z=-4+(i%24)*0.35f;
-                shrubs.Add(Part(SankofaMeshes.FoliageCluster(8500+i),new Vector3(sign*(5.65f+(i%3)*0.24f),0.34f,z),Quaternion.Euler(0,i*37,0),new Vector3(0.55f,0.60f,0.55f)));
+                shrubs.Add(Part(SankofaMeshes.FoliageCluster(8500+i),new Vector3(sign*(5.65f+(i%3)*0.24f),0.55f,z),Quaternion.Euler(0,i*37,0),new Vector3(0.55f,0.60f,0.55f)));
             }
             var shrubMesh=Static(root,"Courtyard planting",Combine(shrubs,"Gallery courtyard planting"),leaves);
             var horizon=Static(root,"Courtyard horizon",GalleryHorizon(),GallerySurface("Courtyard distant hills",new Color(0.055f,0.095f,0.12f)));
@@ -172,6 +172,7 @@ namespace Sankofa.EditorTools
             if(material==null){material=new Material(Shader.Find("Sankofa/Gallery Surface"));AssetDatabase.CreateAsset(material,path);}
             material.shader=Shader.Find("Sankofa/Gallery Surface");material.SetColor("_Color",colour);
             material.SetFloat("_Finish",finish);material.SetFloat("_Wash",wash);material.SetFloat("_Visibility",1);
+            material.SetInt("_SrcBlend",1);material.SetInt("_DstBlend",0);material.SetInt("_ZWrite",1);
             material.SetTexture("_Noise",AssetDatabase.LoadAssetAtPath<Texture2D>(SankofaArt.NoisePath));
             EditorUtility.SetDirty(material);return material;
         }

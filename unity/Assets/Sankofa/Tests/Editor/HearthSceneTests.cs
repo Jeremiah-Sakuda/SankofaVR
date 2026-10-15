@@ -94,7 +94,11 @@ namespace Sankofa.Tests
             var panels = Object.FindObjectsByType<PokePanel>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             Assert.That(panels.Length, Is.EqualTo(4), "controls, choices, questions and settings");
             foreach (var panel in panels)
-                Assert.That(MissingReferences(panel).Where(m => !m.EndsWith(".labelMaterial")), Is.Empty);
+            {
+                var bodyEnabled=new SerializedObject(panel).FindProperty("plaqueDepth").floatValue>0;
+                Assert.That(MissingReferences(panel).Where(m => !m.EndsWith(".labelMaterial") &&
+                    !(m.EndsWith(".plaqueBodyMaterial")&&!bodyEnabled)), Is.Empty);
+            }
             Assert.That(Object.FindObjectsByType<HandSource>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length, Is.EqualTo(2));
 
             // A glow, touch point and place point are optional for staged objects; their surfaces are not.

@@ -117,16 +117,25 @@ namespace Sankofa.Tests
             yield return Open();app.enabled=false;
             var atmosphere=Object.FindFirstObjectByType<GalleryAtmosphere>();
             var eye=Camera.main.transform;var position=eye.position;var rotation=eye.rotation;
+            var originalMaterials=atmosphere.GetComponentsInChildren<Renderer>(true).Where(r=>r.sharedMaterial!=null&&r.sharedMaterial.shader.name=="Sankofa/Gallery Surface").ToDictionary(r=>r,r=>r.sharedMaterial);
             var title=GameObject.Find("Gallery title").GetComponent<TMPro.TMP_Text>();var colour=title.color;
             gallery.StartCoroutine(gallery.Transition("story.water.1850s",Array.Empty<Continuity>(),false));
             yield return Until(()=>gallery.Expansion>0.4f,5);
             Assert.That(atmosphere.Presence,Is.InRange(0.1f,0.7f));
             var presence=atmosphere.Presence;StageClock.Paused=true;yield return new WaitForSecondsRealtime(0.2f);
-            Assert.That(atmosphere.Presence,Is.EqualTo(presence).Within(0.001f));StageClock.Paused=false;
+            Assert.That(atmosphere.Presence,Is.EqualTo(presence).Within(0.001f));
+            try
+            {
+                eye.rotation=rotation*Quaternion.Euler(0,65,0);
+                Capture("pavilion-release-component-probe",1440,1080,75);
+            }
+            finally {eye.rotation=rotation;}
+            StageClock.Paused=false;
             yield return Until(()=>!gallery.Framed,6);
             Assert.That(atmosphere.Presence,Is.Zero);
             yield return gallery.Transition("hearth",Array.Empty<Continuity>(),false);
             Assert.That(atmosphere.Presence,Is.EqualTo(1));Assert.That(Vector4.Distance(title.color,colour),Is.LessThan(0.0001f));
+            foreach(var pair in originalMaterials)Assert.That(pair.Key.sharedMaterial,Is.SameAs(pair.Value),"return restores the original opaque material");
             Assert.That(Vector3.Distance(eye.position,position),Is.LessThan(0.001f));
             Assert.That(Quaternion.Angle(eye.rotation,rotation),Is.LessThan(0.001f));
             // Reduced motion retains its stationary fade, with no scaled painting or moving architecture.
@@ -136,6 +145,7 @@ namespace Sankofa.Tests
             {Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));Assert.That(gallery.Expansion,Is.Zero);yield return null;}
             yield return gallery.Transition("hearth",Array.Empty<Continuity>(),true);
             Assert.That(atmosphere.Presence,Is.EqualTo(1));Assert.That(Vector4.Distance(title.color,colour),Is.LessThan(0.0001f));
+            foreach(var pair in originalMaterials)Assert.That(pair.Key.sharedMaterial,Is.SameAs(pair.Value),"return restores the original opaque material");
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
         [UnityTest] public IEnumerator WallContextIsReadableBesideEntryAndExpandedReturnMenus()
