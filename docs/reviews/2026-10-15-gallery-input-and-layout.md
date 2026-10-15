@@ -39,3 +39,9 @@ The preceding 306 core and 46 complete functional runtime results remain recorde
 Local evidence includes `artifacts/simulator-input-fix/` (manual trace and read-only observer), `artifacts/simulator-input-fix-final/` (the launch that exposed low placement), `artifacts/simulator-recovery-verified/` (fresh recovered-placement observation), `artifacts/living-gallery/wall-context-clear.png`, and `artifacts/tests/gallery-placement-recovery-final.xml`. These raw artifacts and input traces are ignored, removed from Assets after use and not packaged.
 
 Simulator controller evidence does not verify real hands, complete hands-only use, physical reach, stereo comfort or Quest thermal/frame-rate performance. Cultural, pronunciation/listening, applicable rights, account and judge-access acceptance remain separate release gates.
+
+## Updated review APK
+
+Built from clean source **5f0d2ce**, `com.sankofa.quest`, version `0.1.0+5f0d2ce`, code 1, ARM64/IL2CPP. Build succeeded with zero errors and one reported optional OpenXR input-polling warning. File `artifacts/Sankofa-LivingGallery.apk`: **84,142,748 bytes**, SHA-256 `6331e36a74bbabf808ce33806cca4f2de22217c8769a1cbc6246aa149995d33f`. The existing guard verified captured development credentials absent and restored editor settings/version. Archive-name inspection found no private-reference/LocalOnly/credential filename matches; this is not a complete arbitrary-data audit. Source was clean after build.
+
+Identity and retained acceptance gates are in the [candidate record](../release/candidate.md). The old APK/identity are archived locally; no headset installation, channel upload or submission occurred. Existing October 14 preview footage was not regenerated or passed off as footage of this APK.

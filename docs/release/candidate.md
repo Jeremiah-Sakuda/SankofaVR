@@ -1,24 +1,26 @@
-# Gallery candidate — current v0.7 production iteration
+# Gallery candidate — current v0.7 simulator follow-up
 
-Current review APK built from clean source **eaf0354** after [production hardening](../reviews/2026-10-14-production-iteration.md). This supersedes the artifact identity in the historical v0.6 record below.
+Current review APK built from clean source **5f0d2ce** after the [input/layout/placement follow-up](../reviews/2026-10-15-gallery-input-and-layout.md), incorporating the earlier [production hardening](../reviews/2026-10-14-production-iteration.md). This supersedes APK source eaf0354 and the historical v0.6 identity below. The previous eaf0354 APK/identity are preserved locally under `artifacts/release/archive/`.
 
 | Identity | Current local artifact |
 |---|---|
 | Output | `artifacts/Sankofa-LivingGallery.apk` |
-| Android package/version | `com.sankofa.quest` / `0.1.0+eaf0354` / code 1 |
+| Android package/version | `com.sankofa.quest` / `0.1.0+5f0d2ce` / code 1 |
 | Story package | v0.7.0 |
 | Architecture | ARM64 / IL2CPP |
-| Size | 84,142,000 bytes (80.24 MiB) |
-| SHA-256 | `454068fba15c9c9ceec80fa9c63ecf6ce96e901c7d21d42350f646c991f48c32` |
+| Size | 84,142,748 bytes (80.24 MiB) |
+| SHA-256 | `6331e36a74bbabf808ce33806cca4f2de22217c8769a1cbc6246aa149995d33f` |
 | Build | Succeeded, zero errors and one reported warning (optional OpenXR input-polling preference) |
 
-**Verification:** 306 core checks, 31/31 final editor checks and 46/46 final functional runtime checks pass. Eight focused readability/placement/recenter checks also pass. Integrity verifies 31 declared inputs and 92 line fingerprints. No skipped final runtime cases, simulator or sound playback. The build guard verifies captured local development credentials absent; 0 archive-name matches for private brief/reference/LocalOnly/credential material is a narrower filename check, not a complete arbitrary-data audit. Editor-only settings and version are restored after build.
+**Current verification:** 31/31 final editor checks and 10/10 targeted runtime checks, including late-initial-tracking recovery and 108 wall-context projection combinations. Six manual simulated-controller selections succeeded across the diagnostic and corrected-scene sessions, with read-only observation rather than direct flow commands. A fresh launch automatically corrected initial stage height to 0.55 m for a 1.70 m head; labels remained clear and explicit Naserian entry succeeded. No sound was played. Real hands and actual Quest acceptance remain open.
 
-The refreshed preview is **41 seconds with no audio stream**, edited Unity desktop captures with synthetic input and measured capture timestamps. Both memories and accepted/passive hospitality are shown. It is not qualifying headset/emulator footage or real-hand evidence. Review packets remain offline drafts; their responsive/label/no-autoplay checks are software evidence, not completed reviews.
+The previous October 14 result of 306 core checks, 46 complete functional runtime checks and eight focused readability checks remains historical evidence for the unchanged core/story and earlier candidate. It was not rerun in full in this targeted presentation/startup pass. Integrity still verifies 31 declared inputs and 92 speech fingerprints. The current build guard verified captured local development credentials absent; zero private-brief/reference/LocalOnly/credential filename matches is a narrower archive-name check, not a complete arbitrary-data audit. Editor-only settings/version were restored; source remained clean after building.
 
-No device was connected during inventory. No installation, listening/pronunciation/cultural/participant acceptance, applicable asset/contributor contract confirmation, eligibility/account confirmation, Competition upload, independent judge installation or public submission was performed. Source/APK/packet existence does not close those gates. Follow the [evidence protocol](../testing/gallery-next-evidence-session.md), [rights review](rights-review.md) and [access handoff](access-handoff.md).
+The existing **41-second, audio-free preview** is the October 14 edited desktop/synthetic capture, before this wall-label/startup correction. It still demonstrates both memories and paired hospitality; it is not new footage of this APK, qualifying headset footage or real-hand evidence. Review packets remain offline drafts and not completed reviews.
 
-Raw current build log: `artifacts/logs/production-build.log`; identity: `artifacts/release/gallery-apk.json`. The standard BuildMain / Build APK target is LivingGallery. Historical comparison builds are explicitly named.
+No device installation, listening/pronunciation/cultural/participant acceptance, applicable asset/contributor contract confirmation, eligibility/account confirmation, Competition upload, independent judge installation or public submission was performed. Source/APK/simulator existence does not close those gates. Follow the [evidence protocol](../testing/gallery-next-evidence-session.md), [rights review](rights-review.md) and [access handoff](access-handoff.md).
+
+Raw current build log: `artifacts/logs/gallery-context-build.log`; identity: `artifacts/release/gallery-apk.json`. The standard BuildMain / Build APK target is LivingGallery. Historical comparison builds are explicitly named.
 
 ---
 
