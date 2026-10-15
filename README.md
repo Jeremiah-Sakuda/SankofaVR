@@ -12,7 +12,7 @@ The [October 14 production iteration](docs/reviews/2026-10-14-production-iterati
 
 The [October 15 simulator follow-up](docs/reviews/2026-10-15-gallery-input-and-layout.md) verifies manual simulated-controller selection, moves the wall context clear of entry/return controls and recovers initial placement when tracking arrives late. All simulator runs remain muted. These results do not replace actual Quest, real-hand or content acceptance.
 
-The [October 15 museum pass](docs/reviews/2026-10-15-gallery-environment.md) gives the exhibit a warm plaster recess, timber side bays, stone floor, complete ceiling and refined frame. The room surrounds the existing seated position and withdraws with story entry.
+The [October 15 museum pass](docs/reviews/2026-10-15-gallery-environment.md) now gives the exhibit a vaulted pavilion at dusk, open garden arcades, a star-visible roof spine, stone floor and refined frame. The architecture releases as the painting expands and returns with it; the visitor remains stationary. Controls have shallow physical plaque bodies.
 
 ![Sankofa living gallery: What We Carry, waiting for deliberate entry](docs/media/living-gallery.png)
 

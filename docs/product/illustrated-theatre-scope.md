@@ -69,6 +69,10 @@ Times are design budgets to verify against recorded audio. Browsing the gallery 
 
 Edit repeated exposition and idle waits to make room; do not add these stages to every existing line. Preserve the silence before the agreement. Remove the proposed stick-feeding tutorial from this release: the ember and first exhibit interaction already teach receiving. On subsequent visits the gallery is brief if desired; a saved memento provides direct replay or a new perspective.
 
+### Current architectural presentation
+
+The October 15 implementation uses a fictional contemporary pavilion at dusk: a vaulted roof with an open spine, real garden arcades and a freestanding exhibit wall around the existing seated viewpoint. Its architectural presentation withdraws as the painting expands and returns with the frame; reduced motion keeps its stationary fade. This serves the one-view gallery above, adds no locomotion or additional exhibit, and makes no claim to reconstruct a traditional building. The [environment evidence](../reviews/2026-10-15-gallery-environment.md) separates rendering/software checks from pending device and participant acceptance.
+
 ### Entry and perspective selection
 
 The nearby ledge offers **Enter painting** as the primary action. Two optional painted motifs expose specific perspectives: gourd, “What she brings”; bead, “What she remembers.” Choosing a motif deliberately selects that thread and enters; Enter alone uses the gourd default, with “Let us begin with what Wambui brings.” It records default provenance rather than claiming a personal preference. There is no second selection screen or timer forcing someone out of gallery browsing.

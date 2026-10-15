@@ -58,3 +58,6 @@ October 14 completion pass: the gallery ewe fleece/head/hooves, pierced bead and
 
 
 October 15 museum pass: `SankofaGalleryArchitecture.cs`, `GallerySurface.shader` and their generated materials are project-authored architecture and material treatment using Unity built-in cube geometry and the existing project grain texture. No new third-party/generated image, sound, font or library is introduced. The contemporary gallery makes no claim to reconstruct a traditional building. Software renders are separate from device and participant acceptance; see the [environment review](reviews/2026-10-15-gallery-environment.md).
+
+
+October 15 pavilion follow-up: vault ribs/roof leaves, open arcades, horizon, garden arrangement and plaque bodies are project-authored geometry. Courtyard trees/shrubs reuse `SankofaMeshes` and the existing project foliage texture/material input, with a separate candidate material; the sky reuses the authored sky shader. No new image, recording, font or external library was downloaded or generated. These are decorative fictional surroundings and make no claim to depict a reviewed traditional building or specific landscape.

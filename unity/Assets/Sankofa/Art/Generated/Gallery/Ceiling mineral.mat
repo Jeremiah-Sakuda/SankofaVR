@@ -29,9 +29,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _DstBlend: 0
     - _Finish: 0
+    - _SrcBlend: 1
+    - _Visibility: 1
     - _Wash: 0
+    - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.16, g: 0.165, b: 0.15, a: 1}
+    - _Color: {r: 0.13, g: 0.16, b: 0.17, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
