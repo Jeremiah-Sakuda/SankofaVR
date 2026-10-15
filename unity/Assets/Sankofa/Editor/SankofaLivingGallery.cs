@@ -66,13 +66,13 @@ namespace Sankofa.EditorTools
                     edges.Add(Prim(work,"Frame vertical",PrimitiveType.Cube,new Vector3(sign*w/2,0,-0.014f),new Vector3(trim.Item1,h,0.045f),trim.Item2).GetComponent<Renderer>());
                 }
             }
-            GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(2.55f,2.10f,3.16f),0.70f,1.0f);
-            GalleryText(surroundings,"Gallery purpose","Stories time\nnearly left behind",new Vector3(2.55f,1.84f,3.16f),0.48f,1.0f);
+            GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(0,2.86f,3.16f),0.60f,3.0f);
+            GalleryText(surroundings,"Gallery purpose","Stories time\nnearly left behind",new Vector3(-2.5f,2.44f,3.16f),0.48f,1.0f);
             // The near controls project across the wall below the painting. Keep context beside the frame,
             // so its legibility does not depend on which entry/return menu the visitor has open.
             var origin=GalleryText(surroundings,"Title origin","Sankofa\nAn Akan word from Ghana:\ngo back and get it",new Vector3(-2.5f,1.95f,3.16f),0.60f,1.0f);
             origin.alignment=TextAlignmentOptions.Left;
-            GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.81f,3.16f),0.68f,3.8f);
+            GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.75f,3.16f),0.50f,3.8f);
             var placard=GalleryText(surroundings,"Exhibit placard","Enkare Nairobi\nBefore the railway\n\nAn imagined meeting\nDraft for cultural review",new Vector3(-2.5f,1.38f,3.16f),0.60f,1.0f);
             placard.alignment=TextAlignmentOptions.Left;
             foreach(var label in surroundings.GetComponentsInChildren<TextMeshPro>())

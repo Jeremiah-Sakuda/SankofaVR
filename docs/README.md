@@ -17,6 +17,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | [Production iteration](reviews/2026-10-14-production-iteration.md) | Implemented responses, verification and remaining external acceptance |
 | [Gallery simulator verification](reviews/2026-10-15-gallery-simulator.md) | Initial 29 scripted checks and subsequent manual controller diagnosis |
 | [Input and context follow-up](reviews/2026-10-15-gallery-input-and-layout.md) | Manual controller review workflow, clear wall labels and late-tracking placement recovery |
+| [Museum environment pass](reviews/2026-10-15-gallery-environment.md) | Warm architectural surround, seated views and presentation verification |
 | [Product stress test](reviews/2026-10-01-product-stress-test.md) | Challenged assumptions and proposed experiments |
 
 ## Story content

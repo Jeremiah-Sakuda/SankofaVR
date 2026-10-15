@@ -88,7 +88,7 @@ namespace Sankofa.Tests
         [UnityTest] public IEnumerator WallContextIsReadableBesideEntryAndExpandedReturnMenus()
         {
             yield return Open();
-            var labels=new[]{"Title origin","Exhibit placard"}.Select(n=>GameObject.Find(n).GetComponent<TMPro.TMP_Text>()).ToArray();
+            var labels=new[]{"Title origin","Exhibit placard","Gallery title","Gallery purpose","Exhibit title"}.Select(n=>GameObject.Find(n).GetComponent<TMPro.TMP_Text>()).ToArray();
             foreach(var text in labels)text.ForceMeshUpdate();
             var cameraObject=new GameObject("Context projection review");
             var review=cameraObject.AddComponent<Camera>();review.enabled=false;
@@ -119,7 +119,9 @@ namespace Sankofa.Tests
                             review.transform.SetPositionAndRotation(eye.position+eye.right*side,eye.rotation);
                             review.fieldOfView=lens.x;review.aspect=lens.y;
                             var context=labels.Select(t=>Projected(review,t.GetComponent<Renderer>().bounds)).ToArray();
-                            Assert.That(context[0].Overlaps(context[1]),Is.False,"origin and setting retain separate text blocks");
+                            for(var i=0;i<context.Length;i++)
+                            for(var j=i+1;j<context.Length;j++)
+                                Assert.That(context[i].Overlaps(context[j]),Is.False,labels[i].name+" and "+labels[j].name+" retain separate text blocks");
                             foreach(var rectangle in context)
                             {
                                 Assert.That(rectangle.xMin,Is.GreaterThan(0),"context remains inside the forward field of view");

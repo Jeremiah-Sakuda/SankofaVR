@@ -12,7 +12,11 @@ The [October 14 production iteration](docs/reviews/2026-10-14-production-iterati
 
 The [October 15 simulator follow-up](docs/reviews/2026-10-15-gallery-input-and-layout.md) verifies manual simulated-controller selection, moves the wall context clear of entry/return controls and recovers initial placement when tracking arrives late. All simulator runs remain muted. These results do not replace actual Quest, real-hand or content acceptance.
 
+The [October 15 museum pass](docs/reviews/2026-10-15-gallery-environment.md) gives the exhibit a warm plaster recess, timber side bays, stone floor, complete ceiling and refined frame. The room surrounds the existing seated position and withdraws with story entry.
+
 ![Sankofa living gallery: What We Carry, waiting for deliberate entry](docs/media/living-gallery.png)
+
+Current October 15 seated desktop render, with audio disabled; not headset footage. [Side-wall and ceiling view](docs/media/gallery-environment-side.png).
 
 [Before the journey](docs/media/gallery-brings.png) · [Remembered-meeting vignette](docs/media/gallery-remembered.png) · [Keep guidance](docs/media/gallery-keep-guide.png) · [Modern river continuation](docs/media/gallery-modern-river.png). These October 14 v0.7 captures are muted desktop batch renders, not headset footage. The memory windows reuse painted scenery and cast, with time cues and labels. [Caption and memory clearance](docs/media/gallery-caption.png), [the named sheep](docs/media/gallery-sheep.png) and [a bead review close-up](docs/media/gallery-bead-detail.png) show this pass’s focal work. The close-up uses a review camera, not the seated view. Vignette art remains a prototype; cast, garments, narration and cultural context still need review. The modern scene uses a draft OpenAI-generated painting with [exact prompt and provenance](unity/Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json).
 
