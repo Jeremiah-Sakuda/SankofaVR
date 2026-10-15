@@ -50,6 +50,78 @@ namespace Sankofa.Tests
             yield return Until(()=>app.Flow?.Phase==VisitPhase.Choosing);
             Assert.That(app.LoadProblem,Is.Null);yield return new WaitForSeconds(0.3f);
         }
+        [UnityTest] public IEnumerator WallContextIsReadableBesideEntryAndExpandedReturnMenus()
+        {
+            yield return Open();
+            var labels=new[]{"Title origin","Exhibit placard"}.Select(n=>GameObject.Find(n).GetComponent<TMPro.TMP_Text>()).ToArray();
+            foreach(var text in labels)text.ForceMeshUpdate();
+            var cameraObject=new GameObject("Context projection review");
+            var review=cameraObject.AddComponent<Camera>();review.enabled=false;
+            var eye=Camera.main.transform;var anchor=Object.FindFirstObjectByType<WorldAnchor>();
+            try
+            {
+                foreach(var expanded in new[]{false,true})
+                {
+                    if(expanded)
+                    {
+                        // Exercise a larger return menu as well as the actual primary-first entry layout.
+                        GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().Show(new List<(string,string)>
+                        {
+                            ("gallery-other","Their earlier meeting · shorter telling"),("Replay","Replay saved telling"),
+                            ("Follow","The same water today"),("Forget","Forget saved telling"),
+                            ("BeginAgain","Back to the artwork"),("Leave","Leave")
+                        });
+                        yield return null;
+                    }
+                    foreach(var height in new[]{0.85f,1.15f,1.45f})
+                    foreach(var reach in new[]{0f,-0.06f,-0.12f})
+                    {
+                        GameObject.Find("OVRCameraRig").transform.position=new Vector3(0,height,0);
+                        anchor.Place();anchor.ReachOffset=reach;
+                        foreach(var lens in new[]{new Vector2(60,16f/9),new Vector2(60,2),new Vector2(90,1)})
+                        foreach(var side in new[]{-0.032f,0.032f})
+                        {
+                            review.transform.SetPositionAndRotation(eye.position+eye.right*side,eye.rotation);
+                            review.fieldOfView=lens.x;review.aspect=lens.y;
+                            var context=labels.Select(t=>Projected(review,t.GetComponent<Renderer>().bounds)).ToArray();
+                            Assert.That(context[0].Overlaps(context[1]),Is.False,"origin and setting retain separate text blocks");
+                            foreach(var rectangle in context)
+                            {
+                                Assert.That(rectangle.xMin,Is.GreaterThan(0),"context remains inside the forward field of view");
+                                Assert.That(rectangle.xMax,Is.LessThan(1));
+                                Assert.That(rectangle.yMin,Is.GreaterThan(0));Assert.That(rectangle.yMax,Is.LessThan(1));
+                                foreach(var name in new[]{"Choices panel","Controls panel","Settings panel"})
+                                foreach(var face in GameObject.Find(name).GetComponentsInChildren<Renderer>().Where(r=>r.gameObject.name=="Face"))
+                                    Assert.That(rectangle.Overlaps(Projected(review,face.bounds)),Is.False,"wall context must not sit behind "+name);
+                                Assert.That(rectangle.Overlaps(Projected(review,GameObject.Find("Canonical canvas").GetComponent<Renderer>().bounds)),Is.False,"context stays outside the artwork");
+                            }
+                        }
+                    }
+                }
+                GameObject.Find("OVRCameraRig").transform.position=new Vector3(0,1.15f,0);
+                anchor.Place();anchor.ReachOffset=0;
+                // The review still shows the real entry layout, rather than the stress-test menu above.
+                GameObject.Find("Choices panel").GetComponent<Sankofa.Runtime.UI.PokePanel>().Show(new List<(string,string)>
+                {
+                    ("gallery-enter","Enter painting"),("Choose:era.1850s","Wambui · before her journey"),
+                    ("Choose:era.1850s.remembered","Naserian · their earlier meeting")
+                },primaryFirst:true);
+                yield return null;
+                Capture("wall-context-clear",1920,1080,60);
+            }
+            finally {Object.Destroy(cameraObject);}
+        }
+        static Rect Projected(Camera camera,Bounds bounds)
+        {
+            var min=Vector2.one*float.PositiveInfinity;var max=Vector2.one*float.NegativeInfinity;
+            for(var i=0;i<8;i++)
+            {
+                var corner=bounds.center+Vector3.Scale(bounds.extents,new Vector3((i&1)==0?-1:1,(i&2)==0?-1:1,(i&4)==0?-1:1));
+                var p=camera.WorldToViewportPoint(corner);
+                Assert.That(p.z,Is.GreaterThan(0));min=Vector2.Min(min,p);max=Vector2.Max(max,p);
+            }
+            return Rect.MinMaxRect(min.x,min.y,max.x,max.y);
+        }
         [UnityTest] public IEnumerator PreviewWaitsAndHasNoAutomaticChoiceOrSave()
         {
             yield return Open();Time.timeScale=15;yield return new WaitForSeconds(45);
@@ -686,15 +758,15 @@ namespace Sankofa.Tests
             };
         }
 
-        void Capture(string name)
+        void Capture(string name,int width=1440,int height=1080,float fieldOfView=70)
         {
             if(Environment.GetEnvironmentVariable("SANKOFA_CAPTURE")!="1")return;
-            var eye=GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();eye.fieldOfView=70;
+            var eye=GameObject.Find("CenterEyeAnchor").GetComponent<Camera>();eye.fieldOfView=fieldOfView;
             var directory=Path.GetFullPath(Path.Combine(Application.dataPath,"..","..","artifacts","living-gallery"));Directory.CreateDirectory(directory);
             if(!gallery.Framed&&GameObject.Find("Control hint")!=null)GameObject.Find("Control hint").GetComponent<TMPro.TMP_Text>().enabled=false;
-            var target=new RenderTexture(1440,1080,24){antiAliasing=4};var previous=eye.targetTexture;var active=RenderTexture.active;
+            var target=new RenderTexture(width,height,24){antiAliasing=4};var previous=eye.targetTexture;var active=RenderTexture.active;
             eye.targetTexture=target;eye.Render();RenderTexture.active=target;
-            var image=new Texture2D(1440,1080,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,1440,1080),0,0);image.Apply();
+            var image=new Texture2D(width,height,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,width,height),0,0);image.Apply();
             File.WriteAllBytes(Path.Combine(directory,name+".png"),image.EncodeToPNG());eye.targetTexture=previous;RenderTexture.active=active;
             Object.Destroy(image);target.Release();Object.Destroy(target);
         }

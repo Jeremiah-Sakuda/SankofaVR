@@ -72,9 +72,13 @@ namespace Sankofa.EditorTools
             }
             GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(0,3.07f,3.16f),0.85f,3.0f);
             GalleryText(surroundings,"Gallery purpose","Stories time nearly left behind",new Vector3(0,2.88f,3.16f),0.42f,3.8f);
-            GalleryText(surroundings,"Title origin","Sankofa · an Akan word from Ghana: go back and get it",new Vector3(0,0.35f,3.16f),0.55f,4f);
+            // The near controls project across the wall below the painting. Keep context beside the frame,
+            // so its legibility does not depend on which entry/return menu the visitor has open.
+            var origin=GalleryText(surroundings,"Title origin","Sankofa\nAn Akan word from Ghana:\ngo back and get it",new Vector3(-2.5f,1.95f,3.16f),0.60f,1.0f);
+            origin.alignment=TextAlignmentOptions.Left;
             GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.68f,3.16f),0.68f,3.8f);
-            GalleryText(surroundings,"Exhibit placard","Enkare Nairobi · before the railway\nAn imagined meeting · draft for cultural review",new Vector3(0,0.18f,3.16f),0.48f,4f);
+            var placard=GalleryText(surroundings,"Exhibit placard","Enkare Nairobi\nBefore the railway\n\nAn imagined meeting\nDraft for cultural review",new Vector3(-2.5f,1.38f,3.16f),0.60f,1.0f);
+            placard.alignment=TextAlignmentOptions.Left;
             var gallery=world.gameObject.AddComponent<LivingGallery>();
             Set(gallery,"painting",work); Set(gallery,"canvas",canvas); Set(gallery,"stage",stage);
             SetArray(gallery,"frame",edges.Cast<Object>().ToArray());

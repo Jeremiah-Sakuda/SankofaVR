@@ -11,6 +11,35 @@ namespace Sankofa.Tests
     public class StageRecenterTests
     {
         [UnityTest]
+        public IEnumerator LateInitialTrackingRecoversFallbackPlacementWithoutFollowingLaterHeadMotion()
+        {
+            var head=new GameObject("Late tracked head");var world=new GameObject("Late tracking stage");world.SetActive(false);
+            var anchor=world.AddComponent<WorldAnchor>();
+            var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+            typeof(WorldAnchor).GetField("head",flags).SetValue(anchor,head.transform);
+            typeof(WorldAnchor).GetField("settleSeconds",flags).SetValue(anchor,0.05f);
+            anchor.HeightOffset=0.08f;anchor.ReachOffset=-0.06f;var placed=0;
+            anchor.PlacedEvent+=()=>placed++;world.SetActive(true);
+            typeof(WorldAnchor).GetField("enabledAt",flags).SetValue(anchor,Time.realtimeSinceStartup-6);
+            try
+            {
+                yield return null;
+                Assert.That(anchor.Placed,Is.True,"zero-pose timeout retains a usable desktop fallback");
+                Assert.That(world.transform.position.y,Is.EqualTo(0.08f).Within(0.001f));
+                head.transform.position=new Vector3(0,1.7f,0);
+                yield return new WaitForSecondsRealtime(0.12f);
+                Assert.That(world.transform.position.y,Is.EqualTo(0.63f).Within(0.001f),"late first pose recovers designed eye height plus the visitor offset");
+                Assert.That(world.transform.position.z,Is.EqualTo(-0.06f).Within(0.001f),"reach preference survives recovery");
+                Assert.That(placed,Is.EqualTo(1),"recovery must not start the application twice");
+                var position=world.transform.position;var rotation=world.transform.rotation;
+                head.transform.SetPositionAndRotation(new Vector3(0.2f,1.85f,0.1f),Quaternion.Euler(0,25,0));
+                yield return new WaitForSecondsRealtime(0.12f);
+                Assert.That(Vector3.Distance(world.transform.position,position),Is.LessThan(0.001f));
+                Assert.That(Quaternion.Angle(world.transform.rotation,rotation),Is.LessThan(0.01f),"a settled world does not chase the head");
+            }
+            finally {Object.Destroy(world);Object.Destroy(head);}
+        }
+        [UnityTest]
         public IEnumerator CharacterActingFreezesOnPauseAndReleasesTheHandWhenItsObjectLeaves()
         {
             LogAssert.ignoreFailingMessages = true; // No headset: the Meta SDK logs unsupported native calls.

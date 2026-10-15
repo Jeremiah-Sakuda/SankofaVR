@@ -16,6 +16,7 @@ namespace Sankofa.Runtime.App
 
         float settled;
         float enabledAt, seatedBaseHeight;
+        bool awaitingFirstTrackedPosition;
 
         public bool Placed { get; private set; }
 
@@ -58,7 +59,15 @@ namespace Sankofa.Runtime.App
 
         void Update()
         {
-            if (Placed) return;
+            if (Placed)
+            {
+                if (!awaitingFirstTrackedPosition) return;
+                // The editor/simulator may initialise OpenXR after the fallback timeout. Correct that initial
+                // zero-pose placement once a seated head arrives; subsequent head motion never moves the world.
+                settled = head.position.y > 0.3f ? settled + Time.unscaledDeltaTime : 0;
+                if (settled >= settleSeconds) Place();
+                return;
+            }
             // An untracked head stays exactly at the rig origin; wait for a real pose before placing the world.
             var tracked = head.localPosition.sqrMagnitude > 1e-6f || head.localRotation != Quaternion.identity;
             settled = tracked ? settled + Time.unscaledDeltaTime : 0;
@@ -71,6 +80,8 @@ namespace Sankofa.Runtime.App
             forward.y = 0;
             if (forward.sqrMagnitude < 1e-4f) forward = Vector3.forward;
             var p = head.position;
+            awaitingFirstTrackedPosition = p.y <= 0.3f;
+            if (awaitingFirstTrackedPosition) settled = 0;
             // Zero-height untracked/editor poses retain the comparison floor until an actual pose is supplied.
             seatedBaseHeight = p.y > 0.3f ? p.y - designedEyeHeight : 0;
             transform.SetPositionAndRotation(new Vector3(p.x, seatedBaseHeight + heightOffset, p.z) + forward.normalized * reachOffset, Quaternion.LookRotation(forward.normalized, Vector3.up));
