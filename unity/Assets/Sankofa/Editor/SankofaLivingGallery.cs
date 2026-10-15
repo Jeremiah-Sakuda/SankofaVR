@@ -44,15 +44,9 @@ namespace Sankofa.EditorTools
             var surroundings = Child(home.Root.transform, "Gallery architecture");
             // Hide the inherited outdoor environment; the gallery is the outer journey, not another stop before it.
             foreach (var r in home.Root.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
-            var plaster = GalleryPigment("Warm plaster", new Color(0.16f, 0.175f, 0.19f));
-            var floor = GalleryPigment("Slate floor", new Color(0.065f, 0.073f, 0.085f));
-            var wood = GalleryPigment("Walnut frame", new Color(0.16f, 0.105f, 0.065f));
-            var brass = GalleryPigment("Brass edge", new Color(0.66f, 0.42f, 0.2f));
-            Prim(surroundings, "Floor", PrimitiveType.Cube, new Vector3(0,-0.06f,1.8f), new Vector3(10,0.1f,10), floor);
-            Prim(surroundings, "Exhibit wall", PrimitiveType.Cube, new Vector3(0,1.8f,3.3f), new Vector3(9,4,0.12f), plaster);
-            foreach (var x in new[] {-4.5f,4.5f})
-                Prim(surroundings, "Side wall", PrimitiveType.Cube, new Vector3(x,1.8f,0), new Vector3(0.12f,4,7), plaster);
-            Prim(surroundings, "Exhibit ledge", PrimitiveType.Cube, new Vector3(0,0.66f,0.55f), new Vector3(1.22f,0.035f,0.28f), wood);
+            BuildGalleryArchitecture(surroundings);
+            var wood=GallerySurface("Frame walnut",new Color(0.20f,0.115f,0.055f),1);
+            var brass=GallerySurface("Frame bronze",new Color(0.48f,0.30f,0.12f),3);
             var work = Child(world, "What We Carry framed");
             work.localPosition = new Vector3(0,1.53f,3.19f);
             var imageMaterial = new Material(Shader.Find("Sankofa/Gallery Canvas")) { name = "What We Carry canonical" };
@@ -61,6 +55,8 @@ namespace Sankofa.EditorTools
             imageMaterial.mainTexture = painting;
             var canvas=Prim(work,"Canonical canvas",PrimitiveType.Quad,Vector3.zero,new Vector3(3.55f,1.997f,1),imageMaterial).GetComponent<Renderer>();
             var edges = new System.Collections.Generic.List<Renderer>();
+            // A stepped rebate and shadow gap anchor the canvas in the wall. They withdraw with its frame.
+            edges.Add(Prim(work,"Frame shadow gap",PrimitiveType.Cube,new Vector3(0,0,0.055f),new Vector3(3.82f,2.267f,0.035f),GallerySurface("Frame shadow",new Color(0.024f,0.022f,0.018f))).GetComponent<Renderer>());
             foreach (var trim in new[] { (0.08f,wood), (0.024f,brass) })
             {
                 var w=3.55f+trim.Item1*2; var h=1.997f+trim.Item1*2;
@@ -70,15 +66,17 @@ namespace Sankofa.EditorTools
                     edges.Add(Prim(work,"Frame vertical",PrimitiveType.Cube,new Vector3(sign*w/2,0,-0.014f),new Vector3(trim.Item1,h,0.045f),trim.Item2).GetComponent<Renderer>());
                 }
             }
-            GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(0,3.07f,3.16f),0.85f,3.0f);
-            GalleryText(surroundings,"Gallery purpose","Stories time nearly left behind",new Vector3(0,2.88f,3.16f),0.42f,3.8f);
+            GalleryText(surroundings,"Gallery title","SANKOFA",new Vector3(2.55f,2.10f,3.16f),0.70f,1.0f);
+            GalleryText(surroundings,"Gallery purpose","Stories time\nnearly left behind",new Vector3(2.55f,1.84f,3.16f),0.48f,1.0f);
             // The near controls project across the wall below the painting. Keep context beside the frame,
             // so its legibility does not depend on which entry/return menu the visitor has open.
             var origin=GalleryText(surroundings,"Title origin","Sankofa\nAn Akan word from Ghana:\ngo back and get it",new Vector3(-2.5f,1.95f,3.16f),0.60f,1.0f);
             origin.alignment=TextAlignmentOptions.Left;
-            GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.68f,3.16f),0.68f,3.8f);
+            GalleryText(surroundings,"Exhibit title","What We Carry",new Vector3(0,2.81f,3.16f),0.68f,3.8f);
             var placard=GalleryText(surroundings,"Exhibit placard","Enkare Nairobi\nBefore the railway\n\nAn imagined meeting\nDraft for cultural review",new Vector3(-2.5f,1.38f,3.16f),0.60f,1.0f);
             placard.alignment=TextAlignmentOptions.Left;
+            foreach(var label in surroundings.GetComponentsInChildren<TextMeshPro>())
+                label.color=new Color(0.16f,0.12f,0.08f);
             var gallery=world.gameObject.AddComponent<LivingGallery>();
             Set(gallery,"painting",work); Set(gallery,"canvas",canvas); Set(gallery,"stage",stage);
             SetArray(gallery,"frame",edges.Cast<Object>().ToArray());

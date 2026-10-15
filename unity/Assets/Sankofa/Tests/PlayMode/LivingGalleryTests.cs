@@ -50,6 +50,41 @@ namespace Sankofa.Tests
             yield return Until(()=>app.Flow?.Phase==VisitPhase.Choosing);
             Assert.That(app.LoadProblem,Is.Null);yield return new WaitForSeconds(0.3f);
         }
+        [UnityTest] public IEnumerator GallerySurroundIsCompleteClearAndWithdrawsWithTheStory()
+        {
+            yield return Open();
+            var architecture=GameObject.Find("Gallery architecture");
+            var surfaces=architecture.GetComponentsInChildren<Renderer>();
+            var eye=Camera.main.transform;
+            foreach(var direction in new[]{Vector3.forward,Vector3.back,Vector3.left,Vector3.right,Vector3.up,Vector3.down})
+                Assert.That(surfaces.Any(r=>r.enabled&&r.bounds.IntersectRay(new Ray(eye.position,direction))),Is.True,"the seated surround is complete in "+direction);
+            foreach(var name in new[]{"Title origin","Exhibit placard","Gallery title","Gallery purpose","Exhibit title"})
+            {
+                var label=GameObject.Find(name).GetComponent<TMPro.TMP_Text>();label.ForceMeshUpdate();
+                var destination=label.GetComponent<Renderer>().bounds.center;
+                var ray=new Ray(eye.position,(destination-eye.position).normalized);
+                foreach(var surface in surfaces.Where(r=>r is MeshRenderer&&r.GetComponent<TMPro.TMP_Text>()==null))
+                    if(surface.bounds.IntersectRay(ray,out var distance))
+                        Assert.That(distance,Is.GreaterThan((destination-eye.position).magnitude-0.02f),name+" is occluded by "+surface.name);
+            }
+            Capture("environment-front",1920,1080,70);
+            var rotation=eye.rotation;
+            try
+            {
+                foreach(var view in new[]{("left",-65f,0f),("right",65f,0f),("rear",180f,0f),("ceiling",0f,-55f)})
+                {
+                    eye.rotation=rotation*Quaternion.Euler(view.Item3,view.Item2,0);
+                    Capture("environment-"+view.Item1,1440,1080,75);
+                }
+            }
+            finally {eye.rotation=rotation;}
+            var home=stage.ActiveScene;
+            stage.ShowScene("story.water.1850s");yield return null;
+            Assert.That(surfaces.All(r=>!r.gameObject.activeInHierarchy),Is.True,"room architecture cannot intersect the unfolded story");
+            stage.ShowScene(home);yield return null;
+            Assert.That(architecture.activeInHierarchy,Is.True,"the room returns with its exhibit");
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
         [UnityTest] public IEnumerator WallContextIsReadableBesideEntryAndExpandedReturnMenus()
         {
             yield return Open();
