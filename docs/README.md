@@ -15,6 +15,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | [Backlog](backlog.md) | Work in dependency order; a tick means the artifact exists, not that it is accepted |
 | [Current experience audit](reviews/2026-10-14-current-experience-audit.md) | Reproduced software gaps and editorial/visual findings |
 | [Production iteration](reviews/2026-10-14-production-iteration.md) | Implemented responses, verification and remaining external acceptance |
+| [Gallery simulator verification](reviews/2026-10-15-gallery-simulator.md) | 29 scripted checks in Meta OpenXR; unresolved manual selection and placard overlap |
 | [Product stress test](reviews/2026-10-01-product-stress-test.md) | Challenged assumptions and proposed experiments |
 
 ## Story content

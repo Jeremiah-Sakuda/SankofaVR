@@ -2,7 +2,7 @@
 
 October 14, 2026 · Package **v0.7.0** · Local APK: `artifacts/Sankofa-LivingGallery.apk`. Read the [candidate identity](../release/candidate.md) before installation. Competition-channel access and installation on a separate Quest are not yet established. This walkthrough describes implemented software, not accepted hardware behaviour.
 
-The current development restriction is **no sound playback and no simulator**. Keep audio muted until a listening session is authorised. Silent batch captures cannot establish stereo comfort, real hands, sustained frame rate or cultural acceptance.
+On October 15 the user authorised a simulator verification session, superseding the earlier no-simulator restriction. **No sound playback** remains in force. Keep audio muted until a listening session is authorised. Simulator and silent batch captures cannot establish headset comfort, real-hand reliability, sustained Quest frame rate or cultural acceptance. See the [simulator verification record](../reviews/2026-10-15-gallery-simulator.md) for the checked paths and remaining input/layout issues.
 
 ## Install and start
 

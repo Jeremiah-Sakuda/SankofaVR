@@ -160,13 +160,13 @@ The stress test's T3 asks whether a directed fire feels more responsive than a s
 
 ## Running in the Meta XR Simulator
 
-Without a headset, the hearth runs in Play mode against the [Meta XR Simulator](https://developers.meta.com/horizon/documentation/unity/xrsim-intro/), installed at `/Applications/MetaXRSimulator.app`. Use **Sankofa > Play Hearth in XR Simulator**, or with the editor closed:
+Without a headset, the current gallery runs in Play mode against the installed Meta XR Simulator at `/Applications/MetaXRSimulator.app`. Use **Sankofa > Play Living Gallery in XR Simulator**, or with the editor closed:
 
 ```sh
-"$UNITY" -projectPath "$PWD/unity" -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayHearth
+"$UNITY" -noaudio -projectPath "$PWD/unity" -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayLivingGallery
 ```
 
-The simulator starts with controllers: aim with the mouse and click to pull the trigger at a panel. Switch the simulated hands to hand input to try the open palm, touch and pinch. The simulator exercises flow, visuals and wiring; it is not evidence of hand-tracking reliability, comfort, sound or Quest performance.
+`-noaudio` is required while the user's no-playback restriction remains active. Older **Play Hearth** and **Play Illustrated Theatre** commands are comparison scenes. The simulator remembers its input configuration; do not assume it starts in controller mode. Its system-wide runtime toggle is separate from Unity's project-process runtime selection. The October 15 session used the actual Meta OpenXR runtime, but manual point-and-click selection did not pass verification; scripted panel/application probes are recorded separately in the [verification report](../docs/reviews/2026-10-15-gallery-simulator.md). Simulated hand input can exercise open-palm, touch and pinch wiring, but none of this establishes real-hand reliability, comfort, sound or Quest performance.
 
 ## Running on a headset
 
