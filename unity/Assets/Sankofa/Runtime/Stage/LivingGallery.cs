@@ -12,6 +12,7 @@ namespace Sankofa.Runtime.Stage
         [SerializeField] Renderer canvas;
         [SerializeField] Renderer[] frame;
         [SerializeField] StoryStage stage;
+        [SerializeField] GalleryAtmosphere atmosphere;
         [SerializeField] string defaultRoute = "era.1850s";
         [SerializeField] string alternateRoute = "era.1850s.remembered";
         MaterialPropertyBlock block;
@@ -36,6 +37,7 @@ namespace Sankofa.Runtime.Stage
             if (block == null) block = new MaterialPropertyBlock();
             if (scale == Vector3.zero) scale = painting.localScale;
             Expansion = expansion;
+            if(atmosphere!=null)atmosphere.SetPresence((1-expansion)*opacity);
             painting.localScale = scale * Mathf.Lerp(1, 5.5f, expansion);
             canvas.enabled = opacity > 0;
             canvas.GetPropertyBlock(block); block.SetFloat("_Opacity", opacity); canvas.SetPropertyBlock(block);

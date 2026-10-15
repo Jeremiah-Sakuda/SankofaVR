@@ -140,7 +140,12 @@ namespace Sankofa.EditorTools
             settingsPanel.localRotation=FacingVisitor(settingsPanel.localPosition);
             var panelPigment=GalleryPigment("Gallery plaques",new Color(0.36f,0.25f,0.16f));
             foreach(var panel in new[]{choices,controlPanel,settingsPanel})
-            {Set(panel.GetComponent<PokePanel>(),"buttonMaterial",panelPigment);Set(panel.GetComponent<PokePanel>(),"glow",0f);}
+            {
+                var panelComponent=panel.GetComponent<PokePanel>();
+                Set(panelComponent,"buttonMaterial",panelPigment);Set(panelComponent,"glow",0f);
+                Set(panelComponent,"plaqueBodyMaterial",GallerySurface("Plaque bronze",new Color(0.30f,0.20f,0.10f),3));
+                Set(panelComponent,"plaqueDepth",0.008f);
+            }
             settingsPanel.Find("Settings backing").GetComponent<Renderer>().sharedMaterial=GalleryPigment("Settings backing",new Color(0.11f,0.075f,0.045f));
             var controlHint=GalleryText(world,"Control hint","Touch a plaque, or point and pinch.\nPause and Settings stay below.",new Vector3(0,0.78f,0.94f),0.20f,0.72f);
             controlHint.transform.localRotation=FacingVisitor(controlHint.transform.localPosition);Set(app,"controlHint",controlHint);
@@ -162,6 +167,7 @@ namespace Sankofa.EditorTools
             // Put the living flame at the painted fire, inside the work; it remains the visible narrator.
             var fire=Object.FindFirstObjectByType<Sankofa.Runtime.Fire.HearthFire>(FindObjectsInactive.Include);
             fire.transform.localPosition=new Vector3(0.03f,0.73f,3.1f); fire.transform.localScale=Vector3.one*0.36f;
+            Set(gallery,"atmosphere",surroundings.gameObject.AddComponent<GalleryAtmosphere>());
             stage.ShowScene(home.Id);
             // CaptureComposition only changes temporary render properties; clear those before saving the scene.
             foreach(var o in stage.Objects) foreach(var r in o.Surfaces) r.SetPropertyBlock(null);

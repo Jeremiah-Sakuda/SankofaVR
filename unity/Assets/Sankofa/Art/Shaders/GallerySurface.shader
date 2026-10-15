@@ -7,6 +7,7 @@ Shader "Sankofa/Gallery Surface"
         _Color ("Material colour", Color) = (0.4,0.3,0.2,1)
         _Noise ("Material grain", 2D) = "gray" {}
         [Enum(Plaster,0,Timber,1,Stone,2,Metal,3,Light,4)] _Finish ("Finish", Float) = 0
+        _Visibility ("Room presence", Range(0,1)) = 1
         _Wash ("Soft wall wash", Range(0,1)) = 0
     }
     SubShader
@@ -21,7 +22,7 @@ Shader "Sankofa/Gallery Surface"
             #pragma multi_compile_instancing
             #include "UnityCG.cginc"
             #include "SankofaGrade.cginc"
-            fixed4 _Color; sampler2D _Noise; half _Finish, _Wash;
+            fixed4 _Color; sampler2D _Noise; half _Finish, _Wash, _Visibility;
             struct appdata { float4 vertex:POSITION; float3 normal:NORMAL; float2 uv:TEXCOORD0; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct v2f
             {
@@ -39,6 +40,8 @@ Shader "Sankofa/Gallery Surface"
             fixed4 frag(v2f i):SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+                float dissolve=frac(sin(dot(floor(i.metric.xy*130+i.metric.z*53),float2(12.9898,78.233)))*43758.5453);
+                clip(_Visibility-dissolve*0.98-0.001);
                 half3 n=normalize(i.normal);
                 // Object-local triplanar grain: no view-dependent shimmer or random per-frame noise.
                 half3 w=abs(n); w/=max(w.x+w.y+w.z,0.001);
@@ -62,6 +65,11 @@ Shader "Sankofa/Gallery Surface"
                     half joint=1-min(smoothstep(0.003,0.003+aa.x,cell.x),smoothstep(0.003,0.003+aa.y,cell.y));
                     colour*=1-joint*0.22;
                     colour*=0.84+0.16*exp2(-dot(i.metric.xz,i.metric.xz)*0.09);
+                    // Cool light enters the real side apertures, with broad, filtered arcade shadows.
+                    half court=exp2(-pow((abs(i.metric.x)-3.3)*0.55,2));
+                    float band=abs(frac((i.metric.z+i.metric.x*0.45)/2.45)-0.5);
+                    half shade=smoothstep(0.18,0.25,band);
+                    colour+=half3(0.032,0.047,0.064)*court*(1-shade*0.7);
                 }
                 if(_Finish>2.5 && _Finish<3.5)colour+=_Color.rgb*0.12;
                 if(_Finish>3.5)colour=_Color.rgb*1.5;

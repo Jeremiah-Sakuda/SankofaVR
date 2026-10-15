@@ -56,16 +56,16 @@ namespace Sankofa.Tests
             var architecture=GameObject.Find("Gallery architecture");
             var surfaces=architecture.GetComponentsInChildren<Renderer>();
             var eye=Camera.main.transform;
-            foreach(var direction in new[]{Vector3.forward,Vector3.back,Vector3.left,Vector3.right,Vector3.up,Vector3.down})
-                Assert.That(surfaces.Any(r=>r.enabled&&r.bounds.IntersectRay(new Ray(eye.position,direction))),Is.True,"the seated surround is complete in "+direction);
+            foreach(var direction in new[]{Vector3.left,Vector3.right})
+                Assert.That(NearestGalleryGeometry(surfaces,new Ray(eye.position,direction)),Is.GreaterThan(5),"side arches must be real openings to a more distant courtyard");
+            Assert.That(NearestGalleryGeometry(surfaces,new Ray(eye.position,Vector3.down)),Is.LessThan(2),"the seat remains grounded above the gallery floor");
+            Assert.That(NearestGalleryGeometry(surfaces,new Ray(eye.position,Vector3.up)),Is.GreaterThan(5),"the roof spine is genuinely open to the sky");
             foreach(var name in new[]{"Title origin","Exhibit placard","Gallery title","Gallery purpose","Exhibit title"})
             {
                 var label=GameObject.Find(name).GetComponent<TMPro.TMP_Text>();label.ForceMeshUpdate();
                 var destination=label.GetComponent<Renderer>().bounds.center;
                 var ray=new Ray(eye.position,(destination-eye.position).normalized);
-                foreach(var surface in surfaces.Where(r=>r is MeshRenderer&&r.GetComponent<TMPro.TMP_Text>()==null))
-                    if(surface.bounds.IntersectRay(ray,out var distance))
-                        Assert.That(distance,Is.GreaterThan((destination-eye.position).magnitude-0.02f),name+" is occluded by "+surface.name);
+                Assert.That(NearestGalleryGeometry(surfaces,ray),Is.GreaterThan((destination-eye.position).magnitude-0.02f),name+" stays clear of the actual architecture, including arch openings");
             }
             Capture("environment-front",1920,1080,70);
             var rotation=eye.rotation;
@@ -83,6 +83,59 @@ namespace Sankofa.Tests
             Assert.That(surfaces.All(r=>!r.gameObject.activeInHierarchy),Is.True,"room architecture cannot intersect the unfolded story");
             stage.ShowScene(home);yield return null;
             Assert.That(architecture.activeInHierarchy,Is.True,"the room returns with its exhibit");
+            Assert.That(problems,Is.Empty,string.Join("\n",problems));
+        }
+        // Bounds would incorrectly fill an arch or skylight. Check the generated triangles instead.
+        static float NearestGalleryGeometry(Renderer[] surfaces,Ray ray)
+        {
+            var nearest=float.PositiveInfinity;
+            foreach(var surface in surfaces)
+            {
+                if(!surface.enabled||surface.sharedMaterial==null||surface.sharedMaterial.renderQueue>=2500||surface.GetComponent<TMPro.TMP_Text>()!=null)continue;
+                if(!surface.bounds.IntersectRay(ray))continue;
+                var filter=surface.GetComponent<MeshFilter>();if(filter==null)continue;
+                var mesh=filter.sharedMesh;var vertices=mesh.vertices;var triangles=mesh.triangles;
+                for(var i=0;i<triangles.Length;i+=3)
+                {
+                    var a=surface.transform.TransformPoint(vertices[triangles[i]]);
+                    var b=surface.transform.TransformPoint(vertices[triangles[i+1]]);
+                    var c=surface.transform.TransformPoint(vertices[triangles[i+2]]);
+                    var e=b-a;var f=c-a;var cross=Vector3.Cross(ray.direction,f);var determinant=Vector3.Dot(e,cross);
+                    if(Mathf.Abs(determinant)<0.000001f)continue;
+                    var offset=ray.origin-a;var u=Vector3.Dot(offset,cross)/determinant;
+                    if(u<0||u>1)continue;
+                    var q=Vector3.Cross(offset,e);var v=Vector3.Dot(ray.direction,q)/determinant;
+                    if(v<0||u+v>1)continue;
+                    var distance=Vector3.Dot(f,q)/determinant;
+                    if(distance>0)nearest=Mathf.Min(nearest,distance);
+                }
+            }
+            return nearest;
+        }
+        [UnityTest] public IEnumerator PavilionReleasesAndReturnsWithoutMovingTheVisitorAndHonoursPause()
+        {
+            yield return Open();app.enabled=false;
+            var atmosphere=Object.FindFirstObjectByType<GalleryAtmosphere>();
+            var eye=Camera.main.transform;var position=eye.position;var rotation=eye.rotation;
+            var title=GameObject.Find("Gallery title").GetComponent<TMPro.TMP_Text>();var colour=title.color;
+            gallery.StartCoroutine(gallery.Transition("story.water.1850s",Array.Empty<Continuity>(),false));
+            yield return Until(()=>gallery.Expansion>0.4f,5);
+            Assert.That(atmosphere.Presence,Is.InRange(0.1f,0.7f));
+            var presence=atmosphere.Presence;StageClock.Paused=true;yield return new WaitForSecondsRealtime(0.2f);
+            Assert.That(atmosphere.Presence,Is.EqualTo(presence).Within(0.001f));StageClock.Paused=false;
+            yield return Until(()=>!gallery.Framed,6);
+            Assert.That(atmosphere.Presence,Is.Zero);
+            yield return gallery.Transition("hearth",Array.Empty<Continuity>(),false);
+            Assert.That(atmosphere.Presence,Is.EqualTo(1));Assert.That(Vector4.Distance(title.color,colour),Is.LessThan(0.0001f));
+            Assert.That(Vector3.Distance(eye.position,position),Is.LessThan(0.001f));
+            Assert.That(Quaternion.Angle(eye.rotation,rotation),Is.LessThan(0.001f));
+            // Reduced motion retains its stationary fade, with no scaled painting or moving architecture.
+            gallery.StartCoroutine(gallery.Transition("story.water.1850s",Array.Empty<Continuity>(),true));
+            var deadline=Time.realtimeSinceStartup+5;
+            while(gallery.Framed)
+            {Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline));Assert.That(gallery.Expansion,Is.Zero);yield return null;}
+            yield return gallery.Transition("hearth",Array.Empty<Continuity>(),true);
+            Assert.That(atmosphere.Presence,Is.EqualTo(1));Assert.That(Vector4.Distance(title.color,colour),Is.LessThan(0.0001f));
             Assert.That(problems,Is.Empty,string.Join("\n",problems));
         }
         [UnityTest] public IEnumerator WallContextIsReadableBesideEntryAndExpandedReturnMenus()
@@ -357,6 +410,7 @@ namespace Sankofa.Tests
             transition.Recover(change);Assert.That(transition.Busy,Is.False);
             gallery.ResetView();stage.ShowScene("hearth");yield return new WaitForSeconds(4);
             Assert.That(stage.ActiveScene,Is.EqualTo("hearth"));Assert.That(gallery.Framed,Is.True);
+            Assert.That(Object.FindFirstObjectByType<GalleryAtmosphere>().Presence,Is.EqualTo(1));
             Assert.That(problems,Is.Empty,string.Join("\\n",problems));
         }
 

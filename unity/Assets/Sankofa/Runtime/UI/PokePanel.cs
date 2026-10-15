@@ -33,6 +33,8 @@ namespace Sankofa.Runtime.UI
         }
 
         [SerializeField] Material buttonMaterial;
+        [SerializeField] Material plaqueBodyMaterial;
+        [SerializeField] float plaqueDepth;
         [SerializeField] TMP_FontAsset labelFont;
         [SerializeField] Material labelMaterial;
         [SerializeField] Color labelColor = Color.white;
@@ -197,6 +199,16 @@ namespace Sankofa.Runtime.UI
             face.transform.localScale = new Vector3(size.x, size.y, 1f);
             var renderer = face.GetComponent<Renderer>();
             if (buttonMaterial != null) renderer.sharedMaterial = buttonMaterial;
+            if(plaqueDepth>0&&plaqueBodyMaterial!=null)
+            {
+                // Depth lives behind the existing face. Its hit plane and fingertip release distance stay stable.
+                var body=GameObject.CreatePrimitive(PrimitiveType.Cube);Destroy(body.GetComponent<Collider>());
+                body.name="Plaque body";body.transform.SetParent(root.transform,false);
+                body.transform.localPosition=new Vector3(0,0,plaqueDepth/2+0.0005f);
+                body.transform.localScale=new Vector3(size.x+0.003f,size.y+0.003f,plaqueDepth);
+                var surface=body.GetComponent<Renderer>();surface.sharedMaterial=plaqueBodyMaterial;
+                surface.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;surface.receiveShadows=false;
+            }
             // Its resting colour from the first frame it is drawn, not the material's own until the next update.
             if (block == null) block = new MaterialPropertyBlock();
             renderer.GetPropertyBlock(block);
