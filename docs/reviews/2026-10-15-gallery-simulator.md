@@ -2,6 +2,8 @@
 
 **Verdict: scripted flow verified in the actual Meta OpenXR Simulator; manual input acceptance remains open.** The user explicitly authorised this simulator session, superseding the earlier no-simulator restriction. No sound was played. No APK, scene, story package, runtime behaviour or artwork was changed by this verification.
 
+**Later October 15 follow-up:** manual controller selection was subsequently verified with a read-only input observer and native UI events. See the follow-up at the end of this record; the initial unsuccessful attempts below are retained as history.
+
 ## Environment and method
 
 Source baseline `1947516`, gallery package v0.7.0, Unity 6000.3.25f1, Meta XR Core/Simulator 207. The installed simulator used its Meta Quest 3 profile. Unity launched with `-noaudio` and the new `SankofaSimulator.PlayLivingGallery` entry point. The runtime JSON, registered display/input providers and OpenXR session reaching `FOCUSED` are recorded in the local log. This is actual simulator execution, rather than the previous desktop batch-only captures.
@@ -47,3 +49,15 @@ Raw artifacts remain ignored and are not shipped:
 - `artifacts/tests/simulator-launcher-editmode.xml`: 31 passing editor tests; corresponding log in `artifacts/logs/simulator-launcher-editmode.log`.
 
 The tracked change adds a direct current-gallery simulator launcher and corrects instructions. It does not revise the previously built APK identity or close device/reviewer/release gates.
+
+## Follow-up: manual simulated controller selection
+
+Source `836e39c`, unchanged runtime pointer/gesture code, Unity launched with `-noaudio`. A read-only local editor observer recorded controller tracking, trigger strength, pointer target and flow phase; it never invoked story/panel commands. The failed click-only attempts delivered trigger values of 1 and 0 but left the ray pointing away from the target. A native mouse drag in the simulator viewport updated its aim; the following deliberate press and release selected the plaque normally. This points to cursor-motion delivery in this automation setup, not an established defect in the device adapter.
+
+Five manual selections then succeeded through the existing controller adapter: Enter painting, Settings, Done, request Return to the gallery, and confirm Return to the gallery. The recorded phases include Choosing → Story → Paused → Story → Paused → Closing. No visit was kept. This is bounded simulator controller evidence; it does not verify real hands, the complete hands-only experience, physical tracking or Quest performance.
+
+Working setup: both sources Controller, Point & click on, Compatibility mode on, ISDK pointer offset off. Move the cursor until the in-app plaque highlights, then press/release. With the current native automation tool, a short drag followed by a separate click supplied that movement. Do not start a press off-target and sweep onto a control expecting release to select it: Sankofa intentionally requires a press to begin on the same control.
+
+Meta's [point-and-click documentation](https://developers.meta.com/vr/documentation/unreal/xrsim-point-and-click/) recommends compatibility mode for applications without submitted depth or with imprecise default aiming. This build has depth submission disabled; no rendering, device input or SDK package setting was changed to make the verification pass. There is no Interaction SDK Ray Interactor in this app, so its specific pose offset stays off.
+
+Local evidence is `artifacts/simulator-input-fix/input-trace.jsonl`, `input-latest.json`, `manual-selection-evidence.json`, and the removed read-only observer under `observer-source/`. Raw controller input remains ignored. The wall placard overlap remains a separate confirmed presentation issue to correct.
