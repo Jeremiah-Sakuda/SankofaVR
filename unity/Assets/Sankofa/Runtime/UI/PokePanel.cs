@@ -73,6 +73,20 @@ namespace Sankofa.Runtime.UI
 
         public void AddFingertip(Func<Vector3?> fingertip) => fingertips.Add(fingertip);
 
+        /// <summary>Creates a modal with the same readable style, without copying live buttons or gestures.</summary>
+        public PokePanel CreateSibling(Transform parent, string title, Vector2 size, int columnCount)
+        {
+            var panel = new GameObject(title).AddComponent<PokePanel>();
+            panel.transform.SetParent(parent, false);
+            panel.buttonMaterial = buttonMaterial; panel.plaqueBodyMaterial = plaqueBodyMaterial;
+            panel.plaqueDepth = plaqueDepth; panel.labelFont = labelFont; panel.labelMaterial = labelMaterial;
+            panel.labelColor = labelColor; panel.labelSize = labelSize; panel.glow = glow;
+            panel.buttonSize = size; panel.gap = gap; panel.columns = columnCount;
+            panel.pressDepth = pressDepth; panel.releaseDepth = releaseDepth; panel.minPressInterval = minPressInterval;
+            panel.hoverDepth = hoverDepth; panel.idle = idle; panel.hover = hover; panel.pressed = pressed;
+            return panel;
+        }
+
         bool hidden;
         bool primaryLayout;
 

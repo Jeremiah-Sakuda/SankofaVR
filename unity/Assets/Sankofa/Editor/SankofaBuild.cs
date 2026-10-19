@@ -13,12 +13,12 @@ namespace Sankofa.EditorTools
     /// </summary>
     public static class SankofaBuild
     {
-        public const string OutputName = "Sankofa-LivingGallery.apk";
+        public const string OutputName = "Sankofa-StoryTable.apk";
 
         [MenuItem("Sankofa/Build APK")]
         public static void BuildMain()
         {
-            Build(SankofaSceneBuilder.GalleryScene, OutputName);
+            Build(SankofaSceneBuilder.StoryTableScene, OutputName);
         }
 
         [MenuItem("Sankofa/Comparison/Build Hearth APK")]
@@ -32,6 +32,9 @@ namespace Sankofa.EditorTools
 
         [MenuItem("Sankofa/Build Living Gallery APK")]
         public static void BuildLivingGallery() => Build(SankofaSceneBuilder.GalleryScene, "Sankofa-LivingGallery.apk");
+
+        [MenuItem("Sankofa/Build Personal Story Table APK")]
+        public static void BuildPersonalStoryTable() => Build(SankofaSceneBuilder.StoryTableScene, OutputName);
 
         static void Build(string scene, string outputName)
         {

@@ -38,6 +38,9 @@ namespace Sankofa.Runtime.Input
         /// <summary>The button this pointer rests on, if any.</summary>
         public string Hovered { get; private set; }
 
+        /// <summary>New modal panels share the same checked pointer path as the permanent controls.</summary>
+        public void ConfigurePanels(PokePanel[] targets) => panels = targets ?? new PokePanel[0];
+
         void Update()
         {
             source = Read(out var pointer, out var strength);

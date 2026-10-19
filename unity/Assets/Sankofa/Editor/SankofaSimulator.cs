@@ -7,12 +7,18 @@ namespace Sankofa.EditorTools
     /// <summary>
     /// Runs a selected scene in Play mode against the Meta XR Simulator (installed at /Applications/MetaXRSimulator.app).
     /// From a terminal, with the editor closed:
-    /// Unity -noaudio -projectPath unity -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayLivingGallery
+    /// Unity -noaudio -projectPath unity -executeMethod Sankofa.EditorTools.SankofaSimulator.PlayStoryTable
     /// The simulator exercises flow, audio, visuals and wiring; it is not evidence of device tracking, comfort or performance.
     /// </summary>
     public static class SankofaSimulator
     {
         const string ActivateMenu = "Window/Meta/Meta XR Simulator/Activate";
+
+        [MenuItem("Sankofa/Play Personal Story Table in XR Simulator")]
+        public static void PlayStoryTable()
+        {
+            Play(SankofaSceneBuilder.StoryTableScene);
+        }
 
         [MenuItem("Sankofa/Play Living Gallery in XR Simulator")]
         public static void PlayLivingGallery()

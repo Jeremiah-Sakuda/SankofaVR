@@ -7,6 +7,7 @@
         "Sankofa.Interaction",
         "Sankofa.Storage",
         "Oculus.VR",
+        "meta.xr.mrutilitykit",
         "Unity.TextMeshPro",
         "Unity.InputSystem"
     ],
