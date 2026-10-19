@@ -48,7 +48,8 @@ namespace Sankofa.EditorTools
             // The build carries the commit it was made from, logged at start, so an APK is traceable to its source.
             var version = PlayerSettings.bundleVersion;
             var commit = Commit(repository);
-            PlayerSettings.bundleVersion = commit != null ? $"{version}+{commit}" : version;
+            // A previous interrupted build may have left its metadata on disk. Never append a second identity.
+            PlayerSettings.bundleVersion = commit != null ? $"{version.Split('+')[0]}+{commit}" : version;
             try
             {
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
@@ -68,6 +69,7 @@ namespace Sankofa.EditorTools
             {
                 SankofaBuildPrivacy.RestoreEditorSettings();
                 PlayerSettings.bundleVersion = version;
+                AssetDatabase.SaveAssets();
             }
         }
 
