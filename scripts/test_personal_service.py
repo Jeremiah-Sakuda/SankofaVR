@@ -88,6 +88,20 @@ class ContractTests(unittest.TestCase):
         self.assertEqual((story["mode"], reason), ("bundled", "provider_not_configured"))
         self.assertNotIn(PUBLIC_REQUEST["fragment"], json.dumps(story))
 
+    def test_imaginative_question_is_not_mislabelled_as_failed_fact_retrieval(self):
+        story, _ = PersonalStoryService(StubProvider()).create({**PUBLIC_REQUEST, "fragment": "", "question": "Imagine waiting for a companion. What might make the traveller stay?"}, Cancellation())
+        answer = story["chapters"][-1]["questions"][-1]
+        self.assertEqual(answer["label"], "What came from my question?")
+        self.assertIn("fictional possibility", answer["answer"])
+        self.assertNotIn("cannot establish an answer", answer["answer"])
+
+    def test_known_unpictured_interior_scene_is_declined(self):
+        for word in ("door", "inside", "dwelling", "homestead"):
+            proposal = bundled_proposal("journeys")
+            proposal["chapters"][0]["narration"] = "Imagined scene: The traveller waits by the " + word + "."
+            with self.subTest(word=word), self.assertRaises(ProposalError):
+                validate_proposal(proposal)
+
     def test_historical_text_source_urls_and_art_cannot_be_laundered(self):
         story, _ = PersonalStoryService().create(PUBLIC_REQUEST, Cancellation())
         mutations = [lambda s: s["chapters"][1].update(narration="An unsupported claim."), lambda s: s["chapters"][1].update(sources=["C6"]), lambda s: s["sources"][0].update(url="https://example.org/invented"), lambda s: s["chapters"][0].update(illustration="https://example.org/picture.png"), lambda s: s["chapters"][0].update(truth="historical", sources=["C1"])]

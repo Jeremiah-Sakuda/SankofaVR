@@ -130,6 +130,10 @@ def validate_proposal(data):
             # establish that all meaning in generated prose is culturally sound.
             if identity.search(narration) or re.search(r"https?://|www\.|\d", narration, re.I):
                 raise ValueError()
+            # The available illustrations show an outdoor bank. This is a bounded
+            # known-mismatch guard, not proof of complete visual/semantic continuity.
+            if re.search(r"\b(door|doorway|indoors|interior|inside|dwelling|homestead|courtyard|marketplace|building)\b", narration, re.I):
+                raise ValueError()
         return deepcopy(data)
     except (ValueError, KeyError, TypeError):
         raise ProposalError("Provider proposal failed validation") from None
@@ -159,7 +163,9 @@ def contextual_question(question):
     elif ("nairobi" in folded and re.search(r"\b(name|meaning|mean)\b", folded)) or "cool water" in folded:
         claim, label = "C1", "Context for your question: Nairobi's name"
     else:
-        return {"id": "visitor-question", "label": "Your question: evidence limit", "answer": UNANSWERED, "truth": "reconstructed", "sources": []}
+        if re.search(r"\b(ancestor|ancestors|ancestry|grandmother|grandfather|bloodline|genealogy|biography|lineage)\b", folded):
+            return {"id": "visitor-question", "label": "Where the evidence stops", "answer": UNANSWERED, "truth": "reconstructed", "sources": []}
+        return {"id": "visitor-question", "label": "What came from my question?", "answer": DISCLOSURE + "Your question guided a fictional possibility in these pages. The people and events are invented. They are not a recovered account or a verified answer about your family's past.", "truth": "reconstructed", "sources": []}
     return {"id": "visitor-question", "label": label, "answer": HISTORICAL[claim], "truth": "historical", "sources": [claim]}
 
 
