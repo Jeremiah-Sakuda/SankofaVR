@@ -241,7 +241,8 @@ namespace Sankofa.Runtime.Personal
         string SourcesText()
         {
             var references = session.State == PersonalStoryState.Sources && session.Question != null ? session.Question.Sources : session.Chapter.Sources;
-            var names = session.Story.Sources.Where(s => references.Contains(s.Id)).Select(s => s.Id + " • " + s.Title + "\n" + s.Url);
+            var names = session.Story.Sources.Where(s => references.Contains(s.Id)).Select(s => s.Id + " • "
+                + (s.Id == "C6" ? "The Origins of the Kikuyu Land Problem (1988)" : s.Title) + "\n" + s.Url);
             return TruthLabel(session.Question != null ? session.Question.Truth : session.Chapter.Truth) + "\n\n" + string.Join("\n\n", names) + "\n\nThe illustrations are contemporary reconstructions. This is one researched setting; cultural and pronunciation review remain open.";
         }
 

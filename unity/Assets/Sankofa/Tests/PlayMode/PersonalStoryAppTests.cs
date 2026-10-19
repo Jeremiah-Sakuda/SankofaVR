@@ -141,6 +141,13 @@ namespace Sankofa.Tests
             var answer = app.Session.Question.Answer;
             yield return Press("Return and recovery actions", "sources");
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Sources));
+            var shownSources = new List<string> { view.ModalText };
+            while (view.ModalPart + 1 < view.ModalPartCount)
+            {
+                yield return Press("Return and recovery actions", "modal-next");
+                shownSources.Add(view.ModalText);
+            }
+            Assert.That(string.Join(" ", shownSources), Does.Contain("C6").And.Contain("cambridge.org").And.Not.Contain("John Overton"));
             yield return Press("Return and recovery actions", "continue");
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
             Assert.That(app.Session.Question.Answer, Is.EqualTo(answer));
