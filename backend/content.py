@@ -1,0 +1,36 @@
+"""Bounded Enkare Nairobi context; community/cultural acceptance remains pending.
+
+Only these exact historical passages may enter the personal-story response. They
+mirror PersonalStoryCatalog in the engine-free core. No research files or private
+development brief are read or sent to the provider.
+"""
+
+SCHEMA = "sankofa.personal-story.v1"
+REGION = "enkare-nairobi"
+PERIOD = "1850s"
+INTERESTS = ("journeys", "trade-household", "place-water")
+ART_IDS = ("scenery-atlas", "cast-atlas", "modern-river")
+HISTORICAL = {
+    "C1": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters. Spelling and pronunciation still need review by a Maa speaker.",
+    "C6": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
+    "C7": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
+}
+SOURCES = {
+    "C1": {"id": "C1", "title": "Nairobi City County Assembly: clean drinking water motion", "url": "https://nairobiassembly.go.ke/motion/provision-of-free-clean-drinking-water-in-hotels-and-other-public-areas/"},
+    "C6": {"id": "C6", "title": "John Overton (1988): The Origins of the Kikuyu Land Problem", "url": "https://www.cambridge.org/core/journals/african-studies-review/article/abs/origins-of-the-kikuyu-land-problem-land-alienation-and-land-use-in-kiambu-kenya-18951920/01BDC3BCB4D2A9AC40F00F52500F1916"},
+    "C7": {"id": "C7", "title": "National Museums of Kenya: 28 Incredible Containers Used by Kenyan Communities", "url": "https://artsandculture.google.com/story/_gUx7TIiep4KKA"},
+}
+DISCLOSURE = "Imagined scene: "
+ACCOUNT_DISCLOSURE = "Visitor-provided account, not independently verified: "
+UNANSWERED = "Imagined scene: This telling cannot establish an answer to your question from its reviewed context. A personal account is not independent historical evidence."
+
+
+def coverage():
+    return {
+        "schema": SCHEMA,
+        "regions": [{"id": REGION, "label": "Enkare Nairobi, Kenya", "periods": [PERIOD], "interests": list(INTERESTS)}],
+        "language": "en",
+        "review_status": "Draft sourced context; family, community and pronunciation review pending.",
+        "capabilities": {"generated_text": True, "approved_illustrations": True, "generated_images": False, "generated_audio": False, "live_conversation": False},
+        "privacy": "This service stores no story requests and logs no request content. Live generation sends the fragment and question to Google; provider retention and applicable terms require separate review.",
+    }
