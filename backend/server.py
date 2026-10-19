@@ -46,6 +46,12 @@ class PersonalStoryService:
                 reason = error.code
             except ProposalError:
                 reason = "provider_invalid_response"
+            except Cancelled:
+                raise
+            except Exception:
+                # Adapter failures must not strand the complete authored path or
+                # expose provider exception text that may contain personal input.
+                reason = "provider_unavailable"
         if cancellation.event.is_set():
             raise Cancelled()
         return compose_story(request, bundled_proposal(request.interest), "bundled"), reason

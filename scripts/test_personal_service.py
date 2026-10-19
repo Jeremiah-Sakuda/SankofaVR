@@ -40,7 +40,7 @@ class ContractTests(unittest.TestCase):
                 StoryRequest.parse({**PUBLIC_REQUEST, **changes})
 
     def test_duplicate_keys_and_nonfinite_json_rejected(self):
-        for raw in ['{"region":"Nairobi","region":"Accra"}', '{"value":NaN}']:
+        for raw in ['{"region":"Nairobi","region":"Accra"}', '{"value":NaN}', "[" * 10000 + "]" * 10000]:
             with self.assertRaises(ValueError):
                 strict_json(raw)
 
@@ -88,7 +88,7 @@ class ContractTests(unittest.TestCase):
                 validate_story(changed)
 
     def test_provider_proposal_must_be_narrow_and_disclosed(self):
-        mutations = [lambda p: p.update(sources=[SOURCES["C1"]]), lambda p: p["chapters"][0].update(truth="historical"), lambda p: p["chapters"][0].update(narration="This happened."), lambda p: p["chapters"][0].update(illustration="modern-river"), lambda p: p["chapters"][0].update(narration="Imagined scene: Your ancestors built this place."), lambda p: p["chapters"][0].update(narration="Imagined scene: Look at https://example.com."), lambda p: p["chapters"][0].update(narration="Imagined scene: <b>Read this</b>.")]
+        mutations = [lambda p: p.update(sources=[SOURCES["C1"]]), lambda p: p.update(title="Your ancestors lived here"), lambda p: p["chapters"][0].update(title="Your grandfather was a trader"), lambda p: p["chapters"][0].update(truth="historical"), lambda p: p["chapters"][0].update(narration="This happened."), lambda p: p["chapters"][0].update(illustration="modern-river"), lambda p: p["chapters"][0].update(narration="Imagined scene: Your ancestors built this place."), lambda p: p["chapters"][0].update(narration="Imagined scene: Look at https://example.com."), lambda p: p["chapters"][0].update(narration="Imagined scene: <b>Read this</b>.")]
         for mutate in mutations:
             proposal = bundled_proposal("journeys")
             mutate(proposal)
@@ -115,6 +115,14 @@ class ContractTests(unittest.TestCase):
                 raise ProviderError("provider_timeout")
         story, reason = PersonalStoryService(Deadline()).create(PUBLIC_REQUEST, Cancellation())
         self.assertEqual((story["mode"], reason), ("bundled", "provider_timeout"))
+
+    def test_unexpected_adapter_exception_does_not_expose_input(self):
+        class Broken:
+            def generate(self, request, cancellation):
+                raise RuntimeError("synthetic input that must not reach client")
+        story, reason = PersonalStoryService(Broken()).create(PUBLIC_REQUEST, Cancellation())
+        self.assertEqual((story["mode"], reason), ("bundled", "provider_unavailable"))
+        self.assertNotIn("synthetic input", json.dumps(story))
 
 
 class FakeResponse:

@@ -27,7 +27,10 @@ def strict_json(raw):
                 raise ValueError("Duplicate JSON property")
             result[key] = value
         return result
-    return json.loads(raw, object_pairs_hook=pairs, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite JSON value")))
+    try:
+        return json.loads(raw, object_pairs_hook=pairs, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite JSON value")))
+    except (RecursionError, UnicodeError):
+        raise ValueError("Invalid JSON encoding or nesting") from None
 
 
 def text(value, limit, *, empty=False):
@@ -89,6 +92,9 @@ def validate_proposal(data):
         if not isinstance(data, dict) or set(data) != {"title", "chapters"}:
             raise ValueError()
         text(data["title"], 100)
+        identity = re.compile(r"your ancestor|your bloodline|your tribe|your lineage|your family lived|your family came from|your grandmother was|your grandfather was|you descend from|this proves your|historically verified|verified by ai", re.I)
+        if identity.search(data["title"]):
+            raise ValueError()
         chapters = data["chapters"]
         if not isinstance(chapters, list) or len(chapters) != 2:
             raise ValueError()
@@ -96,12 +102,14 @@ def validate_proposal(data):
             if not isinstance(chapter, dict) or set(chapter) != {"title", "narration", "illustration"}:
                 raise ValueError()
             text(chapter["title"], 100)
+            if identity.search(chapter["title"]):
+                raise ValueError()
             narration = text(chapter["narration"], 1000)
             if not narration.startswith(DISCLOSURE) or chapter["illustration"] not in {"scenery-atlas", "cast-atlas"}:
                 raise ValueError()
             # Reject obvious capability/identity laundering. These checks cannot
             # establish that all meaning in generated prose is culturally sound.
-            if re.search(r"https?://|www\.|\d|your ancestors|your ancestor was|your bloodline|your tribe|your lineage|your family lived|your family came from|your grandmother was|your grandfather was|you descend from|this proves your|historically verified|verified by ai", narration, re.I):
+            if identity.search(narration) or re.search(r"https?://|www\.|\d", narration, re.I):
                 raise ValueError()
         return deepcopy(data)
     except (ValueError, KeyError, TypeError):
