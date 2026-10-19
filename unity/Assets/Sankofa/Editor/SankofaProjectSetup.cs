@@ -233,6 +233,7 @@ namespace Sankofa.EditorTools
             // Manual stand remains complete; room use is optional and permission follows an explicit action.
             config.insightPassthroughSupport = OVRProjectConfig.FeatureSupport.Supported;
             config.sceneSupport = OVRProjectConfig.FeatureSupport.Supported;
+            config.systemLoadingScreenBackground = OVRProjectConfig.SystemLoadingScreenBackground.ContextualPassthrough;
             OVRProjectConfig.CommitProjectConfig(config);
         }
 
