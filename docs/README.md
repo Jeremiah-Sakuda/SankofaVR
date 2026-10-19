@@ -9,6 +9,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
 | [Living gallery scope](product/illustrated-theatre-scope.md) | Selected direction: first exhibit, frame-to-world journey, contextual griot, two threads, production limits, work packages and gates |
 | [Experience transformation plan](product/experience-transformation-plan.md) | October 18 proposal: ground-up product choices, bounded memory experiment, directed-story fallback, effort and acceptance gates |
+| [Direction stress test](reviews/2026-10-18-direction-stress-test.md) | Adversarial follow-up: challenges the memory mechanic, dramatic sequence, experiment validity, personalisation tradeoff and fallback budget |
 | [Independent product audit](reviews/2026-10-18-independent-product-audit.md) | Four fresh-context reviewers, current journey/assumptions, primary precedents and newer layout-test failures |
 | [Delivery plan](product/delivery-plan.md) | Capacity, staged proofs and release evidence |
 | [Adaptation summary](product/adaptation.md) | What the Quest version keeps, adds and defers from the original web Sankofa |
