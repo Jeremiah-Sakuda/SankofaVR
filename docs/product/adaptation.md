@@ -1,53 +1,53 @@
 # Adaptation summary
 
-October 8, 2026 · How Sankofa for Quest adapts the original web Sankofa. This summary is for the Adapted / Significantly Updated division; the organisers decide the classification. Software, simulator and device evidence are kept distinct, as elsewhere.
+October 18, 2026 · Personal story table direction · Proposed Adapted / Significantly Updated classification; organisers retain authority
 
-## Selected gallery direction
+**Sankofa — For the stories you never got to hear.** The active Quest MVP returns to the original invitation: bring an inherited fragment or personal curiosity and explore a telling with a warm griot. It gives that telling a place on a nearby table rather than leading with a fixed gallery exhibit. The [current scope](personal-story-table-mvp.md) distinguishes implemented core/service behaviour, in-progress Unity integration and unverified device/content acceptance.
 
-October 13: the user selected Sankofa as a living gallery, with *What We Carry* as its first artwork. The `LivingGallery` candidate connects the framed illustration to a spatial encounter and back again, with two authored perspective vignettes, tangible hospitality and a griot that supplies context without premature reveals. A physical memento can be explicitly deposited beside the unchanged painting; the modern continuation uses a painted background and tangible foreground. See the [current scope](illustrated-theatre-scope.md). Muted batch tests and desktop captures establish these additions in software. Device, cultural and participant acceptance remain open; the comparison below describes the preceding Quest foundation. Recorded contextual questions are not live conversation.
+## The earlier web experience
 
-## The original
+The user's [web Sankofa](https://github.com/Jeremiah-Sakuda/Sankofa), also described in its [earlier submission](https://devpost.com/software/sankofa-y47f9p), predates this competition period. Its README, inspected October 8, describes a visitor supplying seeds such as a surname, region, period and fragments; an AI griot plans and illustrates a story, narrates it and supports follow-up and live voice conversation. It uses Gemini, Google's Agent Development Kit, FastAPI, Next.js and Cloud Run. Those are predecessor capabilities, not claims about the present Quest build.
 
-[Sankofa](https://github.com/Jeremiah-Sakuda/Sankofa) is the user's own web project ([submission](https://devpost.com/software/sankofa-y47f9p)), built for the Gemini Live Agent Challenge and licensed AGPL-3.0. Its README describes the following, as read on October 8, 2026:
-
-- **What the visitor gives:** a few seeds, such as a family surname, a region, a time period and any fragments they know.
-- **What the griot makes:** an AI griot plans a narrative arc, writes text labelled Historical, Cultural or Reconstructed, makes watercolour-style period images, and narrates each segment over an ambient soundscape. It also answers follow-up questions and holds live voice conversations.
-- **The welcome:** a skippable 98-second pre-generated voice-over over a dark cinematic overlay, with timed lines, gold particles and a rotating Sankofa bird.
-- **The stack:** Gemini models orchestrated with Google's Agent Development Kit, a FastAPI backend, a Next.js front end and Cloud Run.
-
-## Timeline
-
-| Date | Event | Evidence |
+| Date | Recorded event | Evidence |
 |---|---|---|
-| March 7, 2026 | Web Sankofa repository created and first commit | GitHub repository metadata and commit history, read October 10, 2026 |
-| April 29, 2026 | Last commit to the web repository's default branch | Same |
-| September 24, 2026 | Competition entry period opens | Official rules |
-| September 30, 2026 | This repository's first commit | `git log` |
+| March 7, 2026 | Web repository created and first commit | GitHub metadata/history read October 10 |
+| April 29, 2026 | Last recorded default-branch web commit | Same historical inspection |
+| September 30, 2026 | Separate SankofaVR repository begins | Local Git history |
+| October 13–15, 2026 | Authored living-gallery implementation and muted software/simulator evidence | [Gallery scope](illustrated-theatre-scope.md) and linked reviews |
+| October 18, 2026 | Personal story table MVP authorised and implemented in stages | [Current scope](personal-story-table-mvp.md), core/service tests and decision record |
 
-The web project existed before the entry period, and the Quest adaptation has been built during it.
+This is an adaptation of a pre-existing product idea and experience. A separate repository does not establish a New Experience classification. Eligibility, selected division and the organiser's interpretation remain to be confirmed.
 
-## What carries over
+## What carries forward
 
-| From the web | In Quest |
+| Original concern | Personal story table treatment |
 |---|---|
-| The griot as narrator, and the *Sankofa* idea of going back for what was left | The fire is the griot. The visit ends with a keepsake carried home, and the continuation to today names the word |
-| Labelling what is documented, cultural or reconstructed | Each line cites the [source register](../content/enkare-nairobi/sources.md) or is reconstruction. Medium-confidence claims are held back until verified. In each era a visitor can ask "Is this a real place?" |
-| A cinematic welcome with a timed voice | A start screen, then the fire's welcome. The 98-second timing is a reference, not a gate ([PRD](prd.md)) |
-| Gemini text-to-speech narration | The same family of voice, pre-rendered for all 85 lines, so a visit needs no network |
-| Ambient soundscapes | Field recordings from Freesound, credited in the app. Nothing is synthesised and there is no music |
+| Stories a visitor never had the chance to hear | A place name, fragment or question gives the telling its direction; no genealogy or recovered-biography claim |
+| A welcoming griot and fire | A warm writing/narrator presence beside a seated illustrated journal; current checks are muted |
+| AI-created narrative from personal curiosity | Optional configured Gemini creates reconstructed scenes inside a bounded source/art contract; complete bundled tellings remain explicitly labelled |
+| Evidence labels | Exact source-linked historical passages, disclosed imagined scenes and a separate unverified-account state; no label alone verifies a model claim |
+| Follow-up and return | Contextual answers and source details; explicit Keep and reopening of realised content without another generation |
 
-## What is new
+## Meaningful Quest additions
 
-- **Spatial staging.** The visitor sits at a night fire. Each era is staged around them without moving them: the 1850s trading place at dusk, the 1899 railway camp and today's city river. They enter through the flame.
-- **Hands.** The visitor holds out a palm, carries and receives things, touches the rail, the gate or the soil, and points and pinches at panels. Every essential step also progresses passively, and controllers are optional.
-- **People and illustration.** The baseline has generic fictional 3D characters with project-made clothing and a restrained ember outline. A separate illustrated-theatre MVP replaces the first chapter's people with painted pose sheets at human scale and layers its scenery at different depths. Its physical gourd crosses from a painted palm into reachable space; an accepted invitation changes the illustration. Both forms remain drafts awaiting cultural and device review.
-- **Consequence and continuity.** The visitor's actions change what the griot says. A kept visit opens the continuation to today, carrying the visitor's own bead or seed, and replays its path and outcomes exactly (questions asked are not replayed). What the visitor lingered on rises back out of the fire at home and again as the continuation opens. Saving is explicit.
-- **Offline by design.** The full story is bundled, with no backend.
+The visitor's own room can supply the table. Local MRUK fitting aims to change the journal's height and footprint, with passthrough on compatible hardware and an adjustable virtual stand when room data is unavailable. The table is intended to support seated reach, a nearby fire, readable pages and hands controls. Actual Quest fitting, hand reliability, comfort and performance are still unverified.
 
-## What was not reused
+The new input path uses hand choices and an in-world keyboard instead of requiring speech. Application state owns consent, pause, page/question navigation, cancellation and stale-response rejection. Generated text cannot execute scene commands or load arbitrary images. A strict shared contract validates supported coverage, exact historical passages, source records, approved illustration IDs and reconstruction disclosures before a telling becomes playable.
 
-No source code, images, audio or music from the web repository are in this repository. Two pieces of the user's own writing carry over: the welcome's opening lines, and the griot's voice direction (voice Kore, delivered as a griot), which the narration script uses with a newer model; see the [asset register](../asset-register.md). Quest tooling and a few small engine-free helpers (a JSON reader, the poke gesture and panel, project setup and build guards) were ported from the user's own earlier Nafasi project; see [workspace provenance](../workspace-provenance.md). The Quest application, its story core and its content were written for this competition; see [workspace provenance](../workspace-provenance.md). Under the PRD's rules, any later import of web code would need its AGPL, contributor and dependency terms assessed first.
+The core has three complete offline tellings whose opening, development, illustration emphasis and questions differ. Optional service output is saved as realised content after explicit Keep. Reopening preserves that content and its original generated/bundled label; room placement is separate. These are implementation additions with core/service verification, not a claim that the integrated headset visit has passed.
 
-## Deliberately deferred
+## Code, assets and earlier Quest work
 
-The web project's live generation from a visitor's own family seeds and live voice conversation are not implemented. Later MVP decisions defer them; the original PRD still describes broader generated-story and conversation requirements, which remain open. Quest personalisation today comes from what the visitor chooses and does. The illustrated-theatre experiment changes presentation and does not establish acceptance of those broader requirements.
+No web source, backend, images, audio or music were imported for the new service or table MVP. The web repository's AGPL terms remain separate; any future import needs an explicit licence, contributor and dependency review. The user's opening lines and griot voice direction carried into earlier Quest narration as recorded in the [asset register](../asset-register.md). Selected Unity setup, build/privacy tooling and small engine-free helpers came from the user's earlier Nafasi project, documented in [workspace provenance](../workspace-provenance.md).
+
+Hearth, IllustratedTheatre and LivingGallery preserve earlier Quest exploration: full seated spatial scenes, painted cast/scenery, tangible exchange, authored perspectives and saved visits. The table MVP reuses approved existing Quest illustrations and engine/input foundations; it is a new primary journey. The prior [gallery scope](illustrated-theatre-scope.md), recordings, source package, saved formats, build identities and reviews remain comparison evidence. Their software/simulator results do not prove the new scene works on a headset.
+
+Existing asset rights, cultural review, pronunciation and applicable provider agreements remain open gates. No AI-generated music is used. No code import or present document certifies release rights.
+
+## Deliberately deferred and evidence needed
+
+Only Enkare Nairobi in the 1850s, three interests and English are in the current contract. Live conversation, freeform voice input, second-language delivery, runtime image generation, wider contexts and real-relative generation are deferred. A provider's broader capabilities do not establish them in the app.
+
+The core/service checkpoint has 342 passing .NET checks and actual .NET validation/roundtrip of generated and bundled service fixtures. Two actual Gemini responses to different public-synthetic fragments/questions also passed the .NET validator and roundtrip, each with four chapters. That narrow live smoke, controlled-provider tests and a complete headset visit remain different evidence. Unity integration, service deployment, actual Quest table/hands use, cultural and participant review, listening acceptance and a new clean-source APK need their own records.
+
+An adaptation comparison should show the original web flow and the new typed-input/table visit using cleared footage. It should demonstrate what different questions change, the generated/bundled distinction, consent, hands, physical placement and exact reopening. No public upload or submission is authorised by this document.

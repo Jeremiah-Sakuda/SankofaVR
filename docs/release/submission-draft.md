@@ -1,62 +1,72 @@
 # Sankofa — submission draft
 
-Prepared October 14, 2026. This is editable submission copy, not a published entry or a declaration of eligibility. Replace the pending evidence fields below before submission. The [release record](candidate.md) tracks actual verification.
+Prepared October 18, 2026 · Personal story table MVP · Local draft only; not a published entry or eligibility declaration
+
+This copy follows the [current scope](../product/personal-story-table-mvp.md). Unity integration and release acceptance are in progress. Confirm every implemented/device statement against the final candidate before publishing. The available Devpost browser session is logged out; no live entry has been edited or submitted. The prior gallery [release record](candidate.md) remains evidence for that earlier build.
+
+## Tagline
+
+**Sankofa — For the stories you never got to hear.**
 
 ## Short description
 
-Step into stories time nearly left behind. Sankofa turns a painting into a spatial encounter, where what you carry and what you remember change your place in the story.
+Bring an inherited fragment or a question to a warm fire. Sankofa turns your curiosity into an illustrated telling beside you, with sourced history, openly imagined scenes and a story you can choose to keep.
 
 ## About the experience
 
-Sankofa is a living gallery. Its first artwork, *What We Carry*, imagines a meeting between two women near the water that would give Nairobi its name. Wambui arrives with less flour than she promised. Naserian remembers something the painting cannot show.
+A place name. A fragment of a family story. A question you never got to ask.
 
-A warm voice invites you closer. The painting opens into layered scenery around your seat. A gourd leaves an illustrated palm and comes within reach. You can receive it and help set down the flour, or remain a guest and watch. The women make their own agreement; your participation changes their hospitality and what the experience later remembers about your visit.
+Sankofa begins with what you bring. A warm griot, present as a small fire, welcomes you to a story table. Choose an interest or type a question with your hands. The telling unfolds as illustrated pages, with historical context and imagined scenes clearly distinguished. You can pause, open a contextual question, look at the sources and continue at your own pace.
 
-Two memories reveal different sides of the same encounter. Returning to the unchanged painting gives it a new meaning. An explicit keepsake records the visit beside its exhibit. You can revisit the other memory in a shorter telling, replay the kept telling and actions in the current staging, or follow the water into an imagined contemporary garden.
+The first context is Enkare Nairobi in the 1850s. Journeys and encounters, trade and household life, and place and water lead to different tellings. When the optional online service is configured and available, Gemini creates reconstructed scenes around the visitor's curiosity inside a bounded historical and visual inventory. Otherwise complete prepared tellings are available and clearly labelled bundled. No fallback is presented as a newly generated story.
 
-The story distinguishes documented context from theatrical reconstruction before entry. The women, their bargain and the bead are fictional. The Akan origin of the name Sankofa is acknowledged separately from the Kenyan setting. Cultural and pronunciation review must be completed before this draft describes the content as reviewed.
+On compatible Quest hardware, the journal and fire can sit in the visitor's room. Local table fitting is intended to adjust the experience to a nearby surface; an adjustable virtual stand keeps the visit available without room data. This hardware behaviour is still awaiting actual-device acceptance.
+
+At the end, keeping the story is your choice. Reopening a kept telling uses its saved words, illustration references, answers and sources without asking a model to rewrite it.
+
+Sankofa does not recover ancestors, recreate a real relative or claim that an invented scene happened to your family. A personal account remains an account. Historical passages have bounded source references; imaginative scenes are labelled. The title's Akan origin and the Kenyan setting are distinct contexts, and cultural review remains an explicit release gate.
 
 ## What makes this spatial
 
-A framed image becomes a place with scenery at different depths, tangible foreground objects and spatial sound. The central encounter moves an object between painted hands, reachable space and the space between the women. The frame remains a recognizable point of return. These actions connect a visitor to a story without asking them to decide another community's moral position.
+The story has a place beside the visitor: a nearby journal, earlier pages and a small fire. Hands select, type, turn pages and open questions without a required microphone. A real table should affect height and usable space, while the virtual stand provides seated recovery. The submission demonstration must show these behaviours in the actual candidate, including their fallbacks; a desktop composition does not establish real-room placement or hand reliability.
 
-## What is implemented
+## Implemented checkpoint and open integration
 
-- Unity application with one authored English exhibit, two memory threads and a modern continuation.
-- Hand receive, touch and selection adapters; passive alternatives, one-hand input paths, captions, pause, recenter and reduced motion.
-- Context questions bounded by the current story's reveal state.
-- Local, explicit Keep, replacement disclosure and a second deposit before overwriting a visit; saved realised plans support replay and continuation.
-- Authored narration and visual assets bundled in the application; no runtime generation, live AI conversation or network service is required for this exhibit.
+- An engine-free personal-story model, strict JSON boundary, exact historical/source checks and approved local illustration IDs.
+- Three complete bundled tellings with different openings and developments; optional configured Gemini service adapter for reconstructed scenes, controlled-provider tests and loopback contract checks.
+- Session rules for request cancellation, stale replies, pause, contextual questions and reopening saved realised content.
+- New Unity story-table builder/view, hands keyboard and local MRUK placement adapters; application/persistence integration and final runtime checks are in progress.
 
-Software coverage is established separately from hands-on device acceptance. Replace these testing statements with the actual verified hardware result before publishing.
+At this checkpoint 342 .NET tests passed, and service fixtures passed the actual .NET parser/validator and roundtrip. These are software checks. Two actual Gemini responses to different public-synthetic fragments/questions also passed the .NET validator and roundtrip. This narrow live smoke, the final Unity suite, current APK, actual Quest use and participant/cultural acceptance remain separate evidence. Current checks are muted; narration-service code does not establish playback or listening acceptance.
 
 ## Adapted Experience lineage
 
-The earlier [web Sankofa](https://github.com/jeremiah-Sakuda/sankofa) supplies the product's concern for stories at risk of being forgotten, warm oral storytelling and the invitation to sit with a fire. SankofaVR is a separate Unity implementation. Web source code, backend and media have not been imported; the original introduction/delivery direction is reused as recorded in project provenance.
+The earlier [web Sankofa](https://github.com/Jeremiah-Sakuda/Sankofa) established the invitation to bring fragments to an AI griot. SankofaVR is a separate Unity implementation. No web code, backend or media were imported for this MVP. The [adaptation summary](../product/adaptation.md) records the predecessor and earlier Quest gallery experiments.
 
-The meaningful additions are embodied frame-to-world storytelling, tangible exchange with illustrated figures, two spatial memory vignettes, truthful hand/passive consequences and an exhibit-side return/replay system. A comparison video should show the web predecessor and the VR additions, using only cleared material. Do not represent this as a web codebase port. Sponsor acceptance of the selected division and the eligible baseline remains unconfirmed.
+The proposed additions are a nearby illustrated story table, hands-accessible typed input, meaningful local surface fitting with recovery, bounded validated generation, clear offline capability labels and explicit reopening of realised content. The prior gallery's tangible exchanges remain comparison work. Confirm division/eligibility with the final evidence; this draft does not claim organiser approval.
 
 ## Technologies and asset disclosure
 
-Unity 6000.3.25f1, Meta XR Core, OpenXR, TextMeshPro and an engine-independent C# story/interaction/storage layer. Recorded narration uses Google Cloud Text-to-Speech, Gemini 3.1 Flash TTS preview, Kore. Illustrations were requested through the built-in OpenAI image-generation tool; it does not expose an exact model identifier. No AI-generated music is used. Native geometry, field-recording edits and asset provenance are described in the asset register. Retain required third-party attribution in the release.
+Unity 6000.3.25f1, Meta XR/OpenXR, MR Utility Kit 207, TextMeshPro, engine-free C# modules and an optional Python/Google Gemini service. Historical context and local illustration IDs are constrained by a shared contract. Existing illustrations were requested through the built-in OpenAI image-generation tool; an exact model identifier was not exposed. Dynamic image generation, live voice conversation, speech input and a second language are deferred. An optional narration adapter requires configuration and separate rights/listening acceptance. No AI-generated music is used. Retain applicable asset and font attributions from the [asset register](../asset-register.md).
 
-## Judge instructions draft
+## Judge instructions draft — verify against the final build
 
-Launch into the gallery while seated. Choose *Wambui · before her journey*. Follow the open-palm invitation when the gourd approaches; touch the trading hide when invited. You may also let any invitation pass. After the final line, deliberately Keep beside the exhibit. Begin again to see the other memory; the previous visit is replaced only after the disclosed second deposit. Follow the water for the modern continuation. Pause and Settings remain visible below the story. Settings pause progression and provide text size, reduced motion, separate voice/ambience, caption-only narration, height/reach and recenter. No-Keep visits leave neither saved visits nor diagnostic interaction journals.
+Begin seated at the story table. Choose Enkare Nairobi, the 1850s, and an interest. Use the hands keyboard to add a short question if desired. Choose the prepared telling, or deliberately consent to online creation when a configured service is available. Read the generated/bundled label, turn a page and open a contextual question and its source details. Pause and resume. At the ending, deliberately Keep, then reopen the saved telling. Try a different interest to see the change before the ending.
 
-No microphone, cloud account or server credential is required for the bundled experience. First-launch permission behavior, fully hands-only use and independent installation must be verified on the release device.
+Use Fit my table only if supported room data is available; test Recenter and manual height controls as the fallback. Room geometry is not sent to the story service. The bundled visit does not require a microphone, personal identity or provider credential. Fully hands-only use, denied permissions, independent installation and actual device performance still require verification on the release device.
 
 ## Fields still requiring real evidence
 
 | Field | Current status |
 |---|---|
-| Meta Start eligibility/membership | User/account confirmation pending |
-| Selected division and eligible adaptation baseline | Adapted proposed; confirmation pending |
-| App ID, judge access and Competition channel | Not verified or uploaded |
-| Intended launch date | User decision pending; November 16 is an internal review target, not a promised launch |
-| Public demo URL | Not published; silent desktop software draft does not qualify as final headset/emulator footage |
-| Device/version/build and sustained performance | No connected Quest during this pass |
-| Cultural, pronunciation and first-time review | Packets prepared; no completed reviews or endorsements |
-| Rights confirmation | Input integrity verified; applicable agreements/contributor clearance pending |
+| Devpost edit destination and authenticated session | Draft only; available browser is logged out |
+| Eligibility, Meta Start membership and selected division | User/account/organiser confirmation pending |
+| New-scene APK, App ID, Competition channel and judge access | Final build/install/access record pending; older gallery APK is not the current MVP |
+| Real-provider generation and deployment | Two public-synthetic Gemini results pass .NET validation; deployed consent, access, reliability and retention review remain pending |
+| Public demonstration URL | Not published; use honest current headset or clearly identified simulator footage |
+| Quest version, table fitting, hands, comfort and sustained performance | Actual-device evidence pending |
+| Cultural, pronunciation/listening and unfamiliar-visitor review | No completed acceptance implied by software tests |
+| Asset/narration rights and applicable provider terms | Existing provenance retained; release clearance remains open |
+| Launch date | User decision pending |
 
-The [official rules](https://start-developer-competition-26.devpost.com/rules) and [FAQ](https://start-developer-competition-26.devpost.com/details/faqs) were checked October 14. Follow their current upload and video requirements; this document is not a copy of the private competition brief.
+Consult the current [official rules](https://start-developer-competition-26.devpost.com/rules) and [FAQ](https://start-developer-competition-26.devpost.com/details/faqs) before publishing. This draft does not replace those requirements or authorise an upload.

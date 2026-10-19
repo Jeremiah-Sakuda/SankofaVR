@@ -1,10 +1,28 @@
 # Sankofa — delivery and validation plan
 
-Updated October 13, 2026 · Current sprint plan for the selected living-gallery direction
+Updated October 18, 2026 · Personal story table MVP is active; prior gallery plans are preserved below
 
-The [PRD](prd.md) records the broader product requirements; the [backlog](../backlog.md#current-illustrated-theatre-sprints) contains sprint tickets. The schedule below follows the detailed living gallery scope for planning from the current build. The September baseline is preserved later in this file as history, not a description of the present repository.
+The [personal story table scope](personal-story-table-mvp.md) and [current PRD contract](prd.md#current-mvp-contract) guide delivery. The user authorised an illustrated personal telling shaped by inherited fragments/questions, a warm fire narrator, real-table presence where available, contextual follow-up and explicit save/reopen. This replaces the gallery as the primary journey. It does not delete its scenes, art, recordings or historical evidence.
 
-Current completion checkpoint (October 14): the [v0.6 candidate](../release/candidate.md) implements the remaining pacing/focal-art/caption work and prepares reviewer, hardware, rights and submission materials. The sprint calendar remains an acceptance schedule; hardware and reviewer results are still required. The d0a17bd APK noted below is historical.
+## Current personal-story sequence
+
+| Step | Current state | Exit evidence |
+|---|---|---|
+| Bounded core and content | Implemented; three distinct bundled tellings, exact approved historical passages, strict JSON/source/art validation | Core/service checkpoint: 342 .NET checks passed; generated and bundled service fixtures accepted and roundtripped by actual .NET |
+| Optional generation service | Gemini adapter and controlled-provider/loopback tests exist; two actual public-synthetic responses pass .NET validation | Retain the narrow live smoke separately from UI/deployment and content acceptance; verify invalid output, unavailable service, timeout and cancellation choose a clearly labelled fallback |
+| Unity table visit | New builder/view, keyboard and local room-placement adapters are being integrated with application state and storage | Final clean Unity checks and muted end-to-end capture of intake, consent, story, question, pause, closing, Keep, reopen and delete |
+| Actual room and hands | MRUK 207 fitting, passthrough and manual-stand fallback require hardware acceptance | Test seated hands input, denied/no-room data, table scale/orientation/reach, changed rooms, readability and sustained Quest performance |
+| Content and release | Existing art/source/narration provenance retained; current rights and cultural gates remain open | Independent content/rights review, clean-source new-scene APK, independent install, judge access and honest current footage |
+
+Protect input-to-story relevance, a complete ending, truthful evidence/capability labels, hands-only operation and offline completion. Freeform voice input, live conversation, dynamic images and a second language are explicitly deferred. Do not spend the remaining acceptance effort expanding unsupported places or eras. The configurable narration adapter does not establish listening acceptance; current implementation checks remain muted.
+
+The development service is optional and credentials stay server-side. Online creation requires consent to sending selected context and the question/fragment. Room geometry stays local. Save realised content only after Keep; reopening must never request a replacement model output.
+
+The [submission draft](../release/submission-draft.md) is prepared local copy. No Devpost update is claimed; the available browser is logged out, so publishing needs the user's accessible edit session/link and explicit publishing instruction. Existing gallery APK hashes and previous simulator checks stay attached to those builds. No new final APK, Quest or participant evidence is implied by this plan.
+
+## Preserved gallery delivery plan — October 13–15
+
+The sections below retain the prior gallery schedule and its reported checkpoints. References there to the current candidate, selected direction or next step describe that historical iteration. Their work packages and time estimates do not silently become the personal-story table plan.
 
 ## Current sprint plan
 

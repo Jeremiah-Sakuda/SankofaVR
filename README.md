@@ -1,5 +1,47 @@
 # SankofaVR
 
+**Sankofa — For the stories you never got to hear.**
+
+Bring a place name, an inherited fragment or a question. A warm griot, present as a small fire, guides an illustrated telling on a nearby table. Your curiosity changes the thread you explore. Historical context is sourced; imagined scenes remain labelled. Sankofa does not recover ancestors or invent a real relative's biography.
+
+The [personal story table MVP](docs/product/personal-story-table-mvp.md) is the active direction. It combines hands-accessible typed input, an illustrated journal, contextual questions and explicit save/reopen. On compatible Quest hardware, passthrough and local table fitting aim to give the telling a place in the visitor's room; an adjustable virtual stand remains available. Unity integration is in progress, and actual room behaviour is device-unverified.
+
+## Current status and source entry points
+
+| Piece | Personal story table MVP |
+|---|---|
+| Coverage | Enkare Nairobi, Kenya, in the 1850s; journeys, trade/household, place/water; English |
+| Personal input | Optional typed fragment or question; hands keyboard and explicit online consent; no identity or ancestry inference |
+| Story | Three distinct authored bundled tellings; optional configured Google Gemini adapter for new reconstructed scenes within fixed historical context |
+| Capability labels | `generated` only after an accepted provider result; unavailable/invalid generation is explicitly `bundled` or offers retry |
+| Questions | Bounded contextual answers and source details; live conversation and voice input are deferred |
+| Images and sound | Existing approved illustration IDs; dynamic image generation deferred; muted/caption-first verification, no AI-generated music |
+| Memory | Explicit Keep, saved realised story, reopen without generation and deletion are being integrated with the new scene |
+| Room | MRUK 207 table fitting and passthrough adapters with manual stand/recenter fallback; no room geometry sent to the story service |
+| Evidence | 342 .NET checks pass at the core/service checkpoint; service fixtures and two actual public-synthetic Gemini responses pass actual .NET validation; final Unity integration checks and Quest/content acceptance remain open |
+
+Historical text is restricted to C1/C6/C7 passages in the [source register](docs/content/enkare-nairobi/sources.md). Cultural and pronunciation acceptance remains pending. A citation or model-applied label cannot establish a new historical claim. Wider places, eras, second-language narration, dynamic images and live voice conversation remain deferred.
+
+## Launch and verify the new scene
+
+Generate `unity/Assets/Sankofa/Scenes/StoryTable.unity` with **Sankofa → Build Personal Story Table**, then open it in Unity. The builder is `SankofaSceneBuilder.BuildStoryTable`. Integration is still underway; the previous review APK and gallery captures below are not evidence for this scene. Check the [Unity guide](unity/README.md) for build/test tooling and the [current scope](docs/product/personal-story-table-mvp.md) for the acceptance gates.
+
+From the repository root, the available core and scene-generation commands are:
+
+```sh
+dotnet test dotnet/Sankofa.Tests
+python3 scripts/check_workspace.py --competition
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildStoryTable
+```
+
+The optional local service starts with `python3 -m backend.server` on loopback port 8787. Its credentials remain server-side; configuration examples are in [backend/.env.example](backend/.env.example). With no provider configured it returns an explicitly bundled response. A headset needs a separately reachable configured service; `localhost` on Quest refers to the headset. Do not expose a credential in the app or publish the development service as a production deployment. Provider access, retention and the deployed connection require their own verification. Local core composition remains available without a server.
+
+The planned competition entry remains Adapted / Significantly Updated Entertainment, with eligibility, judge access, rights and device evidence pending. The [submission draft](docs/release/submission-draft.md) is editable local copy; no Devpost update or public submission has occurred.
+
+## Earlier living-gallery candidate
+
+The following records the October 13–15 gallery candidate and its earlier theatre/3D comparisons. These scenes, recordings, art and evidence are preserved. Their reported checks and APK identities apply to those builds, not the new personal story table.
+
 **Sankofa — Step inside the story.**
 
 Sankofa focuses on stories time nearly left behind: everyday lives and relationships, made legible through specific cultural context and honest imaginative telling. Its living art gallery for Meta Quest lets you encounter a painting, enter its composition, experience a story that responds to your perspective and actions, then return to the same work understanding it differently. **What We Carry** is the first exhibit. The griot supplies context without revealing the story ahead of time; the fire remains its presence inside the artwork. Entry and exploration work while seated.
@@ -30,7 +72,7 @@ Its facts come from a [source register](docs/content/enkare-nairobi/sources.md).
 
 **SankofaVR** is the repository name; **Sankofa** is the product.
 
-## Current status and source entry points
+### Gallery status and source entry points (historical)
 
 | Piece | LivingGallery candidate |
 |---|---|
@@ -43,19 +85,20 @@ Its facts come from a [source register](docs/content/enkare-nairobi/sources.md).
 
 Replay preserves the saved realised text, retained recordings and resolved actions. It uses the current stage art/choreography; questions and interruption timing are excluded. It never generates replacement narration.
 
-Open **`unity/Assets/Sankofa/Scenes/LivingGallery.unity`**. The standard **Build APK** command now builds the gallery. For silent source verification/building from the repository root:
+Open **`unity/Assets/Sankofa/Scenes/LivingGallery.unity`**. For this comparison, use the explicit **Build Living Gallery APK** command; the default build target may change with the active MVP. For silent source verification/building from the repository root:
 
 ```sh
 dotnet test dotnet/Sankofa.Tests
 python3 scripts/check_workspace.py --competition
 python3 scripts/audit_gallery_assets.py
 "/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildLivingGallery
-"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildMain
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildLivingGallery
 ```
 
 The generated APK is `artifacts/Sankofa-LivingGallery.apk`, kept local. Follow the [Unity guide](unity/README.md) for editor/runtime tests and the [device protocol](docs/testing/gallery-next-evidence-session.md) for actual hardware acceptance. The planned entry remains Adapted / Significantly Updated Entertainment; account/division confirmation is pending.
 
-The sections below are **historical comparison experiences**, not the shipped gallery status or default launch instructions.
+The following theatre and 3D records predate this gallery candidate.
+
 
 ## Earlier illustrated-theatre MVP
 

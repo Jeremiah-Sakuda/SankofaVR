@@ -1,4 +1,6 @@
-# Sankofa living gallery product scope
+# Sankofa living gallery product scope — comparison record
+
+October 18 status: the [personal story table MVP](personal-story-table-mvp.md) is now the active product direction. This document preserves the October 13–15 gallery design, implementation and evidence. Its references to the current candidate or release apply to that earlier gallery iteration; they do not describe the new table MVP. Existing gallery content and scenes remain available for comparison.
 
 October 13, 2026 · Gallery direction selected by the user; implementation and acceptance pending · Runtime baseline inspected: `6c3b356`
 

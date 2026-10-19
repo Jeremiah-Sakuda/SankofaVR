@@ -1,5 +1,53 @@
 # Sankofa — product requirements
 
+Version 1.2 · October 18, 2026 · Personal story table MVP authorised; integration and acceptance in progress
+
+**Sankofa — For the stories you never got to hear.**
+
+Sankofa welcomes a visitor who has an inherited fragment, a place name or a personal question. A warm griot, present as a fire, guides an illustrated telling on a nearby table. Curiosity shapes the story; sourced history, visitor accounts and reconstruction remain distinguishable. The experience does not infer ancestry or generate a real relative's biography.
+
+The [personal story table scope](personal-story-table-mvp.md) is the active implementation contract. It replaces the living gallery as the primary journey. *What We Carry*, LivingGallery, IllustratedTheatre and Hearth remain comparison experiences with their original evidence. The earlier requirements below are retained for provenance; their wider ambitions are deferred where the current disposition explicitly says so. This revision is an authorised scope change, not a claim that those requirements were completed.
+
+## Current MVP contract
+
+| Requirement | Active behaviour and acceptance |
+|---|---|
+| SK-01 — Welcome and griot | A concise, warm invitation from the fire leads to personal curiosity. Writing and optional configured narration preserve uncertainty and disclosure; no required humanoid or recorded family impersonation |
+| SK-02 — Hands | Choose, type, confirm, read, ask, pause, save, reopen, delete and exit using hands, with one-hand alternatives and no required microphone; device acceptance remains open |
+| SK-03 — Input and coverage | Region, period, interest and optional typed fragment/question. No required surname. Confirm before online transmission. Only Enkare Nairobi in the 1850s is supported; unknown contexts fail explicitly |
+| SK-04 — Personal story | `journeys`, `trade-household` and `place-water` change the opening and development before the ending. Optional configured Gemini creates bounded reconstructed scenes; the complete local alternative is explicitly labelled bundled |
+| SK-05 — Integrity | Exact approved historical passages cite C1/C6/C7. Reconstructed scenes are labelled imagined. Visitor accounts never become verified history, and no name or location establishes genealogy |
+| SK-06 — Language and captions | English interface and text are active. Second-language acceptance is explicitly deferred. Current verification is muted/caption-first; optional narration requires a separate listening and rights pass |
+| SK-07 — Spatial presentation | An illustrated journal and fire occupy a nearby story table. Gallery frame entry/return is retained comparison work, not the current MVP journey |
+| SK-08 — Participation | Deliberate selection, page control and contextual questions shape exploration. Physical flour exchange is not claimed for the new table scene |
+| SK-09 — Questions | Authored or service-supplied bounded contextual answers and source details return to the same chapter. Live freeform conversation, voice input and speech recognition are deferred |
+| SK-10 — Application authority | Validate stories before display; the application owns state, cancellation, pause and permitted actions. Late provider replies cannot replace a newer request |
+| SK-11 — Assets | Approved existing local illustrations only. Dynamic image generation is deferred. No AI-generated music |
+| SK-12 — Memory | Explicit Keep stores realised content. Reopen reads that content without new generation; new exploration is a separate action. Provide deletion and visible save failure |
+| SK-13/14 — Recovery | A complete labelled bundled story works without a service. Preserve choices for retry, reject invalid outputs and avoid silent saves or substitutions |
+| SK-15 — Comfort | Seated use, legible text, one-hand paths, pause, recenter and manual height adjustment; verify actual-device reach, passthrough and rendering |
+| SK-16 — Data | Consent before cloud transmission; no room geometry in story requests. Minimise saved personal data and verify provider retention before stronger privacy claims |
+| SK-17 — Room presence | Optional local MRUK table fitting changes placement and footprint. Missing/denied room data leaves an adjustable virtual stand usable |
+| SK-18 — Release evidence | Separate core/service tests, Unity checks, simulator captures, actual Quest evidence, cultural review and rights/release acceptance. Publish accurate capability and adaptation disclosures |
+
+## Current release boundary
+
+One source-bounded Enkare Nairobi context, the 1850s, three interests, English, approved existing art, typed hands input, contextual follow-up and explicit save/reopen form the MVP. Wider histories, freeform voice input, live conversation, a second language, dynamic images and genealogy are deferred. No interface or submission copy may imply those capabilities exist because a model or TTS provider supports them elsewhere.
+
+A complete telling has an opening, development and ending. The bundled composer selects three authored chapters; the optional service produces a validated telling with fixed historical context and reconstructed scenes. A fragment informs the question explored without turning an imagined character into an ancestor. A model label is not independent verification.
+
+The table supports personal presence in a real room when compatible hardware and room data are available. Full seated use survives denied permissions or unavailable surfaces. No raw room data is exported to the story service. MR fitting is device-unverified at this revision.
+
+## Current evidence and completion gate
+
+The core/service checkpoint has 342 passing .NET checks and generated/bundled service fixtures accepted by the real .NET parser and validator. Those checks demonstrate bounded content, distinct bundled tellings, cancellation/session behaviour and replay data. Unity integration is in progress; no final new-scene runtime, Quest, cultural, participant or listening acceptance is claimed here. Two actual Gemini responses to different public-synthetic fragments/questions also passed the .NET validator and roundtrip. This narrow provider smoke does not establish general quality or the integrated visit.
+
+The MVP is complete only after the [scope's acceptance gates](personal-story-table-mvp.md#evidence-and-next-acceptance) pass or any exceptions are explicitly accepted and reflected in public claims. The [delivery plan](delivery-plan.md) and [submission draft](../release/submission-draft.md) track the remaining work.
+
+## Prior v1.1 gallery contract and broader ambitions — historical
+
+The following October 13 text preserves the prior gallery scope, broader P0 ambitions and original proposed gates. Its statements of current direction refer to that version. The current contract above explicitly replaces the gallery journey and defers the wider voice/language requirements; neither prior gallery implementation nor this revision fulfils them automatically.
+
 Version 1.1 · October 13, 2026 · Living gallery authored software candidate; content and device validation pending
 
 **October 13 direction update:** the user selected Sankofa as a living gallery, with *What We Carry* as its first artwork, and retained the griot as a narrator who fills contextual gaps without revealing the story ahead of time. The [living gallery scope](illustrated-theatre-scope.md) defines the current candidate: frame-to-world entry, two authored perspectives, tangible hospitality, contextual questions and a meaningful return to the painting. The new v0.5.0 gallery candidate implements the authored frame journey and two perspectives in software; its cultural, participant and device acceptance remains open. The v0.3.0 theatre is retained for comparison. Generated plans, freeform input, live conversation and additional-language acceptance remain broader requirements below, unfulfilled by this narrower candidate.
