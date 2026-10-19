@@ -1,72 +1,79 @@
-# Sankofa — submission draft
+# Sankofa — Devpost draft
 
-Prepared October 18, 2026 · Personal story table MVP · Local draft only; not a published entry or eligibility declaration
+October 18–19, 2026 · Current personal story table MVP · Prepared copy; not published or submitted
 
-This copy follows the [current scope](../product/personal-story-table-mvp.md). Unity integration and release acceptance are in progress. Confirm every implemented/device statement against the final candidate before publishing. The available Devpost browser session is logged out; no live entry has been edited or submitted. The prior gallery [release record](candidate.md) remains evidence for that earlier build.
+This draft replaces the earlier gallery pitch. It reflects the [current scope](../product/personal-story-table-mvp.md) and [implementation record](../reviews/2026-10-18-personal-table-iteration.md). The Devpost session available during this work is signed out, and the edit destination remains unconfirmed. No live entry has been changed. The proposed division remains Adapted / Significantly Updated Entertainment, subject to eligibility and organiser classification.
 
 ## Tagline
 
-**Sankofa — For the stories you never got to hear.**
+**For the stories you never got to hear.**
 
 ## Short description
 
-Bring an inherited fragment or a question to a warm fire. Sankofa turns your curiosity into an illustrated telling beside you, with sourced history, openly imagined scenes and a story you can choose to keep.
+Bring a question to the fire. Explore an illustrated telling of history on a table beside you, shaped by your curiosity, with sourced context and imagined scenes.
 
-## About the experience
+## Inspiration
 
-A place name. A fragment of a family story. A question you never got to ask.
+A story does not always survive as a story. Sometimes all that remains is a place name, an object, or a question nobody thought to ask.
 
-Sankofa begins with what you bring. A warm griot, present as a small fire, welcomes you to a story table. Choose an interest or type a question with your hands. The telling unfolds as illustrated pages, with historical context and imagined scenes clearly distinguished. You can pause, open a contextual question, look at the sources and continue at your own pace.
+The original web Sankofa invited people to bring those fragments to a warm storyteller. We wanted to give that invitation a physical place: a small fire, a journal within reach, and a telling you can spend time with in your own room.
 
-The first context is Enkare Nairobi in the 1850s. Journeys and encounters, trade and household life, and place and water lead to different tellings. When the optional online service is configured and available, Gemini creates reconstructed scenes around the visitor's curiosity inside a bounded historical and visual inventory. Otherwise complete prepared tellings are available and clearly labelled bundled. No fallback is presented as a newly generated story.
+Sankofa takes its name from the Akan idea of going back to retrieve what matters. Our first researched setting is Kenyan: Enkare Nairobi in the 1850s. The name's origin and the story's setting remain distinct. The ambition is broad; this prototype deliberately begins with one context.
 
-On compatible Quest hardware, the journal and fire can sit in the visitor's room. Local table fitting is intended to adjust the experience to a nearby surface; an adjustable virtual stand keeps the visit available without room data. This hardware behaviour is still awaiting actual-device acceptance.
+## What it does
 
-At the end, keeping the story is your choice. Reopening a kept telling uses its saved words, illustration references, answers and sources without asking a model to rewrite it.
+Choose journeys, household life and exchange, or place and water. Add a question with a hands-accessible keyboard, or begin with a complete prepared telling.
 
-Sankofa does not recover ancestors, recreate a real relative or claim that an invented scene happened to your family. A personal account remains an account. Historical passages have bounded source references; imaginative scenes are labelled. The title's Akan origin and the Kenyan setting are distinct contexts, and cultural review remains an explicit release gate.
+With the optional online service connected, your curiosity shapes the tension and outcome of two imagined scenes. The telling begins with the fictional situation, brings in documented context, and returns to the people and their decision. Changing only the question has produced different fictional situations and outcomes in the actual app: waiting for a late companion in one telling, facing a smaller flour delivery in another.
 
-## What makes this spatial
+Illustrations keep the experience coherent. You turn pages, explore bounded contextual questions and sources, pause, and read at your own pace. The fire is the griot's visible presence. Optional narration reads the accepted words; captions remain available throughout. There is no required microphone or live voice conversation.
 
-The story has a place beside the visitor: a nearby journal, earlier pages and a small fire. Hands select, type, turn pages and open questions without a required microphone. A real table should affect height and usable space, while the virtual stand provides seated recovery. The submission demonstration must show these behaviours in the actual candidate, including their fallbacks; a desktop composition does not establish real-room placement or hand reliability.
+On supported Quest hardware, passthrough can keep your room present. Fit my table requests local scene access and uses a nearby surface's height and dimensions to place the journal. An adjustable stand, height controls and Recenter provide a complete fallback. Actual room fitting and hands comfort still require headset acceptance.
 
-## Implemented checkpoint and open integration
+At the ending, Keep is a deliberate choice. Reopening uses the same realised words, illustration references, questions and sources, without generating a replacement. You can replace or forget the one story kept on that device. Generated voice is transient, so a reopened generated telling may be caption-only.
 
-- An engine-free personal-story model, strict JSON boundary, exact historical/source checks and approved local illustration IDs.
-- Three complete bundled tellings with different openings and developments; optional configured Gemini service adapter for reconstructed scenes, controlled-provider tests and loopback contract checks.
-- Session rules for request cancellation, stale replies, pause, contextual questions and reopening saved realised content.
-- New Unity story-table builder/view, hands keyboard and local MRUK placement adapters; application/persistence integration and final runtime checks are in progress.
+Historical passages use a bounded source inventory. Imagined scenes are labelled as fiction; the experience does not recover relatives or establish ancestry. Wider places, languages and personal accounts need their own sources and review.
 
-At this checkpoint 342 .NET tests passed, and service fixtures passed the actual .NET parser/validator and roundtrip. These are software checks. Two actual Gemini responses to different public-synthetic fragments/questions also passed the .NET validator and roundtrip. This narrow live smoke, the final Unity suite, current APK, actual Quest use and participant/cultural acceptance remain separate evidence. Current checks are muted; narration-service code does not establish playback or listening acceptance.
+## How we built it
 
-## Adapted Experience lineage
+The Unity application separates the story contract, application session, local persistence, XR input and presentation. A strict shared boundary checks supported context, exact historical passages, source identity and local illustration IDs before accepting a telling. The application owns navigation and cancellation; a late provider response cannot replace a newer visit.
 
-The earlier [web Sankofa](https://github.com/Jeremiah-Sakuda/Sankofa) established the invitation to bring fragments to an AI griot. SankofaVR is a separate Unity implementation. No web code, backend or media were imported for this MVP. The [adaptation summary](../product/adaptation.md) records the predecessor and earlier Quest gallery experiments.
+An optional Python service connects to Google Gemini and Cloud Text-to-Speech. Provider credentials remain on the server. Both client transports support limited service access credentials. The service uses fixed historical material and a small illustrated setting; it does not generate arbitrary 3D worlds or load model-selected URLs. Prepared stories remain complete when generation is unavailable, with accurate capability labels.
 
-The proposed additions are a nearby illustrated story table, hands-accessible typed input, meaningful local surface fitting with recovery, bounded validated generation, clear offline capability labels and explicit reopening of realised content. The prior gallery's tangible exchanges remain comparison work. Confirm division/eligibility with the final evidence; this draft does not claim organiser approval.
+MR Utility Kit supports optional local table fitting. Room geometry stays in that adapter and never enters a story request. A kept story is separate from room placement.
 
-## Technologies and asset disclosure
+## What changed from the original Sankofa
 
-Unity 6000.3.25f1, Meta XR/OpenXR, MR Utility Kit 207, TextMeshPro, engine-free C# modules and an optional Python/Google Gemini service. Historical context and local illustration IDs are constrained by a shared contract. Existing illustrations were requested through the built-in OpenAI image-generation tool; an exact model identifier was not exposed. Dynamic image generation, live voice conversation, speech input and a second language are deferred. An optional narration adapter requires configuration and separate rights/listening acceptance. No AI-generated music is used. Retain applicable asset and font attributions from the [asset register](../asset-register.md).
+The [original web project](https://github.com/jeremiah-Sakuda/sankofa) established personal curiosity and the warm griot. SankofaVR is a separate Unity implementation; this MVP imports no web code, backend or media. The additions are spatial presentation, hands-accessible intake, local surface fitting and recovery, bounded validated generation, transparent offline completion and explicit realised-content replay. Earlier Quest gallery/theatre experiments are preserved as comparison records. The [adaptation summary](../product/adaptation.md) records that lineage.
 
-## Judge instructions draft — verify against the final build
+## Assets and tools
 
-Begin seated at the story table. Choose Enkare Nairobi, the 1850s, and an interest. Use the hands keyboard to add a short question if desired. Choose the prepared telling, or deliberately consent to online creation when a configured service is available. Read the generated/bundled label, turn a page and open a contextual question and its source details. Pause and resume. At the ending, deliberately Keep, then reopen the saved telling. Try a different interest to see the change before the ending.
+Unity 6000.3.25f1, Meta XR/OpenXR and MR Utility Kit 207, TextMeshPro, engine-free C# modules, and the optional Python/Google service. Existing painted illustrations were produced with the OpenAI image-generation tool; the tool did not expose the exact model identifier. Prepared narration uses Google Cloud Text-to-Speech, `gemini-3.1-flash-tts-preview`, Kore. Provenance and unresolved release terms are recorded in the [asset register](../asset-register.md). No AI-generated music is used.
 
-Use Fit my table only if supported room data is available; test Recenter and manual height controls as the fallback. Room geometry is not sent to the story service. The bundled visit does not require a microphone, personal identity or provider credential. Fully hands-only use, denied permissions, independent installation and actual device performance still require verification on the release device.
+## Current verification — update before publication
 
-## Fields still requiring real evidence
+349 core, 32 service, 36 editor and 16 table runtime checks pass. An additional actual authenticated Unity HTTP smoke uses two public-synthetic question-only requests under the same selected interest and fetches/decodes real narration while remaining muted. These checks establish bounded software and transport behaviour. They do not establish listening quality, unfamiliar-visitor relevance, cultural acceptance or Quest usability/performance.
+
+[Current build identity and limitations](candidate.md) must accompany a published entry. Public hosting, independent installation, judge access, rights, cultural/pronunciation review and actual-device acceptance remain open. The checked-in Android scene has no live endpoint/access credential and can complete prepared tellings offline.
+
+## Judge instructions — draft
+
+Begin seated. Choose an interest and optionally add a short question. Read a prepared telling, or inspect the complete online confirmation and deliberately choose Agree & create when the release service is configured. Turn a page, explore a contextual question and its sources, return to the same reading position, and pause/resume. At the ending, re-read or Keep. Reopen the same telling, then try another interest or question.
+
+Try Fit my table when room access is available, then Recenter and the adjustable stand. Declining scene access must leave the visit usable. Narration is optional and begins disabled in the current review build.
+
+## Fields requiring actual release evidence
 
 | Field | Current status |
 |---|---|
-| Devpost edit destination and authenticated session | Draft only; available browser is logged out |
-| Eligibility, Meta Start membership and selected division | User/account/organiser confirmation pending |
-| New-scene APK, App ID, Competition channel and judge access | Final build/install/access record pending; older gallery APK is not the current MVP |
-| Real-provider generation and deployment | Two public-synthetic Gemini results pass .NET validation; deployed consent, access, reliability and retention review remain pending |
-| Public demonstration URL | Not published; use honest current headset or clearly identified simulator footage |
-| Quest version, table fitting, hands, comfort and sustained performance | Actual-device evidence pending |
-| Cultural, pronunciation/listening and unfamiliar-visitor review | No completed acceptance implied by software tests |
-| Asset/narration rights and applicable provider terms | Existing provenance retained; release clearance remains open |
-| Launch date | User decision pending |
+| Devpost destination and authenticated edit session | Unconfirmed / signed out; this is prepared copy only |
+| Eligibility, Start membership and final division | User/account/organiser confirmation pending |
+| Competition release channel, independent installation and judge access | Not uploaded or verified |
+| Configured HTTPS service | Local authenticated Google transport verified; public deployment/access/retention review pending |
+| Demonstration URL | Not published; use current actual headset or clearly identified simulator footage |
+| Quest hands, surface fitting, readability, reach and sustained minimum 60 fps | Actual-device evidence pending |
+| Cultural, source, pronunciation/listening and unfamiliar-visitor review | Acceptance pending |
+| Applicable asset/provider terms | Provenance recorded; release clearance pending |
+| Launch date and freeze/access plan | Final release decision pending |
 
-Consult the current [official rules](https://start-developer-competition-26.devpost.com/rules) and [FAQ](https://start-developer-competition-26.devpost.com/details/faqs) before publishing. This draft does not replace those requirements or authorise an upload.
+The [official rules](https://start-developer-competition-26.devpost.com/rules) and [FAQ](https://start-developer-competition-26.devpost.com/details/faqs) control submission and adaptation requirements. This draft is neither an eligibility declaration nor authorisation to submit the final entry.

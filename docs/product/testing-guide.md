@@ -1,4 +1,32 @@
-# Living gallery review build
+# Personal story table review
+
+October 18–19, 2026 · Active scene `StoryTable` · Local APK `artifacts/Sankofa-StoryTable.apk`
+
+Read the [current candidate identity](../release/candidate.md) and [MVP scope](personal-story-table-mvp.md). A built APK is not an installed or accepted release. All software verification has been muted. Do not enable Read aloud during the current no-playback review.
+
+## Complete seated visit
+
+1. Start seated in a clear space. The adjustable stand should be in front of you. Use Recenter and Options/height controls if needed. Select with a fingertip or point and pinch; one hand should suffice. Controllers are optional.
+2. Read the supported place/period. Choose an interest. Use Edit my question to type a short curiosity or fragment; inspect its preview. Cancel leaves the previous accepted text unchanged; Done accepts the local edit. Nothing is sent while typing. The heading shows the 500-character limit.
+3. Read a prepared story for complete offline use. Online creation first displays the full selected request and names the Sankofa/Google path. More text exposes long confirmation content. Agree & create is deliberate; returning to choices must send nothing. The checked-in Android scene has no live service endpoint/token, so release online use needs separate HTTPS configuration.
+4. Read the capability and fiction/context labels. Continue reading traverses full measured text parts before the next chapter. Previous page returns within a chapter or to its predecessor. Explore a contextual question and source detail; return to the same reading position. Contextual answers are bounded, not live factual conversation.
+5. Pause/resume. Verify story/keyboard/Keep actions stay blocked while paused and headset focus loss does not override a visitor pause. Try larger text and still pages. Do not activate narration in this muted review.
+6. At the ending, Previous page allows rereading before Keep. Leave without Keep and verify no new story persists. Keep stores one realised telling. Replacing names the previous story and asks again; cancellation preserves it.
+7. Reopen the kept telling with its original generated/prepared label. Words, local illustrations, answers and sources must match. No replacement story or remote speech request occurs on replay. Generated voice can therefore be unavailable; prepared voice is a local resource. Forget requires confirmation and leaves no retained story to reopen.
+
+## Room and failure checks
+
+Fit my table requests local scene access only after selection. A suitable near-horizontal surface must change height/footprint and hide the virtual stand. Decline permission, omit room data, use an unsuitable surface and try a different room. Each should leave Recenter and the manual stand usable. The app does not initiate a new room scan or send geometry to its service. Confirm physical reach, table containment, depth and stable placement on actual hardware.
+
+Interrupt online creation, leave and immediately begin a new request. A late result must not replace the new visit. Test unavailable service and labelled prepared recovery. A failed/corrupt local shelf must offer local retry/return, never start online creation. Failed saving must preserve the open story and show failure rather than claim success.
+
+Record build/device, assistance, errors, discomfort, completion, what the person believes their input changed, and whether they want another telling. Do not count direct method tests or simulated pointer actions as real-hand/user evidence. Profile sustained Quest rendering against the official minimum 60 fps; measured editor cadence is not device evidence. Source/cultural, pronunciation/listening, rights and unfamiliar-visitor acceptance remain open.
+
+The following walkthrough is preserved for the earlier gallery build only.
+
+---
+
+# Preserved living-gallery review build
 
 October 14, 2026 · Package **v0.7.0** · Local APK: `artifacts/Sankofa-LivingGallery.apk`. Read the [candidate identity](../release/candidate.md) before installation. Competition-channel access and installation on a separate Quest are not yet established. This walkthrough describes implemented software, not accepted hardware behaviour.
 

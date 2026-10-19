@@ -2,7 +2,7 @@
 
 October 18, 2026 · Personal story table direction · Proposed Adapted / Significantly Updated classification; organisers retain authority
 
-**Sankofa — For the stories you never got to hear.** The active Quest MVP returns to the original invitation: bring an inherited fragment or personal curiosity and explore a telling with a warm griot. It gives that telling a place on a nearby table rather than leading with a fixed gallery exhibit. The [current scope](personal-story-table-mvp.md) distinguishes implemented core/service behaviour, in-progress Unity integration and unverified device/content acceptance.
+**Sankofa — For the stories you never got to hear.** The active Quest MVP returns to the original invitation: bring an inherited fragment or personal curiosity and explore a telling with a warm griot. It gives that telling a place on a nearby table rather than leading with a fixed gallery exhibit. The [current scope](personal-story-table-mvp.md) distinguishes implemented core/service behaviour, integrated Unity behaviour and unverified device/content acceptance.
 
 ## The earlier web experience
 
@@ -48,6 +48,6 @@ Existing asset rights, cultural review, pronunciation and applicable provider ag
 
 Only Enkare Nairobi in the 1850s, three interests and English are in the current contract. Live conversation, freeform voice input, second-language delivery, runtime image generation, wider contexts and real-relative generation are deferred. A provider's broader capabilities do not establish them in the app.
 
-The core/service checkpoint has 342 passing .NET checks and actual .NET validation/roundtrip of generated and bundled service fixtures. Two actual Gemini responses to different public-synthetic fragments/questions also passed the .NET validator and roundtrip, each with four chapters. That narrow live smoke, controlled-provider tests and a complete headset visit remain different evidence. Unity integration, service deployment, actual Quest table/hands use, cultural and participant review, listening acceptance and a new clean-source APK need their own records.
+Current verification is 349 core, 32 service, 36 editor and 16 table-runtime checks, plus actual authenticated Unity generation and muted narration transport with public-synthetic input. Different typed questions with the same interest change fictional situations and outcomes before the ending. These narrow software checks do not establish general model quality, a deployed service or a complete headset visit. See the [implementation record](../reviews/2026-10-18-personal-table-iteration.md); actual Quest table/hands use, cultural/participant/listening review and release access remain open.
 
 An adaptation comparison should show the original web flow and the new typed-input/table visit using cleared footage. It should demonstrate what different questions change, the generated/bundled distinction, consent, hands, physical placement and exact reopening. No public upload or submission is authorised by this document.

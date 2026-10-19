@@ -1,6 +1,6 @@
 # Sankofa — product requirements
 
-Version 1.2 · October 18, 2026 · Personal story table MVP authorised; integration and acceptance in progress
+Version 1.2 · October 18, 2026 · Personal story table software MVP integrated; device and human acceptance open
 
 **Sankofa — For the stories you never got to hear.**
 
@@ -40,7 +40,7 @@ The table supports personal presence in a real room when compatible hardware and
 
 ## Current evidence and completion gate
 
-The core/service checkpoint has 342 passing .NET checks and generated/bundled service fixtures accepted by the real .NET parser and validator. Those checks demonstrate bounded content, distinct bundled tellings, cancellation/session behaviour and replay data. Unity integration is in progress; no final new-scene runtime, Quest, cultural, participant or listening acceptance is claimed here. Two actual Gemini responses to different public-synthetic fragments/questions also passed the .NET validator and roundtrip. This narrow provider smoke does not establish general quality or the integrated visit.
+Current software evidence is 349 core, 32 service, 36 editor and 16 table-runtime checks, plus an opt-in actual authenticated Unity HTTP test for two question-only Google generations and muted narration download/cache. These are not device, listening, cultural or participant acceptance. The [implementation record](../reviews/2026-10-18-personal-table-iteration.md) separates completed checks and remaining gates.
 
 The MVP is complete only after the [scope's acceptance gates](personal-story-table-mvp.md#evidence-and-next-acceptance) pass or any exceptions are explicitly accepted and reflected in public claims. The [delivery plan](delivery-plan.md) and [submission draft](../release/submission-draft.md) track the remaining work.
 

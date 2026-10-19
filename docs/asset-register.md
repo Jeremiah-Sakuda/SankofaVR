@@ -1,6 +1,8 @@
 # Asset register
 
-The current build uses project-made, generated and SDK-provided material; Quaternius CC0 characters and animation; four scanned CC0 materials and one OFL typeface, which the user approved for download on October 4, 2026; twelve CC0 and CC BY field recordings from Freesound, approved on October 7, 2026, for every sound but the voice; and narration generated with Google's Gemini text-to-speech on the user's own Google Cloud project. Machine-readable provenance with SHA-256 hashes sits beside them in `sources.json`. The PRD's other visual and audio tools remain candidates. AI-generated music is excluded.
+The repository’s current and preserved comparison builds use project-made, generated and SDK-provided material; Quaternius CC0 characters and animation; four scanned CC0 materials and one OFL typeface, which the user approved for download on October 4, 2026; twelve CC0 and CC BY field recordings from Freesound, approved on October 7, 2026, for every sound but the voice; and narration generated with Google's Gemini text-to-speech on the user's own Google Cloud project. Machine-readable provenance with SHA-256 hashes sits beside them in `sources.json`. The PRD's other visual and audio tools remain candidates. AI-generated music is excluded.
+
+The active personal-story table uses the existing painted atlas/modern illustration, font and fire inputs, project-authored journal/deck, and exact-text voice resources. The inventory also records older scene assets; inclusion here does not imply they appear in the active table. The personal-table additions and remaining terms/acceptance status are recorded below.
 
 | Asset | Purpose | Origin | Rights basis | Review status |
 |---|---|---|---|---|
@@ -61,3 +63,12 @@ October 15 museum pass: `SankofaGalleryArchitecture.cs`, `GallerySurface.shader`
 
 
 October 15 pavilion follow-up: vault ribs/roof leaves, open arcades, horizon, garden arrangement and plaque bodies are project-authored geometry. Courtyard trees/shrubs reuse `SankofaMeshes` and the existing project foliage texture/material input, with a separate candidate material; the sky reuses the authored sky shader. No new image, recording, font or external library was downloaded or generated. These are decorative fictional surroundings and make no claim to depict a reviewed traditional building or specific landscape.
+
+
+## Personal story table — October 18–19, 2026
+
+The journal/deck, stand, warm fire arrangement, paper/ink materials, controls and table atmosphere are project-authored Unity geometry and rendering. The illustrations reuse the existing draft cast/scenery atlases and imagined modern river; reuse does not close their cultural/output-term review. No dynamic image generation, new portrait input, music generation or imported web media is used.
+
+`Resources/Narration/personal-table` contains nine recordings generated on the existing Google Cloud project with Google Cloud Text-to-Speech, `gemini-3.1-flash-tts-preview`, voice Kore. `Content/personal-table.narration.json` records exact text, text/audio SHA-256, direction, provider and durations. They were generated without playback. Applicable service/output terms and actual cultural, pronunciation and listening acceptance remain open. The application defaults to captions with narration disabled. Optional service narration is generated from an accepted story and not retained in a kept-story JSON.
+
+MR Utility Kit `com.meta.xr.mrutilitykit` 207.0.0 is pinned from Meta's public scoped registry, alongside the existing Core SDK. Its package licences and dependencies remain in the package; this is an SDK dependency, not project-authored code or device evidence. Fonts and reused shaders retain the earlier attributions. No personal fragment, room capture, provider credential or private competition brief is a runtime asset.

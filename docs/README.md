@@ -7,6 +7,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | Document | What it holds |
 |---|---|
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
+| [Personal table implementation and panel](reviews/2026-10-18-personal-table-iteration.md) | Current software/live-service evidence, implemented judge findings and remaining acceptance |
 | [Personal story table MVP](product/personal-story-table-mvp.md) | Active direction: inherited fragments/questions, illustrated table presence, bounded generation/fallback, hands input and explicit save/reopen |
 | [Living gallery scope](product/illustrated-theatre-scope.md) | Preserved gallery comparison: first exhibit, frame-to-world journey, two threads, production limits and historical gates |
 | [Experience transformation plan](product/experience-transformation-plan.md) | Earlier October 18 proposal: ground-up product choices, bounded memory experiment, directed-story fallback, effort and acceptance gates |

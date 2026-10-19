@@ -1,8 +1,22 @@
 # Modular architecture
 
-September 30, 2026 · Implementation contract. The story core, application flow, gesture logic, Unity presentation and editor tooling exist for the first slice. It plays the draft Enkare Nairobi package; see the [development guide](development.md#implementation-layout-and-checks). A local file store for kept visits implements the persistence contract. Narration is rendered offline by a production script, not by a runtime adapter. Runtime provider and content-service adapters do not exist yet.
+October 18, 2026 · The active implementation is the [personal story table](product/personal-story-table-mvp.md). Engine-free validation/session/storage, a Unity composition host and an optional Python/Google service are implemented. Earlier theatre/gallery sections below preserve their original boundaries and comparison behaviour.
 
 Sankofa should support different reviewed stories, languages and service providers without rebuilding the visitor journey. The [PRD](product/prd.md) defines behaviour and acceptance; the [delivery plan](product/delivery-plan.md) sequences delivery. Competition strategy stays in the ignored local brief described in [development](development.md#local-competition-context).
+
+## Personal story table implementation
+
+`Core/Personal` owns `sankofa.personal-story.v1`, strict request/story JSON, coverage, source identity and exact historical wording. `BundledPersonalStoryComposer` provides three complete authored tellings. The optional Python service accepts the same request and composes provider fiction with fixed source-bounded context. Neither an evidence label nor a model citation verifies a new fact. Generated prose still requires editorial and cultural review.
+
+`PersonalStorySession` owns request versions, accepted content, chapter/question/source navigation, pause and replay. Cancellation invalidates older replies. `PersonalStoryApp` is the Unity composition point: it wires the session to HTTP transport, local persistence, narration and the view. `StoryTableView` renders accepted state and owns measured text pagination; it never calls a provider. `StoryTableKeyboard` is a local input adapter. Existing fingertip/pointer panels emit actions to the application.
+
+`StoryTablePlacement` owns the manual stand, optional passthrough and explicit local MRUK table fitting. Surface dimensions change the deck footprint/height. No room geometry enters the story request or saved story. Missing room data, denial, a failed load or an eight-second load timeout (permission waits are bounded separately) returns to the manual stand. Scene fitting has not been verified on hardware.
+
+`PersonalStoryStore` retains one explicitly kept realised JSON document through an atomic write, separate from historical gallery stores. It saves text, approved local art references, bounded answers and sources, not the original intake or room placement. Reopening never regenerates story text. A forgotten marker prevents restoring the former kept story. Existing illustrations are application assets, not copied into every save.
+
+Narration starts disabled. Exact text hashes address nine local prepared-story recordings. Optional generated narration is requested using a short-lived service-issued proof for an unchanged story/chapter. Generated audio is cached only in memory: a reopened generated telling can remain caption-only. Pausing, leaving and replacing a request cancel/stop its voice. Voice input and live conversation are not implemented.
+
+The service binds to loopback by default and avoids payload logging/storage. Credentials stay server-side. Its explicit Vertex configuration was exercised with public synthetic input; a configured adapter alone is not deployment evidence. The Unity Editor accepts loopback HTTP; Android requires a configured HTTPS service. Public hosting, judge access and authentication provisioning remain release work. The current Android build can complete prepared tellings without a service.
 
 ## Responsibilities and dependencies
 

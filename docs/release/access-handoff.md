@@ -1,3 +1,13 @@
+# Personal story table release access — current handoff
+
+October 18–19, 2026. Use the [StoryTable candidate record](candidate.md), [current Devpost copy](submission-draft.md) and [table walkthrough](../product/testing-guide.md). The earlier gallery account/video plan below is a historical reference; its APK and footage do not demonstrate the new experience.
+
+The local table APK completes prepared stories. Before judge access, configure a reachable HTTPS service and limited client access if online generation is included, maintain that access through judging, confirm eligibility/division, upload the exact hashed APK to the required Competition channel, and independently install it. Neither local generation nor a built file establishes that deployment. No channel upload or final entry submission has occurred.
+
+The video must show the actual current table intake, question/consent, two tellings with observable differences, contextual/source recovery, deliberate Keep/reopen and purposeful real table use if claimed. Use actual headset or clearly identified XR simulator footage, within the official duration limit. Current desktop/synthetic captures are review material, not an unlabeled substitute. Listening remains unreviewed and no sound playback was performed during implementation.
+
+---
+
 # Judge access and final demonstration handoff
 
 Prepared October 14. The [submission draft](submission-draft.md) supplies copy; the [candidate record](candidate.md) supplies source/build evidence. This handoff is prepared, not executed. No account, channel, judge installation or publication has been verified.

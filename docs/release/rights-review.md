@@ -1,3 +1,11 @@
+# Personal story table rights review — current additions
+
+October 18–19, 2026. The active table reuses the recorded draft illustrations, fonts and fire shaders. New journal/deck geometry/materials are project-authored. The optional MR Utility Kit 207 package retains its Meta package terms. Nine current prepared narration clips and six retained earlier clips have provider/model/voice/text/audio hashes in `Content/personal-table.narration.json`. No new music or original web media was imported. Runtime source display uses work title, source ID and URL without the individual C6 author name, following the conservative identifiable-person restriction; full attribution metadata remains in the register. Organiser interpretation and eligibility remain open.
+
+The [asset register](../asset-register.md) holds provenance. Hash integrity is separate from applicable account/output terms, cultural/source acceptance and voice/pronunciation/listening review; those remain open. Runtime generated narration is transient and the table service credentials stay server-side. Do not treat the older gallery-only declared-input totals below as a complete table asset audit or release clearance.
+
+---
+
 # Candidate rights and attribution review
 
 October 14, 2026. Evidence inventory and unresolved decisions, not blanket release clearance. Full contracts, reviewer notes and personal account information stay in ignored local storage.

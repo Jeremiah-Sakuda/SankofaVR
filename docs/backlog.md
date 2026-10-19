@@ -4,7 +4,22 @@ September 30, 2026 · [PRD v1.0](product/prd.md) · [Delivery plan](product/deli
 
 A checked item means the named artifact exists. It does not imply device, content or participant acceptance. Some runtime requirements now exist in software with the draft Enkare Nairobi package; none has device, content or participant acceptance. The historical Nafasi backlog remains in the previous workspace; see [provenance](workspace-provenance.md).
 
-## Current illustrated-theatre sprints
+## Current personal story table
+
+October 18: the [personal story table MVP](product/personal-story-table-mvp.md) controls current work. Earlier gallery/theatre tickets below are comparison records, not an additional active sprint. Checkmarks mean implemented/software-checked only.
+
+- [x] PT-01 — Bounded coverage, strict story/request contract, approved historical text/source/art checks and three prepared tellings.
+- [x] PT-02 — Optional Gemini generation, truthful fallback, cancellation/timeout handling and real-provider public-synthetic fixtures.
+- [x] PT-03 — Table intake, hands keyboard, explicit online consent, measured reading pages, questions, source return, pause and options.
+- [x] PT-04 — Explicit local Keep, replacement confirmation, saved reopening and Forget, separated from room placement.
+- [x] PT-05 — Adjustable stand, explicit MRUK table fitting with fallback, default-muted local/optional online narration adapters.
+- [x] PT-06 — Complete independent simulated panel rounds, resolve actionable MVP findings and publish exact software/build evidence. Three reviewers found no new actionable MVP P0/P1 in consecutive rounds 6 and 7; the [record](reviews/2026-10-18-personal-table-iteration.md) preserves limits and remaining acceptance gates.
+- [ ] PT-07 — Configure authenticated HTTPS service and actual build/judge access; verify service failure and consent on the deployed path.
+- [ ] PT-08 — Test real hands, seated reach, table fitting/denial, unfamiliar rooms, stereo readability and sustained minimum 60 fps on Quest.
+- [ ] PT-09 — Obtain unfamiliar-visitor personal-relevance/return feedback and cultural, source, pronunciation/listening and rights acceptance.
+- [ ] PT-10 — Publish current Devpost copy to the confirmed authenticated draft; record eligibility/division, independent installation and honest footage before submission.
+
+## Previous illustrated-theatre sprints
 
 October 13: use the [detailed product scope](product/illustrated-theatre-scope.md) and [current delivery plan](product/delivery-plan.md#current-sprint-plan). The user selected the living gallery framing: *What We Carry* is the first exhibit, with a contextual griot. Parts of the items below now exist in software; no tick implies participant, cultural or device acceptance. The earlier S1–S5 tickets remain as historical evidence below and are not an additional workload. Generated planning, live conversation and additional narration language remain open in the broader PRD.
 

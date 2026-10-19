@@ -1,17 +1,38 @@
 # Unity application
 
-**Status — October 13, 2026:** the `LivingGallery` authored candidate has passed software checks and has a local review APK. The current gallery checks are muted batch tests and desktop captures, with no simulator launched during this iteration. No Quest, participant or cultural/listening acceptance is claimed. Earlier comparison evidence is retained below.
+**Status — October 18–19, 2026:** `StoryTable` is the active personal-story MVP. The complete caption-first flow is integrated, with 349 core, 32 service, 36 editor and 16 table-runtime checks passing, plus a separate authenticated actual Unity HTTP generation/narration smoke. All verification is muted. Quest, human, cultural and listening acceptance remain open. Earlier gallery evidence is preserved below.
 
 | Item | Version or choice |
 |---|---|
 | Editor | Unity 6000.3.25f1 (6.3 LTS), the version the previous Nafasi project used with Meta XR Core 207 |
-| Meta XR | `com.meta.xr.sdk.core` 207.0.0 from Meta's npm registry (scoped registry in `Packages/manifest.json`) |
+| Meta XR | `com.meta.xr.sdk.core` and `com.meta.xr.mrutilitykit` 207.0.0 from Meta's scoped registry |
 | XR runtime | Unity OpenXR 1.18.0 with the Meta Quest, Meta XR and hand interaction features; single-pass instanced (multiview) |
 | Rendering | Built-in pipeline, Vulkan, linear colour. Surfaces are lit analytically by one warm source (no Unity lights) |
-| Input | Hands first, through Meta's OpenXR hand skeleton: touch, open palm and fingertip presses, or point and pinch at a panel. Touch controllers are optional (point and pull the trigger). Passthrough off: full VR is the baseline |
+| Input | Hands first, through Meta's OpenXR hand skeleton: touch, open palm and fingertip presses, or point and pinch at a panel. Touch controllers are optional (point and pull the trigger). StoryTable supports optional passthrough/local table fitting, with an adjustable virtual stand fallback |
 | Application id | `com.sankofa.quest`, provisional. A store release channel fixes it permanently; confirm before the first upload |
 
-## Living gallery
+## Personal story table
+
+Open `Assets/Sankofa/Scenes/StoryTable.unity`. The builder creates only this scene and its `Art/Generated/StoryTable` materials; it does not regenerate comparison scenes. Choose an interest, optionally type a question, then read a prepared telling or confirm the full request for online creation. Captions, measured pages, contextual questions/sources, pause, comfort controls, explicit Keep/replacement, reopen and Forget form the complete visit. Narration starts disabled. Prepared voice resources match exact text hashes; generated voice is transient and reopening can be caption-only.
+
+From the repository root:
+
+```sh
+UNITY="/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity"
+"$UNITY" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildStoryTable
+"$UNITY" -batchmode -noaudio -projectPath "$PWD/unity" -buildTarget Android -runTests -testPlatform PlayMode -testFilter 'Sankofa.Tests.PersonalStoryAppTests;Sankofa.Tests.PersonalStoryTableTests' -testResults "$PWD/artifacts/logs/story-table-playmode.xml"
+"$UNITY" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildMain
+```
+
+`BuildMain` / **Sankofa > Build APK** now writes `artifacts/Sankofa-StoryTable.apk`. **Play Personal Story Table in XR Simulator** explicitly selects this scene. A simulator launch is separate from batch tests; neither establishes Quest hands or performance. Keep `-noaudio` for muted runs.
+
+The optional [service](../backend/README.md) uses server-side Google credentials. Local Editor configuration uses `SANKOFA_STORY_SERVICE` (loopback HTTP is permitted) and `SANKOFA_STORY_ACCESS_TOKEN`. The checked-in scene has an empty endpoint/token; its Android build completes prepared tellings without a server. Android online creation requires a separately configured HTTPS deployment and limited client access. Never embed Google credentials; a shipped client access token is extractable and needs server controls/rotation. The public-synthetic live test is a separate explicit opt-in, not part of regular offline tests.
+
+On Quest, **Fit my table** requests scene permission deliberately, waits for a bounded load and aligns the deck with the selected surface axes. Denial, missing data and timeout retain the virtual stand. Real-room alignment, reach, occlusion and sustained frame rate remain hardware gates. [Current scope](../docs/product/personal-story-table-mvp.md) and [implementation record](../docs/reviews/2026-10-18-personal-table-iteration.md) distinguish software evidence from acceptance.
+
+## Earlier living gallery
+
+
 
 The candidate scene is `Assets/Sankofa/Scenes/LivingGallery.unity`, package `Content/living-gallery.json` v0.4.0. One canonical framed work opens into the same scene around the stationary seat. One wide Enter control starts the authored default without inferring a preference; two smaller gallery controls explicitly select a gourd or remembered-meeting perspective, each with a short framed vignette; looking at or receiving an object does not choose a cultural or moral position. The contextual griot and question availability preserve the later reveal; the friendship question is offered after the agreement. Flour placement changes milk hospitality, with a receive or passive path on each arrangement.
 
@@ -19,7 +40,7 @@ The closing memento can be kept by the existing panel or by receiving it, holdin
 
 ```sh
 "/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildLivingGallery
-"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildMain
+"/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaBuild.BuildLivingGallery
 ```
 
 `artifacts/Sankofa-LivingGallery.apk` is a local review build. Generation and muted batch tests do not launch the XR Simulator. The frame image is generated from the actual historical scene; the modern background is draft generated art, with [prompt and provenance](Assets/Sankofa/Art/IllustratedTheatre/modern-river-v1.sources.json). No headset or cultural acceptance is implied. Audio files are bundled for product use; they were not played during this iteration at the user's request.
@@ -49,7 +70,7 @@ The engine-free folders are also compiled and tested outside Unity by [../dotnet
 
 ## Commands
 
-**Build APK / SankofaBuild.BuildMain targets LivingGallery.** `BuildHearth` writes the explicitly named historical comparison APK. The illustrated-theatre MVP is a separate comparison scene and build. It reuses the first historical story and its continuation, with a separate local saved-visit shelf. Open **Sankofa > Build Illustrated Theatre MVP**, then Play, or use **Sankofa > Play Illustrated Theatre in XR Simulator**. **Sankofa > Build Illustrated Theatre APK** writes `artifacts/Sankofa-IllustratedTheatre.apk`. The baseline `Hearth` scene remains available for comparison.
+**Build APK / SankofaBuild.BuildMain targets StoryTable.** Use `BuildLivingGallery` for the preserved gallery. `BuildHearth` writes the explicitly named historical comparison APK. The illustrated-theatre MVP is a separate comparison scene and build. It reuses the first historical story and its continuation, with a separate local saved-visit shelf. Open **Sankofa > Build Illustrated Theatre MVP**, then Play, or use **Sankofa > Play Illustrated Theatre in XR Simulator**. **Sankofa > Build Illustrated Theatre APK** writes `artifacts/Sankofa-IllustratedTheatre.apk`. The baseline `Hearth` scene remains available for comparison.
 
 Both APKs use `com.sankofa.quest`, so installing one replaces the other application build. Their saved-visit folders are separate.
 

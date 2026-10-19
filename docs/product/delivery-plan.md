@@ -8,9 +8,9 @@ The [personal story table scope](personal-story-table-mvp.md) and [current PRD c
 
 | Step | Current state | Exit evidence |
 |---|---|---|
-| Bounded core and content | Implemented; three distinct bundled tellings, exact approved historical passages, strict JSON/source/art validation | Core/service checkpoint: 342 .NET checks passed; generated and bundled service fixtures accepted and roundtripped by actual .NET |
+| Bounded core and content | Implemented; three distinct bundled tellings, exact approved historical passages, strict JSON/source/art validation | 349 core checks passed; generated/bundled fixtures accepted by actual .NET; 32 service checks pass |
 | Optional generation service | Gemini adapter and controlled-provider/loopback tests exist; two actual public-synthetic responses pass .NET validation | Retain the narrow live smoke separately from UI/deployment and content acceptance; verify invalid output, unavailable service, timeout and cancellation choose a clearly labelled fallback |
-| Unity table visit | New builder/view, keyboard and local room-placement adapters are being integrated with application state and storage | Final clean Unity checks and muted end-to-end capture of intake, consent, story, question, pause, closing, Keep, reopen and delete |
+| Unity table visit | Integrated builder/view, keyboard, room-placement adapters, application state and local storage | 36 editor and 16 table runtime checks pass; actual authenticated Unity generation/narration smoke passes; device/human whole-visit acceptance remains open |
 | Actual room and hands | MRUK 207 fitting, passthrough and manual-stand fallback require hardware acceptance | Test seated hands input, denied/no-room data, table scale/orientation/reach, changed rooms, readability and sustained Quest performance |
 | Content and release | Existing art/source/narration provenance retained; current rights and cultural gates remain open | Independent content/rights review, clean-source new-scene APK, independent install, judge access and honest current footage |
 
@@ -50,7 +50,7 @@ Internal target remains November 16. November 17–18 is contingency, with the o
 
 ### Delivery rules and dependencies
 
-The current ticket sequence is IT-P01–IT-P11 in the [backlog](../backlog.md#current-illustrated-theatre-sprints). Critical path: prototype and story → route/interaction integration → kept return → user/device acceptance → release. Review and hardware preparation proceed alongside development; a quality governor or simulator cannot close their gates.
+The current ticket sequence is IT-P01–IT-P11 in the [backlog](../backlog.md#previous-illustrated-theatre-sprints). Critical path: prototype and story → route/interaction integration → kept return → user/device acceptance → release. Review and hardware preparation proceed alongside development; a quality governor or simulator cannot close their gates.
 
 Stick feeding, a second lobby and a catalogue browser are outside this release. Cut animal approach, peripheral scenery and decorative effects first. Simplify vignette art before deleting its unique revelation. Preserve recognizable frame/world continuity, the illustrated modern ending, spoiler-safe context, hospitality without penalty, truthful passive outcomes, cultural review and device testing. If only one thread fits, record that reduction and narrow the product claim explicitly. Do not consume the acceptance/submission reserve to disguise overruns.
 

@@ -1,4 +1,31 @@
-# Gallery candidate — current v0.7 pavilion
+# Sankofa candidate builds
+
+## Active personal story table — October 18–19, 2026
+
+Local review APK built from source **7fc1988 with a dirty working tree**. Eight pre-existing gallery/font/animation modifications from another session were preserved and excluded from these commits; documentation edits were also pending. In particular the font files used by this build were modified. This is a review artifact, not a clean-source competition freeze. The earlier gallery builds below remain historical records.
+
+| Identity | Active local artifact |
+|---|---|
+| Output | `artifacts/Sankofa-StoryTable.apk` |
+| Scene | `Assets/Sankofa/Scenes/StoryTable.unity` |
+| Android package/version | `com.sankofa.quest` / `0.1.0+7fc1988-dirty` / code 1 |
+| Architecture | ARM64 / IL2CPP |
+| Size | 65,108,788 bytes (62.09 MiB) |
+| SHA-256 | `86abd891dcfd77e8a6035ab73e244137dc91ae2553bb27d63b560e6db293792a` |
+| Result | Succeeded; zero errors, one optional OpenXR input-polling warning |
+| Build record | `artifacts/release/story-table-apk.json`; `artifacts/logs/story-table-mvp-final-build.log` |
+
+Verified APK permissions include INTERNET and USE_SCENE; Meta scene/passthrough support is optional. The development-credential sanitizer passed and editor settings were restored, including the original bundle version. Archive-name checks found no private brief/reference/LocalOnly/credential filename matches; filename checks are not a full data audit. No Google credential or live service endpoint/token is committed to the scene.
+
+**Software evidence:** 349 core, 32 service, 36 editor and 16 unique table-runtime checks pass. The last combined runtime suite passed 16/16; after the final saved-replay change all nine app cases passed again. An opt-in authenticated actual Unity HTTP test passed two public-synthetic question-only generations and a real MP3 download/decode/cache with narration disabled. A separate three-case direct-service review assessed role fidelity after a prompt fix. None establishes general model, device or listening quality. Exact reports and review limits are in the [implementation record](../reviews/2026-10-18-personal-table-iteration.md).
+
+The APK completes prepared tellings offline. Online creation on a headset needs a separately configured HTTPS deployment with limited access and judge availability. The temporary local test service was stopped and its token removed. Kept generated stories reopen their exact text/art/questions/sources locally and may remain caption-only; no remote speech is requested on replay.
+
+**Open release gates:** clean-source freeze, independent installation and Competition-channel access; HTTPS service/access/retention if online creation is included; actual Quest hands, seated reach, room fitting/denial, stereo readability and sustained minimum 60 fps; cultural/source, rights and pronunciation/listening acceptance; unfamiliar-visitor relevance and return intent; eligibility/division and honest final footage. No Quest session, sound playback, channel upload or final entry submission occurred in this iteration.
+
+---
+
+# Preserved gallery candidate — v0.7 pavilion
 
 Current review APK built from clean source **493c3aa** after the [pavilion immersion follow-up](../reviews/2026-10-15-gallery-environment.md), incorporating the [input/layout/placement follow-up](../reviews/2026-10-15-gallery-input-and-layout.md) and [production hardening](../reviews/2026-10-14-production-iteration.md). This supersedes source 5dbf149; that APK/identity and the older review builds are preserved locally under `artifacts/release/archive/`.
 

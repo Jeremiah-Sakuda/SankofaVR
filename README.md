@@ -4,7 +4,11 @@
 
 Bring a place name, an inherited fragment or a question. A warm griot, present as a small fire, guides an illustrated telling on a nearby table. Your curiosity changes the thread you explore. Historical context is sourced; imagined scenes remain labelled. Sankofa does not recover ancestors or invent a real relative's biography.
 
-The [personal story table MVP](docs/product/personal-story-table-mvp.md) is the active direction. It combines hands-accessible typed input, an illustrated journal, contextual questions and explicit save/reopen. On compatible Quest hardware, passthrough and local table fitting aim to give the telling a place in the visitor's room; an adjustable virtual stand remains available. Unity integration is in progress, and actual room behaviour is device-unverified.
+The [personal story table MVP](docs/product/personal-story-table-mvp.md) is the active direction. It combines hands-accessible typed input, an illustrated journal, contextual questions and explicit save/reopen. On compatible Quest hardware, passthrough and local table fitting aim to give the telling a place in the visitor's room; an adjustable virtual stand remains available. The complete visit is integrated and software-checked; actual room behaviour is device-unverified.
+
+![Sankofa personal story table, actual prepared telling](docs/media/story-table-reading.png)
+
+Muted desktop runtime capture with synthetic input; not headset footage. [Current entry view](docs/media/story-table-entry.png).
 
 ## Current status and source entry points
 
@@ -16,15 +20,15 @@ The [personal story table MVP](docs/product/personal-story-table-mvp.md) is the 
 | Capability labels | `generated` only after an accepted provider result; unavailable/invalid generation is explicitly `bundled` or offers retry |
 | Questions | Bounded contextual answers and source details; live conversation and voice input are deferred |
 | Images and sound | Existing approved illustration IDs; dynamic image generation deferred; muted/caption-first verification, no AI-generated music |
-| Memory | Explicit Keep, saved realised story, reopen without generation and deletion are being integrated with the new scene |
+| Memory | Explicit Keep, replacement confirmation, reopening without generation and deletion are implemented in the new scene |
 | Room | MRUK 207 table fitting and passthrough adapters with manual stand/recenter fallback; no room geometry sent to the story service |
-| Evidence | 342 .NET checks pass at the core/service checkpoint; service fixtures and two actual public-synthetic Gemini responses pass actual .NET validation; final Unity integration checks and Quest/content acceptance remain open |
+| Evidence | 349 core, 32 service, 36 editor and 16 table-runtime checks pass; authenticated actual Unity generation/narration transport passes with public synthetic input. Quest/content acceptance remains open |
 
 Historical text is restricted to C1/C6/C7 passages in the [source register](docs/content/enkare-nairobi/sources.md). Cultural and pronunciation acceptance remains pending. A citation or model-applied label cannot establish a new historical claim. Wider places, eras, second-language narration, dynamic images and live voice conversation remain deferred.
 
 ## Launch and verify the new scene
 
-Generate `unity/Assets/Sankofa/Scenes/StoryTable.unity` with **Sankofa → Build Personal Story Table**, then open it in Unity. The builder is `SankofaSceneBuilder.BuildStoryTable`. Integration is still underway; the previous review APK and gallery captures below are not evidence for this scene. Check the [Unity guide](unity/README.md) for build/test tooling and the [current scope](docs/product/personal-story-table-mvp.md) for the acceptance gates.
+Generate `unity/Assets/Sankofa/Scenes/StoryTable.unity` with **Sankofa → Build Personal Story Table**, then open it in Unity. The builder is `SankofaSceneBuilder.BuildStoryTable`. The default Build APK targets this scene and writes `artifacts/Sankofa-StoryTable.apk`. The previous gallery APK and captures below are not evidence for this scene. Check the [Unity guide](unity/README.md) for build/test tooling and the [current scope](docs/product/personal-story-table-mvp.md) for the acceptance gates.
 
 From the repository root, the available core and scene-generation commands are:
 
@@ -34,7 +38,9 @@ python3 scripts/check_workspace.py --competition
 "/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity" -batchmode -noaudio -quit -projectPath "$PWD/unity" -buildTarget Android -executeMethod Sankofa.EditorTools.SankofaSceneBuilder.BuildStoryTable
 ```
 
-The optional local service starts with `python3 -m backend.server` on loopback port 8787. Its credentials remain server-side; configuration examples are in [backend/.env.example](backend/.env.example). With no provider configured it returns an explicitly bundled response. A headset needs a separately reachable configured service; `localhost` on Quest refers to the headset. Do not expose a credential in the app or publish the development service as a production deployment. Provider access, retention and the deployed connection require their own verification. Local core composition remains available without a server.
+The optional local service starts with `python3 -m backend.server` on loopback port 8787. Its credentials remain server-side; configuration examples are in [backend/.env.example](backend/.env.example). With no provider configured it returns an explicitly bundled response. A headset needs a separately reachable configured service; `localhost` on Quest refers to the headset. Never place Google credentials in the app. A hosted service can use a limited client access token; APK contents are extractable, so limit/rotate that access and provide separate hosting controls. Do not publish the development HTTP server as production. Provider access, retention and the deployed connection require their own verification. Local core composition remains available without a server.
+
+Current checks, iteration findings and remaining gates are in the [implementation and judging record](docs/reviews/2026-10-18-personal-table-iteration.md).
 
 The planned competition entry remains Adapted / Significantly Updated Entertainment, with eligibility, judge access, rights and device evidence pending. The [submission draft](docs/release/submission-draft.md) is editable local copy; no Devpost update or public submission has occurred.
 
