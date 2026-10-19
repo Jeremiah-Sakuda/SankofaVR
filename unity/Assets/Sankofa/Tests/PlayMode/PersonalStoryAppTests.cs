@@ -177,6 +177,10 @@ namespace Sankofa.Tests
             app.StartPrepared(); yield return null;
             var first = PersonalStoryJson.Write(app.Session.Story);
             yield return ReachEnding();
+            yield return Press("Turn a page", "back");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading), "the last page remains readable before deciding to Keep");
+            Assert.That(PersonalStoryJson.Write(app.Session.Story), Is.EqualTo(first));
+            yield return ReachEnding();
             Assert.That(app.HasKept, Is.False);
             Assert.That(File.Exists(Path.Combine(directory, "kept.story")), Is.False);
             yield return Press("Turn a page", "save");
@@ -263,6 +267,31 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator LocalShelfFailuresNeverOfferAnOnlineGenerationRetry()
+        {
+            Directory.CreateDirectory(directory);
+            File.WriteAllText(Path.Combine(directory, "kept.story"), "damaged synthetic shelf");
+            app.SetSeed("Synthetic private question that has not been approved for export");
+            app.Session.Cancel(); yield return null;
+            var shelf = view.Panels.Single(p => p.Ids.Contains("reopen") && p.Ids.Contains("forget"));
+            yield return Press(shelf, "reopen");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            Assert.That(view.ModalText, Does.Contain("No story request will be sent"));
+            Assert.That(Panel("Return and recovery actions").Ids, Does.Not.Contain("retry"));
+            yield return Press("Return and recovery actions", "shelf-retry");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            yield return Press("Return and recovery actions", "shelf-return");
+            Directory.CreateDirectory(Path.Combine(directory, "kept.story.tmp")); // Deliberate local write failure.
+            yield return Press(shelf, "forget");
+            yield return Press("Return and recovery actions", "forget");
+            Assert.That(view.ModalText, Does.Contain("No story request will be sent"));
+            Assert.That(Panel("Return and recovery actions").Ids, Does.Not.Contain("retry"));
+            yield return Press("Return and recovery actions", "shelf-return");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            Assert.That(app.Seed, Does.Contain("not been approved"));
+        }
+
+        [UnityTest]
         public IEnumerator AcceptedGeneratedDtoRendersWithItsOriginalCapabilityLabel()
         {
             // Adapter injection exercises accepted rendering/state, not HTTP or proof of model generation.
@@ -275,7 +304,7 @@ namespace Sankofa.Tests
             Assert.That(app.Session.Accept(version, accepted), Is.True);
             yield return null;
             Assert.That(view.IntakeVisible, Is.False);
-            Assert.That(view.CapabilityLabel, Does.Contain("Created for your question"));
+            Assert.That(view.CapabilityLabel, Does.Contain("Generated telling"));
             Assert.That(view.Caption, Is.Not.Empty);
             Assert.That(app.HasKept, Is.False);
             Assert.That(view.ReadingPartCount, Is.GreaterThan(1));
@@ -378,7 +407,7 @@ namespace Sankofa.Tests
                 Assert.That(app.Session.Story.Mode, Is.EqualTo("generated"), "an explicit bundled fallback does not satisfy this live generation smoke");
                 Assert.That(app.Session.Story.Interest, Is.EqualTo("journeys"), "only the question changes between requests");
                 Assert.That(PersonalStoryValidator.Validate(app.Session.Story).IsValid, Is.True);
-                Assert.That(app.View.CapabilityLabel, Does.Contain("Created for your question"));
+                Assert.That(app.View.CapabilityLabel, Does.Contain("Generated telling"));
                 Assert.That(app.View.Caption, Is.Not.Empty);
                 Assert.That(app.NarrationEnabled, Is.False);
                 Assert.That(app.GetComponents<AudioSource>().All(a => !a.isPlaying && a.volume == 0), Is.True);
@@ -397,6 +426,16 @@ namespace Sankofa.Tests
             Assert.That(first[0], Is.Not.EqualTo(second[0]), "the first reconstructed action changes before the ending");
             Assert.That(first[1], Is.Not.EqualTo(second[1]), "the developed scene also changes");
             Assert.That(stories[0].Id, Is.Not.EqualTo(stories[1].Id));
+            // Exercise the actual app narration transport while remaining muted. This primes an in-memory
+            // clip; it does not enable narration or call AudioSource.Play. The live server requires the same
+            // ephemeral access token for generation and narration during this smoke.
+            var fetch = typeof(PersonalStoryApp).GetMethod("FetchVoice", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var routine = (IEnumerator)fetch.Invoke(app, new object[] { "synthetic-audio-smoke", app.ServiceEndpoint, app.Session.RequestVersion, app.Session.Chapter.Id });
+            yield return app.StartCoroutine(routine);
+            var cache = (Dictionary<string, AudioClip>)typeof(PersonalStoryApp).GetField("clips", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(app);
+            Assert.That(cache.ContainsKey("synthetic-audio-smoke"), Is.True, "authenticated actual narration transport must return a decodable clip");
+            Assert.That(app.NarrationEnabled, Is.False);
+            Assert.That(app.GetComponents<AudioSource>().All(a => !a.isPlaying && a.volume == 0), Is.True);
         }
     }
 }

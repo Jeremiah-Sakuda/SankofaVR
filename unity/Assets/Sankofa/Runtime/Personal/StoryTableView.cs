@@ -31,9 +31,10 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] Transform[] turningPages = Array.Empty<Transform>();
         [SerializeField] TMP_Text heading, subheading, capability, pageNumber, chapterTitle, caption, illustrationLabel;
         [SerializeField] TMP_Text intakeHeading, intakeSummary, seedText, detailHeading, detailBody, progressText;
+        [SerializeField] TMP_Text consentHeading, consentBody;
         [SerializeField] TMP_Text[] previousTitles = Array.Empty<TMP_Text>();
         [SerializeField] GameObject intakeRoot, readingRoot, detailsRoot, progressRoot, cloudConsentRoot;
-        [SerializeField] PokePanel routes, regions, periods, intakeActions, transport, questions, controls, detailActions, consentActions;
+        [SerializeField] PokePanel routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions;
         [SerializeField] HearthFire fire;
         [SerializeField] Illustration[] illustrations = Array.Empty<Illustration>();
         [SerializeField] Renderer customIllustration;
@@ -41,21 +42,36 @@ namespace Sankofa.Runtime.Personal
         public Action<string> RouteSelected, RegionSelected, PeriodSelected, QuestionSelected;
         public Action StartRequested, StartLocalRequested, SeedEditRequested, SourceDetailsRequested;
         public Action NextRequested, BackRequested, AskRequested, SaveRequested, PauseRequested, RecenterRequested, RoomRequested, LeaveRequested, ContinueRequested, RetryRequested;
+        public Action ReopenRequested, ForgetRequested, ComfortRequested;
         public Action<string> DecisionSelected;
 
         string selectedRoute = "trade-household", selectedRegion = "enkare-nairobi", selectedPeriod = "1850s";
         string seed = "", currentTitle = "A question worth carrying";
         bool paused, reducedMotion, canBack, canNext, canAsk, canSave, detailsOpen, intake = true;
-        bool error, closing, decisionOpen;
+        bool error, closing, decisionOpen, hasKeptStory;
+        readonly List<string> captionPages = new List<string>();
+        int captionPage, chapterIndex, chapterCount;
+        string previousCaption, previousChapterTitle;
+        float authoredCaptionSize, authoredChapterSize, authoredDetailSize;
+        readonly List<string> modalPages = new List<string>();
+        (string Id, string Label)[] modalActions = Array.Empty<(string Id, string Label)>();
+        string modalTitle, modalContent;
+        int modalPage;
+        bool modalUsesConsent;
         float pageTurn;
         Quaternion[] restingPageRotations;
 
         public Transform TableRoot => tableRoot != null ? tableRoot : transform;
-        public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, transport, questions, controls, detailActions, consentActions }.Where(p => p != null).ToArray();
+        public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Where(p => p != null).ToArray();
         public string Caption => caption != null ? caption.text : "";
         public string CapabilityLabel => capability != null ? capability.text : "";
         public bool IntakeVisible => intake;
         public bool IsPaused => paused;
+        public int ReadingPart => captionPage;
+        public int ReadingPartCount => captionPages.Count;
+        public int ModalPart => modalPage;
+        public int ModalPartCount => modalPages.Count;
+        public string ModalText => modalUsesConsent ? consentBody != null ? consentBody.text : "" : detailBody != null ? detailBody.text : "";
 
         void Awake()
         {
@@ -63,12 +79,16 @@ namespace Sankofa.Runtime.Personal
             if (regions != null) regions.Pressed += SelectRegion;
             if (periods != null) periods.Pressed += SelectPeriod;
             if (intakeActions != null) intakeActions.Pressed += IntakeAction;
+            if (keptActions != null) keptActions.Pressed += id => { if (id == "reopen") ReopenRequested?.Invoke(); else if (id == "forget") ForgetRequested?.Invoke(); };
             if (transport != null) transport.Pressed += TransportAction;
             if (questions != null) questions.Pressed += id => QuestionSelected?.Invoke(id);
             if (controls != null) controls.Pressed += ControlAction;
             if (detailActions != null) detailActions.Pressed += DetailAction;
             if (consentActions != null) consentActions.Pressed += ConsentAction;
             restingPageRotations = turningPages.Select(p => p.localRotation).ToArray();
+            authoredCaptionSize = caption != null ? caption.fontSize : 0.23f;
+            authoredChapterSize = chapterTitle != null ? chapterTitle.fontSize : 0.22f;
+            authoredDetailSize = detailBody != null ? detailBody.fontSize : 0.135f;
         }
 
         void Start() => RefreshControls();
@@ -93,6 +113,8 @@ namespace Sankofa.Runtime.Personal
         public void ShowIntake()
         {
             intake = true; closing = error = decisionOpen = detailsOpen = false;
+            modalUsesConsent = false;
+            previousCaption = previousChapterTitle = null; captionPages.Clear(); captionPage = 0;
             ShowOnly(intakeRoot);
             if (cloudConsentRoot != null) cloudConsentRoot.SetActive(false);
             SetText(chapterTitle, "Every story begins with a question");
@@ -117,8 +139,15 @@ namespace Sankofa.Runtime.Personal
         public void SetSeedText(string value)
         {
             seed = value ?? "";
-            SetText(seedText, seed.Length == 0 ? "Your question or family fragment (optional)" : seed);
             RefreshIntake();
+        }
+
+        public void SetHasKeptStory(bool value) { hasKeptStory = value; RefreshIntake(); }
+
+        public void ResetReadingPosition()
+        {
+            previousCaption = previousChapterTitle = null;
+            if (captionPages.Count > 0) SetReadingPart(0); else captionPage = 0;
         }
 
         public void ShowPreparing(string message = "Gathering the next pages…")
@@ -139,9 +168,11 @@ namespace Sankofa.Runtime.Personal
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
             intake = false; error = closing = detailsOpen = decisionOpen = false;
             ShowOnly(readingRoot);
-            SetText(pageNumber, $"PAGE {chapter.Index + 1:00} / {Mathf.Max(1, chapter.Count):00}");
+            var retainedPart = previousCaption == chapter.Caption && previousChapterTitle == chapter.Title && chapterIndex == chapter.Index ? captionPage : 0;
+            chapterIndex = chapter.Index; chapterCount = Mathf.Max(1, chapter.Count);
             SetText(chapterTitle, chapter.Title);
-            SetText(caption, chapter.Caption);
+            PaginateCaption(chapter.Caption, retainedPart);
+            previousCaption = chapter.Caption; previousChapterTitle = chapter.Title;
             SetText(illustrationLabel, chapter.ImageLabel);
             ShowIllustration(chapter.ArtKey);
             SetPreviousPages(chapter.PreviousPageTitles);
@@ -157,7 +188,7 @@ namespace Sankofa.Runtime.Personal
         public void RenderQuestion(string question, string answer, string provenanceLabel)
         {
             ShowDetails(question, answer, provenanceLabel);
-            if (detailActions != null) detailActions.Show(new[] { ("continue", "Return to the story"), ("sources", "About this answer") });
+            SetModalActions(new[] { ("continue", "Return to the story"), ("sources", "About this answer") });
         }
 
         public void ShowSourceDetails(string title, string details) => ShowDetails(title, details, "Context, your account and reconstruction are kept distinct.");
@@ -166,7 +197,7 @@ namespace Sankofa.Runtime.Personal
         {
             ShowDetails(title, message, "");
             decisionOpen = true;
-            if (detailActions != null) detailActions.Show(actions ?? Array.Empty<(string Id, string Label)>());
+            SetModalActions(actions ?? Array.Empty<(string Id, string Label)>());
         }
 
         public void ShowError(string message)
@@ -210,6 +241,16 @@ namespace Sankofa.Runtime.Personal
             RestorePages();
         }
 
+        public void SetLargeText(bool value)
+        {
+            if (caption != null) caption.fontSize = authoredCaptionSize * (value ? 1.22f : 1);
+            if (chapterTitle != null) chapterTitle.fontSize = authoredChapterSize * (value ? 1.12f : 1);
+            if (detailBody != null) detailBody.fontSize = authoredDetailSize * (value ? 1.15f : 1);
+            if (consentBody != null) consentBody.fontSize = 0.14f * (value ? 1.15f : 1);
+            if (previousCaption != null && !intake && !detailsOpen && !closing) PaginateCaption(previousCaption, captionPage);
+            if (detailsOpen) RefreshModal();
+        }
+
         public void SetControlState(bool back, bool next, bool ask, bool save)
         {
             canBack = back; canNext = next; canAsk = ask; canSave = save;
@@ -240,11 +281,10 @@ namespace Sankofa.Runtime.Personal
 
         void ShowDetails(string title, string body, string note)
         {
-            detailsOpen = true; decisionOpen = false;
+            detailsOpen = true; decisionOpen = false; modalUsesConsent = false;
             ShowOnly(detailsRoot);
-            SetText(detailHeading, title);
-            SetText(detailBody, body + (string.IsNullOrWhiteSpace(note) ? "" : "\n\n" + note));
-            if (detailActions != null) detailActions.Show(new[] { ("continue", "Return to the story") });
+            modalTitle = title; modalContent = body + (string.IsNullOrWhiteSpace(note) ? "" : "\n\n" + note); modalPage = 0;
+            SetModalActions(new[] { ("continue", "Return to the story") });
             RefreshControls();
             SetFire(Sankofa.Core.Story.FireState.Listening);
         }
@@ -256,6 +296,11 @@ namespace Sankofa.Runtime.Personal
             if (transport != null) transport.Hidden = active != readingRoot || paused;
             // The shared recovery panel is separate from both modal roots.
             if (detailActions != null) detailActions.Hidden = active != detailsRoot && active != progressRoot;
+            if (active == progressRoot && detailActions != null && progressRoot != null)
+                detailActions.transform.SetPositionAndRotation(progressRoot.transform.TransformPoint(new Vector3(0, -0.10f, -0.008f)), progressRoot.transform.rotation);
+            var preview = active == intakeRoot && seed.Length > 0;
+            if (seedText != null) seedText.gameObject.SetActive(preview);
+            if (caption != null) caption.gameObject.SetActive(!preview);
         }
 
         void RefreshIntake()
@@ -265,26 +310,48 @@ namespace Sankofa.Runtime.Personal
             if (regions != null) regions.Show(new[] { ("enkare-nairobi", "• Enkare Nairobi") });
             if (periods != null) periods.Show(new[] { ("1850s", "• Around the 1850s") });
             if (intakeActions != null) intakeActions.Show(new[] { ("local", "Read prepared story"), ("edit", seed.Length == 0 ? "Add my question" : "Edit my question"), ("create", "Create my story") });
+            if (keptActions != null) { keptActions.Show(new[] { ("reopen", "Reopen kept story"), ("forget", "Forget kept story") }); keptActions.Hidden = !hasKeptStory || paused || detailsOpen || intakeRoot == null || !intakeRoot.activeSelf; }
+            if (intakeHeading != null) intakeHeading.gameObject.SetActive(!hasKeptStory);
             var thread = selectedRoute == "journeys" ? "Journeys" : selectedRoute == "place-water" ? "Place & water" : "Trade & home";
             SetText(intakeSummary, thread + "  /  Enkare Nairobi  /  around the 1850s");
-            SetText(seedText, seed.Length == 0 ? "Your question or family fragment (optional)" : seed);
+            var previewLimit = Mathf.Min(170, seed.Length);
+            string Preview()
+            {
+                var excerpt = seed.Length > previewLimit ? seed.Substring(0, previewLimit).TrimEnd() + "…\nFull question is available with Edit my question." : seed;
+                return "Your question" + (seed.Length > previewLimit ? " (preview)" : "") + ":\n" + excerpt;
+            }
+            if (seedText != null)
+            {
+                while (previewLimit > 40 && seedText.GetPreferredValues(Preview(), seedText.rectTransform.rect.width, Mathf.Infinity).y > seedText.rectTransform.rect.height) previewLimit -= 10;
+                SetText(seedText, Preview());
+            }
+            var preview = intakeRoot != null && intakeRoot.activeSelf && seed.Length > 0;
+            if (seedText != null) seedText.gameObject.SetActive(preview);
+            if (caption != null && intakeRoot != null && intakeRoot.activeSelf) caption.gameObject.SetActive(!preview);
         }
 
         void RefreshControls()
         {
-            if (controls != null) controls.Show(new[] { ("pause", paused ? "Resume" : "Pause"), ("recenter", "Recenter"), ("room", "Fit my table"), ("leave", "Leave") });
+            var choosing = intakeRoot != null && intakeRoot.activeSelf && !paused && !detailsOpen;
+            if (routes != null) routes.Hidden = !choosing;
+            if (regions != null) regions.Hidden = !choosing;
+            if (periods != null) periods.Hidden = !choosing;
+            if (intakeActions != null) intakeActions.Hidden = !choosing;
+            if (keptActions != null) keptActions.Hidden = !choosing || !hasKeptStory;
+            if (controls != null) controls.Show(new[] { ("pause", paused ? "Resume" : "Pause"), ("recenter", "Recenter"), ("room", "Fit my table"), ("options", "Options"), ("leave", "Leave") });
             if (transport == null) return;
             var items = new List<(string Id, string Label)>();
             if (closing)
             {
+                if (canBack) items.Add(("back", "Previous page"));
                 if (canSave) items.Add(("save", "Keep this story"));
                 items.Add(("again", "Another question"));
             }
             else
             {
-                if (canBack) items.Add(("back", "Previous page"));
-                if (canNext) items.Add(("next", "Next page"));
-                if (canAsk) items.Add(("ask", "Ask a question"));
+                if (canBack || captionPage > 0) items.Add(("back", "Previous page"));
+                if (canNext || captionPage + 1 < captionPages.Count) items.Add(("next", captionPage + 1 < captionPages.Count ? "Continue reading" : "Next page"));
+                if (canAsk) items.Add(("ask", "Explore context"));
                 items.Add(("sources", "About this story"));
             }
             transport.Show(items);
@@ -319,15 +386,24 @@ namespace Sankofa.Runtime.Personal
             else if (id == "edit") SeedEditRequested?.Invoke();
             else if (id == "create")
             {
-                ShowOnly(cloudConsentRoot);
-                if (consentActions != null) consentActions.Show(new[] { ("create", "Agree & create"), ("cancel", "Back to my choices") });
+                detailsOpen = true; modalUsesConsent = true; ShowOnly(cloudConsentRoot);
+                modalTitle = "Create a story from this question";
+                var thread = selectedRoute == "journeys" ? "Journeys & encounters" : selectedRoute == "place-water" ? "Place & water" : "Trade & household";
+                modalContent = "These selections and your full question go to the Sankofa service, which uses Google Gemini when connected. Read aloud can send accepted story text to Google Cloud Text-to-Speech. Share only what you are comfortable sending. Prepared stories work offline.\n\nPlace: Enkare Nairobi (Kenya)\nPeriod: before the railway (1850s)\nInterest: " + thread + "\n\nYour question or fragment:\n" + (seed.Length == 0 ? "None supplied." : seed);
+                modalPage = 0; SetModalActions(new[] { ("create", "Agree & create"), ("cancel", "Back to my choices") });
+                RefreshControls();
             }
         }
-        void ConsentAction(string id) { if (id == "create") StartRequested?.Invoke(); else ShowIntake(); }
+        void ConsentAction(string id)
+        {
+            if (id == "modal-prev") { modalPage = Mathf.Max(0, modalPage - 1); RefreshModal(); }
+            else if (id == "modal-next") { modalPage = Mathf.Min(modalPages.Count - 1, modalPage + 1); RefreshModal(); }
+            else if (id == "create") StartRequested?.Invoke(); else ShowIntake();
+        }
         void TransportAction(string id)
         {
-            if (id == "back") BackRequested?.Invoke();
-            else if (id == "next") NextRequested?.Invoke();
+            if (id == "back") { if (!closing && captionPage > 0) SetReadingPart(captionPage - 1); else BackRequested?.Invoke(); }
+            else if (id == "next") { if (captionPage + 1 < captionPages.Count) SetReadingPart(captionPage + 1); else NextRequested?.Invoke(); }
             else if (id == "ask") AskRequested?.Invoke();
             else if (id == "save") SaveRequested?.Invoke();
             else if (id == "sources") SourceDetailsRequested?.Invoke();
@@ -338,10 +414,13 @@ namespace Sankofa.Runtime.Personal
             if (id == "pause") PauseRequested?.Invoke();
             else if (id == "recenter") RecenterRequested?.Invoke();
             else if (id == "room") RoomRequested?.Invoke();
+            else if (id == "options") ComfortRequested?.Invoke();
             else if (id == "leave") LeaveRequested?.Invoke();
         }
         void DetailAction(string id)
         {
+            if (id == "modal-prev") { modalPage = Mathf.Max(0, modalPage - 1); RefreshModal(); return; }
+            if (id == "modal-next") { modalPage = Mathf.Min(modalPages.Count - 1, modalPage + 1); RefreshModal(); return; }
             if (decisionOpen) { DecisionSelected?.Invoke(id); return; }
             if (id == "sources") SourceDetailsRequested?.Invoke();
             else if (id == "retry") RetryRequested?.Invoke();
@@ -351,6 +430,108 @@ namespace Sankofa.Runtime.Personal
         }
         void SetFire(Sankofa.Core.Story.FireState state) { if (fire != null) fire.SetState(state); }
         static void SetText(TMP_Text text, string value) { if (text != null) text.text = value ?? ""; }
+
+        void SetModalActions(IReadOnlyList<(string Id, string Label)> actions)
+        {
+            modalActions = actions.ToArray(); RefreshModal();
+        }
+
+        void RefreshModal()
+        {
+            var body = modalUsesConsent ? consentBody : detailBody;
+            var actions = modalUsesConsent ? consentActions : detailActions;
+            var root = modalUsesConsent ? cloudConsentRoot : detailsRoot;
+            var headingText = modalUsesConsent ? consentHeading : detailHeading;
+            if (body == null || actions == null || root == null) return;
+            var compact = modalActions.Length > 3;
+            void LayoutBody()
+            {
+                body.rectTransform.sizeDelta = new Vector2(0.76f, compact ? 0.09f : 0.22f);
+                body.transform.localPosition = new Vector3(0, compact ? 0.065f : 0.015f, -0.006f);
+                modalPages.Clear(); modalPages.AddRange(SplitText(body, modalContent));
+            }
+            LayoutBody();
+            if (!compact && modalPages.Count > 1 && modalActions.Length + 2 > 3) { compact = true; LayoutBody(); }
+            modalPage = Mathf.Clamp(modalPage, 0, modalPages.Count - 1);
+            SetText(body, modalPages[modalPage]);
+            SetText(headingText, modalTitle + (modalPages.Count > 1 ? $"   •   {modalPage + 1} / {modalPages.Count}" : ""));
+            var items = modalActions.ToList();
+            if (modalPage > 0) items.Add(("modal-prev", "Earlier text"));
+            if (modalPage + 1 < modalPages.Count) items.Add(("modal-next", "More text"));
+            actions.transform.SetPositionAndRotation(root.transform.TransformPoint(new Vector3(0, compact ? -0.043f : -0.145f, -0.008f)), root.transform.rotation);
+            actions.Show(items);
+        }
+
+        static List<string> SplitText(TMP_Text field, string value)
+        {
+            var result = new List<string>(); var remaining = (value ?? "").Trim();
+            var bounds = field.rectTransform.rect.size;
+            while (remaining.Length > 0)
+            {
+                if (field.GetPreferredValues(remaining, bounds.x, Mathf.Infinity).y <= bounds.y) { result.Add(remaining); break; }
+                var low = 1; var high = remaining.Length;
+                while (low < high)
+                {
+                    var middle = (low + high + 1) / 2;
+                    if (field.GetPreferredValues(remaining.Substring(0, middle), bounds.x, Mathf.Infinity).y <= bounds.y) low = middle; else high = middle - 1;
+                }
+                var cut = low; while (cut > 0 && !char.IsWhiteSpace(remaining[cut - 1])) cut--;
+                if (cut == 0) cut = low;
+                cut = SentenceBoundary(remaining, cut);
+                result.Add(remaining.Substring(0, cut).TrimEnd()); remaining = remaining.Substring(cut).TrimStart();
+            }
+            if (result.Count == 0) result.Add(""); return result;
+        }
+
+        void PaginateCaption(string value, int retainedPart)
+        {
+            captionPages.Clear(); captionPage = 0;
+            var remaining = (value ?? "").Trim();
+            if (caption == null) { captionPages.Add(remaining); return; }
+            // TMP measures the actual selected font and rectangle; text is never silently clipped or shrunk.
+            while (remaining.Length > 0)
+            {
+                var bounds = caption.rectTransform.rect.size;
+                if (caption.GetPreferredValues(remaining, bounds.x, Mathf.Infinity).y <= bounds.y)
+                { captionPages.Add(remaining); break; }
+                var low = 1; var high = remaining.Length;
+                while (low < high)
+                {
+                    var middle = (low + high + 1) / 2;
+                    if (caption.GetPreferredValues(remaining.Substring(0, middle), bounds.x, Mathf.Infinity).y <= bounds.y) low = middle;
+                    else high = middle - 1;
+                }
+                var cut = low;
+                while (cut > 0 && !char.IsWhiteSpace(remaining[cut - 1])) cut--;
+                if (cut == 0) cut = low;
+                cut = SentenceBoundary(remaining, cut);
+                captionPages.Add(remaining.Substring(0, cut).TrimEnd());
+                remaining = remaining.Substring(cut).TrimStart();
+            }
+            if (captionPages.Count == 0) captionPages.Add("");
+            SetReadingPart(Mathf.Clamp(retainedPart, 0, captionPages.Count - 1));
+        }
+
+        static int SentenceBoundary(string text, int fitted)
+        {
+            for (var i = fitted - 1; i >= fitted * .55f; i--)
+            {
+                if (text[i] != '.' && text[i] != '?' && text[i] != '!') continue;
+                var end = i + 1;
+                while (end < fitted && (text[end] == '\'' || text[end] == '"' || text[end] == '’' || text[end] == '”')) end++;
+                if (end == text.Length || char.IsWhiteSpace(text[end])) return end;
+            }
+            return fitted;
+        }
+
+        void SetReadingPart(int index)
+        {
+            captionPage = Mathf.Clamp(index, 0, captionPages.Count - 1);
+            SetText(caption, captionPages[captionPage]);
+            SetText(pageNumber, $"PAGE {chapterIndex + 1:00} / {chapterCount:00}" + (captionPages.Count > 1 ? $"   •   {captionPage + 1} / {captionPages.Count}" : ""));
+            pageTurn = reducedMotion ? 0 : 1;
+            RefreshControls();
+        }
 
         void Update()
         {

@@ -80,6 +80,12 @@ namespace Sankofa.Runtime.Personal
             loading = true; SetStatus("Finding a comfortable table…");
             try
             {
+                if (!await RequestScenePermission())
+                {
+                    if (this != null && version == placementVersion) { Recenter(); SetStatus("Room access was not granted • the story stand is ready"); }
+                    return;
+                }
+                if (this == null || version != placementVersion) return;
                 roomKit = MRUK.Instance;
                 if (roomKit == null)
                 {
@@ -95,8 +101,15 @@ namespace Sankofa.Runtime.Personal
                     if (this != null && version == placementVersion) { Recenter(); SetStatus("Room placement took too long • the story stand is ready"); }
                     return;
                 }
-                await load;
+                var result = await load;
                 if (this == null || version != placementVersion) return;
+                if (result != MRUK.LoadDeviceResult.Success)
+                {
+                    Recenter(); SetStatus(result == MRUK.LoadDeviceResult.NoScenePermission
+                        ? "Room access was not granted • the story stand is ready"
+                        : "No room data is available • the story stand is ready");
+                    return;
+                }
                 var room = roomKit.GetCurrentRoom();
                 var candidates = room == null ? null : room.Anchors.Where(a => a != null && a.HasAnyLabel(MRUKAnchor.SceneLabels.TABLE)).ToArray();
                 MRUKAnchor best = null; Vector3 at = default; float width = 0, depth = 0, distance = float.MaxValue;
@@ -109,7 +122,7 @@ namespace Sankofa.Runtime.Personal
                         var center = b.HasValue ? table.transform.TransformPoint(new Vector3(b.Value.center.x, b.Value.center.y, b.Value.max.z)) : table.transform.TransformPoint(new Vector3(p.Value.center.x, p.Value.center.y, 0));
                         // Scene table planes face up; use world bounds to tolerate rotated furniture.
                         var normal = table.transform.forward;
-                        if (Mathf.Abs(Vector3.Dot(normal, Vector3.up)) < .7f) continue;
+                        if (Vector3.Dot(normal, Vector3.up) < .99f) continue;
                         var w = b.HasValue ? b.Value.size.x : p.Value.width;
                         var d = b.HasValue ? b.Value.size.y : p.Value.height;
                         if (w < .90f || d < .55f || center.y < head.position.y - .85f || center.y > head.position.y - .12f) continue;
@@ -119,8 +132,8 @@ namespace Sankofa.Runtime.Personal
                         best = table; at = center + Vector3.up * .012f; width = w; depth = d; distance = horizontal.sqrMagnitude;
                     }
                 if (best == null) { Recenter(); SetStatus("No nearby table found • the story stand is ready"); return; }
-                var forward = Vector3.ProjectOnPlane(at - head.position, Vector3.up).normalized;
-                view.FitToSurface(at, Quaternion.LookRotation(forward, Vector3.up), Mathf.Min(width - .06f, 1.25f), Mathf.Min(depth - .06f, .8f));
+                var rotation = RotationAlongSurface(best.transform.rotation, at - head.position);
+                view.FitToSurface(at, rotation, Mathf.Min(width - .06f, 1.25f), Mathf.Min(depth - .06f, .8f));
                 fitted = true; SetVirtualStand(false); SetStatus("Fitted to your table • Recenter restores the stand");
             }
             catch (Exception) { if (this != null && version == placementVersion) { Recenter(); SetStatus("Room placement unavailable • the story stand is ready"); } }
@@ -130,6 +143,30 @@ namespace Sankofa.Runtime.Personal
             await System.Threading.Tasks.Task.CompletedTask;
 #endif
         }
+
+        /// <summary>Retains the measured tabletop axes; facing the visitor may flip them, never introduce overhang through a new yaw.</summary>
+        public static Quaternion RotationAlongSurface(Quaternion surfaceRotation, Vector3 approach)
+        {
+            var forward = Vector3.ProjectOnPlane(surfaceRotation * Vector3.up, Vector3.up).normalized;
+            if (Vector3.Dot(forward, Vector3.ProjectOnPlane(approach, Vector3.up)) < 0) forward = -forward;
+            return Quaternion.LookRotation(forward, Vector3.up);
+        }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        static async System.Threading.Tasks.Task<bool> RequestScenePermission()
+        {
+            var permission = OVRPermissionsRequester.ScenePermission;
+            if (UnityEngine.Android.Permission.HasUserAuthorizedPermission(permission)) return true;
+            var answer = new System.Threading.Tasks.TaskCompletionSource<bool>();
+            var callbacks = new UnityEngine.Android.PermissionCallbacks();
+            callbacks.PermissionGranted += id => answer.TrySetResult(id == permission);
+            callbacks.PermissionDenied += id => answer.TrySetResult(false);
+            UnityEngine.Android.Permission.RequestUserPermission(permission, callbacks);
+            // A silent/no callback permission request cannot strand the table controls.
+            var completed = await System.Threading.Tasks.Task.WhenAny(answer.Task, System.Threading.Tasks.Task.Delay(15000));
+            return completed == answer.Task && await answer.Task;
+        }
+#endif
 
         void SetStatus(string message) { Status = message; StatusChanged?.Invoke(message); }
         void SetVirtualStand(bool value)

@@ -20,12 +20,17 @@ namespace Sankofa.Tests
         public IEnumerator LoadTable()
         {
             LogAssert.ignoreFailingMessages = true; // Meta logs unsupported native calls without a connected headset.
+#if UNITY_EDITOR
+            UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode("Assets/Sankofa/Scenes/StoryTable.unity", new LoadSceneParameters(LoadSceneMode.Single));
+#else
             SceneManager.LoadScene("StoryTable");
+#endif
             yield return null;
             view = UnityEngine.Object.FindFirstObjectByType<StoryTableView>();
             Assert.That(view, Is.Not.Null);
             // The application integration has separate state tests; isolate this view's accepted callback contract.
             foreach (var app in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Where(x => x.GetType().Name == "PersonalStoryApp")) { app.enabled = false; app.StopAllCoroutines(); }
+            view.FitToSurface(new Vector3(0, 0.68f, 0.72f), Quaternion.identity, 1.25f, 0.72f);
             view.ShowIntake();
             yield return null;
         }
@@ -83,7 +88,7 @@ namespace Sankofa.Tests
             Assert.That(actions.Ids, Is.EquivalentTo(new[] { "retry", "local", "cancel" }));
             view.SetPaused(true);
             var controls = view.Panels.Single(p => p.name == "Always available controls");
-            Assert.That(controls.Ids, Is.EquivalentTo(new[] { "pause", "recenter", "room", "leave" }));
+            Assert.That(controls.Ids, Is.EquivalentTo(new[] { "pause", "recenter", "room", "options", "leave" }));
             Assert.That(controls.Hidden, Is.False);
         }
 
@@ -105,14 +110,143 @@ namespace Sankofa.Tests
                 Assert.That(text.richText, Is.False, "visitor and generated text cannot inject presentation markup");
         }
 
-        static void Capture(string name)
+        [UnityTest]
+        public IEnumerator LongGeneratedSizeParagraphIsFullyReadableAcrossLocalPages()
+        {
+            var words = string.Join(" ", Enumerable.Repeat("A remembered journey can lead to a new question about the places people call home.", 8));
+            view.SetReducedMotion(true);
+            view.RenderChapter(0, 3, "A question about a journey", words);
+            view.SetControlState(false, true, true, false);
+            var text = view.GetComponentsInChildren<TMP_Text>(true).Single(x => x.name == "Narrative captions");
+            var pages = new System.Collections.Generic.List<string>();
+            var nextChapter = 0; view.NextRequested = () => nextChapter++;
+            var transport = view.Panels.Single(p => p.name == "Turn a page");
+            var parts = view.ReadingPartCount;
+            Assert.That(parts, Is.GreaterThan(1), "long text must use more reading space, rather than become smaller type");
+            for (var part = 0; part < parts; part++)
+            {
+                text.ForceMeshUpdate(true, true);
+                Assert.That(text.isTextOverflowing, Is.False, "reading part " + part + " must fit the actual caption font and bounds");
+                pages.Add(view.Caption);
+                transport.PressFromPointer("next"); yield return null;
+                if (part + 1 < parts) Assert.That(nextChapter, Is.Zero, "reading continuation must not skip to the next chapter");
+                yield return new WaitForSecondsRealtime(0.32f);
+            }
+            Assert.That(string.Join(" ", pages), Is.EqualTo(words));
+            Assert.That(nextChapter, Is.EqualTo(1));
+            view.SetLargeText(true);
+            Assert.That(view.ReadingPartCount, Is.GreaterThanOrEqualTo(parts));
+            var retained = view.ReadingPart;
+            view.RenderChapter(0, 3, "A question about a journey", words);
+            Assert.That(view.ReadingPart, Is.EqualTo(retained), "pause/options/source refresh preserves the part already being read");
+            text.ForceMeshUpdate(true, true);
+            Assert.That(text.isTextOverflowing, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator ActualPreparedStoryAndEntryFitComfortableForwardLenses()
+        {
+            var app = UnityEngine.Object.FindFirstObjectByType<PersonalStoryApp>();
+            Assert.That(app, Is.Not.Null);
+            UnityEngine.Object.FindFirstObjectByType<StoryTablePlacement>().Recenter();
+            app.Session.Cancel();
+            foreach (var fov in new[] { 60, 72, 82 }) AssertControlsInForwardView(fov);
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1")
+                foreach (var fov in new[] { 60, 72, 82 }) Capture("03-actual-entry-" + fov, fov);
+            app.SetSeed("What did a household carry for trade?"); app.StartPrepared();
+            yield return null;
+            Assert.That(app.Session.Story.Interest, Is.EqualTo("trade-household"));
+            Assert.That(view.Caption, Does.StartWith(app.Session.Chapter.Narration.Substring(0, 30)));
+            foreach (var fov in new[] { 60, 72, 82 }) AssertControlsInForwardView(fov);
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1")
+                foreach (var fov in new[] { 60, 72, 82 }) Capture("04-actual-story-" + fov, fov);
+        }
+
+        [UnityTest]
+        public IEnumerator SeedPreviewSourcesAndOptionsStayReadableAndKeepTheirActionsClear()
+        {
+            var app = UnityEngine.Object.FindFirstObjectByType<PersonalStoryApp>();
+            UnityEngine.Object.FindFirstObjectByType<StoryTablePlacement>().Recenter();
+            app.SetSeed(string.Join(" ", Enumerable.Repeat("What did a household carry when journeys brought people to the river?", 7)));
+            app.Session.Cancel(); yield return null;
+            var preview = view.GetComponentsInChildren<TMP_Text>(true).Single(x => x.name == "Your question preview");
+            Assert.That(preview.gameObject.activeInHierarchy, Is.True);
+            Assert.That(preview.text, Does.Contain("preview").And.Contain("Full question"));
+            preview.ForceMeshUpdate(true, true); Assert.That(preview.isTextOverflowing, Is.False);
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("05-question-preview-60", 60);
+
+            view.Panels.Single(p => p.name == "Start choices").PressFromPointer("create"); yield return null;
+            var consent = view.Panels.Single(p => p.name == "Online consent actions");
+            var inspected = new System.Collections.Generic.List<string>();
+            do
+            {
+                inspected.Add(view.ModalText); AssertControlsInForwardView(60);
+                if (view.ModalPart + 1 >= view.ModalPartCount) break;
+                consent.PressFromPointer("modal-next"); yield return null; yield return new WaitForSecondsRealtime(0.32f);
+            } while (true);
+            var fullRequest = System.Text.RegularExpressions.Regex.Replace(string.Join(" ", inspected), "\\s+", " ");
+            Assert.That(fullRequest, Does.Contain("Place: Enkare Nairobi").And.Contain("Period: before the railway").And.Contain("Interest: Trade & household").And.Contain(app.Seed));
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("08-full-cloud-request-60", 60);
+
+            var sourceText = string.Join("\n", Enumerable.Range(1, 24).Select(i => "Source " + i + ": documented context and remembered places."));
+            view.ShowSourceDetails("Sources and accounts", sourceText);
+            var body = view.GetComponentsInChildren<TMP_Text>(true).Single(x => x.name == "Context answer");
+            var actions = view.Panels.Single(p => p.name == "Return and recovery actions");
+            Assert.That(view.ModalPartCount, Is.GreaterThan(1));
+            var parts = new System.Collections.Generic.List<string>();
+            do
+            {
+                body.ForceMeshUpdate(true, true); Assert.That(body.isTextOverflowing, Is.False);
+                AssertControlsInForwardView(60); parts.Add(view.ModalText);
+                if (view.ModalPart + 1 >= view.ModalPartCount) break;
+                actions.PressFromPointer("modal-next"); yield return null; yield return new WaitForSecondsRealtime(0.32f);
+            } while (true);
+            var realised = System.Text.RegularExpressions.Regex.Replace(string.Join(" ", parts), "\\s+", " ").Trim();
+            Assert.That(realised, Does.Contain(System.Text.RegularExpressions.Regex.Replace(sourceText, "\\s+", " ")));
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("06-source-context-60", 60);
+            view.ComfortRequested?.Invoke(); yield return null;
+            Assert.That(actions.Ids.Count(), Is.EqualTo(6)); AssertControlsInForwardView(60);
+            var controls = view.Panels.Single(p => p.name == "Always available controls");
+            foreach (var action in actions.GetComponentsInChildren<Renderer>().Where(r => r.name == "Face"))
+            foreach (var control in controls.GetComponentsInChildren<Renderer>().Where(r => r.name == "Face"))
+                Assert.That(action.bounds.Intersects(control.bounds), Is.False, "options cannot overlap the essential controls");
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("07-options-60", 60);
+        }
+
+        void AssertControlsInForwardView(float fieldOfView)
+        {
+            var cameraRoot = new GameObject("Forward lens geometry probe");
+            var eye = cameraRoot.AddComponent<Camera>(); eye.enabled = false;
+            eye.transform.SetPositionAndRotation(new Vector3(0, 1.15f, 0), Quaternion.Euler(10, 0, 0));
+            eye.fieldOfView = fieldOfView; eye.aspect = 1600f / 1400;
+            try
+            {
+                foreach (var panel in view.Panels.Where(p => p.gameObject.activeInHierarchy && !p.Hidden))
+                foreach (var face in panel.GetComponentsInChildren<Renderer>().Where(r => r.name == "Face"))
+                {
+                    var bounds = face.bounds;
+                    foreach (var x in new[] { bounds.min.x, bounds.max.x })
+                    foreach (var y in new[] { bounds.min.y, bounds.max.y })
+                    foreach (var z in new[] { bounds.min.z, bounds.max.z })
+                    {
+                        var point = eye.WorldToViewportPoint(new Vector3(x, y, z));
+                        Assert.That(point.z, Is.GreaterThan(0));
+                        Assert.That(point.x, Is.InRange(0.015f, 0.985f), panel.name + " horizontal view at " + fieldOfView);
+                        Assert.That(point.y, Is.InRange(0.015f, 0.985f), panel.name + " vertical view at " + fieldOfView);
+                    }
+                }
+            }
+            finally { UnityEngine.Object.Destroy(cameraRoot); }
+        }
+
+        static void Capture(string name, float fieldOfView = 82)
         {
             var directory = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "artifacts", "story-table"));
             Directory.CreateDirectory(directory);
             var cameraRoot = new GameObject("Silent desktop review camera");
             var eye = cameraRoot.AddComponent<Camera>(); eye.stereoTargetEye = StereoTargetEyeMask.None;
             eye.transform.SetPositionAndRotation(new Vector3(0, 1.15f, 0), Quaternion.Euler(10, 0, 0));
-            eye.fieldOfView = 82; eye.clearFlags = CameraClearFlags.SolidColor; eye.backgroundColor = new Color(0.024f, 0.028f, 0.038f);
+            eye.fieldOfView = fieldOfView; eye.clearFlags = CameraClearFlags.SolidColor; eye.backgroundColor = new Color(0.024f, 0.028f, 0.038f);
             var target = new RenderTexture(1600, 1400, 24) { antiAliasing = 4 };
             var previousActive = RenderTexture.active;
             eye.targetTexture = target; eye.Render(); RenderTexture.active = target;

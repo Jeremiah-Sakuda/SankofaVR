@@ -23,6 +23,8 @@ namespace Sankofa.Runtime.Personal
     {
         [Tooltip("Public HTTPS service root. Never place provider credentials in this scene.")]
         [SerializeField] string serviceEndpoint = "";
+        [Tooltip("Limited service access credential for a controlled build, never a Google key. APK contents can be extracted; rotate and limit server access.")]
+        [SerializeField] string serviceAccessToken = "";
         StoryTableView view;
         StoryTablePlacement placement;
         StoryTableKeyboard keyboard;
@@ -46,6 +48,7 @@ namespace Sankofa.Runtime.Personal
         public string Seed => seed;
         public bool HasKept { get { try { return store != null && store.HasKept; } catch { return false; } } }
         public string ServiceEndpoint { get => serviceEndpoint; set => serviceEndpoint = value ?? ""; }
+        public string ServiceAccessToken { set => serviceAccessToken = value ?? ""; }
         public bool NarrationEnabled => narrationEnabled;
 
         void Awake()
@@ -86,11 +89,15 @@ namespace Sankofa.Runtime.Personal
             view.RetryRequested += StartGenerated;
             view.LeaveRequested += RequestLeave;
             view.DecisionSelected += id => { var action = decision; decision = null; action?.Invoke(id); };
-            keyboard.Edited += value => view.ShowDecision("Your question", (value.Length == 0 ? "What would you like to understand?" : value) + "\n\nNothing is sent while you type.", Array.Empty<(string, string)>());
+            keyboard.Edited += value => view.ShowDecision(value.Length >= StoryTableKeyboard.MaximumLength ? "Limit reached • 500 / 500" : $"Your question • {value.Length} / 500", (value.Length == 0 ? "What would you like to understand?" : value) + "\n\nNothing is sent while you type. Delete text to make room if you reach the limit.", Array.Empty<(string, string)>());
             keyboard.Committed += value => { seed = value; decision = null; session.Cancel(); };
             keyboard.Cancelled += () => { decision = null; Render(); };
             session.Changed += Render;
-            placement.StatusChanged += message => { if (session.State == PersonalStoryState.Intake) view.SetStatus(message); };
+            placement.StatusChanged += message =>
+            {
+                if (session.State == PersonalStoryState.Intake) view.SetStatus(message);
+                else if (session.State == PersonalStoryState.Reading) view.SetStatus(Capability(session.Story) + " • " + message);
+            };
             OVRManager.HMDUnmounted += OnFocusLost;
             OVRManager.InputFocusLost += OnFocusLost;
             OVRManager.HMDMounted += OnFocusRestored;
@@ -144,6 +151,17 @@ namespace Sankofa.Runtime.Personal
             return uri.AbsoluteUri.TrimEnd('/');
         }
 
+        void Authorize(UnityWebRequest request)
+        {
+            var token = serviceAccessToken;
+#if UNITY_EDITOR
+            if (string.IsNullOrEmpty(token)) token = Environment.GetEnvironmentVariable("SANKOFA_STORY_ACCESS_TOKEN");
+#endif
+            // A client credential is distinct from server-side Google credentials and is never logged.
+            if (!string.IsNullOrEmpty(token) && token.Length <= 512 && token.All(c => c >= '!' && c <= '~'))
+                request.SetRequestHeader("Authorization", "Bearer " + token);
+        }
+
         IEnumerator Generate(int version, PersonalStoryRequest input, string endpoint)
         {
             using (var call = new UnityWebRequest(endpoint + "/create-story", "POST"))
@@ -152,6 +170,7 @@ namespace Sankofa.Runtime.Personal
                 call.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(PersonalStoryJson.WriteRequest(input)));
                 call.downloadHandler = new DownloadHandlerBuffer(); call.timeout = 35; call.redirectLimit = 0;
                 call.SetRequestHeader("Content-Type", "application/json");
+                Authorize(call);
                 yield return call.SendWebRequest();
                 if (pending == call) pending = null;
                 if (version != session.RequestVersion || session.State != PersonalStoryState.Preparing) yield break;
@@ -188,7 +207,7 @@ namespace Sankofa.Runtime.Personal
                 case PersonalStoryState.Preparing: view.ShowPreparing("Listening to your question, gathering the next pages…"); break;
                 case PersonalStoryState.Error: view.ShowError(session.Problem); break;
                 case PersonalStoryState.Reading:
-                    view.RenderStory(story.Title, "Enkare Nairobi • around the 1850s", session.IsReplay ? "Your kept telling • no new generation" : story.Mode == "generated" ? "Created for your question • prepared illustrations" : "Prepared story • works offline");
+                    view.RenderStory(story.Title, "Enkare Nairobi • around the 1850s", Capability(story));
                     view.RenderChapter(new StoryTableChapterViewData
                     {
                         Index = session.ChapterIndex, Count = story.Chapters.Count, Title = session.Chapter.Title,
@@ -205,16 +224,24 @@ namespace Sankofa.Runtime.Personal
                 case PersonalStoryState.Sources:
                     view.ShowSourceDetails("What this telling knows", SourcesText()); break;
                 case PersonalStoryState.Closing:
-                    view.ShowClosing("What question would you bring back? Keep this realised telling on this device, or begin another question without saving.");
+                    view.ShowClosing(ReturnInvitation(story.Interest) + "\n\nKeep these exact pages on this device, or return to your choices without saving.");
                     view.SetControlState(true, false, false, true); break;
             }
         }
 
         static string TruthLabel(string truth) => truth == "historical" ? "Documented context • sources available" : truth == "personal-account" ? "Your account • not independently verified" : "Imagined scene • not an account of your ancestors";
+        string Capability(PersonalStoryDocument story) => session.IsReplay
+            ? "Kept telling • originally " + (story.Mode == "generated" ? "generated" : "prepared") + " • no new generation"
+            : story.Mode == "generated" ? "Generated telling • prepared illustrations" : "Prepared story • works offline";
+        static string ReturnInvitation(string thread) => thread == "trade-household"
+            ? "What stayed at home while the gourd travelled? A question about household life can begin a different telling."
+            : thread == "place-water"
+                ? "Who followed the path beside the water? A question about journeys can follow the people next."
+                : "What did the travellers bring to their meeting? A question about trade can follow what they carried.";
         string SourcesText()
         {
             var references = session.State == PersonalStoryState.Sources && session.Question != null ? session.Question.Sources : session.Chapter.Sources;
-            var names = session.Story.Sources.Where(s => references.Contains(s.Id)).Select(s => s.Title);
+            var names = session.Story.Sources.Where(s => references.Contains(s.Id)).Select(s => s.Id + " • " + s.Title + "\n" + s.Url);
             return TruthLabel(session.Question != null ? session.Question.Truth : session.Chapter.Truth) + "\n\n" + string.Join("\n\n", names) + "\n\nThe illustrations are contemporary reconstructions. This is one researched setting; cultural and pronunciation review remain open.";
         }
 
@@ -265,16 +292,21 @@ namespace Sankofa.Runtime.Personal
         {
             if (session.Paused) return false;
             try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); view.ResetReadingPosition(); return session.OpenSaved(kept); }
-            catch (Exception) { view.ShowError("Your kept story could not be opened. It has not been replaced."); return false; }
+            catch (Exception) { ShelfProblem("Your kept story could not be opened. It has not been replaced.", () => Reopen()); return false; }
         }
         public void Forget()
         {
             if (session.Paused) return;
             Decide("Forget your kept story?", "This removes the story kept on this device.", new[] { ("forget", "Forget kept story"), ("cancel", "Keep it") }, id =>
             {
-                if (id == "forget") { try { store.Forget(); } catch (Exception) { view.ShowError("The kept story could not be removed. Try again."); return; } }
+                if (id == "forget") { try { store.Forget(); } catch (Exception) { ShelfProblem("The kept story could not be removed.", Forget); return; } }
                 Render();
             });
+        }
+        void ShelfProblem(string message, Action retry)
+        {
+            Decide("Your kept story", message + " No story request will be sent.", new[] { ("shelf-retry", "Try the kept story again"), ("shelf-return", "Return") },
+                id => { if (id == "shelf-retry") retry(); else Render(); });
         }
         void RequestLeave()
         {
@@ -322,23 +354,24 @@ namespace Sankofa.Runtime.Personal
                 pendingAudio = call; call.method = "POST";
                 call.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonText.Serialize(body)));
                 call.SetRequestHeader("Content-Type", "application/json"); call.timeout = 30; call.redirectLimit = 0;
+                Authorize(call);
                 view.SetStatus("Preparing the voice • the captions remain available");
                 yield return call.SendWebRequest();
                 if (pendingAudio == call) pendingAudio = null;
                 voiceRequest = null;
-                if (version != session.RequestVersion || session.Chapter == null || session.Chapter.Id != chapterId || !narrationEnabled) yield break;
+                if (version != session.RequestVersion || session.Chapter == null || session.Chapter.Id != chapterId) yield break;
                 if (call.result != UnityWebRequest.Result.Success || call.downloadedBytes > 8 * 1024 * 1024)
                 { view.SetStatus("Voice is unavailable • continue with captions"); yield break; }
                 var clip = DownloadHandlerAudioClip.GetContent(call);
                 if (clip == null) { view.SetStatus("Voice is unavailable • continue with captions"); yield break; }
                 clips[key] = clip;
-                if (!session.Paused && session.State == PersonalStoryState.Reading) PlayClip(clip);
+                if (narrationEnabled && !session.Paused && session.State == PersonalStoryState.Reading) PlayClip(clip);
             }
         }
         void PlayClip(AudioClip clip)
         {
             if (!narrationEnabled || clip == null || session.Paused) return;
-            voice.transform.position = view.TableRoot.TransformPoint(new Vector3(-.515f, .05f, -.17f));
+            voice.transform.position = view.TableRoot.TransformPoint(new Vector3(-.47f, .20f, .20f));
             voice.clip = clip; voice.volume = .85f; voice.Play();
         }
         void ClearClips() { foreach (var clip in clips.Values) if (clip != null) Destroy(clip); clips.Clear(); }
