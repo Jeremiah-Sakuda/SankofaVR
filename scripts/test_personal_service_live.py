@@ -43,7 +43,9 @@ def main():
         stories.append(story)
         print(f"Generation passed: mode={story['mode']}; chapters={len(story['chapters'])}; interest={interest}; model={args.model}; seconds={time.monotonic() - started:.2f}")
     if stories:
-        distinct = stories[0]["chapters"][2]["narration"] != stories[1]["chapters"][2]["narration"] and stories[0]["chapters"][3]["narration"] != stories[1]["chapters"][3]["narration"]
+        first_fiction = [c["narration"] for c in stories[0]["chapters"] if c["truth"] == "reconstructed"]
+        second_fiction = [c["narration"] for c in stories[1]["chapters"] if c["truth"] == "reconstructed"]
+        distinct = len(first_fiction) == len(second_fiction) == 2 and all(a != b for a, b in zip(first_fiction, second_fiction))
         print(f"Distinct generated actions: {distinct}. This checks differing text, not cultural quality or independent factual verification.")
         if not distinct:
             return 1
@@ -55,7 +57,7 @@ def main():
     if args.narration or args.narration_only:
         started = time.monotonic()
         try:
-            audio = GoogleNarrationProvider(args.project).synthesize(stories[0]["chapters"][2]["narration"] if stories else HISTORICAL["C1"], Cancellation(55))
+            audio = GoogleNarrationProvider(args.project).synthesize(next(c["narration"] for c in stories[0]["chapters"] if c["truth"] == "reconstructed") if stories else HISTORICAL["C1"], Cancellation(55))
         except ProviderError as error:
             print(f"Narration failed: code={error.code}; http_status={error.status}")
             return 1

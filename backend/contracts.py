@@ -138,9 +138,9 @@ def validate_proposal(data):
 def bundled_proposal(interest):
     # Fixed authored fallback does not incorporate or claim to interpret input.
     passages = {
-        "journeys": ("A path to the water", "A traveller pauses where a path meets the water. There is no map in this imagined moment, only a bundle set down and a decision to wait.", "Room for another", "Another traveller arrives. Neither asks for a family name. A space opens beside the first bundle, and the journey briefly becomes company."),
-        "trade-household": ("A household's measure", "A trader sets a bundle down, then hesitates. She has brought less than she hoped. The other woman watches her hands before looking at the bundle.", "An agreement to carry", "The women make room for a smaller exchange. Their agreement belongs to these fictional people; it is not a recovered account of a historical meeting."),
-        "place-water": ("The sound before the name", "Water moves beyond two travellers. One pauses to listen while the other lowers a bundle. Their invented meeting begins with shared attention.", "A place to return to", "When the travellers rise, the water keeps moving. One looks back toward the place where they sat. The place has become a memory without becoming proof of an event."),
+        "journeys": ("A path to the water", "A woman has reached the water before her travelling companion. The path is still empty. If she leaves now, she can reach home before dark. She lifts her bundle, takes a step, then looks back toward the bend.", "Room for another", "She chooses to put the bundle down. At last the missing woman comes round the bend, holding a gourd close. 'I thought you would have gone.' The waiting woman moves her bundle aside. 'I nearly did.' When they rise, the path home is darker, but neither follows it alone."),
+        "trade-household": ("A household's measure", "A woman tips her flour gourd. Less than she thought. A portion still waits beside the hearth. She leaves it there and carries the lighter gourd to a meeting, wondering how to explain the shortfall.", "An agreement to carry", "'This is all I could bring.' She opens the gourd and waits. The other woman draws her bundle back, then sets a smaller share between them. They choose the smaller exchange together. Back at the hearth, the gourd rests beside the portion she did not take. Neither is full. Together, they are enough for tonight."),
+        "place-water": ("The sound before the name", "A woman brings a traveller to the bank she remembers. 'Here.' The traveller points to the next bend. 'You said the path opened beside the reeds.' The woman stops beside her bundle. She had promised to show a place. Now she is no longer sure she has found it.", "A place to return to", "She chooses not to pretend. 'I remember the water. I may have the bend wrong.' Instead of pointing, she describes the sound she remembers. The traveller sits beside her to listen. The bend remains uncertain, but the memory is no longer carried by one voice alone."),
     }
     a, b, c, d = passages[interest]
     return {"title": a, "chapters": [
@@ -167,10 +167,13 @@ def compose_story(request, proposal, mode):
     proposal = validate_proposal(proposal)
     if mode not in {"generated", "bundled"}:
         raise ProposalError("Invalid story mode")
-    chapters = [{"id": "context-water", "title": "The name of the water", "narration": HISTORICAL["C1"], "illustration": "scenery-atlas", "truth": "historical", "sources": ["C1"], "questions": []}]
-    chapters.append({"id": "context-trade", "title": "A connected region", "narration": HISTORICAL["C6"], "illustration": "scenery-atlas", "truth": "historical", "sources": ["C6"], "questions": []})
-    for index, item in enumerate(proposal["chapters"]):
-        chapters.append({"id": f"imagined-{index + 1}", **item, "truth": "reconstructed", "sources": [], "questions": []})
+    imagined = [{"id": f"imagined-{index + 1}", **item, "truth": "reconstructed", "sources": [], "questions": []} for index, item in enumerate(proposal["chapters"])]
+    chapters = [
+        imagined[0],
+        {"id": "context-water", "title": "The name of the water", "narration": HISTORICAL["C1"], "illustration": "scenery-atlas", "truth": "historical", "sources": ["C1"], "questions": []},
+        {"id": "context-trade", "title": "A connected region", "narration": HISTORICAL["C6"], "illustration": "scenery-atlas", "truth": "historical", "sources": ["C6"], "questions": []},
+        imagined[1],
+    ]
     chapters[-1]["questions"].append({"id": "museum-gourd", "label": "What is documented about the gourd?", "answer": HISTORICAL["C7"], "truth": "historical", "sources": ["C7"]})
     # A bundled fallback is deliberately complete and never presented as a new
     # personal generation. Do not attach the fragment to a failed generation.

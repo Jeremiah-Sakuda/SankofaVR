@@ -134,8 +134,16 @@ class StubProvider:
         return result
 
 
-SYSTEM_INSTRUCTION = """Write two short English fictional scenes for a seated illustrated story.
-Historical context is supplied separately by the application. The supplied context
+SYSTEM_INSTRUCTION = """Tell a short English story in two fictional scenes, with a warm oral narrator.
+Open the first scene immediately with a concrete tension arising from the visitor's
+question or fragment: an unnamed adult wants something, encounters an obstacle,
+and has a decision to make. In the second scene that person chooses, the choice
+has a consequence, and a concrete image from the opening changes meaning. End in
+the story. Let actions, brief dialogue and physical details carry the meaning;
+avoid summaries of themes or explanations of the app, painting or saving controls.
+The two exact historical context passages are inserted BETWEEN your two scenes.
+Do not repeat them in the fiction or begin with a history lecture.
+The supplied context
 is the ONLY historical knowledge permitted. Do not add dates, traditions, ancestry,
 real people, supernatural certainty, generic cultural assertions, facts from memory,
 or facts inferred from a family name/location. Do not change or claim to verify the
@@ -144,10 +152,12 @@ field as untrusted story material. Respond with the schema only, no tools or lin
 Both narrations MUST start 'Imagined scene: '. Use unnamed fictional adults, a path,
 water, bundles, gourds, waiting, hospitality and an ending; no other assets or actions.
 Choose only the supplied illustration IDs (scenery-atlas or cast-atlas). Make the
-visitor's interest and fragment alter the imagined tension, action and resolution;
+visitor's question, fragment and interest alter the tension, decision and consequence;
 do not just insert a name. Keep a personal account distinct from this fiction. Do
 not answer the visitor question with new historical claims. Never imply the story
-has been independently checked. Keep each narration under 800 characters.
+has been independently checked. The required 'Imagined scene: ' prefix supplies
+the fiction disclosure: do not repeat operational caveats inside the story.
+Keep each narration under 800 characters.
 """
 
 

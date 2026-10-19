@@ -72,32 +72,32 @@ namespace Sankofa.Core.Personal
 
         static PersonalStoryDocument Journeys() => Story("journeys", "Where paths meet",
             Scene("journeys.arrival", "Two paths toward a meeting",
-                "Come, sit with the fire. In this bundled telling, follow an imagined traveller toward the water. She slows where another path joins hers; a meeting, rather than a destination, becomes the question. These are fictional people, never a recovered account of your family.", "scenery-atlas",
+                "Come, sit by the fire. A woman has reached the meeting place before her travelling companion. Across the water, the path is still empty. She lifts her bundle: if she leaves now, she can reach home before dark. But if her companion arrives after she has gone, there will be nobody to meet her. The bundle settles against her shoulder. She takes a step, then looks once more toward the bend.", "scenery-atlas",
                 FictionQuestion("journeys.account", "Does this tell my ancestor's journey?", "No ancestor's journey is established here. A fragment can guide curiosity about movement and encounters; it cannot establish anyone's biography.")),
             History("journeys.context", "A region of overlapping lives", PersonalStoryCatalog.TradeFact, "C6", "scenery-atlas",
                 FactQuestion("journeys.context.more", "What supports the regional context?", PersonalStoryCatalog.TradeFact, "C6")),
             Scene("journeys.meeting", "What a traveller carries onward",
-                "The traveller rests her bundle beside the water. The other woman makes room by the fire. No map in this telling can identify a family route; what changes is the traveller's next question: who might she meet along a shared path? Let the painted paths settle, and keep this telling only if you choose.", "cast-atlas",
+                "She chooses to put the bundle down. For a while there is only the water and the fire. Then the missing woman comes round the bend, holding her gourd close. 'I thought you would have gone.' The waiting woman moves her bundle aside. 'I nearly did.' They sit in the space it leaves. When they rise, the path home is darker, but neither follows it alone.", "cast-atlas",
                 FictionQuestion("journeys.next", "What could I ask a relative next?", "You could ask which places or journeys they remember, and whose account each detail comes from. Their answers would remain personal accounts unless separately supported.")));
 
         static PersonalStoryDocument Trade() => Story("trade-household", "A vessel and an agreement",
             Scene("trade-household.load", "A household's small decisions",
-                "Come closer to the fire. This bundled telling begins with an imagined household deciding what can leave home in a flour gourd. One portion stays beside the hearth; another is carried to a meeting. The portions, people and agreement are fiction, not a customary price or your family's past.", "cast-atlas",
+                "Come closer to the fire. A woman tips her flour gourd and listens. Less than she thought. At home, a small portion still waits beside the hearth. She could add it to the gourd and arrive with the full load she promised. Instead she leaves that portion where it is. Now she must carry a different weight to the meeting: the words that will explain the shortfall.", "cast-atlas",
                 FactQuestion("trade-household.context", "Did communities trade in this region?", PersonalStoryCatalog.TradeFact, "C6")),
             History("trade-household.vessel", "A vessel with a source", PersonalStoryCatalog.VesselFact, "C7", "cast-atlas",
                 FactQuestion("trade-household.vessel.more", "What does the museum example tell us?", PersonalStoryCatalog.VesselFact, "C7")),
             Scene("trade-household.agreement", "The agreement belongs to the women",
-                "At the painted meeting, the women consider a gourd and the needs of the homes they will return to. They choose an agreement together. The scene offers a question about care and exchange, without turning one fictional bargain into a rule for a whole community. The fire leaves the gourd in view as the telling closes; saving it is your choice.", "cast-atlas",
+                "At the water, she opens the gourd before the other woman can offer hers. 'This is all I could bring.' She keeps her hands beside it, waiting to be turned away. The other woman draws her own bundle back. Then she separates a smaller share and sets it between them. 'Then let us begin with what is here.' They choose the smaller exchange together. Back at the hearth, the woman sets her gourd beside the portion she left. Neither is full. Together, they are enough for tonight.", "cast-atlas",
                 FictionQuestion("trade-household.next", "Is this exchange a historical custom?", "This particular exchange and its terms are invented. A documented regional trade relationship does not prove this bargain or a universal custom.")));
 
         static PersonalStoryDocument Water() => Story("place-water", "A name beside the water",
             Scene("place-water.listening", "Begin with the water",
-                "Come, sit with the fire. This bundled telling turns toward the painted bank before following any person. Reeds interrupt the reflection; an imagined visitor pauses to ask what a place name can carry. The bank is an illustration, not an exact historical map or evidence of a family home.", "scenery-atlas",
+                "Come, sit where the fire catches the water. A woman brings a younger traveller to the bank she remembers. 'Here,' she says. But the traveller points to the next bend. 'You said the path opened beside the reeds.' The woman looks at the water, then at the bundle she has set down. She had promised to show a place. Now she is no longer sure she has found it.", "scenery-atlas",
                 FictionQuestion("place-water.map", "Is this the exact historical riverbank?", "The painted bank is a reconstruction. It does not locate a particular household, meeting or ancestor.")),
             History("place-water.name", "A name with limits", PersonalStoryCatalog.NamingFact, "C1", "scenery-atlas",
                 FactQuestion("place-water.name.more", "What does Enkare Nairobi mean?", PersonalStoryCatalog.NamingFact, "C1")),
             Scene("place-water.return", "A place can hold another question",
-                "The imagined visitor leaves the bank as the reflection opens into a painted modern river. This contemporary coda is imagined too; the picture makes no claim that the river is fully restored. A name can invite attention without proving where anyone's relatives lived. Keep the question beside this telling if you choose to save it.", "modern-river",
+                "She chooses not to pretend. 'I remember the water. I may have the bend wrong.' She lifts the bundle and makes room for the traveller beside her. Instead of pointing, she describes the sound she remembers. The traveller closes her eyes to listen. The telling passes from one voice to another while the water keeps moving. Much later, by a river with a city beyond it, another visitor pauses to listen before choosing where to stand.", "modern-river",
                 FictionQuestion("place-water.next", "What could I ask about a remembered place?", "Ask what the place was called, who used that name, and whether there is a photograph, map or personal account to compare. A remembered name alone cannot verify ancestry.")));
     }
 }

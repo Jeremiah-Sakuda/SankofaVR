@@ -51,16 +51,26 @@ class ContractTests(unittest.TestCase):
         self.assertNotIn(PUBLIC_REQUEST["fragment"], json.dumps(story))
         self.assertNotIn(PUBLIC_REQUEST["question"], json.dumps(story))
         validate_story(story)
-        self.assertEqual(story["chapters"][0]["narration"], HISTORICAL["C1"])
-        for chapter in story["chapters"][2:]:
+        self.assertEqual(story["chapters"][1]["narration"], HISTORICAL["C1"])
+        for chapter in (story["chapters"][0], story["chapters"][3]):
             self.assertEqual(chapter["truth"], "reconstructed")
             self.assertTrue(chapter["narration"].startswith("Imagined scene: "))
 
     def test_interests_change_story_action_not_just_metadata(self):
         service = PersonalStoryService(StubProvider())
         stories = [service.create({**PUBLIC_REQUEST, "interest": interest}, Cancellation())[0] for interest in ("journeys", "trade-household", "place-water")]
-        self.assertEqual(len({s["chapters"][2]["narration"] for s in stories}), 3)
+        self.assertEqual(len({s["chapters"][0]["narration"] for s in stories}), 3)
         self.assertEqual(len({s["chapters"][3]["narration"] for s in stories}), 3)
+
+    def test_personal_action_opens_and_resolves_around_unchanged_context(self):
+        for provider in (StubProvider(), None):
+            for interest in ("journeys", "trade-household", "place-water"):
+                story, _ = PersonalStoryService(provider).create({**PUBLIC_REQUEST, "interest": interest}, Cancellation())
+                self.assertEqual([c["id"] for c in story["chapters"]], ["imagined-1", "context-water", "context-trade", "imagined-2"])
+                self.assertEqual([c["truth"] for c in story["chapters"]], ["reconstructed", "historical", "historical", "reconstructed"])
+                self.assertEqual([c["narration"] for c in story["chapters"][1:3]], [HISTORICAL["C1"], HISTORICAL["C6"]])
+                self.assertEqual((story["region"], story["period"], story["interest"]), ("enkare-nairobi", "1850s", interest))
+                self.assertTrue(story["chapters"][-1]["questions"])
 
     def test_question_context_uses_only_exact_inventory_or_declares_limit(self):
         service = PersonalStoryService(StubProvider())
@@ -80,7 +90,7 @@ class ContractTests(unittest.TestCase):
 
     def test_historical_text_source_urls_and_art_cannot_be_laundered(self):
         story, _ = PersonalStoryService().create(PUBLIC_REQUEST, Cancellation())
-        mutations = [lambda s: s["chapters"][0].update(narration="An unsupported claim."), lambda s: s["chapters"][0].update(sources=["C6"]), lambda s: s["sources"][0].update(url="https://example.org/invented"), lambda s: s["chapters"][2].update(illustration="https://example.org/picture.png"), lambda s: s["chapters"][2].update(truth="historical", sources=["C1"])]
+        mutations = [lambda s: s["chapters"][1].update(narration="An unsupported claim."), lambda s: s["chapters"][1].update(sources=["C6"]), lambda s: s["sources"][0].update(url="https://example.org/invented"), lambda s: s["chapters"][0].update(illustration="https://example.org/picture.png"), lambda s: s["chapters"][0].update(truth="historical", sources=["C1"])]
         for mutate in mutations:
             changed = deepcopy(story)
             mutate(changed)
