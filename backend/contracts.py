@@ -20,6 +20,25 @@ class ProposalError(ValueError):
 
 
 def strict_json(raw):
+    if isinstance(raw, (bytes, bytearray)):
+        raw = raw.decode("utf-8")
+    depth, quoted, escaped = 0, False, False
+    for char in raw:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char in "[{":
+            depth += 1
+            if depth > 16:
+                raise ValueError("JSON nesting exceeds the supported contract")
+        elif char in "]}":
+            depth -= 1
     def pairs(items):
         result = {}
         for key, value in items:
