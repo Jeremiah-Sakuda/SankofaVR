@@ -29,7 +29,7 @@ class PersonalStoryService:
     def from_environment(cls):
         key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
         project = os.environ.get("SANKOFA_GOOGLE_PROJECT")
-        provider = GeminiProvider(key, os.environ.get("SANKOFA_GEMINI_MODEL") or DEFAULT_MODEL, project=project) if key or project else None
+        provider = GeminiProvider(key, os.environ.get("SANKOFA_GEMINI_MODEL") or DEFAULT_MODEL, project=project, backend=os.environ.get("SANKOFA_GEMINI_BACKEND") or "developer") if key or project else None
         narrator = GoogleNarrationProvider(project, os.environ.get("SANKOFA_TTS_MODEL") or "gemini-3.1-flash-tts-preview") if project and os.environ.get("SANKOFA_ENABLE_NARRATION") == "1" else None
         return cls(provider, narrator)
 
@@ -46,7 +46,8 @@ class PersonalStoryService:
                 reason = error.code
             except ProposalError:
                 reason = "provider_invalid_response"
-        cancellation.remaining()
+        if cancellation.event.is_set():
+            raise Cancelled()
         return compose_story(request, bundled_proposal(request.interest), "bundled"), reason
 
     def fallback(self, data):
@@ -181,6 +182,7 @@ class PersonalStoryHandler(BaseHTTPRequestHandler):
             return
         cancellation = Cancellation(self.server.request_timeout)
         acquired = False
+        worker_started = False
         try:
             data = self._read_json()
             if self.path == "/create-story":
@@ -195,7 +197,10 @@ class PersonalStoryHandler(BaseHTTPRequestHandler):
                     future.set_result(value)
                 except Exception as error:
                     future.set_exception(error)
+                finally:
+                    self.server.generation_slots.release()
             threading.Thread(target=generate, daemon=True).start()
+            worker_started = True
             while not future.done():
                 if self._disconnected():
                     cancellation.cancel()
@@ -223,7 +228,7 @@ class PersonalStoryHandler(BaseHTTPRequestHandler):
             self._json(500, {"error": {"code": "internal_error", "message": "The service could not complete the request."}})
         finally:
             cancellation.cancel()
-            if acquired:
+            if acquired and not worker_started:
                 self.server.generation_slots.release()
 
     def _respond_story(self, story, reason):

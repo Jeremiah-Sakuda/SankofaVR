@@ -31,12 +31,14 @@ def strict_json(raw):
 
 
 def text(value, limit, *, empty=False):
-    if not isinstance(value, str) or len(value) > limit or (not empty and not value.strip()):
+    if not isinstance(value, str) or (not empty and not value.strip()):
         raise ValueError("Invalid text length or type")
-    if any(ord(c) < 32 and c not in "\n\t" for c in value):
+    if any((ord(c) < 32 and c not in "\r\n\t") or 0xD800 <= ord(c) <= 0xDFFF or 0x202A <= ord(c) <= 0x202E or 0x2066 <= ord(c) <= 0x2069 for c in value):
         raise ValueError("Control characters are unsupported")
+    if len(value.encode("utf-16-le")) // 2 > limit:
+        raise ValueError("Invalid text length")
     # Unity text must be plain; provider/user material cannot inject rich text.
-    if "<" in value or ">" in value:
+    if any(c in value for c in "<>`[]") or re.search(r"(?:https?|javascript|data):", value, re.I):
         raise ValueError("Markup is unsupported")
     return value.strip()
 
@@ -54,8 +56,8 @@ class StoryRequest:
         if not isinstance(data, dict) or set(data) - {"region", "period", "interest", "fragment", "question"}:
             raise RequestError("invalid_request", "Expected only region, period, interest, fragment and question.")
         try:
-            region = text(data.get("region"), 100)
-            period = text(data.get("period"), 100)
+            region = text(data.get("region"), 80)
+            period = text(data.get("period"), 80)
             interest = text(data.get("interest"), 80)
             fragment = text(data.get("fragment", ""), 1000, empty=True)
             question = text(data.get("question", ""), 500, empty=True)
@@ -99,7 +101,7 @@ def validate_proposal(data):
                 raise ValueError()
             # Reject obvious capability/identity laundering. These checks cannot
             # establish that all meaning in generated prose is culturally sound.
-            if re.search(r"https?://|www\.|\d|your ancestors|your bloodline|your tribe|your lineage|historically verified|verified by ai", narration, re.I):
+            if re.search(r"https?://|www\.|\d|your ancestors|your ancestor was|your bloodline|your tribe|your lineage|your family lived|your family came from|your grandmother was|your grandfather was|you descend from|this proves your|historically verified|verified by ai", narration, re.I):
                 raise ValueError()
         return deepcopy(data)
     except (ValueError, KeyError, TypeError):
@@ -120,6 +122,20 @@ def bundled_proposal(interest):
     ]}
 
 
+def contextual_question(question):
+    """Offer known context, without claiming arbitrary questions were answered."""
+    folded = question.casefold()
+    if re.search(r"\b(gourd|vessel)\b", folded):
+        claim, label = "C7", "Context for your question: the gourd"
+    elif re.search(r"\b(trade|trading|household)\b", folded):
+        claim, label = "C6", "Context for your question: regional trade"
+    elif ("nairobi" in folded and re.search(r"\b(name|meaning|mean)\b", folded)) or "cool water" in folded:
+        claim, label = "C1", "Context for your question: Nairobi's name"
+    else:
+        return {"id": "visitor-question", "label": "Your question: evidence limit", "answer": UNANSWERED, "truth": "reconstructed", "sources": []}
+    return {"id": "visitor-question", "label": label, "answer": HISTORICAL[claim], "truth": "historical", "sources": [claim]}
+
+
 def compose_story(request, proposal, mode):
     proposal = validate_proposal(proposal)
     if mode not in {"generated", "bundled"}:
@@ -132,7 +148,7 @@ def compose_story(request, proposal, mode):
     # A bundled fallback is deliberately complete and never presented as a new
     # personal generation. Do not attach the fragment to a failed generation.
     if mode == "generated" and request.question:
-        chapters[-1]["questions"].append({"id": "visitor-question", "label": "Your question", "answer": UNANSWERED, "truth": "reconstructed", "sources": []})
+        chapters[-1]["questions"].append(contextual_question(request.question))
     story = {"schema": SCHEMA, "id": "personal-" + uuid.uuid4().hex, "title": proposal["title"], "region": request.region, "period": request.period, "interest": request.interest, "mode": mode, "chapters": chapters, "sources": [deepcopy(SOURCES[key]) for key in ("C1", "C6", "C7")]}
     validate_story(story)
     return story

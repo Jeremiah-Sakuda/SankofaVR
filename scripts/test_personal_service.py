@@ -35,7 +35,7 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(raised.exception.code, expected)
 
     def test_plain_text_and_input_bounds(self):
-        for changes in [{"fragment": "x" * 1001}, {"question": "x" * 501}, {"region": ["Nairobi"]}, {"fragment": "<color=red>test</color>"}, {"fragment": "bad\u0000text"}, {"extra": "not accepted"}]:
+        for changes in [{"fragment": "x" * 1001}, {"question": "x" * 501}, {"fragment": "🎒" * 501}, {"region": ["Nairobi"]}, {"fragment": "<color=red>test</color>"}, {"fragment": "bad\u0000text"}, {"fragment": "[link]"}, {"fragment": "wrong\u202edirection"}, {"fragment": "https://example.org"}, {"fragment": "\ud800"}, {"extra": "not accepted"}]:
             with self.subTest(changes=changes), self.assertRaises(RequestError):
                 StoryRequest.parse({**PUBLIC_REQUEST, **changes})
 
@@ -61,6 +61,17 @@ class ContractTests(unittest.TestCase):
         stories = [service.create({**PUBLIC_REQUEST, "interest": interest}, Cancellation())[0] for interest in ("journeys", "trade-household", "place-water")]
         self.assertEqual(len({s["chapters"][2]["narration"] for s in stories}), 3)
         self.assertEqual(len({s["chapters"][3]["narration"] for s in stories}), 3)
+
+    def test_question_context_uses_only_exact_inventory_or_declares_limit(self):
+        service = PersonalStoryService(StubProvider())
+        for question, claim in [("What does Nairobi's name mean?", "C1"), ("What is known about trade?", "C6"), ("What is documented about a gourd?", "C7"), ("Who was my ancestor?", None)]:
+            story, _ = service.create({**PUBLIC_REQUEST, "question": question}, Cancellation())
+            answer = story["chapters"][-1]["questions"][-1]
+            if claim:
+                self.assertEqual((answer["truth"], answer["answer"], answer["sources"]), ("historical", HISTORICAL[claim], [claim]))
+            else:
+                self.assertEqual((answer["truth"], answer["sources"]), ("reconstructed", []))
+                self.assertIn("cannot establish", answer["answer"])
 
     def test_bundled_fallback_is_honest_and_does_not_echo_input(self):
         story, reason = PersonalStoryService().create(PUBLIC_REQUEST, Cancellation())
@@ -96,6 +107,14 @@ class ContractTests(unittest.TestCase):
         token.cancel()
         with self.assertRaises(Cancelled):
             PersonalStoryService(StubProvider()).create(PUBLIC_REQUEST, token)
+
+    def test_provider_deadline_returns_bundled_without_connection_drop(self):
+        class Deadline:
+            def generate(self, request, cancellation):
+                cancellation.deadline = time.monotonic() - 1
+                raise ProviderError("provider_timeout")
+        story, reason = PersonalStoryService(Deadline()).create(PUBLIC_REQUEST, Cancellation())
+        self.assertEqual((story["mode"], reason), ("bundled", "provider_timeout"))
 
 
 class FakeResponse:
@@ -149,6 +168,17 @@ class ProviderTests(unittest.TestCase):
             GeminiProvider("synthetic-secret", connection_factory=transport).generate(StoryRequest.parse(PUBLIC_REQUEST), Cancellation())
         self.assertEqual(str(raised.exception), "provider_rejected")
         self.assertNotIn("synthetic-secret", str(raised.exception))
+
+    def test_vertex_uses_explicit_project_fixed_google_host_and_compatible_schema(self):
+        transport = fake_transport(FakeResponse(gemini_response()))
+        provider = GeminiProvider(project="synthetic-project", backend="vertex", model="gemini-2.5-flash", connection_factory=transport)
+        with patch.object(provider._auth, "headers", return_value={"Authorization": "Bearer synthetic"}):
+            provider.generate(StoryRequest.parse(PUBLIC_REQUEST), Cancellation())
+        call = transport.instances[-1]
+        self.assertEqual(call.host, "aiplatform.googleapis.com")
+        self.assertEqual(call.path, "/v1/projects/synthetic-project/locations/global/publishers/google/models/gemini-2.5-flash:generateContent")
+        self.assertIn("responseJsonSchema", call.body["generationConfig"])
+        self.assertNotIn("responseFormat", call.body["generationConfig"])
 
     def test_truncated_blocked_invalid_and_oversized_responses_fail_closed(self):
         bodies = [gemini_response(finish="MAX_TOKENS"), {"promptFeedback": {"blockReason": "SAFETY"}}, b"not JSON", b" " * 65537, gemini_response({"title": "wrong", "chapters": []})]
@@ -268,6 +298,16 @@ class HTTPTests(unittest.TestCase):
         self.server.service.provider = Failure()
         status, headers, story = self.request("/create-story", PUBLIC_REQUEST)
         self.assertEqual((status, story["mode"], headers["X-Sankofa-Fallback-Reason"]), (200, "bundled", "provider_unavailable"))
+
+    def test_busy_capacity_returns_bounded_client_error(self):
+        for _ in range(4):
+            self.assertTrue(self.server.generation_slots.acquire(blocking=False))
+        try:
+            status, _, body = self.request("/create-story", PUBLIC_REQUEST)
+            self.assertEqual((status, body["error"]["code"]), (429, "busy"))
+        finally:
+            for _ in range(4):
+                self.server.generation_slots.release()
 
     def test_http_timeout_cancels_provider_and_returns_bundled(self):
         stopped = threading.Event()

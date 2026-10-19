@@ -22,9 +22,9 @@ class Cancelled(Exception):
 
 
 class ProviderError(Exception):
-    def __init__(self, code="provider_unavailable"):
+    def __init__(self, code="provider_unavailable", status=None):
         super().__init__(code)
-        self.code = code
+        self.code, self.status = code, status
 
 
 class GoogleAuth:
@@ -53,9 +53,10 @@ def post_google(host, path, payload, headers, cancellation, connection_factory, 
     """HTTPS only, fixed callers, no redirects/proxy discovery or error-body logs."""
     connection = connection_factory(host, timeout=min(10.0, cancellation.remaining()))
     def abort():
-        if connection.sock:
+        active_socket = connection.sock
+        if active_socket:
             try:
-                connection.sock.shutdown(socket.SHUT_RDWR)
+                active_socket.shutdown(socket.SHUT_RDWR)
             except OSError:
                 pass
         connection.close()
@@ -67,7 +68,7 @@ def post_google(host, path, payload, headers, cancellation, connection_factory, 
             connection.sock.settimeout(cancellation.remaining())
         response = connection.getresponse()
         if response.status != 200:
-            raise ProviderError("provider_rejected" if response.status in (400, 401, 403, 404) else "provider_unavailable")
+            raise ProviderError("provider_rejected" if response.status in (400, 401, 403, 404) else "provider_unavailable", response.status)
         raw = bytearray()
         while True:
             if connection.sock:
@@ -105,7 +106,6 @@ class Cancellation:
             raise Cancelled()
         remaining = self.deadline - time.monotonic()
         if remaining <= 0:
-            self.cancel()
             raise ProviderError("provider_timeout")
         return remaining
 
@@ -152,10 +152,13 @@ has been independently checked. Keep each narration under 800 characters.
 
 
 class GeminiProvider:
-    def __init__(self, api_key=None, model=DEFAULT_MODEL, connection_factory=http.client.HTTPSConnection, project=None):
+    def __init__(self, api_key=None, model=DEFAULT_MODEL, connection_factory=http.client.HTTPSConnection, project=None, backend="developer"):
         if not (api_key or project) or not re.fullmatch(r"gemini-[a-z0-9][a-z0-9.-]{1,90}", model):
             raise ValueError("Gemini key/model configuration is invalid")
         self._auth, self.model, self._connection_factory = GoogleAuth(api_key, project), model, connection_factory
+        if backend not in {"developer", "vertex"} or (backend == "vertex" and not project):
+            raise ValueError("Vertex generation requires an explicit Google project")
+        self.backend, self._project = backend, project
 
     def generate(self, request, cancellation):
         payload = {
@@ -163,8 +166,15 @@ class GeminiProvider:
             "contents": [{"role": "user", "parts": [{"text": json.dumps({"approved_context": HISTORICAL, "approved_illustrations": list(ART_IDS[:2]), "visitor_input": asdict(request)}, ensure_ascii=False)}]}],
             "generationConfig": {"temperature": 0.55, "candidateCount": 1, "maxOutputTokens": 4096, "responseFormat": {"text": {"mimeType": "application/json", "schema": proposal_schema()}}},
         }
+        host, path = "generativelanguage.googleapis.com", f"/v1beta/models/{self.model}:generateContent"
+        if self.backend == "vertex":
+            host = "aiplatform.googleapis.com"
+            path = f"/v1/projects/{self._project}/locations/global/publishers/google/models/{self.model}:generateContent"
+            config = payload["generationConfig"]
+            del config["responseFormat"]
+            config.update(responseMimeType="application/json", responseJsonSchema=proposal_schema())
         try:
-            result = post_google("generativelanguage.googleapis.com", f"/v1beta/models/{self.model}:generateContent", payload, self._auth.headers(cancellation), cancellation, self._connection_factory)
+            result = post_google(host, path, payload, self._auth.headers(cancellation, oauth=self.backend == "vertex"), cancellation, self._connection_factory)
             candidates = result.get("candidates", [])
             if len(candidates) != 1 or candidates[0].get("finishReason") != "STOP":
                 raise ProviderError("provider_invalid_response")
