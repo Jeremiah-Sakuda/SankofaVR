@@ -40,7 +40,7 @@ namespace Sankofa.Runtime.Personal
             {
                 manager.isInsightPassthroughEnabled = true;
                 passthrough = manager.gameObject.AddComponent<OVRPassthroughLayer>();
-                passthrough.overlayType = OVROverlay.OverlayType.Underlay;
+                // SDK 207 creates its internal overlay as Underlay; no public overlayType setter exists.
                 passthrough.textureOpacity = 1;
                 enabledRoom = true;
                 var camera = head != null ? head.GetComponent<Camera>() : Camera.main;

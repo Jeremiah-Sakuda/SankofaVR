@@ -156,6 +156,10 @@ Do not move into a home, doorway, interior, marketplace or other unpictured loca
 Home may be remembered or discussed while the characters remain at the bank.
 Choose only the supplied illustration IDs (scenery-atlas or cast-atlas). Make the
 visitor's question, fragment and interest alter the tension, decision and consequence;
+when a fictional protagonist is supplied, preserve that person's role, obstacle
+and intended listener. Do not swap the giver and receiver or move the dilemma to
+another person. Perform the requested choice or explanation and its concrete
+consequence in the ending, rather than promising it offstage later;
 do not just insert a name. Keep a personal account distinct from this fiction. Do
 not answer the visitor question with new historical claims. Never imply the story
 has been independently checked. The required 'Imagined scene: ' prefix supplies
