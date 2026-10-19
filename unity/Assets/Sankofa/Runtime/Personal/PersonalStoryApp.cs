@@ -291,7 +291,7 @@ namespace Sankofa.Runtime.Personal
         public bool Reopen()
         {
             if (session.Paused) return false;
-            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); view.ResetReadingPosition(); return session.OpenSaved(kept); }
+            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
             catch (Exception) { ShelfProblem("Your kept story could not be opened. It has not been replaced.", () => Reopen()); return false; }
         }
         public void Forget()

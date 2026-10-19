@@ -61,10 +61,10 @@ namespace Sankofa.EditorTools
             RunMetaProjectSetupFixes();
             // After Meta's fixes, which turn SpaceWarp back on.
             DisableFeatures();
-            RemoveUnusedPermissions();
+            EnsureStoryServicePermission();
             SankofaText.EnsureEssentials();
             AssetDatabase.SaveAssets();
-            Debug.Log("[Sankofa] Project configured for Quest (Android, OpenXR, hands first, full VR).");
+            Debug.Log("[Sankofa] Project configured for Quest (Android, OpenXR, hands first, optional room fitting).");
         }
 
         static void ConfigurePlayer()
@@ -230,18 +230,18 @@ namespace Sankofa.EditorTools
             config.handTrackingSupport = OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
             // Pokes, pinches and the open palm are the whole interface: track hands at the higher rate.
             config.handTrackingFrequency = OVRProjectConfig.HandTrackingFrequency.HIGH;
-            // Full VR is the baseline. A room-aware hearth is a later, conditional extension.
-            config.insightPassthroughSupport = OVRProjectConfig.FeatureSupport.None;
+            // Manual stand remains complete; room use is optional and permission follows an explicit action.
+            config.insightPassthroughSupport = OVRProjectConfig.FeatureSupport.Supported;
+            config.sceneSupport = OVRProjectConfig.FeatureSupport.Supported;
             OVRProjectConfig.CommitProjectConfig(config);
         }
 
         const string ManifestPath = "Assets/Plugins/Android/AndroidManifest.xml";
 
         /// <summary>
-        /// Unity adds INTERNET automatically when a linked module references networking. This build makes no network
-        /// requests (the bundled story is complete offline), so the merged manifest drops it until a service exists.
+        /// Unity adds INTERNET for the optional story service. Remove the old offline-only override on upgrade.
         /// </summary>
-        static void RemoveUnusedPermissions()
+        static void EnsureStoryServicePermission()
         {
             if (!System.IO.File.Exists(ManifestPath))
             {
@@ -249,13 +249,30 @@ namespace Sankofa.EditorTools
                 return;
             }
             var text = System.IO.File.ReadAllText(ManifestPath);
-            const string removal = "<uses-permission android:name=\"android.permission.INTERNET\" tools:node=\"remove\" />";
-            if (text.Contains(removal)) return;
-            if (!text.Contains("xmlns:tools="))
-                text = text.Replace("<manifest ", "<manifest xmlns:tools=\"http://schemas.android.com/tools\" ");
-            text = text.Replace("</manifest>", "  " + removal + "\n</manifest>");
-            System.IO.File.WriteAllText(ManifestPath, text);
+            var updated = PermitStoryNetworking(text);
+            if (updated == text) return;
+            System.IO.File.WriteAllText(ManifestPath, updated);
             AssetDatabase.ImportAsset(ManifestPath);
+        }
+
+        public static string PermitStoryNetworking(string manifest)
+        {
+            var document = new System.Xml.XmlDocument { PreserveWhitespace = true, XmlResolver = null };
+            document.LoadXml(manifest);
+            var removals = document.GetElementsByTagName("uses-permission").Cast<System.Xml.XmlElement>()
+                .Where(node => node.GetAttribute("name", "http://schemas.android.com/apk/res/android") == "android.permission.INTERNET"
+                    && node.GetAttribute("node", "http://schemas.android.com/tools") == "remove").ToArray();
+            if (removals.Length == 0) return manifest;
+            foreach (var node in removals) node.ParentNode.RemoveChild(node);
+            return document.OuterXml;
+        }
+
+        [MenuItem("Sankofa/Configure Story Table Capabilities")]
+        public static void ConfigureStoryTableCapabilities()
+        {
+            ConfigureMetaProjectConfig();
+            EnsureStoryServicePermission();
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary>Applies Meta's Project Setup Tool fixes (blocking), via its internal API.</summary>

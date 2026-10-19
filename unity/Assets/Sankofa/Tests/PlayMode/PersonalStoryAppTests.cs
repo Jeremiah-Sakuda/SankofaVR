@@ -196,10 +196,12 @@ namespace Sankofa.Tests
             app.Forget();
             Assert.That(Panel("Return and recovery actions").Hidden, Is.True, "Forget cannot open a decision while paused");
             yield return Press("Always available controls", "pause");
+            typeof(PersonalStoryApp).GetField("narrationToken", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(app, "synthetic-previous-visit-token");
             yield return Press(kept, "reopen");
             Assert.That(app.Session.IsReplay, Is.True);
             Assert.That(PersonalStoryJson.Write(app.Session.Story), Is.EqualTo(first));
             Assert.That(view.CapabilityLabel, Does.Contain("no new generation"));
+            Assert.That(typeof(PersonalStoryApp).GetField("narrationToken", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(app), Is.Null, "reopening cannot fetch fresh speech with an earlier visit's token");
             yield return Press("Always available controls", "leave");
             yield return Press("Return and recovery actions", "leave");
             yield return Press("Interest choices", "place-water");
