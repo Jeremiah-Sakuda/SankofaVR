@@ -39,6 +39,56 @@ namespace Sankofa.Core.Personal
         public string Truth { get; set; }
         public IReadOnlyList<string> Sources { get; set; } = new string[0];
         public IReadOnlyList<PersonalStoryQuestion> Questions { get; set; } = new PersonalStoryQuestion[0];
+        /// <summary>Optional: whose side of the scene to follow next. The first choice is the authored default.</summary>
+        public IReadOnlyList<PersonalStoryChoice> Choices { get; set; } = new PersonalStoryChoice[0];
+    }
+
+    /// <summary>A perspective the visitor may follow. It changes what is revealed, never what a character decides.</summary>
+    public sealed class PersonalStoryChoice
+    {
+        public string Id { get; set; }
+        public string Label { get; set; }
+        public string Next { get; set; }
+    }
+
+    /// <summary>
+    /// Route rules shared by validation, the session and presentation. A chapter with choices continues to the chosen
+    /// chapter; a chapter a choice leads to ends the telling unless it offers choices itself; any other chapter continues
+    /// to the one after it, and the last chapter ends the telling.
+    /// </summary>
+    public static class PersonalStoryRoutes
+    {
+        public static int IndexOf(PersonalStoryDocument story, string chapterId)
+        {
+            if (story?.Chapters == null || chapterId == null) return -1;
+            for (var i = 0; i < story.Chapters.Count; i++) if (story.Chapters[i]?.Id == chapterId) return i;
+            return -1;
+        }
+
+        public static bool HasChoices(PersonalStoryChapter chapter) => chapter?.Choices != null && chapter.Choices.Count > 0;
+
+        public static bool IsBranchTarget(PersonalStoryDocument story, int index)
+        {
+            var id = story.Chapters[index]?.Id;
+            return id != null && story.Chapters.Any(c => HasChoices(c) && c.Choices.Any(x => x?.Next == id));
+        }
+
+        /// <summary>The chapter after <paramref name="index"/> without a visitor choice; -1 ends the telling.</summary>
+        public static int Continue(PersonalStoryDocument story, int index)
+        {
+            var chapter = story.Chapters[index];
+            if (HasChoices(chapter)) return IndexOf(story, chapter.Choices[0]?.Next);
+            if (IsBranchTarget(story, index) || index + 1 >= story.Chapters.Count) return -1;
+            return index + 1;
+        }
+
+        /// <summary>Pages still to read from <paramref name="index"/>, following authored defaults, including this one.</summary>
+        public static int RemainingPages(PersonalStoryDocument story, int index)
+        {
+            var pages = 0;
+            for (var i = index; i >= 0 && pages <= story.Chapters.Count; i = Continue(story, i)) pages++;
+            return pages;
+        }
     }
 
     public sealed class PersonalStoryQuestion
@@ -63,6 +113,12 @@ namespace Sankofa.Core.Personal
         public PersonalStoryDocument Story { get; internal set; }
         public string Code { get; internal set; }
         public string Message { get; internal set; }
+        /// <summary>
+        /// Why this thread was chosen, in the catalog's own words. It quotes only recognised theme words, never
+        /// arbitrary visitor text, and is presentation only: it is not part of the story or a kept telling.
+        /// </summary>
+        public string Reason { get; internal set; }
+        public IReadOnlyList<string> Cues { get; internal set; } = new string[0];
     }
 
     public sealed class PersonalStoryIssue

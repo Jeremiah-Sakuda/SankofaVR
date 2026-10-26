@@ -25,6 +25,9 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] string serviceEndpoint = "";
         [Tooltip("Limited service access credential for a controlled build, never a Google key. APK contents can be extracted; rotate and limit server access.")]
         [SerializeField] string serviceAccessToken = "";
+        [Tooltip("A prepared field recording of a small fire (Art/Recorded/sources.json); played on the headset only.")]
+        [SerializeField] AudioClip fireRecording;
+        static readonly Vector3 FireOnTable = new Vector3(-.47f, .20f, .20f);
         StoryTableView view;
         StoryTablePlacement placement;
         StoryTableKeyboard keyboard;
@@ -40,6 +43,9 @@ namespace Sankofa.Runtime.Personal
         bool narrationEnabled;
         UnityWebRequest pendingAudio;
         bool largeText;
+        string personalReason;
+        AudioSource fireSound;
+        readonly float[] speech = new float[256];
         readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
         public static string StoreFolderOverride;
         public PersonalStorySession Session => session;
@@ -47,7 +53,13 @@ namespace Sankofa.Runtime.Personal
         public StoryTableKeyboard Keyboard => keyboard;
         public string Seed => seed;
         public bool HasKept { get { try { return store != null && store.HasKept; } catch { return false; } } }
-        public string ServiceEndpoint { get => serviceEndpoint; set => serviceEndpoint = value ?? ""; }
+        public string ServiceEndpoint
+        {
+            get => serviceEndpoint;
+            set { serviceEndpoint = value ?? ""; if (view != null && session.State == PersonalStoryState.Intake && decision == null) Render(); }
+        }
+        public bool OnlineAvailable => Endpoint() != null;
+        public string PersonalReason => personalReason;
         public string ServiceAccessToken { set => serviceAccessToken = value ?? ""; }
         public bool NarrationEnabled => narrationEnabled;
 
@@ -65,8 +77,10 @@ namespace Sankofa.Runtime.Personal
             foreach (var panel in panels) foreach (var hand in hands) { var source = hand; panel.AddFingertip(() => source.Fingertip); }
             foreach (var pointer in FindObjectsByType<PointerSource>(FindObjectsSortMode.None)) pointer.ConfigurePanels(panels);
             store = new PersonalStoryStore(StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story"));
-            voice = gameObject.AddComponent<AudioSource>(); voice.playOnAwake = false; voice.volume = 0; voice.spatialBlend = .75f;
-            narrationEnabled = false; // A developer/simulator session starts silently; Listen is explicit.
+            // On the headset the griot reads aloud by default, beside full captions. Editor, simulator and batch sessions
+            // start silently; Options switches either way.
+            narrationEnabled = !Application.isEditor;
+            voice = gameObject.AddComponent<AudioSource>(); voice.playOnAwake = false; voice.volume = narrationEnabled ? .85f : 0; voice.spatialBlend = .75f;
             view.StartLocalRequested += StartPrepared;
             view.StartRequested += StartGenerated;
             view.RouteSelected += id => interest = id;
@@ -76,6 +90,8 @@ namespace Sankofa.Runtime.Personal
             view.NextRequested += () => { StopVoice(); session.Next(); };
             view.BackRequested += () => { StopVoice(); session.Back(); };
             view.QuestionSelected += id => { if (int.TryParse(id, out var index)) { StopVoice(); session.Ask(index); } };
+            view.ChoiceSelected += id => { if (int.TryParse(id, out var index) && session.OffersChoice) { StopVoice(); session.Choose(index); } };
+            view.AboutRequested += ShowAbout;
             view.AskRequested += () => { StopVoice(); session.Ask(0); };
             view.SourceDetailsRequested += ShowSources;
             view.SaveRequested += RequestKeep;
@@ -111,7 +127,38 @@ namespace Sankofa.Runtime.Personal
             placement.Configure(view, eye != null ? eye.transform : null);
             reducedMotion = ExperienceSettings.Load().ReducedMotion;
             view.SetReducedMotion(reducedMotion);
+            StartFireSound();
             Render();
+        }
+
+        /// <summary>The fire is heard where it burns. Headset only, like the voice; the tabletop view itself creates no sound.</summary>
+        void StartFireSound()
+        {
+            if (Application.isEditor || fireRecording == null) return;
+            var source = new GameObject("Fire sound");
+            source.transform.SetParent(transform, false);
+            fireSound = source.AddComponent<AudioSource>();
+            fireSound.clip = fireRecording; fireSound.loop = true; fireSound.playOnAwake = false;
+            fireSound.spatialBlend = .9f; fireSound.volume = .28f; fireSound.dopplerLevel = 0;
+            fireSound.rolloffMode = AudioRolloffMode.Logarithmic; fireSound.minDistance = .6f; fireSound.maxDistance = 12f;
+            fireSound.transform.position = view.TableRoot.TransformPoint(FireOnTable);
+            fireSound.timeSamples = UnityEngine.Random.Range(0, fireRecording.samples);
+            fireSound.Play();
+        }
+
+        void Update()
+        {
+            if (view == null) return;
+            var level = 0f;
+            if (voice != null && voice.isPlaying)
+            {
+                voice.GetOutputData(speech, 0);
+                var sum = 0f;
+                for (var i = 0; i < speech.Length; i++) sum += speech[i] * speech[i];
+                level = Mathf.Clamp01(Mathf.Sqrt(sum / speech.Length) * 6f);
+            }
+            view.SetSpeechLevel(level);
+            if (fireSound != null) fireSound.transform.position = view.TableRoot.TransformPoint(FireOnTable);
         }
 
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
@@ -125,6 +172,7 @@ namespace Sankofa.Runtime.Personal
             var request = Request(); var version = session.Begin(request);
             if (session.State != PersonalStoryState.Preparing) return;
             var result = BundledPersonalStoryComposer.Compose(request);
+            personalReason = string.IsNullOrWhiteSpace(seed) ? null : result.Reason;
             if (result.Success) session.Accept(version, result.Story); else session.Fail(version, result.Message);
         }
 
@@ -132,6 +180,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (session.Paused) return;
             AbortPending(); StopVoice(); ClearClips(); keyboard.Close(); decision = null; narrationToken = null; view.ResetReadingPosition();
+            personalReason = null;
             var input = Request(); var version = session.Begin(input);
             if (session.State != PersonalStoryState.Preparing) return;
             var endpoint = Endpoint();
@@ -182,7 +231,11 @@ namespace Sankofa.Runtime.Personal
                 if (story != null && session.Accept(version, story))
                 {
                     narrationToken = call.GetResponseHeader("X-Sankofa-Narration-Token");
-                    if (story.Mode == "bundled") view.SetStatus("Prepared story • online creation was unavailable");
+                    if (story.Mode == "bundled")
+                    {
+                        if (!string.IsNullOrWhiteSpace(seed)) personalReason = BundledPersonalStoryComposer.Compose(input).Reason;
+                        view.SetStatus("Prepared story • online creation was unavailable");
+                    }
                     if (narrationEnabled) SpeakCurrent();
                 }
             }
@@ -192,31 +245,34 @@ namespace Sankofa.Runtime.Personal
         {
             if (view == null) return;
             view.SetPaused(session.Paused); keyboard.Suspend(session.Paused);
-            if (session.Paused) { voice.Pause(); return; }
+            if (session.Paused) { voice.Pause(); if (fireSound != null) fireSound.Pause(); return; }
             if (voice.clip != null && narrationEnabled && !voice.isPlaying) voice.UnPause();
+            if (fireSound != null && !fireSound.isPlaying) fireSound.UnPause();
             if (decision != null || keyboard.IsOpen) return;
             var story = session.Story;
             switch (session.State)
             {
                 case PersonalStoryState.Intake:
                     view.RenderStory("Sankofa", "For the stories you never got to hear", placement.Status);
-                    view.SetIntakeSelection(interest, region, period); view.SetSeedText(seed); view.ShowIntake();
+                    view.SetIntakeSelection(interest, region, period); view.SetSeedText(seed); view.SetOnlineAvailable(OnlineAvailable); view.ShowIntake();
                     view.SetHasKeptStory(HasKept);
                     view.SetControlState(false, false, false, false);
                     break;
                 case PersonalStoryState.Preparing: view.ShowPreparing("Listening to your question, gathering the next pages…"); break;
                 case PersonalStoryState.Error: view.ShowError(session.Problem); break;
                 case PersonalStoryState.Reading:
-                    view.RenderStory(story.Title, "Enkare Nairobi • around the 1850s", Capability(story));
+                    // The first page says what the visitor's own words changed; later pages return to the setting.
+                    view.RenderStory(story.Title, session.PageNumber == 1 && personalReason != null ? personalReason : "Enkare Nairobi • around the 1850s", Capability(story));
                     view.RenderChapter(new StoryTableChapterViewData
                     {
-                        Index = session.ChapterIndex, Count = story.Chapters.Count, Title = session.Chapter.Title,
+                        Index = session.PageNumber - 1, Count = session.PageCount, Title = session.Chapter.Title,
                         Caption = session.Chapter.Narration, ArtKey = session.Chapter.Illustration,
                         ImageLabel = TruthLabel(session.Chapter.Truth),
-                        PreviousPageTitles = story.Chapters.Take(session.ChapterIndex).Select(c => c.Title).TakeLast(2).ToArray(),
+                        PreviousPageTitles = session.PagesBefore.Select(c => c.Title).TakeLast(2).ToArray(),
                         Questions = session.Chapter.Questions.Select(q => q.Label).ToArray(),
+                        Choices = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Label).ToArray() : Array.Empty<string>(),
                     });
-                    view.SetControlState(session.ChapterIndex > 0, true, session.Chapter.Questions.Count > 0, false);
+                    view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0, false);
                     if (narrationEnabled && voice.clip == null && voiceRequest == null) SpeakCurrent();
                     break;
                 case PersonalStoryState.Question:
@@ -224,7 +280,7 @@ namespace Sankofa.Runtime.Personal
                 case PersonalStoryState.Sources:
                     view.ShowSourceDetails("What this telling knows", SourcesText()); break;
                 case PersonalStoryState.Closing:
-                    view.ShowClosing(ReturnInvitation(story.Interest) + "\n\nKeep these exact pages on this device, or return to your choices without saving.");
+                    view.ShowClosing(Followed(story) + "\n\nKeep these exact pages on this device, or return to your choices without saving.");
                     view.SetControlState(true, false, false, true); break;
             }
         }
@@ -238,12 +294,37 @@ namespace Sankofa.Runtime.Personal
             : thread == "place-water"
                 ? "Who followed the path beside the water? A question about journeys can follow the people next."
                 : "What did the travellers bring to their meeting? A question about trade can follow what they carried.";
+        /// <summary>Names the side the visitor followed, honestly distinguishing their choice from the fire's default, and the side still unheard.</summary>
+        string Followed(PersonalStoryDocument story)
+        {
+            var followed = session.Followed;
+            if (followed == null) return ReturnInvitation(story.Interest);
+            var text = (session.FollowedByChoice ? "You chose to " : "The fire chose to ") + Lower(followed.Label) + ".";
+            if (session.NotFollowed.Count > 0) text += " Another time, you could " + Lower(session.NotFollowed[0].Label) + ".";
+            return text;
+        }
+        static string Lower(string label) => string.IsNullOrEmpty(label) ? "" : char.ToLowerInvariant(label[0]) + label.Substring(1);
+
+        void ShowAbout()
+        {
+            if (session.Paused) return;
+            StopVoice();
+            Decide("How it works",
+                "Choose a thread, or add a question: recognised words in your question choose which telling the fire begins.\n\n" +
+                "Each telling reaches a moment where you choose whose side to follow. If you simply turn the page, the fire chooses.\n\n" +
+                "Documented pages are marked and sourced. Imagined scenes are labelled; nothing here recovers a real ancestor.\n\n" +
+                "At the end you can keep a telling on this device and reopen it exactly, without a connection.\n\n" +
+                "Fire sound: \u201ccampfire sound\u201d by SterckxS, Freesound, CC BY 3.0. The narrator is a synthetic voice.",
+                new[] { ("return", "Return") }, _ => Render());
+        }
+
         string SourcesText()
         {
             var references = session.State == PersonalStoryState.Sources && session.Question != null ? session.Question.Sources : session.Chapter.Sources;
             var names = session.Story.Sources.Where(s => references.Contains(s.Id)).Select(s => s.Id + " • "
                 + (s.Id == "C6" ? "The Origins of the Kikuyu Land Problem (1988)" : s.Title) + "\n" + s.Url);
-            return TruthLabel(session.Question != null ? session.Question.Truth : session.Chapter.Truth) + "\n\n" + string.Join("\n\n", names) + "\n\nThe illustrations are contemporary reconstructions. This is one researched setting; cultural and pronunciation review remain open.";
+            var why = personalReason != null && !session.IsReplay ? "\n\nWhy this telling: " + personalReason : "";
+            return TruthLabel(session.Question != null ? session.Question.Truth : session.Chapter.Truth) + "\n\n" + string.Join("\n\n", names) + why + "\n\nThe illustrations are contemporary reconstructions. This is one researched setting; cultural and pronunciation review remain open.";
         }
 
         void EditSeed()
@@ -292,7 +373,7 @@ namespace Sankofa.Runtime.Personal
         public bool Reopen()
         {
             if (session.Paused) return false;
-            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
+            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; personalReason = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
             catch (Exception) { ShelfProblem("Your kept story could not be opened. It has not been replaced.", () => Reopen()); return false; }
         }
         public void Forget()
@@ -372,7 +453,7 @@ namespace Sankofa.Runtime.Personal
         void PlayClip(AudioClip clip)
         {
             if (!narrationEnabled || clip == null || session.Paused) return;
-            voice.transform.position = view.TableRoot.TransformPoint(new Vector3(-.47f, .20f, .20f));
+            voice.transform.position = view.TableRoot.TransformPoint(FireOnTable);
             voice.clip = clip; voice.volume = .85f; voice.Play();
         }
         void ClearClips() { foreach (var clip in clips.Values) if (clip != null) Destroy(clip); clips.Clear(); }

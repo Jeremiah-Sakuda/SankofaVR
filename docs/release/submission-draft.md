@@ -26,7 +26,9 @@ Choose journeys, household life and exchange, or place and water. Add a question
 
 With the optional online service connected, your curiosity shapes the tension and outcome of two imagined scenes. The telling begins with the fictional situation, brings in documented context, and returns to the people and their decision. Changing only the question has produced different fictional situations and outcomes in the actual app: waiting for a late companion in one telling, facing a smaller flour delivery in another.
 
-Illustrations keep the experience coherent. You turn pages, explore bounded contextual questions and sources, pause, and read at your own pace. The fire is the griot's visible presence. Optional narration reads the accepted words; captions remain available throughout. There is no required microphone or live voice conversation.
+Every telling reaches a turning point where you choose whose side of the meeting to follow: the woman who waits or the one who is late, the one who brought less or the one who expected more, the one who remembers or the one being shown. Turn the page without choosing and the fire chooses for you, and says so. Each side ends differently, and the ending names the side you have not heard yet.
+
+Illustrations keep the experience coherent. You turn pages, explore bounded contextual questions and sources, pause, and read at your own pace. The fire is the griot's visible presence: on the headset a warm voice reads each prepared page while the flame moves with it, and captions stay on throughout. There is no required microphone or live voice conversation.
 
 On supported Quest hardware, passthrough can keep your room present. Fit my table requests local scene access and uses a nearby surface's height and dimensions to place the journal. An adjustable stand, height controls and Recenter provide a complete fallback. Actual room fitting and hands comfort still require headset acceptance.
 
@@ -52,7 +54,7 @@ Unity 6000.3.25f1, Meta XR/OpenXR and MR Utility Kit 207, TextMeshPro, engine-fr
 
 ## Current verification — update before publication
 
-349 core, 32 service, 36 editor and 16 table runtime checks pass. An additional actual authenticated Unity HTTP smoke uses two public-synthetic question-only requests under the same selected interest and fetches/decodes real narration while remaining muted. These checks establish bounded software and transport behaviour. They do not establish listening quality, unfamiliar-visitor relevance, cultural acceptance or Quest usability/performance.
+358 core and 32 service checks pass after the October 26 iteration; the Unity editor and table-runtime suites must be rerun on the new scene before this line is published. An additional actual authenticated Unity HTTP smoke uses two public-synthetic question-only requests under the same selected interest and fetches/decodes real narration while remaining muted. These checks establish bounded software and transport behaviour. They do not establish listening quality, unfamiliar-visitor relevance, cultural acceptance or Quest usability/performance.
 
 [Current build identity and limitations](candidate.md) must accompany a published entry. Public hosting, independent installation, judge access, rights, cultural/pronunciation review and actual-device acceptance remain open. The checked-in Android scene has no live endpoint/access credential and can complete prepared tellings offline.
 
@@ -73,6 +75,7 @@ Try Fit my table when room access is available, then Recenter and the adjustable
 | Demonstration URL | Not published; use current actual headset or clearly identified simulator footage |
 | Quest hands, surface fitting, readability, reach and sustained minimum 60 fps | Actual-device evidence pending |
 | Cultural, source, pronunciation/listening and unfamiliar-visitor review | Acceptance pending |
+| Voice on every prepared page | Nine pages recorded; the three new perspective chapters are pending recording and play as captions until then |
 | Applicable asset/provider terms | Provenance recorded; release clearance pending |
 | Launch date and freeze/access plan | Final release decision pending |
 

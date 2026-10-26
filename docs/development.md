@@ -50,6 +50,7 @@ Keep the brief, copied rules and any local review evidence outside runtime promp
 |---|---|
 | `scripts/check_workspace.py` | Checks Markdown links and local-only exclusions; `--competition` also checks that the local brief is present |
 | `scripts/generate_narration.py` | Renders the package's lines with Google Cloud Text-to-Speech into `Resources/Narration`, using the user's gcloud sign-in; unchanged lines are cached |
+| `scripts/generate_table_narration.py` | Records the story table's chapters marked `pending-recording` in `personal-table.narration.json`, in the manifest's existing voice; `--dry-run` lists them without a provider call |
 | `scripts/prepare_recordings.py` | Edits the approved Freesound downloads in ignored `vendor/freesound/` into the loops and single sounds in `Art/Recorded`, and records their provenance |
 
 The engine-free folders build outside Unity as .NET Standard 2.1 with C# 9, the level Unity 6 accepts, with warnings as errors. With the .NET 10 SDK (for example installed in `~/.dotnet` by Microsoft's [install script](https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script)):

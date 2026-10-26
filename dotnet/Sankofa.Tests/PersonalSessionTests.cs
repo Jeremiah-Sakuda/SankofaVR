@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using Sankofa.Core.Personal;
 using Sankofa.Flow;
@@ -51,6 +52,55 @@ namespace Sankofa.Tests
             Assert.That(s.State, Is.EqualTo(PersonalStoryState.Closing)); Assert.That(s.Next(), Is.False);
             s.Cancel(); Assert.That(s.OpenSaved(realised), Is.True); Assert.That(s.IsReplay, Is.True);
             Assert.That(s.Story, Is.SameAs(realised)); Assert.That(s.ChapterIndex, Is.Zero);
+        }
+
+        [Test]
+        public void ContinuingAtAChoiceFollowsTheAuthoredDefaultWithoutClaimingTheVisitorChose()
+        {
+            var s = new PersonalStorySession(); s.Accept(s.Begin(Request()), Story());
+            Assert.That(s.PageNumber, Is.EqualTo(1)); Assert.That(s.PageCount, Is.EqualTo(3)); Assert.That(s.OffersChoice, Is.False);
+            Assert.That(s.Choose(0), Is.False, "the opening offers no perspective choice");
+            Assert.That(s.Next(), Is.True); Assert.That(s.OffersChoice, Is.True);
+            var offered = s.Chapter.Choices;
+            Assert.That(s.Next(), Is.True);
+            Assert.That(s.Chapter.Id, Is.EqualTo(offered[0].Next));
+            Assert.That(s.Followed, Is.SameAs(offered[0])); Assert.That(s.FollowedByChoice, Is.False);
+            Assert.That(s.NotFollowed, Is.EqualTo(new[] { offered[1] }));
+            Assert.That(s.PageNumber, Is.EqualTo(3)); Assert.That(s.PageCount, Is.EqualTo(3));
+            Assert.That(s.PagesBefore.Select(c => c.Id), Is.EqualTo(new[] { s.Story.Chapters[0].Id, s.Story.Chapters[1].Id }));
+            Assert.That(s.Next(), Is.True); Assert.That(s.State, Is.EqualTo(PersonalStoryState.Closing));
+        }
+
+        [Test]
+        public void ChoosingTheOtherSideRevealsADifferentEndingAndBackReopensTheChoice()
+        {
+            foreach (var interest in PersonalStoryCatalog.Interests)
+            {
+                var s = new PersonalStorySession(); s.Accept(s.Begin(Request(interest)), Story(interest)); s.Next();
+                var offered = s.Chapter.Choices;
+                s.Pause(true); Assert.That(s.Choose(1), Is.False); s.Pause(false);
+                Assert.That(s.Choose(2), Is.False); Assert.That(s.Choose(-1), Is.False);
+                Assert.That(s.Choose(1), Is.True);
+                Assert.That(s.Chapter.Id, Is.EqualTo(offered[1].Next));
+                Assert.That(s.FollowedByChoice, Is.True); Assert.That(s.Followed, Is.SameAs(offered[1]));
+                Assert.That(s.PageNumber, Is.EqualTo(3)); Assert.That(s.PageCount, Is.EqualTo(3));
+                Assert.That(s.Choose(0), Is.False, "an ending offers no further choice");
+                Assert.That(s.Back(), Is.True);
+                Assert.That(s.OffersChoice, Is.True); Assert.That(s.Followed, Is.Null);
+                Assert.That(s.Choose(0), Is.True); Assert.That(s.Chapter.Id, Is.EqualTo(offered[0].Next));
+                Assert.That(s.Next(), Is.True); Assert.That(s.State, Is.EqualTo(PersonalStoryState.Closing));
+                Assert.That(s.Back(), Is.True); Assert.That(s.Chapter.Id, Is.EqualTo(offered[0].Next), "the last page of the followed side stays readable");
+            }
+        }
+
+        [Test]
+        public void ReopeningAKeptTellingOffersTheChoiceAgainWithoutAnEarlierRoute()
+        {
+            var s = new PersonalStorySession(); s.Accept(s.Begin(Request()), Story()); s.Next(); s.Choose(1);
+            var kept = s.Story; s.Cancel();
+            Assert.That(s.OpenSaved(kept), Is.True);
+            Assert.That(s.ChapterIndex, Is.Zero); Assert.That(s.PageNumber, Is.EqualTo(1)); Assert.That(s.Followed, Is.Null);
+            s.Next(); Assert.That(s.OffersChoice, Is.True);
         }
 
         [Test]

@@ -261,11 +261,15 @@ namespace Sankofa.Tests
         [UnityTest]
         public IEnumerator OnlineFailurePreservesSeedAndOffersActualPreparedRecovery()
         {
+            // A well-formed loopback address with nothing listening: online creation is offered, then fails locally.
+            app.ServiceEndpoint = "http://127.0.0.1:9";
             app.SetSeed("What does the river name mean?");
             var version = app.Session.RequestVersion;
             yield return Press("Start choices", "create");
             Assert.That(app.Session.RequestVersion, Is.EqualTo(version), "opening consent sends nothing");
             yield return Press("Online consent actions", "create");
+            for (var deadline = Time.realtimeSinceStartup + 10f; app.Session.State == PersonalStoryState.Preparing && Time.realtimeSinceStartup < deadline;)
+                yield return null;
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Error));
             Assert.That(app.Seed, Is.EqualTo("What does the river name mean?"));
             Assert.That(Panel("Return and recovery actions").Ids, Does.Contain("local"));
@@ -273,6 +277,71 @@ namespace Sankofa.Tests
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
             Assert.That(app.Session.Story.Mode, Is.EqualTo("bundled"));
             Assert.That(app.Session.Story.Interest, Is.EqualTo("place-water"));
+        }
+
+        [UnityTest]
+        public IEnumerator WithoutAServiceTheIntakeOffersNoOnlineActionThatCanOnlyFail()
+        {
+            Assert.That(app.OnlineAvailable, Is.False);
+            var version = app.Session.RequestVersion;
+            var start = Panel("Start choices");
+            Assert.That(start.Ids, Is.EquivalentTo(new[] { "local", "edit", "about" }));
+            yield return Press(start, "about");
+            var shown = new List<string> { view.ModalText };
+            while (view.ModalPart + 1 < view.ModalPartCount)
+            {
+                yield return Press("Return and recovery actions", "modal-next");
+                shown.Add(view.ModalText);
+            }
+            Assert.That(string.Join(" ", shown), Does.Contain("whose side to follow").And.Contain("CC BY 3.0"));
+            Assert.That(app.Session.RequestVersion, Is.EqualTo(version), "reading how it works starts no request");
+            yield return Press("Return and recovery actions", "return");
+            Assert.That(view.IntakeVisible, Is.True);
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            app.ServiceEndpoint = "http://127.0.0.1:9";
+            yield return null;
+            Assert.That(Panel("Start choices").Ids, Does.Contain("create"), "a configured service restores the explicit online path");
+        }
+
+        [UnityTest]
+        public IEnumerator ChoosingASideChangesTheEndingAndContinuingLetsTheFireChoose()
+        {
+            var endings = new List<string>();
+            foreach (var choose in new[] { true, false })
+            {
+                app.Session.Cancel(); app.SetSeed("");
+                yield return Press("Interest choices", "journeys");
+                yield return Press("Start choices", "local");
+                for (var step = 0; step < 20 && !app.Session.OffersChoice; step++) yield return Press("Turn a page", "next");
+                Assert.That(app.Session.OffersChoice, Is.True, "each prepared telling reaches a perspective choice");
+                while (view.ReadingPart + 1 < view.ReadingPartCount) yield return Press("Turn a page", "next");
+                Assert.That(view.Caption, Does.Contain(StoryTableView.DefaultChoicePrompt));
+                var side = Panel("Questions beside the story");
+                Assert.That(side.Ids, Is.EquivalentTo(new[] { "choice:0", "choice:1" }));
+                if (choose) yield return Press(side, "choice:1"); else yield return Press("Turn a page", "next");
+                Assert.That(app.Session.FollowedByChoice, Is.EqualTo(choose), "continuing is the fire's choice, never recorded as the visitor's");
+                Assert.That(app.Session.Chapter.Id, Is.EqualTo(choose ? "journeys.late" : "journeys.meeting"));
+                endings.Add(app.Session.Chapter.Narration);
+                yield return ReachEnding();
+                Assert.That(view.Caption, Does.StartWith(choose ? "You chose to find the one who is late." : "The fire chose to stay with the one who waits."));
+                Assert.That(view.Caption, Does.Contain(choose ? "stay with the one who waits" : "find the one who is late"), "the unheard side is named as a reason to return");
+                Assert.That(app.HasKept, Is.False);
+            }
+            Assert.That(endings.Distinct().Count(), Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator TheFirstPageSaysWhatTheVisitorsQuestionChanged()
+        {
+            app.SetSeed("What did a household carry in a gourd?");
+            yield return Press("Start choices", "local");
+            Assert.That(app.PersonalReason, Does.Contain("trade and household").And.Contain("gourd"));
+            var subtitle = view.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(t => t.name == "Story setting");
+            Assert.That(subtitle.text, Is.EqualTo(app.PersonalReason));
+            Assert.That(PersonalStoryJson.Write(app.Session.Story), Does.Not.Contain(app.PersonalReason), "the reason is never saved as story content");
+            for (var step = 0; step < 6 && app.Session.PageNumber == 1; step++) yield return Press("Turn a page", "next");
+            Assert.That(app.Session.PageNumber, Is.EqualTo(2));
+            Assert.That(subtitle.text, Does.Contain("Enkare Nairobi"));
         }
 
         [UnityTest]

@@ -77,6 +77,39 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator PerspectiveChoicesUseTheSidePanelAndNeverCountAsQuestions()
+        {
+            var chosen = ""; var asked = "";
+            view.ChoiceSelected = id => chosen = id; view.QuestionSelected = id => asked = id;
+            view.RenderStory("Where paths meet", "Enkare Nairobi • around the 1850s", "Prepared story • works offline");
+            view.RenderChapter(new StoryTableChapterViewData
+            {
+                Index = 1, Count = 3, Title = "A region of overlapping lives", Caption = "Documented regional context.",
+                ArtKey = "scenery-atlas", ImageLabel = "Documented context • sources available",
+                Questions = new[] { "What supports the regional context?" },
+                Choices = new[] { "Stay with the one who waits", "Find the one who is late" },
+            });
+            view.SetControlState(true, true, true, false);
+            yield return null;
+            var side = view.Panels.Single(p => p.name == "Questions beside the story");
+            Assert.That(side.Ids, Is.EqualTo(new[] { "choice:0", "choice:1" }));
+            Assert.That(side.Hidden, Is.False);
+            Assert.That(view.Caption, Does.StartWith("Documented regional context.").And.EndWith(StoryTableView.DefaultChoicePrompt));
+            Assert.That(view.Panels.Single(p => p.name == "Turn a page").Ids, Does.Contain("next").And.Contain("ask"), "context stays available and continuing remains possible");
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("09-perspective-choice");
+            side.PressFromPointer("choice:1"); yield return null;
+            Assert.That(chosen, Is.EqualTo("1")); Assert.That(asked, Is.Empty);
+            view.RenderChapter(new StoryTableChapterViewData
+            {
+                Index = 2, Count = 3, Title = "A promise still walking", Caption = "An imagined ending.", ArtKey = "scenery-atlas",
+                ImageLabel = "Imagined scene • not an account of your ancestors", Questions = new[] { "What could I ask?" },
+            });
+            yield return null;
+            Assert.That(side.Ids, Is.EqualTo(new[] { "0" }));
+            Assert.That(view.Caption, Is.EqualTo("An imagined ending."));
+        }
+
+        [UnityTest]
         public IEnumerator DecisionsAndRecoveryStayReachableAlongsidePauseRecenterAndLeave()
         {
             var decision = ""; view.DecisionSelected = id => decision = id;

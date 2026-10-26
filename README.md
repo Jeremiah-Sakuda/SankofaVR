@@ -16,13 +16,13 @@ Muted desktop runtime capture with synthetic input; not headset footage. [Curren
 |---|---|
 | Coverage | Enkare Nairobi, Kenya, in the 1850s; journeys, trade/household, place/water; English |
 | Personal input | Optional typed fragment or question; hands keyboard and explicit online consent; no identity or ancestry inference |
-| Story | Three distinct authored bundled tellings; optional configured Google Gemini adapter for new reconstructed scenes within fixed historical context |
+| Story | Three distinct authored bundled tellings, each with a choice of whose side to follow and two endings; optional configured Google Gemini adapter for new reconstructed scenes within fixed historical context |
 | Capability labels | `generated` only after an accepted provider result; unavailable/invalid generation is explicitly `bundled` or offers retry |
 | Questions | Bounded contextual answers and source details; live conversation and voice input are deferred |
 | Images and sound | Existing approved illustration IDs; dynamic image generation deferred; muted/caption-first verification, no AI-generated music |
 | Memory | Explicit Keep, replacement confirmation, reopening without generation and deletion are implemented in the new scene |
 | Room | MRUK 207 table fitting and passthrough adapters with manual stand/recenter fallback; no room geometry sent to the story service |
-| Evidence | 349 core, 32 service, 36 editor and 16 table-runtime checks pass; authenticated actual Unity generation/narration transport passes with public synthetic input. Quest/content acceptance remains open |
+| Evidence | 358 core and 32 service checks pass after the October 26 iteration; the 36 editor and 16 table-runtime results predate it and must be rerun in Unity. Authenticated actual Unity generation/narration transport passed with public synthetic input. Quest/content acceptance remains open |
 
 Historical text is restricted to C1/C6/C7 passages in the [source register](docs/content/enkare-nairobi/sources.md). Cultural and pronunciation acceptance remains pending. A citation or model-applied label cannot establish a new historical claim. Wider places, eras, second-language narration, dynamic images and live voice conversation remain deferred.
 
@@ -40,7 +40,7 @@ python3 scripts/check_workspace.py --competition
 
 The optional local service starts with `python3 -m backend.server` on loopback port 8787. Its credentials remain server-side; configuration examples are in [backend/.env.example](backend/.env.example). With no provider configured it returns an explicitly bundled response. A headset needs a separately reachable configured service; `localhost` on Quest refers to the headset. Never place Google credentials in the app. A hosted service can use a limited client access token; APK contents are extractable, so limit/rotate that access and provide separate hosting controls. Do not publish the development HTTP server as production. Provider access, retention and the deployed connection require their own verification. Local core composition remains available without a server.
 
-Current checks, iteration findings and remaining gates are in the [implementation and judging record](docs/reviews/2026-10-18-personal-table-iteration.md).
+Current checks, iteration findings and remaining gates are in the [implementation and judging record](docs/reviews/2026-10-18-personal-table-iteration.md). The [October 26 judged-path audit](docs/reviews/2026-10-26-judged-path-audit.md) reviews the build as a judge would install it, offline on Quest, and records the perspective-choice, voice and intake changes that followed.
 
 The planned competition entry remains Adapted / Significantly Updated Entertainment, with eligibility, judge access, rights and device evidence pending. The [submission draft](docs/release/submission-draft.md) is editable local copy; no Devpost update or public submission has occurred.
 

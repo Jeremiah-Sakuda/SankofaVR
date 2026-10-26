@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Sankofa.Core.Personal;
 
 namespace Sankofa.Flow
@@ -11,10 +13,22 @@ namespace Sankofa.Flow
         int requestVersion;
         PersonalStoryState beforeDetails;
         PersonalStoryRequest request;
+        readonly List<int> route = new List<int> { 0 };
         public PersonalStoryState State { get; private set; } = PersonalStoryState.Intake;
         public PersonalStoryDocument Story { get; private set; }
-        public int ChapterIndex { get; private set; }
+        public int ChapterIndex => route[route.Count - 1];
         public PersonalStoryChapter Chapter => Story != null ? Story.Chapters[ChapterIndex] : null;
+        /// <summary>Pages read so far on this route, including the current one.</summary>
+        public int PageNumber => route.Count;
+        /// <summary>Pages on this route, assuming the authored default at any choice still ahead.</summary>
+        public int PageCount => Story == null ? 0 : route.Count - 1 + PersonalStoryRoutes.RemainingPages(Story, ChapterIndex);
+        public IReadOnlyList<PersonalStoryChapter> PagesBefore => Story == null ? new PersonalStoryChapter[0] : route.Take(route.Count - 1).Select(i => Story.Chapters[i]).ToArray();
+        public bool OffersChoice => State == PersonalStoryState.Reading && PersonalStoryRoutes.HasChoices(Chapter);
+        /// <summary>The perspective followed at the last choice point, and whether the visitor chose it or let the default stand.</summary>
+        public PersonalStoryChoice Followed { get; private set; }
+        public bool FollowedByChoice { get; private set; }
+        /// <summary>Perspectives offered alongside the one followed, which a later reading could take.</summary>
+        public IReadOnlyList<PersonalStoryChoice> NotFollowed { get; private set; } = new PersonalStoryChoice[0];
         public PersonalStoryQuestion Question { get; private set; }
         public bool Paused { get; private set; }
         public string Problem { get; private set; }
@@ -27,7 +41,7 @@ namespace Sankofa.Flow
             requestVersion++;
             request = input == null ? null : new PersonalStoryRequest(input.Region, input.Period, input.Interest, input.Fragment, input.Question);
             var validation = PersonalStoryValidator.ValidateRequest(request);
-            Story = null; Question = null; ChapterIndex = 0; IsReplay = false;
+            Story = null; Question = null; ResetRoute(); IsReplay = false;
             Problem = validation.IsValid ? null : validation.Issues[0].Message;
             State = validation.IsValid ? PersonalStoryState.Preparing : PersonalStoryState.Error;
             Changed?.Invoke();
@@ -39,7 +53,7 @@ namespace Sankofa.Flow
             if (version != requestVersion || State != PersonalStoryState.Preparing) return false;
             var validation = PersonalStoryValidator.Validate(story, request);
             if (!validation.IsValid) { Fail(version, "This telling could not be checked. Your choices are still here."); return false; }
-            Story = story; ChapterIndex = 0; Question = null; Problem = null;
+            Story = story; ResetRoute(); Question = null; Problem = null;
             State = PersonalStoryState.Reading;
             Changed?.Invoke();
             return true;
@@ -50,7 +64,7 @@ namespace Sankofa.Flow
             var validation = PersonalStoryValidator.Validate(story);
             if (!validation.IsValid) return false;
             requestVersion++;
-            request = null; Story = story; Question = null; ChapterIndex = 0; Problem = null; IsReplay = true;
+            request = null; Story = story; Question = null; ResetRoute(); Problem = null; IsReplay = true;
             State = PersonalStoryState.Reading;
             Changed?.Invoke(); return true;
         }
@@ -64,15 +78,36 @@ namespace Sankofa.Flow
         public void Cancel()
         {
             requestVersion++; Story = null; Question = null; Problem = null; request = null;
-            ChapterIndex = 0; IsReplay = false; State = PersonalStoryState.Intake;
+            ResetRoute(); IsReplay = false; State = PersonalStoryState.Intake;
             Changed?.Invoke();
         }
 
+        /// <summary>Turns the page. At a choice, a visitor who simply continues follows the authored default, which is not recorded as their choice.</summary>
         public bool Next()
         {
             if (Paused || State != PersonalStoryState.Reading) return false;
-            if (ChapterIndex + 1 < Story.Chapters.Count) ChapterIndex++;
+            if (PersonalStoryRoutes.HasChoices(Chapter)) return Follow(0, false);
+            var next = PersonalStoryRoutes.Continue(Story, ChapterIndex);
+            if (next >= 0) route.Add(next);
             else State = PersonalStoryState.Closing;
+            Question = null; Changed?.Invoke(); return true;
+        }
+
+        /// <summary>Follows one offered perspective. It changes what the telling reveals next; characters still make their own decisions.</summary>
+        public bool Choose(int index)
+        {
+            if (Paused || !OffersChoice || index < 0 || index >= Chapter.Choices.Count) return false;
+            return Follow(index, true);
+        }
+
+        bool Follow(int index, bool chosen)
+        {
+            var choices = Chapter.Choices;
+            var target = PersonalStoryRoutes.IndexOf(Story, choices[index].Next);
+            if (target <= ChapterIndex) return false;
+            Followed = choices[index]; FollowedByChoice = chosen;
+            NotFollowed = choices.Where((c, i) => i != index).ToArray();
+            route.Add(target);
             Question = null; Changed?.Invoke(); return true;
         }
 
@@ -80,10 +115,18 @@ namespace Sankofa.Flow
         {
             if (Paused || (State != PersonalStoryState.Reading && State != PersonalStoryState.Closing)) return false;
             if (State == PersonalStoryState.Closing) State = PersonalStoryState.Reading;
-            else if (ChapterIndex > 0) ChapterIndex--;
+            else if (route.Count > 1)
+            {
+                route.RemoveAt(route.Count - 1);
+                // Stepping back to a choice reopens it; the earlier path is no longer the one being followed.
+                if (PersonalStoryRoutes.HasChoices(Chapter)) ClearFollowed();
+            }
             else return false;
             Question = null; Changed?.Invoke(); return true;
         }
+
+        void ResetRoute() { route.Clear(); route.Add(0); ClearFollowed(); }
+        void ClearFollowed() { Followed = null; FollowedByChoice = false; NotFollowed = new PersonalStoryChoice[0]; }
 
         public bool Ask(int index)
         {

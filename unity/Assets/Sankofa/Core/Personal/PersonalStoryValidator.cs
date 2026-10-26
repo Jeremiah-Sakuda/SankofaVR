@@ -88,7 +88,55 @@ namespace Sankofa.Core.Personal
                     Evidence(report, question.Truth, question.Answer, question.Sources, sources, qpath, originalRequest);
                 }
             }
+            Choices(report, story, ids);
             return report;
+        }
+
+        /// <summary>Perspective choices only move forward, every chapter is reachable and every route is a complete telling.</summary>
+        static void Choices(PersonalStoryValidation report, PersonalStoryDocument story, HashSet<string> ids)
+        {
+            var count = Math.Min(story.Chapters.Count, 6);
+            for (var i = 0; i < count; i++)
+            {
+                var chapter = story.Chapters[i];
+                if (chapter == null) continue;
+                var path = "$.chapters[" + i + "].choices";
+                if (chapter.Choices == null || chapter.Choices.Count == 1 || chapter.Choices.Count > 3)
+                { report.Add("choices.count", path, "A chapter offers no choices, or two to three perspectives to follow."); continue; }
+                var targets = new HashSet<string>(StringComparer.Ordinal);
+                for (var c = 0; c < chapter.Choices.Count; c++)
+                {
+                    var choice = chapter.Choices[c];
+                    var cpath = path + "[" + c + "]";
+                    if (choice == null) { report.Add("choice.missing", cpath, "A choice must be an object."); continue; }
+                    Id(report, ids, choice.Id, cpath + ".id");
+                    Text(report, choice.Label, cpath + ".label", 80);
+                    var target = PersonalStoryRoutes.IndexOf(story, choice.Next);
+                    if (target <= i || target >= count) report.Add("choice.target", cpath + ".next", "A choice must lead forward to a chapter in this telling.");
+                    else if (!targets.Add(choice.Next)) report.Add("choice.duplicate", cpath + ".next", "Each choice must lead to a different chapter.");
+                }
+            }
+            if (report.Issues.Any(i => i.Code.StartsWith("choice", StringComparison.Ordinal)) || count < 3) return;
+
+            var reached = new bool[count];
+            var shortest = int.MaxValue;
+            void Walk(int index, int pages)
+            {
+                reached[index] = true;
+                var chapter = story.Chapters[index];
+                if (chapter == null) return;
+                if (PersonalStoryRoutes.HasChoices(chapter))
+                    foreach (var choice in chapter.Choices) Walk(PersonalStoryRoutes.IndexOf(story, choice.Next), pages + 1);
+                else
+                {
+                    var next = PersonalStoryRoutes.Continue(story, index);
+                    if (next < 0) shortest = Math.Min(shortest, pages); else Walk(next, pages + 1);
+                }
+            }
+            Walk(0, 1);
+            for (var i = 0; i < count; i++)
+                if (!reached[i]) report.Add("chapters.unreachable", "$.chapters[" + i + "]", "Every chapter must be reachable from the opening.");
+            if (shortest < 3) report.Add("chapters.route", "$.chapters", "Every route must be a complete telling of at least three pages.");
         }
 
         static void Evidence(PersonalStoryValidation report, string truth, string text, IReadOnlyList<string> cited,

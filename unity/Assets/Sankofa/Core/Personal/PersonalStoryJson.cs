@@ -47,12 +47,21 @@ namespace Sankofa.Core.Personal
             return JsonText.Serialize(new JsonObject()
                 .Add("schema", story.Schema).Add("id", story.Id).Add("title", story.Title)
                 .Add("region", story.Region).Add("period", story.Period).Add("interest", story.Interest).Add("mode", story.Mode)
-                .Add("chapters", story.Chapters.Select(c => new JsonObject()
-                    .Add("id", c.Id).Add("title", c.Title).Add("narration", c.Narration).Add("illustration", c.Illustration)
-                    .Add("truth", c.Truth).Add("sources", c.Sources)
-                    .Add("questions", c.Questions.Select(q => new JsonObject().Add("id", q.Id).Add("label", q.Label)
-                        .Add("answer", q.Answer).Add("truth", q.Truth).Add("sources", q.Sources)))))
+                .Add("chapters", story.Chapters.Select(WriteChapter))
                 .Add("sources", story.Sources.Select(s => new JsonObject().Add("id", s.Id).Add("title", s.Title).Add("url", s.Url))));
+        }
+
+        static JsonObject WriteChapter(PersonalStoryChapter c)
+        {
+            var chapter = new JsonObject()
+                .Add("id", c.Id).Add("title", c.Title).Add("narration", c.Narration).Add("illustration", c.Illustration)
+                .Add("truth", c.Truth).Add("sources", c.Sources)
+                .Add("questions", c.Questions.Select(q => new JsonObject().Add("id", q.Id).Add("label", q.Label)
+                    .Add("answer", q.Answer).Add("truth", q.Truth).Add("sources", q.Sources)));
+            // Linear tellings keep their exact earlier form, so existing kept files and recordings still match.
+            if (PersonalStoryRoutes.HasChoices(c))
+                chapter.Add("choices", c.Choices.Select(x => new JsonObject().Add("id", x.Id).Add("label", x.Label).Add("next", x.Next)));
+            return chapter;
         }
 
         public static string WriteRequest(PersonalStoryRequest request)
@@ -64,12 +73,18 @@ namespace Sankofa.Core.Personal
 
         static PersonalStoryChapter Chapter(Fields f)
         {
-            f.Only("id", "title", "narration", "illustration", "truth", "sources", "questions");
+            f.Only("id", "title", "narration", "illustration", "truth", "sources", "questions", "choices");
             return new PersonalStoryChapter
             {
                 Id = f.String("id"), Title = f.String("title"), Narration = f.String("narration"), Illustration = f.String("illustration"),
                 Truth = f.String("truth"), Sources = f.Strings("sources", 3), Questions = f.Objects("questions", 3, Question),
+                Choices = f.Has("choices") ? f.Objects("choices", 3, Choice) : new PersonalStoryChoice[0],
             };
+        }
+        static PersonalStoryChoice Choice(Fields f)
+        {
+            f.Only("id", "label", "next");
+            return new PersonalStoryChoice { Id = f.String("id"), Label = f.String("label"), Next = f.String("next") };
         }
         static PersonalStoryQuestion Question(Fields f)
         {
@@ -115,6 +130,7 @@ namespace Sankofa.Core.Personal
                 foreach (var key in value.Keys)
                     if (!fields.Contains(key)) throw new PersonalStoryFormatException(Path + "." + key, "Unknown field.");
             }
+            public bool Has(string key) => value.TryGet(key, out _);
             public string String(string key)
             {
                 if (!value.TryGet(key, out var item) || !(item is string text)) throw new PersonalStoryFormatException(Path + "." + key, "Expected a string.");

@@ -18,6 +18,10 @@ October 18: the [personal story table MVP](product/personal-story-table-mvp.md) 
 - [ ] PT-08 — Test real hands, seated reach, table fitting/denial, unfamiliar rooms, stereo readability and sustained minimum 60 fps on Quest.
 - [ ] PT-09 — Obtain unfamiliar-visitor personal-relevance/return feedback and cultural, source, pronunciation/listening and rights acceptance.
 - [ ] PT-10 — Publish current Devpost copy to the confirmed authenticated draft; record eligibility/division, independent installation and honest footage before submission.
+- [x] PT-11 — Perspective choice in each bundled telling, an honest fire default, a first-page reason for the chosen thread, voice and fire sound on the headset, and an offline-first intake. Core and service checks pass; Unity suites must be rerun. See the [judged-path audit](reviews/2026-10-26-judged-path-audit.md).
+- [ ] PT-12 — Record the three new perspective chapters (`scripts/generate_table_narration.py`) and listen to all twelve with the fire before shipping voice-on by default.
+- [ ] PT-13 — Pop-up illustration: separate the existing layers in depth on each page turn, reduced-motion static; verify caption/control clearance in captures and overdraw on device.
+- [ ] PT-14 — Replace the single-option place and period buttons with one line of text; confirm the intake fits the forward lenses.
 
 ## Previous illustrated-theatre sprints
 

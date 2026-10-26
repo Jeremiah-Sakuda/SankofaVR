@@ -146,7 +146,12 @@ namespace Sankofa.EditorTools
             BuildPointers(rig, pointerArt, view.Panels);
             table.gameObject.AddComponent<StoryTableAtmosphere>();
             var appType = Type.GetType("Sankofa.Runtime.Personal.PersonalStoryApp, Sankofa.Runtime");
-            if (appType != null) new GameObject("Sankofa personal story").AddComponent(appType);
+            if (appType != null)
+            {
+                var app = new GameObject("Sankofa personal story").AddComponent(appType);
+                // The app owns the fire's sound and plays it on the headset only; the tabletop view stays silent.
+                Set(app, "fireRecording", Recording("small-fire"));
+            }
             else Debug.LogWarning("[Sankofa] Story table presentation built without the application adapter.");
             reading.gameObject.SetActive(false); details.gameObject.SetActive(false); progress.gameObject.SetActive(false); consent.gameObject.SetActive(false);
             detailActions.Hidden = true;

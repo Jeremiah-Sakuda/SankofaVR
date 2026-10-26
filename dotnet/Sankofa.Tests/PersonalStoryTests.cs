@@ -25,11 +25,111 @@ namespace Sankofa.Tests
             Assert.That(stories.Select(s => s.Chapters[1].Illustration).Distinct().Count(), Is.GreaterThan(1));
             foreach (var story in stories)
             {
-                Assert.That(story.Chapters, Has.Count.EqualTo(3));
+                Assert.That(story.Chapters, Has.Count.EqualTo(4), "three pages on either route, with two perspectives to follow");
+                Assert.That(PersonalStoryRoutes.RemainingPages(story, 0), Is.EqualTo(3));
                 Assert.That(PersonalStoryValidator.Validate(story).IsValid, Is.True, PersonalStoryValidator.Validate(story).ToString());
-                Assert.That(story.Chapters.Last().Narration, Does.Contain("choose").Or.Contain("choice"));
+                var endings = Enumerable.Range(0, story.Chapters.Count).Where(i => PersonalStoryRoutes.Continue(story, i) < 0).ToArray();
+                Assert.That(endings, Has.Length.EqualTo(2));
+                foreach (var ending in endings) Assert.That(story.Chapters[ending].Narration, Does.Contain("choose").Or.Contain("choice"));
                 Assert.That(story.Mode, Is.EqualTo("bundled"));
             }
+        }
+
+        [Test]
+        public void EachTellingOffersTwoSidesWhoseEndingsDiffer()
+        {
+            foreach (var interest in PersonalStoryCatalog.Interests)
+            {
+                var story = Story(interest);
+                var choice = story.Chapters.Single(PersonalStoryRoutes.HasChoices);
+                Assert.That(choice.Truth, Is.EqualTo("historical"), "the documented page is where the visitor decides whose side to follow");
+                Assert.That(choice.Choices, Has.Count.EqualTo(2));
+                Assert.That(choice.Choices.Select(c => c.Label).Distinct().Count(), Is.EqualTo(2));
+                var endings = choice.Choices.Select(c => story.Chapters[PersonalStoryRoutes.IndexOf(story, c.Next)]).ToArray();
+                Assert.That(endings[0].Narration, Is.Not.EqualTo(endings[1].Narration));
+                Assert.That(endings.All(e => e.Truth == "reconstructed" && e.Questions.Count > 0), Is.True);
+                Assert.That(PersonalStoryRoutes.Continue(story, PersonalStoryRoutes.IndexOf(story, endings[1].Id)), Is.EqualTo(-1));
+            }
+        }
+
+        [Test]
+        public void LinearTellingsKeepTheirEarlierJsonForm()
+        {
+            var story = Story();
+            story.Chapters = story.Chapters.Take(3).ToArray();
+            story.Chapters[1].Choices = new PersonalStoryChoice[0];
+            Assert.That(PersonalStoryValidator.Validate(story).IsValid, Is.True, PersonalStoryValidator.Validate(story).ToString());
+            var text = PersonalStoryJson.Write(story);
+            Assert.That(text, Does.Not.Contain("\"choices\""), "provider tellings and earlier kept files have no choices field");
+            Assert.That(PersonalStoryJson.Write(PersonalStoryJson.ReadValidated(text)), Is.EqualTo(text));
+            Assert.That(PersonalStoryJson.Write(Story()), Does.Contain("\"choices\""));
+        }
+
+        [Test]
+        public void ChoicesMustLeadForwardReachEveryChapterAndCompleteEachRoute()
+        {
+            PersonalStoryDocument Mutate(Action<PersonalStoryDocument> change) { var story = Story(); change(story); return story; }
+            var cases = new (string Code, PersonalStoryDocument Story)[]
+            {
+                ("choices.count", Mutate(s => s.Chapters[1].Choices = s.Chapters[1].Choices.Take(1).ToArray())),
+                ("choice.target", Mutate(s => s.Chapters[1].Choices[1].Next = s.Chapters[0].Id)),
+                ("choice.target", Mutate(s => s.Chapters[1].Choices[1].Next = "missing.chapter")),
+                ("choice.duplicate", Mutate(s => s.Chapters[1].Choices[1].Next = s.Chapters[1].Choices[0].Next)),
+                ("id.duplicate", Mutate(s => s.Chapters[1].Choices[1].Id = s.Chapters[0].Id)),
+                ("text.unsafe", Mutate(s => s.Chapters[1].Choices[0].Label = "<b>Follow</b>")),
+                ("text.length", Mutate(s => s.Chapters[1].Choices[0].Label = new string('a', 81))),
+                ("chapters.route", Mutate(s => s.Chapters[0].Choices = new[]
+                {
+                    new PersonalStoryChoice { Id = "early.a", Label = "One side", Next = s.Chapters[2].Id },
+                    new PersonalStoryChoice { Id = "early.b", Label = "The other side", Next = s.Chapters[3].Id },
+                })),
+                ("chapters.unreachable", Mutate(s => s.Chapters = s.Chapters.Concat(new[]
+                {
+                    new PersonalStoryChapter
+                    {
+                        Id = "after.an.ending", Title = "Never reached", Narration = PersonalStoryCatalog.ReconstructionPrefix + "A page after both endings.",
+                        Illustration = "scenery-atlas", Truth = "reconstructed",
+                    },
+                }).ToArray())),
+            };
+            foreach (var (code, story) in cases)
+                Assert.That(Codes(PersonalStoryValidator.Validate(story)), Does.Contain(code), code);
+        }
+
+        [Test]
+        public void ChoiceJsonIsStrictAndBounded()
+        {
+            var text = JsonText.Serialize(JsonText.ParseObject(PersonalStoryJson.Write(Story())), false);
+            Assert.That(PersonalStoryJson.ReadValidated(text).Chapters[1].Choices, Has.Count.EqualTo(2));
+            Assert.Throws<PersonalStoryFormatException>(() => PersonalStoryJson.Parse(text.Replace("\"next\":", "\"script\":\"x\",\"next\":")));
+            var many = string.Join(",", Enumerable.Range(0, 4).Select(i => "{\"id\":\"c" + i + "\",\"label\":\"Side\",\"next\":\"x\"}"));
+            var start = text.IndexOf("\"choices\":[", StringComparison.Ordinal);
+            Assert.That(start, Is.GreaterThan(0));
+            var end = text.IndexOf("]", start, StringComparison.Ordinal);
+            Assert.Throws<PersonalStoryFormatException>(() => PersonalStoryJson.Parse(text.Substring(0, start) + "\"choices\":[" + many + text.Substring(end)));
+        }
+
+        [Test]
+        public void TheReasonExplainsWhatTheVisitorsWordsChangedUsingOnlyCatalogVocabulary()
+        {
+            var question = BundledPersonalStoryComposer.Compose(Request("journeys", question: "My grandmother SampleFamily carried flour in a gourd. Why?"));
+            Assert.That(question.Story.Interest, Is.EqualTo("trade-household"));
+            Assert.That(question.Reason, Is.EqualTo("Your question mentioned \u201ccarried\u201d, \u201cflour\u201d and \u201cgourd\u201d, so the fire follows trade and household."));
+            Assert.That(question.Reason, Does.Not.Contain("SampleFamily").And.Not.Contain("grandmother"));
+            Assert.That(question.Cues, Is.EquivalentTo(new[] { "carried", "flour", "gourd" }));
+
+            var fragment = BundledPersonalStoryComposer.Compose(Request("journeys", "Someone remembered the river by its name."));
+            Assert.That(fragment.Story.Interest, Is.EqualTo("place-water"));
+            Assert.That(fragment.Reason, Does.StartWith("Your fragment mentioned"));
+
+            var unmatched = BundledPersonalStoryComposer.Compose(Request("place-water", question: "What songs did children sing?"));
+            Assert.That(unmatched.Story.Interest, Is.EqualTo("place-water"));
+            Assert.That(unmatched.Reason, Does.Contain("did not point to one prepared thread").And.Contain("place and water"));
+            Assert.That(unmatched.Reason, Does.Not.Contain("songs"));
+            Assert.That(unmatched.Cues, Is.Empty);
+
+            Assert.That(BundledPersonalStoryComposer.Compose(Request("journeys")).Reason, Is.EqualTo("You chose journeys."));
+            Assert.That(PersonalStoryJson.Write(question.Story), Does.Not.Contain("Your question mentioned"), "the reason is presentation, never kept story content");
         }
 
         [Test]

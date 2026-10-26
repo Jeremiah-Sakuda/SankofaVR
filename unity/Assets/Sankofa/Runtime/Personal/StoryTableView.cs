@@ -16,6 +16,9 @@ namespace Sankofa.Runtime.Personal
         public string Title, Caption, ArtKey, ImageLabel;
         public string[] PreviousPageTitles = Array.Empty<string>();
         public string[] Questions = Array.Empty<string>();
+        /// <summary>Perspectives to follow from this page; when present they take the place of the side questions.</summary>
+        public string[] Choices = Array.Empty<string>();
+        public string ChoicePrompt;
     }
 
     /// <summary>A seated illustrated journal. Every essential action has a labelled hand/pointer button.</summary>
@@ -39,16 +42,16 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] Illustration[] illustrations = Array.Empty<Illustration>();
         [SerializeField] Renderer customIllustration;
 
-        public Action<string> RouteSelected, RegionSelected, PeriodSelected, QuestionSelected;
+        public Action<string> RouteSelected, RegionSelected, PeriodSelected, QuestionSelected, ChoiceSelected;
         public Action StartRequested, StartLocalRequested, SeedEditRequested, SourceDetailsRequested;
         public Action NextRequested, BackRequested, AskRequested, SaveRequested, PauseRequested, RecenterRequested, RoomRequested, LeaveRequested, ContinueRequested, RetryRequested;
-        public Action ReopenRequested, ForgetRequested, ComfortRequested;
+        public Action ReopenRequested, ForgetRequested, ComfortRequested, AboutRequested;
         public Action<string> DecisionSelected;
 
         string selectedRoute = "trade-household", selectedRegion = "enkare-nairobi", selectedPeriod = "1850s";
         string seed = "", currentTitle = "A question worth carrying";
         bool paused, reducedMotion, canBack, canNext, canAsk, canSave, detailsOpen, intake = true;
-        bool error, closing, decisionOpen, hasKeptStory;
+        bool error, closing, decisionOpen, hasKeptStory, offeringChoice, onlineAvailable = true;
         readonly List<string> captionPages = new List<string>();
         int captionPage, chapterIndex, chapterCount;
         string previousCaption, previousChapterTitle;
@@ -61,6 +64,8 @@ namespace Sankofa.Runtime.Personal
         float pageTurn;
         Quaternion[] restingPageRotations;
 
+        const string ChoicePrefix = "choice:";
+        public const string DefaultChoicePrompt = "Whose side will you follow?";
         public Transform TableRoot => tableRoot != null ? tableRoot : transform;
         public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Where(p => p != null).ToArray();
         public string Caption => caption != null ? caption.text : "";
@@ -81,7 +86,11 @@ namespace Sankofa.Runtime.Personal
             if (intakeActions != null) intakeActions.Pressed += IntakeAction;
             if (keptActions != null) keptActions.Pressed += id => { if (id == "reopen") ReopenRequested?.Invoke(); else if (id == "forget") ForgetRequested?.Invoke(); };
             if (transport != null) transport.Pressed += TransportAction;
-            if (questions != null) questions.Pressed += id => QuestionSelected?.Invoke(id);
+            if (questions != null) questions.Pressed += id =>
+            {
+                if (id.StartsWith(ChoicePrefix, StringComparison.Ordinal)) ChoiceSelected?.Invoke(id.Substring(ChoicePrefix.Length));
+                else QuestionSelected?.Invoke(id);
+            };
             if (controls != null) controls.Pressed += ControlAction;
             if (detailActions != null) detailActions.Pressed += DetailAction;
             if (consentActions != null) consentActions.Pressed += ConsentAction;
@@ -112,7 +121,7 @@ namespace Sankofa.Runtime.Personal
 
         public void ShowIntake()
         {
-            intake = true; closing = error = decisionOpen = detailsOpen = false;
+            intake = true; closing = error = decisionOpen = detailsOpen = offeringChoice = false;
             modalUsesConsent = false;
             previousCaption = previousChapterTitle = null; captionPages.Clear(); captionPage = 0;
             ShowOnly(intakeRoot);
@@ -144,6 +153,12 @@ namespace Sankofa.Runtime.Personal
 
         public void SetHasKeptStory(bool value) { hasKeptStory = value; RefreshIntake(); }
 
+        /// <summary>Without a configured story service, the intake offers no online action that can only fail.</summary>
+        public void SetOnlineAvailable(bool value) { onlineAvailable = value; RefreshIntake(); }
+
+        /// <summary>0..1 loudness of the narrator's voice; the fire breathes with it.</summary>
+        public void SetSpeechLevel(float level) { if (fire != null) fire.SpeechLevel = level; }
+
         public void ResetReadingPosition()
         {
             previousCaption = previousChapterTitle = null;
@@ -152,7 +167,7 @@ namespace Sankofa.Runtime.Personal
 
         public void ShowPreparing(string message = "Gathering the next pages…")
         {
-            intake = false; error = closing = decisionOpen = detailsOpen = false;
+            intake = false; error = closing = decisionOpen = detailsOpen = offeringChoice = false;
             ShowOnly(progressRoot);
             SetText(progressText, message);
             SetText(pageNumber, "A MOMENT BY THE FIRE");
@@ -168,15 +183,19 @@ namespace Sankofa.Runtime.Personal
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
             intake = false; error = closing = detailsOpen = decisionOpen = false;
             ShowOnly(readingRoot);
-            var retainedPart = previousCaption == chapter.Caption && previousChapterTitle == chapter.Title && chapterIndex == chapter.Index ? captionPage : 0;
+            var choices = chapter.Choices ?? Array.Empty<string>();
+            offeringChoice = choices.Length > 0;
+            // The prompt is presentation: it follows the page's own words and is never part of the story or its narration.
+            var text = offeringChoice ? chapter.Caption + "\n\n" + (string.IsNullOrWhiteSpace(chapter.ChoicePrompt) ? DefaultChoicePrompt : chapter.ChoicePrompt) : chapter.Caption;
+            var retainedPart = previousCaption == text && previousChapterTitle == chapter.Title && chapterIndex == chapter.Index ? captionPage : 0;
             chapterIndex = chapter.Index; chapterCount = Mathf.Max(1, chapter.Count);
             SetText(chapterTitle, chapter.Title);
-            PaginateCaption(chapter.Caption, retainedPart);
-            previousCaption = chapter.Caption; previousChapterTitle = chapter.Title;
+            PaginateCaption(text, retainedPart);
+            previousCaption = text; previousChapterTitle = chapter.Title;
             SetText(illustrationLabel, chapter.ImageLabel);
             ShowIllustration(chapter.ArtKey);
             SetPreviousPages(chapter.PreviousPageTitles);
-            SetQuestions(chapter.Questions);
+            if (offeringChoice) SetChoices(choices); else SetQuestions(chapter.Questions);
             pageTurn = reducedMotion ? 0 : 1;
             RefreshControls();
             SetFire(Sankofa.Core.Story.FireState.Telling);
@@ -202,7 +221,7 @@ namespace Sankofa.Runtime.Personal
 
         public void ShowError(string message)
         {
-            intake = false; error = true; closing = decisionOpen = detailsOpen = false;
+            intake = false; error = true; closing = decisionOpen = detailsOpen = offeringChoice = false;
             ShowOnly(progressRoot);
             SetText(progressText, message);
             SetText(chapterTitle, "Let’s find another way in");
@@ -214,7 +233,7 @@ namespace Sankofa.Runtime.Personal
 
         public void ShowClosing(string message = "A new question can begin another visit.")
         {
-            intake = false; error = decisionOpen = detailsOpen = false; closing = true;
+            intake = false; error = decisionOpen = detailsOpen = offeringChoice = false; closing = true;
             ShowOnly(readingRoot);
             SetText(pageNumber, "WHAT YOU CARRY FORWARD");
             SetText(chapterTitle, "The next page is yours");
@@ -268,6 +287,17 @@ namespace Sankofa.Runtime.Personal
             questions.Hidden = intake || detailsOpen || paused || items.Count == 0;
         }
 
+        /// <summary>Side-by-side perspectives in the same reachable panel as the questions; continuing without choosing lets the fire choose.</summary>
+        public void SetChoices(IReadOnlyList<string> labels)
+        {
+            if (questions == null) return;
+            var items = new List<(string Id, string Label)>();
+            for (var i = 0; i < Mathf.Min(2, labels.Count); i++)
+                if (!string.IsNullOrWhiteSpace(labels[i])) items.Add((ChoicePrefix + i, labels[i]));
+            questions.Show(items);
+            questions.Hidden = intake || detailsOpen || paused || items.Count == 0;
+        }
+
         /// <summary>A generated image is still one flat illustration on a page, never unvalidated scene geometry.</summary>
         public void SetIllustration(Texture texture, string label)
         {
@@ -309,7 +339,10 @@ namespace Sankofa.Runtime.Personal
             if (routes != null) routes.Show(routeLabels.Select(x => (x.Item1, (selectedRoute == x.Item1 ? "• " : "") + x.Item2)).ToArray());
             if (regions != null) regions.Show(new[] { ("enkare-nairobi", "• Enkare Nairobi") });
             if (periods != null) periods.Show(new[] { ("1850s", "• Around the 1850s") });
-            if (intakeActions != null) intakeActions.Show(new[] { ("local", "Read prepared story"), ("edit", seed.Length == 0 ? "Add my question" : "Edit my question"), ("create", "Create my story") });
+            var edit = ("edit", seed.Length == 0 ? "Add my question" : "Edit my question");
+            if (intakeActions != null) intakeActions.Show(onlineAvailable
+                ? new[] { ("local", "Read prepared story"), edit, ("create", "Create my story") }
+                : new[] { ("local", seed.Length == 0 ? "Begin the story" : "Begin with my question"), edit, ("about", "How it works") });
             if (keptActions != null) { keptActions.Show(new[] { ("reopen", "Reopen kept story"), ("forget", "Forget kept story") }); keptActions.Hidden = !hasKeptStory || paused || detailsOpen || intakeRoot == null || !intakeRoot.activeSelf; }
             if (intakeHeading != null) intakeHeading.gameObject.SetActive(!hasKeptStory);
             var thread = selectedRoute == "journeys" ? "Journeys" : selectedRoute == "place-water" ? "Place & water" : "Trade & home";
@@ -350,7 +383,8 @@ namespace Sankofa.Runtime.Personal
             else
             {
                 if (canBack || captionPage > 0) items.Add(("back", "Previous page"));
-                if (canNext || captionPage + 1 < captionPages.Count) items.Add(("next", captionPage + 1 < captionPages.Count ? "Continue reading" : "Next page"));
+                var morePage = captionPage + 1 < captionPages.Count;
+                if (canNext || morePage) items.Add(("next", morePage ? "Continue reading" : offeringChoice ? "Let the fire choose" : "Next page"));
                 if (canAsk) items.Add(("ask", "Explore context"));
                 items.Add(("sources", "About this story"));
             }
@@ -384,6 +418,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (id == "local") StartLocalRequested?.Invoke();
             else if (id == "edit") SeedEditRequested?.Invoke();
+            else if (id == "about") AboutRequested?.Invoke();
             else if (id == "create")
             {
                 detailsOpen = true; modalUsesConsent = true; ShowOnly(cloudConsentRoot);
