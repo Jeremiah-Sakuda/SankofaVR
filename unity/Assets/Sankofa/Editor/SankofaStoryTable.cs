@@ -234,7 +234,7 @@ namespace Sankofa.EditorTools
                 return root.gameObject;
             }
             Prim(root, "Printed dusk", PrimitiveType.Quad, Vector3.zero, new Vector3(0.85f, 0.29f, 1), TableMaterial("Printed dusk", new Color(0.29f, 0.23f, 0.27f)));
-            // Atlas parts form one flat print; fractions of a millimetre only establish its graphic draw order.
+            // Atlas parts form one print; their fractions of a millimetre set its layer order, which StoryTableView raises into pop-up depth.
             Prim(root, "Printed forest and hills", PrimitiveType.Quad, new Vector3(0, 0.030f, -0.0002f), new Vector3(0.85f, 0.23f, 1), TableAtlasMaterial("Printed landscape", "scenery-atlas.png", new Vector4(0, 0.625f, 1, 0.37f)));
             Prim(root, "Printed riverbank", PrimitiveType.Quad, new Vector3(0, -0.062f, -0.0004f), new Vector3(0.85f, 0.16f, 1), TableAtlasMaterial("Printed water", "scenery-atlas.png", new Vector4(0, 0.36f, 1, 0.26f)));
             if (people)

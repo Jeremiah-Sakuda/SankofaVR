@@ -30,6 +30,14 @@ namespace Sankofa.Runtime.Personal
             public GameObject Root;
         }
 
+        /// <summary>One painted layer of a print, with where it rests on the page and how far it stands forward.</summary>
+        sealed class PrintLayer
+        {
+            public Transform Layer;
+            public Vector3 Position, Scale;
+            public float Depth;
+        }
+
         [SerializeField] Transform tableRoot;
         [SerializeField] Transform[] turningPages = Array.Empty<Transform>();
         [SerializeField] TMP_Text heading, subheading, capability, pageNumber, chapterTitle, caption, illustrationLabel;
@@ -64,6 +72,15 @@ namespace Sankofa.Runtime.Personal
         float pageTurn;
         Quaternion[] restingPageRotations;
 
+        // Pop-up print: each illustration's existing painted layers stand forward of the page in stereo depth, the
+        // backdrop on the paper and the figures nearest the reader, rising from flat as a page turns.
+        const float LayerStep = 0.012f, PopUpSeconds = 0.5f, LayerInset = 0.975f, NominalViewingDistance = 0.95f;
+        const int DeepestLayer = 3;
+        public const float MaximumLayerDepth = LayerStep * DeepestLayer;
+        readonly Dictionary<GameObject, PrintLayer[]> prints = new Dictionary<GameObject, PrintLayer[]>();
+        GameObject raisedPrint;
+        float popUp = 1, viewingDistance = NominalViewingDistance;
+
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
         public Transform TableRoot => tableRoot != null ? tableRoot : transform;
@@ -76,6 +93,8 @@ namespace Sankofa.Runtime.Personal
         public int ReadingPartCount => captionPages.Count;
         public int ModalPart => modalPage;
         public int ModalPartCount => modalPages.Count;
+        /// <summary>0 while a print lies flat on a newly turned page, 1 once its layers stand at full depth.</summary>
+        public float PopUpProgress => popUp;
         public string ModalText => modalUsesConsent ? consentBody != null ? consentBody.text : "" : detailBody != null ? detailBody.text : "";
 
         void Awake()
@@ -95,6 +114,7 @@ namespace Sankofa.Runtime.Personal
             if (detailActions != null) detailActions.Pressed += DetailAction;
             if (consentActions != null) consentActions.Pressed += ConsentAction;
             restingPageRotations = turningPages.Select(p => p.localRotation).ToArray();
+            CollectPrints();
             authoredCaptionSize = caption != null ? caption.fontSize : 0.23f;
             authoredChapterSize = chapterTitle != null ? chapterTitle.fontSize : 0.22f;
             authoredDetailSize = detailBody != null ? detailBody.fontSize : 0.135f;
@@ -108,6 +128,7 @@ namespace Sankofa.Runtime.Personal
             TableRoot.SetPositionAndRotation(center, rotation);
             var scale = Mathf.Clamp(Mathf.Min(width / 1.25f, depth / 0.72f), 0.65f, 1.15f);
             TableRoot.localScale = Vector3.one * scale;
+            if (raisedPrint != null) { viewingDistance = MeasureViewingDistance(raisedPrint.transform); ApplyDepth(); }
         }
 
         public void RenderStory(string title, string subtitle, string capabilityLabel)
@@ -130,7 +151,7 @@ namespace Sankofa.Runtime.Personal
             SetText(pageNumber, "YOUR STORY TABLE");
             SetText(caption, "Choose a thread below, or bring a small fragment of your own. Read at your own pace; the table stays with you.");
             SetText(illustrationLabel, "Enkare Nairobi • a prepared illustrated setting");
-            ShowIllustration("exchange");
+            ShowIllustration("exchange", false);
             SetPreviousPages(Array.Empty<string>());
             RefreshIntake();
             RefreshControls();
@@ -187,13 +208,15 @@ namespace Sankofa.Runtime.Personal
             offeringChoice = choices.Length > 0;
             // The prompt is presentation: it follows the page's own words and is never part of the story or its narration.
             var text = offeringChoice ? chapter.Caption + "\n\n" + (string.IsNullOrWhiteSpace(chapter.ChoicePrompt) ? DefaultChoicePrompt : chapter.ChoicePrompt) : chapter.Caption;
-            var retainedPart = previousCaption == text && previousChapterTitle == chapter.Title && chapterIndex == chapter.Index ? captionPage : 0;
+            var samePage = previousChapterTitle == chapter.Title && chapterIndex == chapter.Index;
+            var retainedPart = previousCaption == text && samePage ? captionPage : 0;
             chapterIndex = chapter.Index; chapterCount = Mathf.Max(1, chapter.Count);
             SetText(chapterTitle, chapter.Title);
             PaginateCaption(text, retainedPart);
             previousCaption = text; previousChapterTitle = chapter.Title;
             SetText(illustrationLabel, chapter.ImageLabel);
-            ShowIllustration(chapter.ArtKey);
+            // Returning from a question or source detail keeps the print standing; a new page raises it again.
+            ShowIllustration(chapter.ArtKey, !samePage);
             SetPreviousPages(chapter.PreviousPageTitles);
             if (offeringChoice) SetChoices(choices); else SetQuestions(chapter.Questions);
             pageTurn = reducedMotion ? 0 : 1;
@@ -256,7 +279,7 @@ namespace Sankofa.Runtime.Personal
         {
             reducedMotion = value;
             if (fire != null) fire.ReducedMotion = value;
-            if (value) pageTurn = 0;
+            if (value) { pageTurn = 0; popUp = 1; ApplyDepth(); }
             RestorePages();
         }
 
@@ -404,11 +427,58 @@ namespace Sankofa.Runtime.Personal
             }
         }
 
-        void ShowIllustration(string key)
+        void ShowIllustration(string key, bool newPage)
         {
             if (customIllustration != null) customIllustration.gameObject.SetActive(false);
             var chosen = illustrations.FirstOrDefault(x => x.Key == key) ?? illustrations.FirstOrDefault(x => x.Key == "exchange");
             foreach (var root in illustrations.Where(x => x.Root != null).Select(x => x.Root).Distinct()) root.SetActive(chosen != null && root == chosen.Root);
+            if (chosen?.Root == null) return;
+            if (newPage || chosen.Root != raisedPrint)
+            {
+                raisedPrint = chosen.Root;
+                viewingDistance = MeasureViewingDistance(raisedPrint.transform);
+                popUp = reducedMotion ? 1 : 0;
+            }
+            ApplyDepth();
+        }
+
+        /// <summary>Orders each print's painted layers from the page outward by their authored drawing order.</summary>
+        void CollectPrints()
+        {
+            foreach (var root in illustrations.Where(x => x.Root != null).Select(x => x.Root).Distinct())
+            {
+                var layers = root.GetComponentsInChildren<Renderer>(true).Where(r => r.transform.parent == root.transform)
+                    .Select(r => r.transform).OrderByDescending(t => t.localPosition.z).ToArray();
+                prints[root] = layers.Select((t, rank) => new PrintLayer
+                    { Layer = t, Position = t.localPosition, Scale = t.localScale, Depth = Mathf.Min(rank, DeepestLayer) * LayerStep }).ToArray();
+            }
+        }
+
+        static float MeasureViewingDistance(Transform print)
+        {
+            var eye = Camera.main;
+            if (eye == null) return NominalViewingDistance;
+            return Mathf.Clamp(Mathf.Abs(Vector3.Dot(eye.transform.position - print.position, print.forward)), 0.45f, 1.6f);
+        }
+
+        /// <summary>
+        /// Raises each layer toward the reader and draws it in toward the print's centre by the same proportion, so from
+        /// the seat the composition keeps its painted size and stays inside the print: only depth and parallax change.
+        /// A small inset keeps raised edges within the backdrop when the visitor leans.
+        /// </summary>
+        void ApplyDepth()
+        {
+            if (raisedPrint == null || !prints.TryGetValue(raisedPrint, out var layers)) return;
+            var eased = popUp * popUp * (3 - 2 * popUp);
+            var worldScale = Mathf.Abs(raisedPrint.transform.lossyScale.z);
+            foreach (var item in layers)
+            {
+                if (item.Layer == null) continue;
+                var depth = item.Depth * eased;
+                var keep = depth <= 0 ? 1 : Mathf.Max(0.5f, (viewingDistance - depth * worldScale) / viewingDistance) * Mathf.Lerp(1, LayerInset, eased);
+                item.Layer.localPosition = new Vector3(item.Position.x * keep, item.Position.y * keep, item.Position.z - depth);
+                item.Layer.localScale = new Vector3(item.Scale.x * keep, item.Scale.y * keep, item.Scale.z);
+            }
         }
 
         void SelectRoute(string id) { selectedRoute = id; RefreshIntake(); RouteSelected?.Invoke(id); }
@@ -570,7 +640,13 @@ namespace Sankofa.Runtime.Personal
 
         void Update()
         {
-            if (paused || reducedMotion || pageTurn <= 0) return;
+            if (paused) return;
+            if (popUp < 1)
+            {
+                popUp = reducedMotion ? 1 : Mathf.Min(1, popUp + Time.deltaTime / PopUpSeconds);
+                ApplyDepth();
+            }
+            if (reducedMotion || pageTurn <= 0) return;
             pageTurn = Mathf.Max(0, pageTurn - Time.deltaTime / 0.38f);
             for (var i = 0; i < turningPages.Length; i++)
                 if (turningPages[i] != null) turningPages[i].localRotation = restingPageRotations[i] * Quaternion.Euler(0, Mathf.Sin(pageTurn * Mathf.PI) * (i == 0 ? 3 : -2), 0);

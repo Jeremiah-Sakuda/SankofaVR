@@ -54,7 +54,7 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
-        public IEnumerator ChapterReplacementKeepsOneFlatFocalImageAndTruthfulCapability()
+        public IEnumerator ChapterReplacementKeepsOneFocalImageAndTruthfulCapability()
         {
             view.RenderStory("A question about home", "Enkare Nairobi • around the 1850s", "Prepared story • works offline");
             view.RenderChapter(new StoryTableChapterViewData
@@ -107,6 +107,87 @@ namespace Sankofa.Tests
             yield return null;
             Assert.That(side.Ids, Is.EqualTo(new[] { "0" }));
             Assert.That(view.Caption, Is.EqualTo("An imagined ending."));
+        }
+
+        [UnityTest]
+        public IEnumerator PrintLayersRiseInDepthWithinTheirBackdropAndHoldStillWhenAsked()
+        {
+            var print = view.TableRoot.Find("Upright illustrated journal/One flat illustrated page/Cast and exchange");
+            var backdrop = print.Find("Printed dusk");
+            var figure = print.Find("Printed trader left");
+            var toward = print.TransformDirection(Vector3.back).normalized;
+            float Raised(Transform layer, Transform page) => Vector3.Dot(layer.position - page.position, toward);
+            var scale = view.TableRoot.lossyScale.z;
+            const string imagined = "Imagined scene • not an account of your ancestors";
+
+            view.SetReducedMotion(false);
+            var chapter = new StoryTableChapterViewData { Index = 0, Count = 3, Title = "A household's small decisions", Caption = "A print rises from the page.", ArtKey = "cast-atlas", ImageLabel = imagined };
+            view.RenderChapter(chapter);
+            Assert.That(view.PopUpProgress, Is.Zero, "a newly turned page begins flat");
+            Assert.That(Raised(figure, backdrop), Is.LessThan(0.002f));
+            for (var deadline = Time.realtimeSinceStartup + 3f; view.PopUpProgress < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(view.PopUpProgress, Is.EqualTo(1));
+            Assert.That(Raised(figure, backdrop), Is.EqualTo(StoryTableView.MaximumLayerDepth * scale).Within(0.002f), "the figures stand nearest the reader");
+            Assert.That(Raised(print.Find("Printed forest and hills"), backdrop), Is.GreaterThan(0.005f * scale).And.LessThan(Raised(print.Find("Printed riverbank"), backdrop)));
+            AssertPrintInsideBackdropAndClearOfText(print, backdrop);
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") { Capture("10-pop-up-print-60", 60); Capture("10-pop-up-print-82"); }
+
+            view.RenderChapter(chapter);
+            Assert.That(view.PopUpProgress, Is.EqualTo(1), "returning from a question or source to the same page keeps the print standing");
+
+            view.SetReducedMotion(true);
+            view.RenderChapter(new StoryTableChapterViewData { Index = 1, Count = 3, Title = "A region of overlapping lives", Caption = "Documented context.", ArtKey = "scenery-atlas", ImageLabel = "Documented context • sources available" });
+            var scenery = view.TableRoot.Find("Upright illustrated journal/One flat illustrated page/River landscape");
+            var river = scenery.Find("Printed riverbank"); var still = river.position;
+            Assert.That(view.PopUpProgress, Is.EqualTo(1), "reduced motion shows the final depth at once");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(Vector3.Distance(river.position, still), Is.LessThan(0.00001f), "reduced motion keeps the print still");
+            Assert.That(Raised(river, scenery.Find("Printed dusk")), Is.GreaterThan(0.01f * scale));
+
+            view.SetReducedMotion(false);
+            view.RenderChapter(new StoryTableChapterViewData { Index = 2, Count = 3, Title = "The one who expected more", Caption = "The print rises again.", ArtKey = "cast-atlas", ImageLabel = imagined });
+            view.SetPaused(true);
+            Assert.That(view.PopUpProgress, Is.Zero);
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(view.PopUpProgress, Is.Zero, "pause holds the print where it is");
+            view.SetPaused(false);
+            for (var deadline = Time.realtimeSinceStartup + 3f; view.PopUpProgress < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(view.PopUpProgress, Is.EqualTo(1));
+        }
+
+        /// <summary>From the seated eye, every raised layer stays within its print's backdrop and covers no page text.</summary>
+        void AssertPrintInsideBackdropAndClearOfText(Transform print, Transform backdrop)
+        {
+            var cameraRoot = new GameObject("Pop-up print probe");
+            var eye = cameraRoot.AddComponent<Camera>(); eye.enabled = false;
+            eye.transform.SetPositionAndRotation(new Vector3(0, 1.15f, 0), Quaternion.Euler(10, 0, 0));
+            eye.fieldOfView = 60; eye.aspect = 1600f / 1400;
+            try
+            {
+                Rect Viewport(System.Collections.Generic.IEnumerable<Vector3> world)
+                {
+                    var points = world.Select(w => eye.WorldToViewportPoint(w)).ToArray();
+                    return Rect.MinMaxRect(points.Min(p => p.x), points.Min(p => p.y), points.Max(p => p.x), points.Max(p => p.y));
+                }
+                System.Collections.Generic.IEnumerable<Vector3> Quad(Transform quad) =>
+                    new[] { new Vector3(-.5f, -.5f, 0), new Vector3(-.5f, .5f, 0), new Vector3(.5f, -.5f, 0), new Vector3(.5f, .5f, 0) }.Select(c => quad.TransformPoint(c));
+                System.Collections.Generic.IEnumerable<Vector3> Box(Bounds b) =>
+                    new[] { -1f, 1f }.SelectMany(x => new[] { -1f, 1f }.SelectMany(y => new[] { -1f, 1f }.Select(z => b.center + Vector3.Scale(b.extents, new Vector3(x, y, z)))));
+                var frame = Viewport(Quad(backdrop));
+                var texts = view.GetComponentsInChildren<TMP_Text>(true)
+                    .Where(t => (t.name == "Illustration context" || t.name == "Narrative captions" || t.name == "Chapter title") && t.gameObject.activeInHierarchy && t.text.Length > 0).ToArray();
+                Assert.That(texts, Has.Length.EqualTo(3));
+                foreach (var text in texts) text.ForceMeshUpdate(true, true);
+                foreach (var layer in print.Cast<Transform>().Where(t => t != backdrop && t.GetComponent<Renderer>() != null))
+                {
+                    var area = Viewport(Quad(layer));
+                    Assert.That(area.xMin >= frame.xMin - .001f && area.xMax <= frame.xMax + .001f && area.yMin >= frame.yMin - .001f && area.yMax <= frame.yMax + .001f,
+                        Is.True, layer.name + " stays within the print's backdrop from the seat");
+                    foreach (var text in texts)
+                        Assert.That(area.Overlaps(Viewport(Box(text.GetComponent<Renderer>().bounds))), Is.False, layer.name + " must not cover " + text.name);
+                }
+            }
+            finally { UnityEngine.Object.Destroy(cameraRoot); }
         }
 
         [UnityTest]

@@ -78,7 +78,7 @@ Not changed: the comparison scenes, the shared `PokePanel`, the backend (whose o
 |---|---|---|
 | 1 | **Quest access and a first hands-only session** (first launch, permissions, passthrough, readability, OVR Metrics frame rate) | A broken first minute or sub-60 fps loses Technical and Experience regardless of content |
 | 2 | Competition release channel, Invite URL and an install from a second account | Judges cannot score what they cannot launch |
-| 3 | **Pop-up illustration** (specification below) | The largest remaining Innovation and Polish gain, and the strongest shot in the video |
+| 3 | **Pop-up illustration**: implemented in software (below); needs Unity tests, captures and a device look | The largest remaining Innovation and Polish gain, and the strongest shot in the video |
 | 4 | Decide online creation: offline-only, or a hosted service kept up to December 11 | Determines what the video and copy may claim |
 | 5 | Declutter the intake: the single-option place and period buttons become one line of text | Fewer buttons in the first view; clearer onboarding |
 | 6 | One Kenyan reader and one Maa speaker; record what they change | Cultural specificity is the product's claim |
@@ -87,14 +87,22 @@ Not changed: the comparison scenes, the shared `PokePanel`, the backend (whose o
 
 Suggested rhythm: week of October 26, Unity checks, recordings, listening and the first device session; week of November 2, pop-up illustration, intake cleanup and a second device session in another room; week of November 9, freeze by November 13, capture, copy, second-account install, submit November 16, leaving November 17–18 in reserve.
 
-## Next Unity iteration: the pop-up illustration
+## Pop-up illustration
 
-Today each page shows one flat print made of layered atlas parts separated by fractions of a millimetre. In a headset, real stereo depth is the cheapest way to make the page feel like something that could only exist in VR.
+Until this pass each page showed one flat print made of layered atlas parts separated by fractions of a millimetre. In a headset, real stereo depth is the cheapest way to make the page feel like something that could only exist in VR.
 
-- Separate the existing layers toward the reader: backdrop at the page, hills about 1.5 cm forward, riverbank about 3 cm, figures about 4.5 cm. Animate from flat to depth over half a second when a page turns, like a pop-up book; reduced motion shows the final depth without movement.
-- Keep every layer within the page outline; verify in captures at 60°, 72° and 82° that nothing covers the caption or controls; measure overdraw on device.
-- Keep the change in the view so no story data, validator or saved telling changes.
-- Later, use the cast atlas's other poses so each perspective chapter shows its own person in the foreground.
+**Implemented October 26 in `StoryTableView`, presentation only.** No scene regeneration is needed, and no story data, validator or kept telling changes.
+
+- Each print's existing painted layers stand forward of the page in their authored order: backdrop on the paper, hills 1.2 cm, riverbank 2.4 cm, figures 3.6 cm. The modern river is a single layer and stays flat; generated images remain one flat quad.
+- A newly turned page rises from flat over half a second with an ease-out curve. Returning from a question, source detail or the closing page keeps the print standing. Reduced motion shows the final depth at once and holds still; pause holds the rise where it is.
+- Each raised layer is drawn in toward the print's centre in proportion to its depth, measured against the visitor's actual viewing distance when the page turns. From the seat, the composition therefore keeps its painted size, and only stereo depth and parallax change. A further 2.5% inset leaves about a centimetre of dusk around the raised layers, like a mat.
+- The layers are alpha-tested with depth writes on, so the depth buffer, not transparent sorting, decides what covers what. Wider separation also removes the old sub-millimetre z-fighting risk. Moving existing layers adds no overdraw.
+
+**Geometry check (numerical model, not a render).** I simulated the builder's layer sizes and placement and cast rays from the seated eye and from heads moved ±10–15 cm vertically and ±20 cm sideways. Every raised layer stays inside its backdrop and at least 2 mm above the truth label's box, well clear of the caption and title. The proposed 1.5 cm step let the hills edge rise 0.8 mm past the print's top when the head dropped 15 cm, so 1.2 cm was chosen. Stereo depth on the hills layer may be subtle at Quest resolution, while the figures should read clearly; tune `LayerStep` on a headset.
+
+**Test:** the PlayMode test `PrintLayersRiseInDepthWithinTheirBackdropAndHoldStillWhenAsked` checks the rise, figure depth and layer order, same-page return, reduced motion and pause. It also checks, projected from the seated eye, that every raised layer stays within its backdrop and covers no page text. It was type-checked against stubs only and has not run in Unity.
+
+**Still needed:** capture `10-pop-up-print-60` and `-82` with `SANKOFA_CAPTURE=1`, look at it in a headset, and confirm comfort and frame time on device. Later, the cast atlas's other poses could put each perspective chapter's own person in the foreground.
 
 ## Special-award lenses
 
