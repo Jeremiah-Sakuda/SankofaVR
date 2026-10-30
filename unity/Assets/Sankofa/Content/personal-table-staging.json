@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "note": "Presentation only. Positions are stage-local metres (x right, z away from the visitor); at is the fraction of each chapter's narration. A turn shows the other side of the scene, so figures there are mirrored to keep facing each other.",
+  "choices": {
+    "journeys.follow.waiting": "naserian",
+    "journeys.follow.late": "wambui",
+    "trade-household.follow.less": "wambui",
+    "trade-household.follow.more": "naserian",
+    "place-water.follow.remembers": "wambui",
+    "place-water.follow.traveller": "naserian"
+  },
+  "chapters": {
+    "trade-household.load": {
+      "entry": "unfold",
+      "beats": [
+        { "at": 0, "who": "wambui", "shown": true, "x": -0.06, "z": 0, "pose": 0, "mirror": false },
+        { "at": 0, "who": "naserian", "shown": false },
+        { "at": 0, "who": "gourd", "place": "with", "holder": "wambui" },
+        { "at": 0.12, "who": "wambui", "pose": 1 },
+        { "at": 0.42, "who": "wambui", "pose": 0 },
+        { "at": 0.7, "who": "wambui", "x": 0.04 }
+      ]
+    },
+    "trade-household.vessel": {
+      "entry": "stay",
+      "beats": [
+        { "at": 0, "who": "gourd", "place": "lifted" },
+        { "at": 0, "who": "wambui", "shown": true, "x": -0.16, "z": 0, "pose": 0, "mirror": false },
+        { "at": 0.05, "who": "naserian", "shown": true, "x": 0.16, "z": 0.02, "pose": 0, "mirror": false },
+        { "at": 0.8, "who": "wambui", "x": -0.12 },
+        { "at": 0.8, "who": "naserian", "x": 0.12 },
+        { "at": 0.8, "who": "gourd", "place": "with", "holder": "wambui" }
+      ]
+    },
+    "trade-household.agreement": {
+      "entry": "turn",
+      "beats": [
+        { "at": 0, "who": "wambui", "shown": true, "x": 0.08, "z": -0.08, "pose": 0, "mirror": true },
+        { "at": 0, "who": "naserian", "shown": true, "x": -0.14, "z": 0.08, "pose": 0, "mirror": true },
+        { "at": 0, "who": "gourd", "place": "with", "holder": "wambui" },
+        { "at": 0.08, "who": "wambui", "pose": 1 },
+        { "at": 0.45, "who": "naserian", "pose": 1 },
+        { "at": 0.45, "who": "gourd", "place": "between" },
+        { "at": 0.58, "who": "naserian", "pose": 2 },
+        { "at": 0.7, "who": "wambui", "pose": 2 },
+        { "at": 0.82, "who": "wambui", "x": 0.14, "z": -0.02 },
+        { "at": 0.82, "who": "gourd", "place": "with", "holder": "wambui" }
+      ]
+    },
+    "trade-household.expected": {
+      "entry": "turn",
+      "beats": [
+        { "at": 0, "who": "naserian", "shown": true, "x": -0.06, "z": -0.08, "pose": 0, "mirror": true },
+        { "at": 0, "who": "wambui", "shown": false },
+        { "at": 0, "who": "gourd", "place": "hidden" },
+        { "at": 0.22, "who": "wambui", "shown": true, "x": 0.15, "z": 0.08, "pose": 1, "mirror": true },
+        { "at": 0.22, "who": "gourd", "place": "with", "holder": "wambui" },
+        { "at": 0.42, "who": "naserian", "x": -0.09 },
+        { "at": 0.68, "who": "naserian", "pose": 1 },
+        { "at": 0.88, "who": "naserian", "pose": 2 },
+        { "at": 0.88, "who": "gourd", "place": "between" }
+      ]
+    },
+    "journeys.arrival": {
+      "entry": "unfold",
+      "beats": [
+        { "at": 0, "who": "naserian", "shown": true, "x": 0.04, "z": 0, "pose": 0, "mirror": false },
+        { "at": 0, "who": "wambui", "shown": false },
+        { "at": 0, "who": "gourd", "place": "hidden" },
+        { "at": 0.35, "who": "naserian", "pose": 1 },
+        { "at": 0.75, "who": "naserian", "pose": 0 }
+      ]
+    },
+    "journeys.context": {
+      "entry": "stay",
+      "beats": [
+        { "at": 0, "who": "naserian", "shown": false },
+        { "at": 0.55, "who": "wambui", "shown": true, "x": -0.14, "z": 0, "pose": 0, "mirror": false },
+        { "at": 0.55, "who": "naserian", "shown": true, "x": 0.14, "z": 0, "pose": 0, "mirror": false },
+        { "at": 0.55, "who": "gourd", "place": "with", "holder": "wambui" }
+      ]
+    },
+    "journeys.meeting": {
+      "entry": "turn",
+      "beats": [
+        { "at": 0, "who": "naserian", "shown": true, "x": 0.06, "z": -0.08, "pose": 0, "mirror": true },
+        { "at": 0, "who": "wambui", "shown": false },
+        { "at": 0, "who": "gourd", "place": "hidden" },
+        { "at": 0.3, "who": "wambui", "shown": true, "x": -0.16, "z": 0.08, "pose": 1, "mirror": true },
+        { "at": 0.3, "who": "gourd", "place": "with", "holder": "wambui" },
+        { "at": 0.55, "who": "naserian", "pose": 2 },
+        { "at": 0.8, "who": "wambui", "x": -0.08, "z": 0.04, "pose": 2 }
+      ]
+    },
+    "journeys.late": {
+      "entry": "turn",
+      "beats": [
+        { "at": 0, "who": "wambui", "shown": true, "x": -0.18, "z": -0.06, "pose": 1, "mirror": true },
+        { "at": 0, "who": "naserian", "shown": false },
+        { "at": 0, "who": "gourd", "place": "with", "holder": "wambui" },
+        { "at": 0.4, "who": "wambui", "x": -0.06 },
+        { "at": 0.8, "who": "naserian", "shown": true, "x": 0.16, "z": 0.1, "pose": 0, "mirror": true }
+      ]
+    },
+    "place-water.listening": {
+      "entry": "unfold",
+      "beats": [
+        { "at": 0, "who": "wambui", "shown": true, "x": -0.08, "z": 0, "pose": 2, "mirror": false },
+        { "at": 0, "who": "naserian", "shown": true, "x": 0.12, "z": 0.02, "pose": 0, "mirror": false },
+        { "at": 0, "who": "gourd", "place": "hidden" },
+        { "at": 0.3, "who": "naserian", "pose": 2 },
+        { "at": 0.65, "who": "wambui", "pose": 0 }
+      ]
+    },
+    "place-water.name": {
+      "entry": "stay",
+      "beats": [
+        { "at": 0, "who": "wambui", "shown": false },
+        { "at": 0, "who": "naserian", "shown": false },
+        { "at": 0.6, "who": "wambui", "shown": true, "x": -0.13, "z": 0, "pose": 0, "mirror": false },
+        { "at": 0.6, "who": "naserian", "shown": true, "x": 0.13, "z": 0, "pose": 0, "mirror": false }
+      ]
+    },
+    "place-water.return": {
+      "entry": "turn",
+      "beats": [
+        { "at": 0, "who": "wambui", "shown": true, "x": 0.06, "z": -0.08, "pose": 0, "mirror": true },
+        { "at": 0, "who": "naserian", "shown": true, "x": -0.14, "z": 0.08, "pose": 0, "mirror": true },
+        { "at": 0.35, "who": "wambui", "pose": 2 },
+        { "at": 0.55, "who": "naserian", "x": -0.06, "z": 0.02 },
+        { "at": 0.75, "who": "naserian", "pose": 1 }
+      ]
+    },
+    "place-water.traveller": {
+      "entry": "turn",
+      "beats": [
+        { "at": 0, "who": "naserian", "shown": true, "x": -0.06, "z": -0.08, "pose": 0, "mirror": true },
+        { "at": 0, "who": "wambui", "shown": true, "x": 0.14, "z": 0.08, "pose": 0, "mirror": true },
+        { "at": 0.45, "who": "naserian", "pose": 1 },
+        { "at": 0.8, "who": "naserian", "pose": 2 }
+      ]
+    }
+  }
+}

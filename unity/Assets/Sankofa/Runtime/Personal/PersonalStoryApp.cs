@@ -27,7 +27,6 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] string serviceAccessToken = "";
         [Tooltip("A prepared field recording of a small fire (Art/Recorded/sources.json); played on the headset only.")]
         [SerializeField] AudioClip fireRecording;
-        static readonly Vector3 FireOnTable = new Vector3(-.47f, .20f, .20f);
         StoryTableView view;
         StoryTablePlacement placement;
         StoryTableKeyboard keyboard;
@@ -71,7 +70,7 @@ namespace Sankofa.Runtime.Personal
             if (oldAnchor != null) oldAnchor.enabled = false; // This scene has one placement owner.
             placement = gameObject.AddComponent<StoryTablePlacement>();
             keyboard = gameObject.AddComponent<StoryTableKeyboard>();
-            keyboard.Configure(view, view.Panels.First());
+            keyboard.Configure(view, view.StylePanel);
             var panels = view.Panels.Concat(new[] { keyboard.Panel }).ToArray();
             var hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
             foreach (var panel in panels) foreach (var hand in hands) { var source = hand; panel.AddFingertip(() => source.Fingertip); }
@@ -141,7 +140,7 @@ namespace Sankofa.Runtime.Personal
             fireSound.clip = fireRecording; fireSound.loop = true; fireSound.playOnAwake = false;
             fireSound.spatialBlend = .9f; fireSound.volume = .28f; fireSound.dopplerLevel = 0;
             fireSound.rolloffMode = AudioRolloffMode.Logarithmic; fireSound.minDistance = .6f; fireSound.maxDistance = 12f;
-            fireSound.transform.position = view.TableRoot.TransformPoint(FireOnTable);
+            fireSound.transform.position = view.FirePosition;
             fireSound.timeSamples = UnityEngine.Random.Range(0, fireRecording.samples);
             fireSound.Play();
         }
@@ -158,7 +157,8 @@ namespace Sankofa.Runtime.Personal
                 level = Mathf.Clamp01(Mathf.Sqrt(sum / speech.Length) * 6f);
             }
             view.SetSpeechLevel(level);
-            if (fireSound != null) fireSound.transform.position = view.TableRoot.TransformPoint(FireOnTable);
+            if (voice != null && voice.isPlaying && voice.clip != null) view.SetNarrationProgress(voice.time, voice.clip.length);
+            if (fireSound != null) fireSound.transform.position = view.FirePosition;
         }
 
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
@@ -265,12 +265,13 @@ namespace Sankofa.Runtime.Personal
                     view.RenderStory(story.Title, session.PageNumber == 1 && personalReason != null ? personalReason : "Enkare Nairobi • around the 1850s", Capability(story));
                     view.RenderChapter(new StoryTableChapterViewData
                     {
-                        Index = session.PageNumber - 1, Count = session.PageCount, Title = session.Chapter.Title,
+                        Index = session.PageNumber - 1, Count = session.PageCount, Id = session.Chapter.Id, Title = session.Chapter.Title,
                         Caption = session.Chapter.Narration, ArtKey = session.Chapter.Illustration,
                         ImageLabel = TruthLabel(session.Chapter.Truth),
                         PreviousPageTitles = session.PagesBefore.Select(c => c.Title).TakeLast(2).ToArray(),
                         Questions = session.Chapter.Questions.Select(q => q.Label).ToArray(),
                         Choices = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Label).ToArray() : Array.Empty<string>(),
+                        ChoiceIds = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Id).ToArray() : Array.Empty<string>(),
                     });
                     view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0, false);
                     if (narrationEnabled && voice.clip == null && voiceRequest == null) SpeakCurrent();
@@ -453,7 +454,7 @@ namespace Sankofa.Runtime.Personal
         void PlayClip(AudioClip clip)
         {
             if (!narrationEnabled || clip == null || session.Paused) return;
-            voice.transform.position = view.TableRoot.TransformPoint(FireOnTable);
+            voice.transform.position = view.FirePosition;
             voice.clip = clip; voice.volume = .85f; voice.Play();
         }
         void ClearClips() { foreach (var clip in clips.Values) if (clip != null) Destroy(clip); clips.Clear(); }

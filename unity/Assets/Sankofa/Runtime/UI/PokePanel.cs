@@ -30,6 +30,7 @@ namespace Sankofa.Runtime.UI
             public float Flash;
             public float Glow;
             public bool Hover;
+            public bool LabelSettled;
         }
 
         [SerializeField] Material buttonMaterial;
@@ -241,18 +242,30 @@ namespace Sankofa.Runtime.UI
             text.rectTransform.sizeDelta = new Vector2(size.x * 0.9f, size.y * 0.86f);
             text.alignment = TextAlignmentOptions.Center;
             text.textWrappingMode = TextWrappingModes.Normal;
+            SettleLabel(text);
+            text.color = labelColor;
+            text.text = label;
+
+            return new Button { Id = id, Root = root, Face = renderer, Label = text, Size = size, LabelSettled = go.activeInHierarchy };
+        }
+
+        /// <summary>
+        /// One size for every label, shrinking only when a long one cannot fit. A label made while its panel is set
+        /// aside is initialised by TextMeshPro when first shown, which resets these sizes; they are applied again then.
+        /// </summary>
+        void SettleLabel(TextMeshPro text)
+        {
             text.lineSpacing = -12f;
             text.enableAutoSizing = true;
             text.fontSizeMin = 0.1f;
             text.fontSizeMax = labelSize;
-            text.color = labelColor;
-            text.text = label;
-
-            return new Button { Id = id, Root = root, Face = renderer, Label = text, Size = size };
+            text.fontSize = labelSize;
         }
 
         void Update()
         {
+            foreach (var b in buttons)
+                if (!b.LabelSettled && b.Label.gameObject.activeInHierarchy) { SettleLabel(b.Label); b.LabelSettled = true; }
             if (hidden)
             {
                 FingerNear = false;

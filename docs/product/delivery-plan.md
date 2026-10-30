@@ -1,8 +1,20 @@
 # Sankofa — delivery and validation plan
 
-Updated October 18, 2026 · Personal story table MVP is active; prior gallery plans are preserved below
+Updated October 30, 2026 · Pop-up story theatre on the personal story table; prior plans are preserved below
 
 The [personal story table scope](personal-story-table-mvp.md) and [current PRD contract](prd.md#current-mvp-contract) guide delivery. The user authorised an illustrated personal telling shaped by inherited fragments/questions, a warm fire narrator, real-table presence where available, contextual follow-up and explicit save/reopen. This replaces the gallery as the primary journey. It does not delete its scenes, art, recordings or historical evidence.
+
+## Final three weeks — October 30 to November 18
+
+User-approved on October 30. The table becomes a **pop-up story theatre**: an heirloom chosen at the fire begins a telling that rises from the table as painted paper scenery, performs to the griot's voice, and turns to show the other side when the visitor chooses whose side to follow. No headset is available; verification is batch tests, desktop captures and the Meta XR Simulator, with simulator footage for the video. The entry deadline is November 18 at noon PST; the internal submission target is November 16.
+
+| Dates | Goal | Work | Exit |
+|---|---|---|---|
+| Oct 30 – Nov 5 | Prove the stage | Land the October 26 iteration in Unity; record the three pending chapters; build one telling end to end as a pop-up stage with heirlooms, staged poses and the turn | **Go/no-go on November 5** from captures and a motion study. If the stage does not clearly beat the book, polish the book instead |
+| Nov 6 – 12 | Complete and craft | Optional gourd hand-off; optional life-size moment (capped at two days); sound pass; fewer on-page disclaimers; conservative rendering budget; hand tolerances; captions, reduced motion and one-hand use | All three tellings staged and reviewed in captures; suites pass |
+| Nov 13 – 18 | Freeze and ship | Feature freeze on November 13; simulator footage and a video under three minutes; Devpost copy and adaptation summary; Competition release channel; submit on November 16 | Submitted entry with honest evidence labels; November 17–18 held in reserve |
+
+User actions: confirm eligibility and Start membership; create the release channel; listen to the narration; decide on hosting online generation; decide what happens to the stashed gallery-layout work.
 
 ## Current personal-story sequence
 

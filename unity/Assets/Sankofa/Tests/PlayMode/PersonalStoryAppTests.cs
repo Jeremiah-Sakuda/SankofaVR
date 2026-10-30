@@ -93,14 +93,14 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
-        public IEnumerator ActualPreparedButtonsProduceThreeDifferentDevelopments()
+        public IEnumerator EachHeirloomBeginsADifferentPreparedTelling()
         {
             var openings = new HashSet<string>(); var contexts = new HashSet<string>();
             foreach (var interest in PersonalStoryCatalog.Interests)
             {
-                app.Session.Cancel(); app.SetSeed("");
+                app.Session.Cancel(); app.SetSeed(""); yield return null;
+                // Without a story service, touching an heirloom is the beginning: one action, no second button.
                 yield return Press("Interest choices", interest);
-                yield return Press("Start choices", "local");
                 Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
                 Assert.That(app.Session.Story.Interest, Is.EqualTo(interest));
                 Assert.That(app.Session.Story.Mode, Is.EqualTo("bundled"));
@@ -117,10 +117,9 @@ namespace Sankofa.Tests
         [UnityTest]
         public IEnumerator FreeformQuestionChangesPreparedThreadWithoutAssumingFamilyIdentity()
         {
-            yield return Press("Interest choices", "journeys");
             app.SetSeed("What could a household carry in a gourd?");
-            yield return Press("Start choices", "local");
-            Assert.That(app.Session.Story.Interest, Is.EqualTo("trade-household"));
+            yield return Press("Interest choices", "journeys");
+            Assert.That(app.Session.Story.Interest, Is.EqualTo("trade-household"), "recognised words in the question choose the thread over the heirloom");
             var trade = app.Session.Story.Chapters[0].Narration;
             app.Session.Cancel(); app.SetSeed("What does the river name mean?");
             yield return Press("Start choices", "local");
@@ -212,7 +211,6 @@ namespace Sankofa.Tests
             yield return Press("Always available controls", "leave");
             yield return Press("Return and recovery actions", "leave");
             yield return Press("Interest choices", "place-water");
-            yield return Press("Start choices", "local");
             var second = PersonalStoryJson.Write(app.Session.Story);
             Assert.That(second, Is.Not.EqualTo(first));
             yield return ReachEnding();
@@ -311,14 +309,20 @@ namespace Sankofa.Tests
             {
                 app.Session.Cancel(); app.SetSeed("");
                 yield return Press("Interest choices", "journeys");
-                yield return Press("Start choices", "local");
                 for (var step = 0; step < 20 && !app.Session.OffersChoice; step++) yield return Press("Turn a page", "next");
                 Assert.That(app.Session.OffersChoice, Is.True, "each prepared telling reaches a perspective choice");
                 while (view.ReadingPart + 1 < view.ReadingPartCount) yield return Press("Turn a page", "next");
                 Assert.That(view.Caption, Does.Contain(StoryTableView.DefaultChoicePrompt));
                 var side = Panel("Questions beside the story");
                 Assert.That(side.Ids, Is.EquivalentTo(new[] { "choice:0", "choice:1" }));
-                if (choose) yield return Press(side, "choice:1"); else yield return Press("Turn a page", "next");
+                if (choose)
+                {
+                    // Choosing by touching the painted figure: the one who is late carries the gourd.
+                    view.Stage.Seek(1); yield return null; yield return null;
+                    Assert.That(Panel("Follow naserian").Ids, Is.EqualTo(new[] { "choice:0" }));
+                    yield return Press("Follow wambui", "choice:1");
+                }
+                else yield return Press("Turn a page", "next");
                 Assert.That(app.Session.FollowedByChoice, Is.EqualTo(choose), "continuing is the fire's choice, never recorded as the visitor's");
                 Assert.That(app.Session.Chapter.Id, Is.EqualTo(choose ? "journeys.late" : "journeys.meeting"));
                 endings.Add(app.Session.Chapter.Narration);

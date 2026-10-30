@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Sankofa.Runtime.Fire;
 using Sankofa.Runtime.Personal;
@@ -49,74 +50,44 @@ namespace Sankofa.EditorTools
                 Prim(stand, "Table support", PrimitiveType.Cube, new Vector3(x, -0.34f, 0.20f), new Vector3(0.055f, 0.63f, 0.055f), timber);
             Prim(stand, "Front brass seam", PrimitiveType.Cube, new Vector3(0, -0.005f, -0.342f), new Vector3(1.19f, 0.005f, 0.005f), brass);
 
-            var book = Point(table, "Upright illustrated journal", new Vector3(0, 0.515f, 0.27f));
-            book.localRotation = Quaternion.Euler(4, 0, 0);
-            Prim(book, "Quiet folio shadow", PrimitiveType.Cube, new Vector3(0.008f, -0.006f, 0.012f), new Vector3(0.982f, 0.630f, 0.014f), shadow);
-            Prim(book, "Journal cover", PrimitiveType.Cube, new Vector3(0, 0, 0.008f), new Vector3(0.976f, 0.624f, 0.013f), timber);
-            for (var i = 0; i < 3; i++)
-                Prim(book, "Paper leaf " + i, PrimitiveType.Cube, new Vector3(i * 0.002f, -i * 0.001f, 0.002f - i * 0.001f), new Vector3(0.95f, 0.60f, 0.001f), i == 2 ? paper : pageEdge);
-            Prim(book, "Binding", PrimitiveType.Cube, new Vector3(-0.463f, 0, -0.002f), new Vector3(0.012f, 0.59f, 0.005f), brass);
-            TableRule(book, new Vector3(0, 0.102f, -0.006f), 0.85f, brass);
-            TableRule(book, new Vector3(0, -0.166f, -0.007f), 0.85f, pageEdge);
+            // The story is performed on a pop-up paper stage raised on a low drum; the words and actions sit on one open
+            // page in front of it, the way a pop-up book keeps its text below the scene.
+            var stage = BuildPopUpStage(table, ink, brass, out var heirlooms, out var plaques);
+            Set(view, "stage", stage);
+            SetArray(view, "heirlooms", heirlooms);
+            SetArray(view, "figureChoices", plaques);
 
-            Set(view, "heading", TableText(book, "Story name", "Sankofa", new Vector3(0, 0.260f, -0.008f), 0.25f, new Vector2(0.88f, 0.045f), TableInk));
-            Set(view, "subheading", TableText(book, "Story setting", "For the stories you never got to hear", new Vector3(0, 0.221f, -0.008f), 0.14f, new Vector2(0.88f, 0.031f), TableInk));
-            var pageNumber = TableText(book, "Page number", "YOUR STORY TABLE", new Vector3(0, 0.182f, -0.008f), 0.12f, new Vector2(0.85f, 0.028f), TableInk);
+            // One open page in front of the stage holds the words and every action, low enough to keep the stage in view.
+            var page = Point(table, "Story page", new Vector3(0, 0.072f, -0.222f));
+            page.localRotation = Quaternion.Euler(66, 0, 0);
+            Prim(page, "Page shadow", PrimitiveType.Cube, new Vector3(0.004f, -0.004f, 0.006f), new Vector3(0.668f, 0.302f, 0.004f), shadow);
+            Prim(page, "Page paper", PrimitiveType.Cube, Vector3.zero, new Vector3(0.66f, 0.30f, 0.005f), paper);
+            TableRule(page, new Vector3(0, 0.080f, -0.003f), 0.60f, brass);
+            Set(view, "heading", TableText(page, "Story name", "Sankofa", new Vector3(-0.15f, 0.133f, -0.004f), 0.12f, new Vector2(0.30f, 0.02f), TableInk, TextAlignmentOptions.Left));
+            Set(view, "subheading", TableText(page, "Story setting", "For the stories you never got to hear", new Vector3(0.11f, 0.133f, -0.004f), 0.08f, new Vector2(0.38f, 0.02f), TableInk, TextAlignmentOptions.Right));
+            var pageNumber = TableText(page, "Page number", "YOUR STORY TABLE", new Vector3(0, 0.114f, -0.004f), 0.07f, new Vector2(0.60f, 0.014f), TableInk);
             Set(view, "pageNumber", pageNumber); Set(view, "intakeSummary", pageNumber);
-            Set(view, "chapterTitle", TableText(book, "Chapter title", "Every story begins with a question", new Vector3(0, 0.137f, -0.008f), 0.22f, new Vector2(0.86f, 0.055f), TableInk));
-            Set(view, "caption", TableText(book, "Narrative captions", "Choose a thread below, or bring a small fragment of your own.", new Vector3(0, -0.226f, -0.011f), 0.23f, new Vector2(0.86f, 0.108f), TableInk, TextAlignmentOptions.TopLeft));
-            var seedPreview = TableText(book, "Your question preview", "", new Vector3(0, -0.226f, -0.012f), 0.20f, new Vector2(0.86f, 0.108f), TableInk, TextAlignmentOptions.TopLeft);
+            Set(view, "chapterTitle", TableText(page, "Chapter title", "Every story begins with a question", new Vector3(0, 0.095f, -0.004f), 0.12f, new Vector2(0.60f, 0.02f), TableInk));
+            Set(view, "caption", TableText(page, "Narrative captions", "Choose what you would carry back.", new Vector3(0, 0.038f, -0.004f), 0.15f, new Vector2(0.62f, 0.076f), TableInk, TextAlignmentOptions.TopLeft));
+            var seedPreview = TableText(page, "Your question preview", "", new Vector3(0, 0.038f, -0.005f), 0.14f, new Vector2(0.62f, 0.076f), TableInk, TextAlignmentOptions.TopLeft);
             Set(view, "seedText", seedPreview); seedPreview.gameObject.SetActive(false);
-            Set(view, "illustrationLabel", TableText(book, "Illustration context", "Illustrated reconstruction", new Vector3(0, -0.150f, -0.012f), 0.13f, new Vector2(0.84f, 0.024f), TableInk));
-            Set(view, "capability", TableText(book, "Story availability", "Prepared story • works offline", new Vector3(0, -0.285f, -0.012f), 0.12f, new Vector2(0.84f, 0.028f), TableInk));
+            Set(view, "illustrationLabel", TableText(page, "Illustration context", "Illustrated reconstruction", new Vector3(-0.155f, -0.008f, -0.004f), 0.07f, new Vector2(0.30f, 0.013f), TableInk, TextAlignmentOptions.Left));
+            Set(view, "capability", TableText(page, "Story availability", "Prepared story • works offline", new Vector3(0.155f, -0.008f, -0.004f), 0.07f, new Vector2(0.30f, 0.013f), TableInk, TextAlignmentOptions.Right));
+            SetArray(view, "previousTitles", new Object[0]);
+            SetArray(view, "turningPages", new Object[] { page });
 
-            var illustration = Point(book, "One flat illustrated page", new Vector3(0, -0.025f, -0.008f));
-            illustration.localScale = new Vector3(1, 0.23f / 0.29f, 1);
-            var cast = BuildTableIllustration(illustration, "Cast and exchange", true, false);
-            var scenery = BuildTableIllustration(illustration, "River landscape", false, false);
-            var modern = BuildTableIllustration(illustration, "Same water today", false, true);
-            var viewData = new SerializedObject(view);
-            var items = viewData.FindProperty("illustrations"); items.arraySize = 4;
-            var keys = new[] { "exchange", "cast-atlas", "scenery-atlas", "modern-river" };
-            var roots = new[] { cast, cast, scenery, modern };
-            for (var i = 0; i < keys.Length; i++)
-            {
-                items.GetArrayElementAtIndex(i).FindPropertyRelative("Key").stringValue = keys[i];
-                items.GetArrayElementAtIndex(i).FindPropertyRelative("Root").objectReferenceValue = roots[i];
-            }
-            viewData.ApplyModifiedPropertiesWithoutUndo();
-            var custom = Prim(illustration, "Created illustration", PrimitiveType.Quad, new Vector3(0, 0, -0.001f), new Vector3(0.85f, 0.29f, 1), TableImageMaterial("Created page image", null));
-            custom.SetActive(false); Set(view, "customIllustration", custom.GetComponent<Renderer>());
-            cast.SetActive(true); scenery.SetActive(false); modern.SetActive(false);
-
-            var previous = new Object[2];
-            for (var i = 0; i < 2; i++)
-            {
-                var leaf = Point(table, "Earlier page " + (i + 1), new Vector3(i == 0 ? -0.48f : 0.48f, 0.044f, 0.125f));
-                leaf.localRotation = Quaternion.Euler(76, 0, i == 0 ? -7 : 7);
-                Prim(leaf, "Earlier paper", PrimitiveType.Cube, Vector3.zero, new Vector3(0.205f, 0.20f, 0.003f), paper);
-                TableRule(leaf, new Vector3(0, 0.049f, -0.003f), 0.165f, pageEdge);
-                previous[i] = TableText(leaf, "Earlier page title", "", new Vector3(0, 0, -0.004f), 0.115f, new Vector2(0.174f, 0.16f), TableInk);
-            }
-            SetArray(view, "previousTitles", previous);
-            SetArray(view, "turningPages", new Object[] { book });
-
-            // The same compact deck carries intake, reading and recovery; the far illustration stays dominant.
-            var intake = TableDeck(table, "Choose your story", new Vector3(0, 0.145f, -0.02f), new Vector2(0.85f, 0.33f), paper);
+            // Intake and reading actions share the lower half of the page; only one set is shown at a time.
+            var intake = Point(page, "Choose your story", Vector3.zero);
             Set(view, "intakeRoot", intake.gameObject);
-            Set(view, "intakeHeading", TableText(intake, "Intake heading", "What would you like to understand?", new Vector3(0, 0.145f, -0.006f), 0.14f, new Vector2(0.78f, 0.035f), TableInk));
-            Set(view, "keptActions", TablePanel(intake, "Kept story choices", new Vector3(0, 0.145f, -0.009f), 2, new Vector2(0.365f, 0.045f), ink));
-            Set(view, "routes", TablePanel(intake, "Interest choices", new Vector3(0, 0.092f, -0.007f), 3, new Vector2(0.237f, 0.052f), ink));
-            Set(view, "regions", TablePanel(intake, "Place choice", new Vector3(-0.187f, 0.026f, -0.007f), 1, new Vector2(0.365f, 0.047f), secondary));
-            Set(view, "periods", TablePanel(intake, "Period choice", new Vector3(0.187f, 0.026f, -0.007f), 1, new Vector2(0.365f, 0.047f), secondary));
-            Set(view, "intakeActions", TablePanel(intake, "Start choices", new Vector3(0, -0.044f, -0.007f), 3, new Vector2(0.237f, 0.062f), ink));
-
-            var reading = TableDeck(table, "Read and wonder", new Vector3(0, 0.145f, -0.02f), new Vector2(0.85f, 0.33f), paper);
+            Set(view, "intakeHeading", TableText(intake, "Intake heading", "", new Vector3(0, -0.024f, -0.004f), 0.07f, new Vector2(0.60f, 0.012f), TableInk));
+            Set(view, "keptActions", TablePanel(intake, "Kept story choices", new Vector3(0, -0.094f, -0.007f), 2, new Vector2(0.29f, 0.04f), ink));
+            Set(view, "intakeActions", TablePanel(intake, "Start choices", new Vector3(0, -0.047f, -0.007f), 3, new Vector2(0.19f, 0.042f), ink));
+            var reading = Point(page, "Read and wonder", Vector3.zero);
             Set(view, "readingRoot", reading.gameObject);
-            TableText(reading, "Reading guidance", "Read in your own time. Point and pinch, or touch a button.", new Vector3(0, 0.115f, -0.006f), 0.10f, new Vector2(0.76f, 0.031f), TableInk);
-            Set(view, "questions", TablePanel(reading, "Questions beside the story", new Vector3(0, 0.049f, -0.007f), 2, new Vector2(0.366f, 0.062f), secondary));
-            Set(view, "transport", TablePanel(reading, "Turn a page", new Vector3(0, -0.026f, -0.007f), 4, new Vector2(0.175f, 0.061f), ink));
+            Set(view, "transport", TablePanel(reading, "Turn a page", new Vector3(0, -0.047f, -0.007f), 4, new Vector2(0.143f, 0.042f), ink));
+            Set(view, "questions", TablePanel(reading, "Questions beside the story", new Vector3(0, -0.094f, -0.007f), 2, new Vector2(0.29f, 0.04f), secondary));
 
+            // Answers, preparation and consent open over the stage, which waits behind them.
             var details = TableDeck(table, "Question and context", new Vector3(0, 0.23f, 0.02f), new Vector2(0.85f, 0.39f), paper);
             details.Find("Paper deck").localPosition = new Vector3(0, 0.015f, 0);
             Set(view, "detailsRoot", details.gameObject);
@@ -137,8 +108,8 @@ namespace Sankofa.EditorTools
             Set(view, "consentBody", TableText(consent, "Online consent notice", "Your selected place, period, question and fragment will be sent to an online story service.\n\nShare only what you are comfortable sending. The prepared stories work without this.", new Vector3(0, 0.012f, -0.006f), 0.14f, new Vector2(0.75f, 0.22f), TableInk, TextAlignmentOptions.TopLeft));
             Set(view, "consentActions", TablePanel(consent, "Online consent actions", new Vector3(0, -0.157f, -0.007f), 2, new Vector2(0.355f, 0.059f), ink));
 
-            var controls = TablePanel(table, "Always available controls", new Vector3(0, 0.062f, -0.113f), 5, new Vector2(0.140f, 0.044f), ink);
-            controls.transform.localRotation = Quaternion.Euler(45, 0, 0);
+            var controls = TablePanel(page, "Always available controls", new Vector3(0, -0.133f, -0.007f), 5, new Vector2(0.112f, 0.03f), ink);
+            Set(controls, "gap", 0.008f); Set(controls, "labelSize", 0.11f);
             Set(view, "controls", controls);
             Set(view, "fire", BuildStoryTableFire(table));
 
@@ -210,6 +181,7 @@ namespace Sankofa.EditorTools
             var path = TableArtFolder + "/" + name + ".mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (material == null) { material = new Material(Shader.Find("Sankofa/Gallery Canvas")) { name = name }; AssetDatabase.CreateAsset(material, path); }
+            material.shader = Shader.Find("Sankofa/Gallery Canvas");
             material.mainTexture = texture; material.SetFloat("_Opacity", 1); EditorUtility.SetDirty(material); return material;
         }
 
@@ -225,44 +197,171 @@ namespace Sankofa.EditorTools
             EditorUtility.SetDirty(material); return material;
         }
 
-        static GameObject BuildTableIllustration(Transform parent, string name, bool people, bool modern)
+        /// <summary>
+        /// A paper theatre on a turntable. Scenery hinges stand from flat, back to front, using the painted scenery atlas;
+        /// the two painted figures stand on their own hinges; a small gourd travels between them. In front, three
+        /// heirlooms wait on slanted cards: touching one chooses the thread a telling follows.
+        /// </summary>
+        static PopUpStage BuildPopUpStage(Transform table, Material ink, Material brass, out Object[] heirlooms, out Object[] plaques)
         {
-            var root = Child(parent, name);
-            if (modern)
+            Prim(table, "Stage drum", PrimitiveType.Cylinder, new Vector3(0.02f, 0.04f, 0.11f), new Vector3(0.6f, 0.04f, 0.6f), TableMaterial("Walnut deck", new Color(0.14f, 0.095f, 0.065f)));
+            var root = Point(table, "Pop-up stage", new Vector3(0.02f, 0.08f, 0.11f));
+            var stage = root.gameObject.AddComponent<PopUpStage>();
+            Set(stage, "stagingData", AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Sankofa/Content/personal-table-staging.json"));
+            var turntable = Child(root, "Turntable");
+            Prim(turntable, "Brass rim", PrimitiveType.Cylinder, new Vector3(0, 0.004f, 0), new Vector3(0.585f, 0.004f, 0.585f), brass);
+            Prim(turntable, "Painted ground", PrimitiveType.Cylinder, new Vector3(0, 0.007f, 0), new Vector3(0.56f, 0.006f, 0.56f),
+                TableImageMaterial("Stage earth", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/Scanned/dry_ground_01/dry_ground_01_diff_1k.jpg")));
+            Prim(turntable, "Painted water", PrimitiveType.Quad, new Vector3(0, 0.0135f, 0.075f), new Vector3(0.50f, 0.11f, 1), TableAtlasMaterial("Stage water", "scenery-atlas.png", new Vector4(0.2f, 0.40f, 0.6f, 0.12f)), Quaternion.Euler(90, 0, 0));
+            Set(stage, "turntable", turntable);
+
+            var sky = TableImageMaterial("Stage dusk", StageSky());
+            var hinges = new[]
             {
-                Prim(root, "Printed modern river", PrimitiveType.Quad, Vector3.zero, new Vector3(0.85f, 0.29f, 1), TableAtlasMaterial("Modern river page", "modern-river-v1.png", new Vector4(0, 0.260f, 1, 0.480f)));
-                return root.gameObject;
-            }
-            Prim(root, "Printed dusk", PrimitiveType.Quad, Vector3.zero, new Vector3(0.85f, 0.29f, 1), TableMaterial("Printed dusk", new Color(0.29f, 0.23f, 0.27f)));
-            // Atlas parts form one print; their fractions of a millimetre set its layer order, which StoryTableView raises into pop-up depth.
-            Prim(root, "Printed forest and hills", PrimitiveType.Quad, new Vector3(0, 0.030f, -0.0002f), new Vector3(0.85f, 0.23f, 1), TableAtlasMaterial("Printed landscape", "scenery-atlas.png", new Vector4(0, 0.625f, 1, 0.37f)));
-            Prim(root, "Printed riverbank", PrimitiveType.Quad, new Vector3(0, -0.062f, -0.0004f), new Vector3(0.85f, 0.16f, 1), TableAtlasMaterial("Printed water", "scenery-atlas.png", new Vector4(0, 0.36f, 1, 0.26f)));
-            if (people)
+                StageLayer(root, "Dusk backdrop", new Vector3(0, 0.013f, 0.235f), new Vector2(0.60f, 0.34f), sky, true),
+                StageLayer(root, "Painted hills", new Vector3(0, 0.013f, 0.205f), new Vector2(0.58f, 0.215f), TableAtlasMaterial("Stage hills", "scenery-atlas.png", new Vector4(0, 0.625f, 1, 0.37f)), false),
+                StageLayer(root, "Painted riverbank", new Vector3(0, 0.013f, 0.115f), new Vector2(0.54f, 0.14f), TableAtlasMaterial("Stage riverbank", "scenery-atlas.png", new Vector4(0, 0.36f, 1, 0.26f)), false),
+                StageLayer(root, "Left reeds", new Vector3(-0.205f, 0.013f, -0.075f), new Vector2(0.15f, 0.138f), TableAtlasMaterial("Stage reeds left", "scenery-atlas.png", new Vector4(0, 0.02f, 0.36f, 0.33f)), false),
+                StageLayer(root, "Right reeds", new Vector3(0.205f, 0.013f, -0.075f), new Vector2(0.15f, 0.138f), TableAtlasMaterial("Stage reeds right", "scenery-atlas.png", new Vector4(0.64f, 0.02f, 0.36f, 0.33f)), false),
+            };
+            SetArray(stage, "scenery", hinges);
+
+            var cast = new[] { ("wambui", "Printed Wambui", new Vector2(0, 0.5f), -0.12f), ("naserian", "Printed Naserian", new Vector2(0.5f, 0.5f), 0.12f) };
+            var stageData = new SerializedObject(stage);
+            var figures = stageData.FindProperty("figures"); figures.arraySize = cast.Length;
+            plaques = new Object[cast.Length];
+            for (var i = 0; i < cast.Length; i++)
             {
-                Prim(root, "Printed trader left", PrimitiveType.Quad, new Vector3(-0.15f, -0.015f, -0.0006f), new Vector3(0.19f, 0.24f, 1), TableAtlasMaterial("Printed Wambui", "cast-atlas.png", new Vector4(0, 1f / 3, 0.5f, 1f / 3)));
-                Prim(root, "Printed trader right", PrimitiveType.Quad, new Vector3(0.15f, -0.015f, -0.0008f), new Vector3(0.19f, 0.24f, 1), TableAtlasMaterial("Printed Naserian", "cast-atlas.png", new Vector4(0.5f, 1f / 3, 0.5f, 1f / 3)));
+                var (id, materialName, column, x) = cast[i];
+                var figure = Point(root, "Paper figure " + id, new Vector3(x, 0.013f, 0));
+                var hinge = Child(figure, "Fold");
+                var face = Prim(hinge, "Painted figure", PrimitiveType.Quad, new Vector3(0, 0.1f, 0), new Vector3(0.2f, 0.2f, 1),
+                    TableAtlasMaterial(materialName, "cast-atlas.png", new Vector4(column.x, 2f / 3, column.y, 1f / 3)));
+                var item = figures.GetArrayElementAtIndex(i);
+                item.FindPropertyRelative("Id").stringValue = id;
+                item.FindPropertyRelative("Root").objectReferenceValue = figure;
+                item.FindPropertyRelative("Hinge").objectReferenceValue = hinge;
+                item.FindPropertyRelative("Face").objectReferenceValue = face.transform;
+                item.FindPropertyRelative("Paint").objectReferenceValue = face.GetComponent<Renderer>();
+                item.FindPropertyRelative("Column").vector2Value = column;
+                // Her plaque hangs just above her head and walks with her; it never turns with her painted mirror image.
+                var plaque = TablePanel(figure, "Follow " + id, new Vector3(0, 0.245f, -0.01f), 1, new Vector2(0.15f, 0.042f), ink);
+                plaque.transform.localRotation = Quaternion.Euler(18, 0, 0);
+                Set(plaque, "labelSize", 0.11f);
+                plaques[i] = plaque;
             }
-            return root.gameObject;
+            stageData.ApplyModifiedPropertiesWithoutUndo();
+
+            var gourd = Point(root, "Stage gourd", new Vector3(0, 0.013f, 0));
+            TableProp(gourd, "Stage gourd body", GourdWithLip(0.042f, 0.016f, 0.005f), new Color(0.60f, 0.38f, 0.19f), 811);
+            Set(stage, "gourd", gourd);
+
+            // The heirlooms' cards follow the interest panel's own layout: three columns, centred.
+            var cards = TablePanel(root, "Interest choices", new Vector3(0, 0.03f, -0.03f), 3, new Vector2(0.125f, 0.055f), TableMaterial("Woven mats", new Color(0.36f, 0.25f, 0.15f)));
+            cards.transform.localRotation = Quaternion.Euler(55, 0, 0);
+            Set(cards, "gap", 0.03f); Set(cards, "labelSize", 0.13f);
+            var spacing = 0.125f + 0.03f;
+            var objects = new[]
+            {
+                ("Travelling bundle", new List<Vector2> { new Vector2(0, 0), new Vector2(0.026f, 0.004f), new Vector2(0.040f, 0.018f), new Vector2(0.041f, 0.036f), new Vector2(0.03f, 0.052f), new Vector2(0.012f, 0.06f), new Vector2(0.014f, 0.068f), new Vector2(0.008f, 0.074f), new Vector2(0, 0.074f) }, new Color(0.15f, 0.19f, 0.42f)),
+                ("Flour gourd", GourdWithLip(0.10f, 0.038f, 0.012f), new Color(0.60f, 0.38f, 0.19f)),
+                ("Water pot", new List<Vector2> { new Vector2(0, 0), new Vector2(0.024f, 0.002f), new Vector2(0.043f, 0.024f), new Vector2(0.045f, 0.044f), new Vector2(0.032f, 0.064f), new Vector2(0.021f, 0.071f), new Vector2(0.027f, 0.08f), new Vector2(0.023f, 0.083f), new Vector2(0, 0.083f) }, new Color(0.50f, 0.24f, 0.13f)),
+            };
+            heirlooms = new Object[objects.Length];
+            for (var i = 0; i < objects.Length; i++)
+            {
+                var (name, profile, tone) = objects[i];
+                var holder = Point(root, "Heirloom " + name, new Vector3((i - 1) * spacing, 0.013f, 0.045f));
+                TableProp(holder, name, profile, tone, 820 + i);
+                heirlooms[i] = holder;
+            }
+            Set(table.GetComponent<StoryTableView>(), "routes", cards);
+            return stage;
         }
 
+        /// <summary>A dusk sky for the stage's back cloth: indigo overhead, warm at the horizon, with a few stars.</summary>
+        static Texture2D StageSky()
+        {
+            var path = TableArtFolder + "/Stage sky.asset";
+            // Texels match the back cloth's 0.60 x 0.34 m proportions, so stars stay round.
+            var sky = new Texture2D(352, 200, TextureFormat.RGBA32, false) { name = "Stage sky", wrapMode = TextureWrapMode.Clamp };
+            var top = new Color(0.05f, 0.05f, 0.13f); var middle = new Color(0.25f, 0.15f, 0.26f); var horizon = new Color(0.74f, 0.40f, 0.22f);
+            var random = new System.Random(1850);
+            for (var y = 0; y < sky.height; y++)
+            {
+                var t = y / (sky.height - 1f);
+                var colour = t < 0.35f ? Color.Lerp(horizon, middle, Mathf.SmoothStep(0, 1, t / 0.35f)) : Color.Lerp(middle, top, Mathf.SmoothStep(0, 1, (t - 0.35f) / 0.65f));
+                for (var x = 0; x < sky.width; x++) sky.SetPixel(x, y, colour);
+            }
+            for (var i = 0; i < 90; i++)
+            {
+                var x = random.Next(sky.width); var y = random.Next(sky.height / 2, sky.height);
+                var glint = 0.45f + (float)random.NextDouble() * 0.5f;
+                sky.SetPixel(x, y, Color.Lerp(sky.GetPixel(x, y), new Color(1, 0.95f, 0.85f), glint));
+            }
+            sky.Apply();
+            AssetDatabase.DeleteAsset(path); AssetDatabase.CreateAsset(sky, path);
+            return sky;
+        }
+
+        /// <summary>A bottle gourd with a turned lip, as the gallery's detailed vessels have.</summary>
+        static List<Vector2> GourdWithLip(float height, float bulb, float neck) => new List<Vector2>
+        {
+            new Vector2(0, 0), new Vector2(bulb * 0.35f, 0.008f * height / 0.1f), new Vector2(bulb * 0.82f, height * 0.12f),
+            new Vector2(bulb, height * 0.3f), new Vector2(bulb * 0.96f, height * 0.48f), new Vector2(bulb * 0.65f, height * 0.65f),
+            new Vector2(neck, height * 0.79f), new Vector2(neck, height * 0.95f), new Vector2(neck * 1.15f, height * 0.95f),
+            new Vector2(neck * 1.15f, height), new Vector2(0, height),
+        };
+
+        /// <summary>A scenery hinge lying on the stage floor; its painted face stands above it when the hinge turns up.</summary>
+        static Transform StageLayer(Transform stage, string name, Vector3 at, Vector2 size, Material material, bool opaque)
+        {
+            var hinge = Point(stage, name, at);
+            Prim(hinge, name + " face", PrimitiveType.Quad, new Vector3(0, size.y / 2, 0), new Vector3(size.x, size.y, 1), material);
+            if (opaque) Prim(hinge, name + " back", PrimitiveType.Quad, new Vector3(0, size.y / 2, 0.001f), new Vector3(size.x, size.y, 1), material, Quaternion.Euler(0, 180, 0));
+            return hinge;
+        }
+
+        static void TableProp(Transform parent, string name, List<Vector2> profile, Color tone, int seed)
+        {
+            var mesh = SankofaStoryMeshes.Lathe("Table " + name, profile, 24, (a, y) => new Color(tone.r, tone.g, tone.b) * (0.9f + 0.1f * Mathf.Sin(a * 5 + y * 90)), seed);
+            var path = TableArtFolder + "/" + mesh.name + ".asset";
+            AssetDatabase.DeleteAsset(path); AssetDatabase.CreateAsset(mesh, path);
+            // Each prop carries its own pigment; vertex tint only adds the hand-turned variation.
+            var materialPath = TableArtFolder + "/Table " + name + " pigment.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null) { material = new Material(Shader.Find("Sankofa/Painted Prop")) { name = "Table " + name + " pigment" }; AssetDatabase.CreateAsset(material, materialPath); }
+            material.SetColor("_Color", tone); material.SetFloat("_VertexTint", 0); material.SetFloat("_InkWidth", 0.24f);
+            material.SetTexture("_Noise", AssetDatabase.LoadAssetAtPath<Texture2D>(SankofaArt.NoisePath));
+            EditorUtility.SetDirty(material);
+            Static(parent, name, mesh, material);
+        }
+
+        /// <summary>The griot's fire burns in a clay bowl at the front left of the table, beside the telling and within reach.</summary>
         static HearthFire BuildStoryTableFire(Transform table)
         {
-            var root = Point(table, "Quiet tabletop fire", new Vector3(-0.47f, 0.18f, 0.20f));
-            root.localScale = Vector3.one * 0.25f;
+            var hearth = Point(table, "Griot fire", new Vector3(-0.45f, 0, -0.03f));
+            var clay = TableMaterial("Ember bowl", new Color(0.29f, 0.16f, 0.08f));
+            Prim(hearth, "Clay hearth", PrimitiveType.Cylinder, new Vector3(0, 0.012f, 0), new Vector3(0.16f, 0.012f, 0.16f), clay);
+            for (var i = 0; i < 5; i++)
+            {
+                var a = i * Mathf.PI * 2 / 5 + 0.3f;
+                Prim(hearth, "Hearth stone", PrimitiveType.Sphere, new Vector3(Mathf.Cos(a) * 0.072f, 0.026f, Mathf.Sin(a) * 0.072f), new Vector3(0.042f, 0.03f, 0.036f), TableMaterial("Hearth stones", new Color(0.24f, 0.22f, 0.20f)));
+            }
+            var root = Point(hearth, "Quiet tabletop fire", new Vector3(0, 0.028f, 0));
+            root.localScale = Vector3.one * 0.34f;
             var fire = root.gameObject.AddComponent<HearthFire>();
             var flame = AssetDatabase.LoadAssetAtPath<Material>(SankofaArt.Folder + "/Flame.mat");
-            var layers = new Object[3]; var cards = new Object[3];
+            var layers = new Object[3]; var flames = new Object[3];
             for (var i = 0; i < 3; i++)
             {
                 var layer = Point(root, "Silent flame " + i, new Vector3((i - 1) * 0.045f, 0, i * 0.025f));
                 layer.gameObject.AddComponent<Billboard>();
                 layers[i] = layer;
-                cards[i] = Prim(layer, "Flame", PrimitiveType.Quad, new Vector3(0, 0.5f, 0), Vector3.one, flame).GetComponent<Renderer>();
+                flames[i] = Prim(layer, "Flame", PrimitiveType.Quad, new Vector3(0, 0.5f, 0), Vector3.one, flame).GetComponent<Renderer>();
             }
-            SetArray(fire, "layers", layers); SetArray(fire, "cards", cards);
-            Set(fire, "lightPower", 0.55f); Set(fire, "lightAttenuation", 2f);
-            Prim(root, "Bronze ember cup", PrimitiveType.Cylinder, new Vector3(0, -0.018f, 0), new Vector3(0.58f, 0.045f, 0.58f), TableMaterial("Ember bowl", new Color(0.29f, 0.16f, 0.08f)));
-            Prim(root, "Ember pedestal", PrimitiveType.Cylinder, new Vector3(0, -0.38f, 0), new Vector3(0.28f, 0.36f, 0.28f), TableMaterial("Ember bowl", new Color(0.29f, 0.16f, 0.08f)));
+            SetArray(fire, "layers", layers); SetArray(fire, "cards", flames);
+            Set(fire, "lightPower", 0.7f); Set(fire, "lightAttenuation", 2f);
             return fire;
         }
     }

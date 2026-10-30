@@ -38,7 +38,7 @@ Material:
     - _Unfold: 1
     - _Visibility: 1
     m_Colors:
-    - _FrameA: {r: 0.5, g: 0.33333334, b: 0.5, a: 0.33333334}
-    - _FrameB: {r: 0.5, g: 0.33333334, b: 0.5, a: 0.33333334}
+    - _FrameA: {r: 0.5, g: 0.6666667, b: 0.5, a: 0.33333334}
+    - _FrameB: {r: 0.5, g: 0.6666667, b: 0.5, a: 0.33333334}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

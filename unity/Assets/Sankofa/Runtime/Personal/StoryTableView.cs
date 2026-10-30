@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sankofa.Core.Personal;
 using Sankofa.Runtime.Fire;
 using Sankofa.Runtime.UI;
 using TMPro;
@@ -13,11 +14,15 @@ namespace Sankofa.Runtime.Personal
     public sealed class StoryTableChapterViewData
     {
         public int Index, Count;
+        /// <summary>The chapter's own id, so the pop-up stage can perform it; never shown.</summary>
+        public string Id;
         public string Title, Caption, ArtKey, ImageLabel;
         public string[] PreviousPageTitles = Array.Empty<string>();
         public string[] Questions = Array.Empty<string>();
         /// <summary>Perspectives to follow from this page; when present they take the place of the side questions.</summary>
         public string[] Choices = Array.Empty<string>();
+        /// <summary>Ids of <see cref="Choices"/>, in order, so each perspective can stand at its painted figure.</summary>
+        public string[] ChoiceIds = Array.Empty<string>();
         public string ChoicePrompt;
     }
 
@@ -49,6 +54,12 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] HearthFire fire;
         [SerializeField] Illustration[] illustrations = Array.Empty<Illustration>();
         [SerializeField] Renderer customIllustration;
+        [Tooltip("The pop-up paper theatre; when present it performs each chapter in place of a flat print.")]
+        [SerializeField] PopUpStage stage;
+        [Tooltip("Heirlooms beside the interest cards, in the same order as the interests.")]
+        [SerializeField] Transform[] heirlooms = Array.Empty<Transform>();
+        [Tooltip("A plaque at each painted figure's feet, in the staging's figure order, for choosing whose side to follow.")]
+        [SerializeField] PokePanel[] figureChoices = Array.Empty<PokePanel>();
 
         public Action<string> RouteSelected, RegionSelected, PeriodSelected, QuestionSelected, ChoiceSelected;
         public Action StartRequested, StartLocalRequested, SeedEditRequested, SourceDetailsRequested;
@@ -84,8 +95,13 @@ namespace Sankofa.Runtime.Personal
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
         public Transform TableRoot => tableRoot != null ? tableRoot : transform;
-        public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Where(p => p != null).ToArray();
+        public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Concat(figureChoices).Where(p => p != null).ToArray();
         public string Caption => caption != null ? caption.text : "";
+        public PopUpStage Stage => stage;
+        /// <summary>Where the griot's fire burns, for its voice and sound.</summary>
+        public Vector3 FirePosition => fire != null ? fire.transform.position : TableRoot.TransformPoint(new Vector3(-.47f, .20f, .20f));
+        /// <summary>The ordinary ink buttons, as the style for panels made at runtime such as the keyboard.</summary>
+        public PokePanel StylePanel => intakeActions != null ? intakeActions : Panels.First();
         public string CapabilityLabel => capability != null ? capability.text : "";
         public bool IntakeVisible => intake;
         public bool IsPaused => paused;
@@ -110,6 +126,8 @@ namespace Sankofa.Runtime.Personal
                 if (id.StartsWith(ChoicePrefix, StringComparison.Ordinal)) ChoiceSelected?.Invoke(id.Substring(ChoicePrefix.Length));
                 else QuestionSelected?.Invoke(id);
             };
+            foreach (var plaque in figureChoices.Where(p => p != null))
+                plaque.Pressed += id => { if (id.StartsWith(ChoicePrefix, StringComparison.Ordinal)) ChoiceSelected?.Invoke(id.Substring(ChoicePrefix.Length)); };
             if (controls != null) controls.Pressed += ControlAction;
             if (detailActions != null) detailActions.Pressed += DetailAction;
             if (consentActions != null) consentActions.Pressed += ConsentAction;
@@ -152,6 +170,12 @@ namespace Sankofa.Runtime.Personal
             SetText(caption, "Choose a thread below, or bring a small fragment of your own. Read at your own pace; the table stays with you.");
             SetText(illustrationLabel, "Enkare Nairobi • a prepared illustrated setting");
             ShowIllustration("exchange", false);
+            if (stage != null)
+            {
+                stage.Rest(); ReturnHeirlooms();
+                SetText(caption, "Every family carries something. Choose what you would carry back to the fire, and its story will rise.");
+                SetText(illustrationLabel, "Imagined scenes • sourced context");
+            }
             SetPreviousPages(Array.Empty<string>());
             RefreshIntake();
             RefreshControls();
@@ -179,6 +203,21 @@ namespace Sankofa.Runtime.Personal
 
         /// <summary>0..1 loudness of the narrator's voice; the fire breathes with it.</summary>
         public void SetSpeechLevel(float level) { if (fire != null) fire.SpeechLevel = level; }
+
+        /// <summary>
+        /// While the griot reads a chapter aloud, the stage performs to the voice and the captions keep pace with it,
+        /// turning to the part being spoken. Without narration the visitor turns caption parts themselves.
+        /// </summary>
+        public void SetNarrationProgress(float seconds, float length)
+        {
+            if (length <= 0 || intake || detailsOpen || closing) return;
+            if (stage != null) stage.SetNarration(seconds, length);
+            if (captionPages.Count < 2) return;
+            var spoken = Mathf.Clamp01(seconds / length) * captionPages.Sum(p => p.Length);
+            var part = 0;
+            for (var reached = captionPages[0].Length; part < captionPages.Count - 1 && spoken > reached; reached += captionPages[++part].Length) { }
+            if (part > captionPage) SetReadingPart(part);
+        }
 
         public void ResetReadingPosition()
         {
@@ -217,7 +256,14 @@ namespace Sankofa.Runtime.Personal
             SetText(illustrationLabel, chapter.ImageLabel);
             // Returning from a question or source detail keeps the print standing; a new page raises it again.
             ShowIllustration(chapter.ArtKey, !samePage);
+            if (stage != null)
+            {
+                stage.Perform(chapter.Id ?? chapter.Title, chapter.Caption, !samePage);
+                var ids = chapter.ChoiceIds ?? Array.Empty<string>();
+                stage.OfferFigures(offeringChoice ? ids.Select(id => stage.Staging?.FigureFor(id)).ToArray() : Array.Empty<string>());
+            }
             SetPreviousPages(chapter.PreviousPageTitles);
+            choiceFigures = offeringChoice && stage != null ? (chapter.ChoiceIds ?? Array.Empty<string>()).Select(id => stage.Staging?.FigureFor(id)).ToArray() : Array.Empty<string>();
             if (offeringChoice) SetChoices(choices); else SetQuestions(chapter.Questions);
             pageTurn = reducedMotion ? 0 : 1;
             RefreshControls();
@@ -272,6 +318,7 @@ namespace Sankofa.Runtime.Personal
         {
             paused = value;
             if (fire != null) fire.enabled = !value;
+            if (stage != null) stage.SetPaused(value);
             RefreshControls();
         }
 
@@ -279,6 +326,7 @@ namespace Sankofa.Runtime.Personal
         {
             reducedMotion = value;
             if (fire != null) fire.ReducedMotion = value;
+            if (stage != null) stage.SetReducedMotion(value);
             if (value) { pageTurn = 0; popUp = 1; ApplyDepth(); }
             RestorePages();
         }
@@ -310,9 +358,20 @@ namespace Sankofa.Runtime.Personal
             questions.Hidden = intake || detailsOpen || paused || items.Count == 0;
         }
 
-        /// <summary>Side-by-side perspectives in the same reachable panel as the questions; continuing without choosing lets the fire choose.</summary>
+        /// <summary>
+        /// Side-by-side perspectives in the same reachable panel as the questions; continuing without choosing lets the
+        /// fire choose. On the pop-up stage each perspective also stands at the feet of the figure it follows.
+        /// </summary>
         public void SetChoices(IReadOnlyList<string> labels)
         {
+            for (var f = 0; f < figureChoices.Length; f++)
+            {
+                if (figureChoices[f] == null) continue;
+                var figure = f < TableStaging.Figures.Count ? TableStaging.Figures[f] : null;
+                var index = Array.IndexOf(choiceFigures, figure);
+                figureChoices[f].Show(index >= 0 && index < labels.Count ? new[] { (ChoicePrefix + index, labels[index]) } : Array.Empty<(string, string)>());
+            }
+            RefreshFigureChoices();
             if (questions == null) return;
             var items = new List<(string Id, string Label)>();
             for (var i = 0; i < Mathf.Min(2, labels.Count); i++)
@@ -345,6 +404,7 @@ namespace Sankofa.Runtime.Personal
         void ShowOnly(GameObject active)
         {
             foreach (var root in new[] { intakeRoot, readingRoot, detailsRoot, progressRoot, cloudConsentRoot }) if (root != null) root.SetActive(root == active);
+            if (stage != null) stage.SetWaiting(active != null && active != readingRoot && active != intakeRoot);
             if (questions != null) questions.Hidden = active != readingRoot || paused;
             if (transport != null) transport.Hidden = active != readingRoot || paused;
             // The shared recovery panel is separate from both modal roots.
@@ -358,8 +418,10 @@ namespace Sankofa.Runtime.Personal
 
         void RefreshIntake()
         {
-            var routeLabels = new[] { ("journeys", "Journeys"), ("trade-household", "Trade & home"), ("place-water", "Place & water") };
-            if (routes != null) routes.Show(routeLabels.Select(x => (x.Item1, (selectedRoute == x.Item1 ? "• " : "") + x.Item2)).ToArray());
+            var routeLabels = stage != null
+                ? new[] { ("journeys", "A bundle\nJourneys"), ("trade-household", "A gourd\nTrade & home"), ("place-water", "A water pot\nPlace & water") }
+                : new[] { ("journeys", "Journeys"), ("trade-household", "Trade & home"), ("place-water", "Place & water") };
+            if (routes != null) routes.Show(routeLabels.Select(x => (x.Item1, (stage == null && selectedRoute == x.Item1 ? "• " : "") + x.Item2)).ToArray());
             if (regions != null) regions.Show(new[] { ("enkare-nairobi", "• Enkare Nairobi") });
             if (periods != null) periods.Show(new[] { ("1850s", "• Around the 1850s") });
             var edit = ("edit", seed.Length == 0 ? "Add my question" : "Edit my question");
@@ -394,6 +456,9 @@ namespace Sankofa.Runtime.Personal
             if (periods != null) periods.Hidden = !choosing;
             if (intakeActions != null) intakeActions.Hidden = !choosing;
             if (keptActions != null) keptActions.Hidden = !choosing || !hasKeptStory;
+            // Heirlooms belong to choosing; once a telling begins only the carried one is still on its way to the fire.
+            for (var i = 0; i < heirlooms.Length; i++)
+                if (heirlooms[i] != null && i != carried) heirlooms[i].gameObject.SetActive(intake && !detailsOpen);
             if (controls != null) controls.Show(new[] { ("pause", paused ? "Resume" : "Pause"), ("recenter", "Recenter"), ("room", "Fit my table"), ("options", "Options"), ("leave", "Leave") });
             if (transport == null) return;
             var items = new List<(string Id, string Label)>();
@@ -481,7 +546,19 @@ namespace Sankofa.Runtime.Personal
             }
         }
 
-        void SelectRoute(string id) { selectedRoute = id; RefreshIntake(); RouteSelected?.Invoke(id); }
+        void SelectRoute(string id)
+        {
+            selectedRoute = id; RefreshIntake(); RouteSelected?.Invoke(id);
+            if (stage == null) return;
+            // Choosing an heirloom carries it to the fire. Without an online path, that choice is also the beginning.
+            var index = Array.IndexOf(RouteIds, id);
+            if (index >= 0 && index < heirlooms.Length && heirlooms[index] != null) { carried = index; carry = 0; carryFrom = heirlooms[index].localPosition; }
+            if (!onlineAvailable) StartLocalRequested?.Invoke();
+        }
+        static readonly string[] RouteIds = { "journeys", "trade-household", "place-water" };
+        int carried = -1;
+        float carry = 1;
+        Vector3 carryFrom;
         void SelectRegion(string id) { selectedRegion = id; RefreshIntake(); RegionSelected?.Invoke(id); }
         void SelectPeriod(string id) { selectedPeriod = id; RefreshIntake(); PeriodSelected?.Invoke(id); }
         void IntakeAction(string id)
@@ -640,7 +717,9 @@ namespace Sankofa.Runtime.Personal
 
         void Update()
         {
+            RefreshFigureChoices();
             if (paused) return;
+            CarryHeirloom();
             if (popUp < 1)
             {
                 popUp = reducedMotion ? 1 : Mathf.Min(1, popUp + Time.deltaTime / PopUpSeconds);
@@ -651,6 +730,43 @@ namespace Sankofa.Runtime.Personal
             for (var i = 0; i < turningPages.Length; i++)
                 if (turningPages[i] != null) turningPages[i].localRotation = restingPageRotations[i] * Quaternion.Euler(0, Mathf.Sin(pageTurn * Mathf.PI) * (i == 0 ? 3 : -2), 0);
         }
+        /// <summary>The chosen heirloom rises in an arc to the fire and is taken in by it; the others wait for another visit.</summary>
+        string[] choiceFigures = Array.Empty<string>();
+
+        /// <summary>A figure's plaque is there only while she stands on the stage and a choice is open.</summary>
+        void RefreshFigureChoices()
+        {
+            for (var f = 0; f < figureChoices.Length; f++)
+            {
+                if (figureChoices[f] == null) continue;
+                var figure = f < TableStaging.Figures.Count ? TableStaging.Figures[f] : null;
+                var open = offeringChoice && !intake && !paused && !detailsOpen && !closing && !error && stage != null
+                    && !stage.Turning && stage.FigureShown(figure) && Array.IndexOf(choiceFigures, figure) >= 0;
+                if (figureChoices[f].Hidden == open) figureChoices[f].Hidden = !open;
+            }
+        }
+
+        void CarryHeirloom()
+        {
+            if (carried < 0 || carry >= 1 || heirlooms[carried] == null) return;
+            carry = Mathf.Min(1, carry + Time.deltaTime / (reducedMotion ? 0.01f : 0.9f));
+            var item = heirlooms[carried];
+            var target = item.parent.InverseTransformPoint(FirePosition + Vector3.up * 0.04f);
+            var eased = carry * carry * (3 - 2 * carry);
+            var at = Vector3.Lerp(carryFrom, target, eased);
+            at.y += Mathf.Sin(eased * Mathf.PI) * 0.12f;
+            item.localPosition = at;
+            item.localScale = Vector3.one * Mathf.Lerp(1, 0.25f, eased * eased);
+            if (carry >= 1) item.gameObject.SetActive(false);
+        }
+
+        void ReturnHeirlooms()
+        {
+            if (carried >= 0 && carried < heirlooms.Length && heirlooms[carried] != null) heirlooms[carried].localPosition = carryFrom;
+            carried = -1; carry = 1;
+            foreach (var item in heirlooms) if (item != null) { item.localScale = Vector3.one; item.gameObject.SetActive(true); }
+        }
+
         void RestorePages()
         {
             if (restingPageRotations == null) return;

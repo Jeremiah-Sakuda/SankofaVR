@@ -67,9 +67,7 @@ namespace Sankofa.Tests
             yield return null;
             Assert.That(view.Caption, Does.Contain("not proof of ancestry"));
             Assert.That(view.CapabilityLabel, Is.EqualTo("Prepared story • works offline"));
-            Assert.That(view.TableRoot.Find("Upright illustrated journal/One flat illustrated page/Cast and exchange").gameObject.activeSelf, Is.True,
-                "an alias cannot disable the same illustration root a second time");
-            Assert.That(view.TableRoot.Find("Upright illustrated journal/One flat illustrated page/River landscape").gameObject.activeSelf, Is.False);
+            Assert.That(view.Stage.ChapterId, Is.EqualTo("An exchange remembered"), "a chapter without staging is still performed, holding its arrangement");
             var question = ""; view.QuestionSelected = id => question = id;
             view.Panels.Single(p => p.name == "Questions beside the story").PressFromPointer("1"); yield return null;
             Assert.That(question, Is.EqualTo("1"));
@@ -110,84 +108,133 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
-        public IEnumerator PrintLayersRiseInDepthWithinTheirBackdropAndHoldStillWhenAsked()
+        public IEnumerator PopUpStageRisesTurnsToTheChosenSideAndHoldsStillWhenAsked()
         {
-            var print = view.TableRoot.Find("Upright illustrated journal/One flat illustrated page/Cast and exchange");
-            var backdrop = print.Find("Printed dusk");
-            var figure = print.Find("Printed trader left");
-            var toward = print.TransformDirection(Vector3.back).normalized;
-            float Raised(Transform layer, Transform page) => Vector3.Dot(layer.position - page.position, toward);
-            var scale = view.TableRoot.lossyScale.z;
+            var stage = view.Stage;
+            Assert.That(stage, Is.Not.Null, "the table performs on its pop-up stage");
+            var capture = Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1";
             const string imagined = "Imagined scene • not an account of your ancestors";
-
             view.SetReducedMotion(false);
-            var chapter = new StoryTableChapterViewData { Index = 0, Count = 3, Title = "A household's small decisions", Caption = "A print rises from the page.", ArtKey = "cast-atlas", ImageLabel = imagined };
-            view.RenderChapter(chapter);
-            Assert.That(view.PopUpProgress, Is.Zero, "a newly turned page begins flat");
-            Assert.That(Raised(figure, backdrop), Is.LessThan(0.002f));
-            for (var deadline = Time.realtimeSinceStartup + 3f; view.PopUpProgress < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
-            Assert.That(view.PopUpProgress, Is.EqualTo(1));
-            Assert.That(Raised(figure, backdrop), Is.EqualTo(StoryTableView.MaximumLayerDepth * scale).Within(0.002f), "the figures stand nearest the reader");
-            Assert.That(Raised(print.Find("Printed forest and hills"), backdrop), Is.GreaterThan(0.005f * scale).And.LessThan(Raised(print.Find("Printed riverbank"), backdrop)));
-            AssertPrintInsideBackdropAndClearOfText(print, backdrop);
-            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") { Capture("10-pop-up-print-60", 60); Capture("10-pop-up-print-82"); }
+            yield return new WaitForSecondsRealtime(0.4f);
+            Assert.That(stage.Rise, Is.Zero, "between tellings the scene lies flat");
+            Assert.That(view.TableRoot.GetComponentsInChildren<Transform>().Count(t => t.name.StartsWith("Heirloom ")), Is.EqualTo(3), "three heirlooms wait to be chosen");
+            if (capture) Capture("11-stage-intake", 72);
 
-            view.RenderChapter(chapter);
-            Assert.That(view.PopUpProgress, Is.EqualTo(1), "returning from a question or source to the same page keeps the print standing");
+            var load = new StoryTableChapterViewData { Id = "trade-household.load", Index = 0, Count = 3, Title = "A household's small decisions", Caption = "Imagined scene: Come closer to the fire. A woman tips her flour gourd and listens. Less than she thought.", ArtKey = "cast-atlas", ImageLabel = imagined };
+            view.RenderChapter(load);
+            for (var deadline = Time.realtimeSinceStartup + 3f; stage.Rise < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(stage.Rise, Is.EqualTo(1));
+            Assert.That(stage.FigureShown("wambui"), Is.True); Assert.That(stage.FigureShown("naserian"), Is.False, "she has not reached the meeting yet");
+            Assert.That(stage.GourdPlace, Is.EqualTo(TableStagingPlace.With)); Assert.That(stage.GourdHolder, Is.EqualTo("wambui"));
+            stage.Seek(0.2f); yield return null;
+            Assert.That(stage.FigurePose("wambui"), Is.EqualTo(1), "she tips her gourd when the words say so");
+            yield return new WaitForSecondsRealtime(0.6f);
+            if (capture) { Capture("12-stage-first-page-72", 72); Capture("12-stage-first-page-82"); }
+            view.RenderChapter(load);
+            Assert.That(stage.Progress, Is.GreaterThanOrEqualTo(0.2f), "returning to the same page keeps its performance");
+
+            var vessel = new StoryTableChapterViewData
+            {
+                Id = "trade-household.vessel", Index = 1, Count = 3, Title = "A vessel with a source", Caption = "A National Museums of Kenya exhibit describes a Maasai gourd.",
+                ArtKey = "cast-atlas", ImageLabel = "Documented context • sources available", Questions = new[] { "What does the museum example tell us?" },
+                Choices = new[] { "Follow the one who brought less", "Wait with the one who expected more" },
+                ChoiceIds = new[] { "trade-household.follow.less", "trade-household.follow.more" },
+            };
+            view.RenderChapter(vessel); view.SetControlState(true, true, true, false);
+            stage.Seek(0.1f); yield return null; yield return null;
+            var wambui = view.Panels.Single(p => p.name == "Follow wambui");
+            var naserian = view.Panels.Single(p => p.name == "Follow naserian");
+            Assert.That(wambui.Ids, Is.EqualTo(new[] { "choice:0" }));
+            Assert.That(naserian.Ids, Is.EqualTo(new[] { "choice:1" }));
+            Assert.That(naserian.Hidden, Is.False, "each perspective stands at the feet of the figure it follows");
+            yield return new WaitForSecondsRealtime(0.7f);
+            if (capture) { Capture("13-stage-choice-72", 72); Capture("13-stage-choice-82"); }
+            var chosen = ""; view.ChoiceSelected = id => chosen = id;
+            yield return new WaitForSecondsRealtime(0.33f);
+            naserian.PressFromPointer("choice:1"); yield return null;
+            Assert.That(chosen, Is.EqualTo("1"));
+
+            var expected = new StoryTableChapterViewData { Id = "trade-household.expected", Index = 2, Count = 3, Title = "The one who expected more", Caption = "Imagined scene: The other woman reached the water first.", ArtKey = "cast-atlas", ImageLabel = imagined, Questions = new[] { "What did accepting less cost her?" } };
+            view.RenderChapter(expected);
+            Assert.That(stage.Turning, Is.True, "choosing a side turns the stage");
+            for (var deadline = Time.realtimeSinceStartup + 4f; (stage.Turning || stage.Rise < 1) && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(stage.Mirrored, Is.True);
+            Assert.That(stage.FigurePlace("naserian").z, Is.LessThan(stage.FigurePlace("wambui").z), "the chosen side stands nearest the visitor");
+            Assert.That(naserian.Hidden, Is.True, "no choice is open once the side is chosen");
+            stage.Seek(0.95f); yield return new WaitForSecondsRealtime(0.9f);
+            Assert.That(stage.FigureShown("wambui"), Is.True);
+            if (capture) { Capture("14-stage-other-side-72", 72); Capture("14-stage-other-side-82"); }
+
+            view.RenderQuestion("What did accepting less cost her?", "A smaller meal at home tonight.", imagined);
+            for (var deadline = Time.realtimeSinceStartup + 1.5f; stage.Rise > 0 && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(stage.Rise, Is.Zero, "the scene lies down while an answer covers it");
+            view.RenderChapter(expected);
+            for (var deadline = Time.realtimeSinceStartup + 3f; stage.Rise < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(stage.Rise, Is.EqualTo(1)); Assert.That(stage.Mirrored, Is.True, "returning keeps the chosen side");
+            view.ShowClosing("You chose to wait with the one who expected more.");
+            yield return new WaitForSecondsRealtime(0.3f);
+            if (capture) Capture("15-stage-ending-72", 72);
 
             view.SetReducedMotion(true);
-            view.RenderChapter(new StoryTableChapterViewData { Index = 1, Count = 3, Title = "A region of overlapping lives", Caption = "Documented context.", ArtKey = "scenery-atlas", ImageLabel = "Documented context • sources available" });
-            var scenery = view.TableRoot.Find("Upright illustrated journal/One flat illustrated page/River landscape");
-            var river = scenery.Find("Printed riverbank"); var still = river.position;
-            Assert.That(view.PopUpProgress, Is.EqualTo(1), "reduced motion shows the final depth at once");
+            view.RenderChapter(vessel);
+            Assert.That(stage.Turning, Is.False, "reduced motion turns back at once");
+            Assert.That(stage.Mirrored, Is.False); Assert.That(stage.Rise, Is.EqualTo(1));
+            var figure = stage.FigureRoot("wambui"); var still = figure.position;
             yield return new WaitForSecondsRealtime(0.3f);
-            Assert.That(Vector3.Distance(river.position, still), Is.LessThan(0.00001f), "reduced motion keeps the print still");
-            Assert.That(Raised(river, scenery.Find("Printed dusk")), Is.GreaterThan(0.01f * scale));
+            Assert.That(Vector3.Distance(figure.position, still), Is.LessThan(0.00001f), "reduced motion keeps the stage still");
 
             view.SetReducedMotion(false);
-            view.RenderChapter(new StoryTableChapterViewData { Index = 2, Count = 3, Title = "The one who expected more", Caption = "The print rises again.", ArtKey = "cast-atlas", ImageLabel = imagined });
+            view.ShowIntake();
+            Assert.That(view.TableRoot.GetComponentsInChildren<Transform>().Count(t => t.name.StartsWith("Heirloom ")), Is.EqualTo(3), "a new visit offers every heirloom again");
+            yield return new WaitForSecondsRealtime(0.5f);
+            view.RenderChapter(load);
+            yield return null;
             view.SetPaused(true);
-            Assert.That(view.PopUpProgress, Is.Zero);
+            var held = stage.Rise;
             yield return new WaitForSecondsRealtime(0.3f);
-            Assert.That(view.PopUpProgress, Is.Zero, "pause holds the print where it is");
+            Assert.That(stage.Rise, Is.EqualTo(held), "pause holds the stage where it is");
             view.SetPaused(false);
-            for (var deadline = Time.realtimeSinceStartup + 3f; view.PopUpProgress < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
-            Assert.That(view.PopUpProgress, Is.EqualTo(1));
         }
 
-        /// <summary>From the seated eye, every raised layer stays within its print's backdrop and covers no page text.</summary>
-        void AssertPrintInsideBackdropAndClearOfText(Transform print, Transform backdrop)
+        static class TableStagingPlace { public const string With = Sankofa.Core.Personal.TableStaging.GourdWith; }
+
+        /// <summary>
+        /// Review frames of the stage in motion at a fixed 12 frames per second: a telling rises, its figures take their
+        /// poses, a side is chosen and the stage turns. Desktop renders for review, not a performance measurement.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CapturePopUpStageMotion()
         {
-            var cameraRoot = new GameObject("Pop-up print probe");
-            var eye = cameraRoot.AddComponent<Camera>(); eye.enabled = false;
-            eye.transform.SetPositionAndRotation(new Vector3(0, 1.15f, 0), Quaternion.Euler(10, 0, 0));
-            eye.fieldOfView = 60; eye.aspect = 1600f / 1400;
-            try
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1") { Assert.Ignore("Set SANKOFA_CAPTURE=1 to write the stage motion study."); yield break; }
+            var stage = view.Stage;
+            view.SetReducedMotion(false);
+            var frame = 0;
+            IEnumerator Film(float seconds)
             {
-                Rect Viewport(System.Collections.Generic.IEnumerable<Vector3> world)
+                for (var end = frame + Mathf.RoundToInt(seconds * 12); frame < end; frame++)
                 {
-                    var points = world.Select(w => eye.WorldToViewportPoint(w)).ToArray();
-                    return Rect.MinMaxRect(points.Min(p => p.x), points.Min(p => p.y), points.Max(p => p.x), points.Max(p => p.y));
-                }
-                System.Collections.Generic.IEnumerable<Vector3> Quad(Transform quad) =>
-                    new[] { new Vector3(-.5f, -.5f, 0), new Vector3(-.5f, .5f, 0), new Vector3(.5f, -.5f, 0), new Vector3(.5f, .5f, 0) }.Select(c => quad.TransformPoint(c));
-                System.Collections.Generic.IEnumerable<Vector3> Box(Bounds b) =>
-                    new[] { -1f, 1f }.SelectMany(x => new[] { -1f, 1f }.SelectMany(y => new[] { -1f, 1f }.Select(z => b.center + Vector3.Scale(b.extents, new Vector3(x, y, z)))));
-                var frame = Viewport(Quad(backdrop));
-                var texts = view.GetComponentsInChildren<TMP_Text>(true)
-                    .Where(t => (t.name == "Illustration context" || t.name == "Narrative captions" || t.name == "Chapter title") && t.gameObject.activeInHierarchy && t.text.Length > 0).ToArray();
-                Assert.That(texts, Has.Length.EqualTo(3));
-                foreach (var text in texts) text.ForceMeshUpdate(true, true);
-                foreach (var layer in print.Cast<Transform>().Where(t => t != backdrop && t.GetComponent<Renderer>() != null))
-                {
-                    var area = Viewport(Quad(layer));
-                    Assert.That(area.xMin >= frame.xMin - .001f && area.xMax <= frame.xMax + .001f && area.yMin >= frame.yMin - .001f && area.yMax <= frame.yMax + .001f,
-                        Is.True, layer.name + " stays within the print's backdrop from the seat");
-                    foreach (var text in texts)
-                        Assert.That(area.Overlaps(Viewport(Box(text.GetComponent<Renderer>().bounds))), Is.False, layer.name + " must not cover " + text.name);
+                    yield return null;
+                    Capture($"motion/stage-{frame:000}", 72, 960, 840);
                 }
             }
-            finally { UnityEngine.Object.Destroy(cameraRoot); }
+            Time.captureFramerate = 12;
+            try
+            {
+                yield return Film(0.8f);
+                view.RenderChapter(new StoryTableChapterViewData { Id = "trade-household.load", Index = 0, Count = 3, Title = "A household's small decisions", Caption = "Imagined scene: Come closer to the fire. A woman tips her flour gourd and listens. Less than she thought. At home, a small portion still waits beside the hearth. She could add it to the gourd and arrive with the full load she promised. Instead she leaves that portion where it is.", ArtKey = "cast-atlas", ImageLabel = "Imagined scene" });
+                stage.SetNarration(0, 6f);
+                for (var t = 0f; t < 6f; t += 1f / 12) { stage.SetNarration(t, 6f); yield return null; Capture($"motion/stage-{frame++:000}", 72, 960, 840); }
+                view.RenderChapter(new StoryTableChapterViewData
+                {
+                    Id = "trade-household.vessel", Index = 1, Count = 3, Title = "A vessel with a source", Caption = "A National Museums of Kenya exhibit describes a Maasai gourd.",
+                    ArtKey = "cast-atlas", ImageLabel = "Documented context", Choices = new[] { "Follow the one who brought less", "Wait with the one who expected more" },
+                    ChoiceIds = new[] { "trade-household.follow.less", "trade-household.follow.more" },
+                });
+                yield return Film(2.5f);
+                view.RenderChapter(new StoryTableChapterViewData { Id = "trade-household.expected", Index = 2, Count = 3, Title = "The one who expected more", Caption = "Imagined scene: The other woman reached the water first.", ArtKey = "cast-atlas", ImageLabel = "Imagined scene" });
+                for (var t = 0f; t < 8f; t += 1f / 12) { if (!stage.Turning) stage.SetNarration(t, 8f); yield return null; Capture($"motion/stage-{frame++:000}", 72, 960, 840); }
+            }
+            finally { Time.captureFramerate = 0; }
         }
 
         [UnityTest]
@@ -215,7 +262,7 @@ namespace Sankofa.Tests
             Assert.That(Quaternion.Angle(view.TableRoot.rotation, rotation), Is.LessThan(0.001f));
             Assert.That(view.TableRoot.localScale.x, Is.EqualTo(view.TableRoot.localScale.z));
             view.SetReducedMotion(true);
-            var page = view.TableRoot.Find("Upright illustrated journal"); var before = page.localRotation;
+            var page = view.TableRoot.Find("Story page"); var before = page.localRotation;
             view.RenderChapter(0, 2, "A river", "The story can be read without voice or sound.", "scenery-atlas");
             yield return new WaitForSecondsRealtime(0.16f);
             Assert.That(Quaternion.Angle(page.localRotation, before), Is.LessThan(0.001f));
@@ -255,6 +302,42 @@ namespace Sankofa.Tests
             Assert.That(view.ReadingPart, Is.EqualTo(retained), "pause/options/source refresh preserves the part already being read");
             text.ForceMeshUpdate(true, true);
             Assert.That(text.isTextOverflowing, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator LabelsMadeWhileTheirPanelIsAsideStayInsideTheirButtons()
+        {
+            // At the intake the reading actions are made while their page is set aside; showing them must not let
+            // TextMeshPro's first-use defaults turn a one-line label into lettering metres tall.
+            var transport = view.Panels.Single(p => p.name == "Turn a page");
+            Assert.That(transport.gameObject.activeInHierarchy, Is.False);
+            view.RenderChapter(new StoryTableChapterViewData { Id = "journeys.arrival", Index = 0, Count = 3, Title = "Two paths toward a meeting", Caption = "Short.", ArtKey = "scenery-atlas", ImageLabel = "Imagined scene" });
+            yield return null; yield return null;
+            foreach (var panel in view.Panels.Where(p => p.gameObject.activeInHierarchy && !p.Hidden))
+            foreach (var face in panel.GetComponentsInChildren<Renderer>().Where(r => r.name == "Face"))
+            {
+                var label = face.transform.parent.GetComponentInChildren<TMP_Text>();
+                label.ForceMeshUpdate(true, true);
+                var size = label.GetComponent<Renderer>().bounds.size;
+                Assert.That(Mathf.Max(size.x, size.y, size.z), Is.LessThan(face.bounds.size.magnitude), panel.name + ": " + label.text);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator CaptionsKeepPaceWithTheVoiceAndNeverTurnBackOnTheReader()
+        {
+            var words = string.Join(" ", Enumerable.Repeat("A remembered journey can lead to a new question about the places people call home.", 6));
+            view.RenderChapter(new StoryTableChapterViewData { Id = "journeys.arrival", Index = 0, Count = 3, Title = "Two paths toward a meeting", Caption = words, ArtKey = "scenery-atlas", ImageLabel = "Imagined scene" });
+            var parts = view.ReadingPartCount;
+            Assert.That(parts, Is.GreaterThan(1));
+            view.SetNarrationProgress(0.5f, 40f);
+            Assert.That(view.ReadingPart, Is.Zero, "the first words are still being spoken");
+            view.SetNarrationProgress(39f, 40f);
+            Assert.That(view.ReadingPart, Is.EqualTo(parts - 1), "the captions reach the part being spoken");
+            Assert.That(view.Stage.Progress, Is.GreaterThan(0.95f), "the stage performs to the same voice");
+            view.SetNarrationProgress(1f, 40f);
+            Assert.That(view.ReadingPart, Is.EqualTo(parts - 1), "a reader who is ahead is never pulled back");
+            yield return null;
         }
 
         [UnityTest]
@@ -331,7 +414,7 @@ namespace Sankofa.Tests
         {
             var cameraRoot = new GameObject("Forward lens geometry probe");
             var eye = cameraRoot.AddComponent<Camera>(); eye.enabled = false;
-            eye.transform.SetPositionAndRotation(new Vector3(0, 1.15f, 0), Quaternion.Euler(10, 0, 0));
+            eye.transform.SetPositionAndRotation(SeatedEye, Quaternion.Euler(TableGaze, 0, 0));
             eye.fieldOfView = fieldOfView; eye.aspect = 1600f / 1400;
             try
             {
@@ -353,15 +436,22 @@ namespace Sankofa.Tests
             finally { UnityEngine.Object.Destroy(cameraRoot); }
         }
 
-        static void Capture(string name, float fieldOfView = 82)
+        static readonly Vector3 SeatedEye = new Vector3(0, 1.15f, 0);
+        /// <summary>
+        /// A seated visitor watching the tabletop stage and reading the page in front of it looks down about 25 degrees;
+        /// lenses and captures are centred there rather than on the horizon.
+        /// </summary>
+        const float TableGaze = 25f;
+
+        static void Capture(string name, float fieldOfView = 82, int width = 1600, int height = 1400)
         {
             var directory = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "artifacts", "story-table"));
-            Directory.CreateDirectory(directory);
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(directory, name)));
             var cameraRoot = new GameObject("Silent desktop review camera");
             var eye = cameraRoot.AddComponent<Camera>(); eye.stereoTargetEye = StereoTargetEyeMask.None;
-            eye.transform.SetPositionAndRotation(new Vector3(0, 1.15f, 0), Quaternion.Euler(10, 0, 0));
+            eye.transform.SetPositionAndRotation(SeatedEye, Quaternion.Euler(TableGaze, 0, 0));
             eye.fieldOfView = fieldOfView; eye.clearFlags = CameraClearFlags.SolidColor; eye.backgroundColor = new Color(0.024f, 0.028f, 0.038f);
-            var target = new RenderTexture(1600, 1400, 24) { antiAliasing = 4 };
+            var target = new RenderTexture(width, height, 24) { antiAliasing = 4 };
             var previousActive = RenderTexture.active;
             eye.targetTexture = target; eye.Render(); RenderTexture.active = target;
             var pixels = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);

@@ -371,11 +371,17 @@ namespace Sankofa.Tests
                 Assert.That(clip.length, Is.EqualTo(seconds).Within(0.05f), path);
                 Assert.That(clip.samples / (float)clip.frequency, Is.EqualTo(clip.length).Within(0.05f), path + " samples at its frequency");
             }
+            // A story table chapter is a whole paragraph; its recording is bounded by its own words, exactly as
+            // scripts/generate_table_narration.py bounds a take, so a runaway take fails however short the text.
+            var table = Sankofa.Core.Json.JsonText.ParseObject(System.IO.File.ReadAllText("Assets/Sankofa/Content/personal-table.narration.json"));
+            var chapterWords = table.GetArray("chapters").Cast<Sankofa.Core.Json.JsonObject>()
+                .ToDictionary(c => c.GetString("filename"), c => c.GetString("text").Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries).Length);
             foreach (var path in AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Sankofa/Resources/Narration" }).Select(AssetDatabase.GUIDToAssetPath))
             {
                 var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
                 Assert.That(clip.samples / (float)clip.frequency, Is.EqualTo(clip.length).Within(0.05f), path);
-                Assert.That(clip.length, Is.InRange(0.5f, 60f), path);
+                var maximum = chapterWords.TryGetValue(System.IO.Path.GetFileName(path), out var words) ? Mathf.Min(75f, Mathf.Max(15f, words * 0.75f + 10f)) : 60f;
+                Assert.That(clip.length, Is.InRange(0.5f, maximum), path);
             }
         }
 

@@ -737,4 +737,27 @@ The build uses the existing privacy sanitizer, with development credentials excl
 | The table becomes a **pop-up story theatre**: painted scenery and figures stand up from a turntable on the table, perform each chapter to its narration, and turn to show the other side when the visitor chooses a perspective | User-approved direction on October 30, to be built as a Week 1 vertical slice and judged at a **November 5 go/no-go** on captures. The book layout committed here is the fallback |
 | Heirlooms (a bundle, a gourd, a water pot) replace the interest buttons as the way to begin | Part of the slice; the typed question stays optional |
 | Online generation stays off the judged path unless the user decides to host it | Recommended; user decision open |
-| Uncommitted gallery-layout and font changes from `main` were stashed, not discarded | `stash@{1}` on the user's machine ("main WIP Oct 30"); user decision open |
+| Uncommitted gallery-layout and font changes from `main` were stashed, not discarded | A local stash named "main WIP Oct 30: LivingGallery layout fixes…" on the user's machine; user decision open |
+
+## October 30, 2026 — pop-up stage vertical slice
+
+**Implemented and checked on the desktop, muted.** This is the Week 1 slice for the November 5 go/no-go. In `StoryTable`, a pop-up paper theatre on the table replaces the upright book's flat print:
+
+- **Stage.** It sits on a low drum and turntable. Its painted scenery stands up from flat, back layers first: a dusk back cloth with stars, hills, a riverbank and reed wings. The two painted figures stand on their own hinges, and a small gourd travels between them.
+- **Staging data.** `Content/personal-table-staging.json` says who stands where and in which painted pose at each fraction of a chapter's narration. It covers all twelve prepared chapters and has no effect on story text, choices or state. `Core/Personal/TableStaging` parses and validates it; .NET tests check that every prepared chapter is staged, every perspective maps to a different figure, and the chosen figure stands nearest after the turn.
+- **Choosing a side.** Each perspective shows as a plaque above the figure it follows. Choosing one turns the stage: the scenery folds, the turntable spins and the scene rises mirrored, with the chosen woman in front. The lectern-free page keeps the same choices as buttons.
+- **Heirlooms.** A bundle, a gourd and a water pot replace the interest buttons. Without a story service, touching one begins its telling; the chosen heirloom arcs into the fire.
+- **Narration and captions.** While the voice plays, it drives the staging clock, and the captions turn to the part being spoken.
+- **Pauses and options.** While an answer, source or notice covers the stage, the scene lies down and waits. Reduced motion shows every arrangement at once, and pause holds everything.
+- **Layout.** The words and every action sit on one open page in front of the stage. The fire moves to the front left, larger. Lens checks and review captures now centre on a seated tabletop gaze, 25 degrees down instead of 10.
+
+| Check | Result |
+|---|---|
+| EditMode | 36/36. `RecordingsAndNarrationKeepTheirDuration` failed after recording: `place-water.traveller` is 60.3 s against a flat 60 s cap. The test now bounds each table chapter by its own word count, the same bound `scripts/generate_table_narration.py` applies (between 15 and 75 s), and keeps 60 s for other narration |
+| Table PlayMode | 24/24, including `PopUpStageRisesTurnsToTheChosenSideAndHoldsStillWhenAsked` and `CaptionsKeepPaceWithTheVoiceAndNeverTurnBackOnTheReader`. Two app tests are renamed or reordered because an heirloom now begins a telling with one touch |
+| Whole-project PlayMode after the panel fix | 72 passed, 0 failed, 7 opt-in skips (capture studies, the live HTTP test and the new motion study) |
+| .NET | 368/368, including 10 staging checks |
+| Captures | `artifacts/story-table/11`–`15` (local): intake with heirlooms, first page, choice with figure plaques, the turned other side, and the ending. `CapturePopUpStageMotion` writes a fixed 12 fps study, encoded locally as `stage-motion.mp4` (about 17 s) |
+| Shared `PokePanel` fix | The motion study showed a label lettered metres tall over the stage, and the book layout had the same blank button. A button made while its panel is set aside has its label sizes reset by TextMeshPro on first activation, so it auto-sized at 18 units. `PokePanel` now applies the label sizes again the first time each label is shown. Regression test: `LabelsMadeWhileTheirPanelIsAsideStayInsideTheirButtons`. Comparison-scene suites were rerun because the panel is shared |
+
+**Limits.** No simulator or headset run. Rendering cost has not been measured, though the stage adds only alpha-tested layers already used elsewhere. Nobody has listened to the narration. The pose and position timings are estimates against recorded clip lengths, not reviewed performance.
