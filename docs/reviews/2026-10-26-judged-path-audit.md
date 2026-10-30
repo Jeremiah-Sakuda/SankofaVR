@@ -107,3 +107,26 @@ Until this pass each page showed one flat print made of layered atlas parts sepa
 ## Special-award lenses
 
 These are not targets; they show where this iteration helps. *Best First Five Minutes*: voice from the first page, a How it works card instead of a wall of text, a decision by about the second minute. *Best Reason to Come Back*: the unheard side is named at the ending. *Accessibility*: captions always on, one-touch choices, larger text, reduced motion, stand height and recenter.
+
+## Unity verification, October 30
+
+Run on the user's Mac with Unity 6000.3.25f1, on branch `claude/optimistic-goldberg-urzbnr` at `fd935d1` plus the regenerated scene. All runs muted (`-noaudio`); desktop software evidence only, not simulator or device evidence.
+
+| Check | Result |
+|---|---|
+| `SankofaSceneBuilder.BuildStoryTable` | Compiled and regenerated `StoryTable.unity`; comparison scenes not regenerated |
+| EditMode, all assemblies | **36/36 pass** |
+| PlayMode, table suites (`PersonalStoryAppTests`, `PersonalStoryTableTests`) | **21/21 pass**, including the four new tests and the loopback-failure test |
+| PlayMode, whole project | **70 pass, 0 fail, 6 skipped** (five capture studies need `SANKOFA_CAPTURE=1`; the live HTTP test needs `SANKOFA_TEST_LIVE_SERVICE=1`) |
+| `SANKOFA_CAPTURE=1` table suites | 21/21 pass; 15 images in `artifacts/story-table/` (local only) |
+| Pending narration | `scripts/generate_table_narration.py` recorded `journeys.late`, `trade-household.expected` and `place-water.traveller` (57.3, 51.6 and 60.3 s, 24 kHz mono), with the user's gcloud login. Nobody has listened to them |
+| `dotnet test dotnet/Sankofa.Tests` after recording | **358/358 pass** (.NET 10 SDK) |
+
+**Captures reviewed.** The intake (`03-actual-entry-60/72/82`), reading (`04-actual-story-60/72/82`) and choice page (`09-perspective-choice`) show no text overflow and no overlapping controls at any lens. Two observations:
+
+- In the editor, the intake shows **Create my story**, because the editor falls back to a loopback service address. A build without a configured endpoint shows Begin, Add my question and How it works instead; the PlayMode test `WithoutAServiceTheIntakeOffersNoOnlineActionThatCanOnlyFail` covers that case.
+- `10-pop-up-print-60` shows one unlabelled dark button on the reading deck, and the pop-up depth cannot be judged from a flat capture.
+
+The suites have no ending capture, so the closing page was not reviewed.
+
+These captures are the "before" images for the pop-up stage proposed on October 30, which replaces the upright book.

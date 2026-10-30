@@ -8,7 +8,6 @@
   "input_source": "Actual validated BundledPersonalStoryComposer outputs for all three interests, exported through the engine-free .NET assembly; no visitor material.",
   "review_status": "Public authored fiction and bounded historical context. Cultural fit, pronunciation, listening quality, provider terms and release rights acceptance remain pending.",
   "verification": "MP3 format, positive duration, 24kHz mono metadata, exact UTF-8 text hashes and byte hashes checked. No sound playback.",
-  "pending_note": "Entries with status pending-recording have approved text but no recording yet; the app shows captions for them. Record them with scripts/generate_table_narration.py.",
   "chapters": [
     {
       "interest": "journeys",
@@ -76,9 +75,18 @@
       "truth": "reconstructed",
       "hash": "b1136f876ec8f231652c0bc100aba4051c06eff7ebd020e1bb0301a0a728b680",
       "text_sha256": "b1136f876ec8f231652c0bc100aba4051c06eff7ebd020e1bb0301a0a728b680",
-      "status": "pending-recording",
       "filename": "p-b1136f876ec8f231.mp3",
-      "resource_id": "Narration/personal-table/p-b1136f876ec8f231"
+      "resource_id": "Narration/personal-table/p-b1136f876ec8f231",
+      "audio_sha256": "0cb856f700165325d89d42bf6d4f2f81ac31acefdf6f71aad42f6ec6b6ba2826",
+      "provider": "GoogleCloudTextToSpeech",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Kore",
+      "date": "2026-10-30",
+      "length_seconds": 51.52,
+      "bytes": 206540,
+      "sample_rate_hertz": 24000,
+      "channels": 1,
+      "synthesis_attempts": 1
     },
     {
       "interest": "trade-household",
@@ -146,9 +154,18 @@
       "truth": "reconstructed",
       "hash": "492076ec569a38bf823ba4601925045519d7d1d9d2ad499c029c9f390e88df18",
       "text_sha256": "492076ec569a38bf823ba4601925045519d7d1d9d2ad499c029c9f390e88df18",
-      "status": "pending-recording",
       "filename": "p-492076ec569a38bf.mp3",
-      "resource_id": "Narration/personal-table/p-492076ec569a38bf"
+      "resource_id": "Narration/personal-table/p-492076ec569a38bf",
+      "audio_sha256": "f17f87a18f33ba8e88cfee0d1c56d48601df656ae84615e3d75452a23cf3faff",
+      "provider": "GoogleCloudTextToSpeech",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Kore",
+      "date": "2026-10-30",
+      "length_seconds": 57.28,
+      "bytes": 229580,
+      "sample_rate_hertz": 24000,
+      "channels": 1,
+      "synthesis_attempts": 1
     },
     {
       "interest": "place-water",
@@ -216,12 +233,21 @@
       "truth": "reconstructed",
       "hash": "bcf027ed77e4d81ebb8cad4ac54d56dcf7e1798bec46fc180c21c570429983a1",
       "text_sha256": "bcf027ed77e4d81ebb8cad4ac54d56dcf7e1798bec46fc180c21c570429983a1",
-      "status": "pending-recording",
       "filename": "p-bcf027ed77e4d81e.mp3",
-      "resource_id": "Narration/personal-table/p-bcf027ed77e4d81e"
+      "resource_id": "Narration/personal-table/p-bcf027ed77e4d81e",
+      "audio_sha256": "da0e97582ffe88f3affc4c99d76f835ce13ce8c96f1099365fe6dadeb3a9651b",
+      "provider": "GoogleCloudTextToSpeech",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Kore",
+      "date": "2026-10-30",
+      "length_seconds": 60.28,
+      "bytes": 241580,
+      "sample_rate_hertz": 24000,
+      "channels": 1,
+      "synthesis_attempts": 1
     }
   ],
-  "updated_utc": "2026-10-19T02:45:13.671011+00:00",
+  "updated_utc": "2026-10-30T17:57:08.859016+00:00",
   "archived_chapters": [
     {
       "interest": "journeys",
