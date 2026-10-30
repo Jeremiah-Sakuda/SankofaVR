@@ -100,7 +100,7 @@ namespace Sankofa.Tests
             view.RenderChapter(new StoryTableChapterViewData
             {
                 Index = 2, Count = 3, Title = "A promise still walking", Caption = "An imagined ending.", ArtKey = "scenery-atlas",
-                ImageLabel = "Imagined scene • not an account of your ancestors", Questions = new[] { "What could I ask?" },
+                ImageLabel = "Imagined scene", Questions = new[] { "What could I ask?" },
             });
             yield return null;
             Assert.That(side.Ids, Is.EqualTo(new[] { "0" }));
@@ -113,7 +113,7 @@ namespace Sankofa.Tests
             var stage = view.Stage;
             Assert.That(stage, Is.Not.Null, "the table performs on its pop-up stage");
             var capture = Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1";
-            const string imagined = "Imagined scene • not an account of your ancestors";
+            const string imagined = "Imagined scene";
             view.SetReducedMotion(false);
             yield return new WaitForSecondsRealtime(0.4f);
             Assert.That(stage.Rise, Is.Zero, "between tellings the scene lies flat");
@@ -161,7 +161,18 @@ namespace Sankofa.Tests
             Assert.That(stage.Mirrored, Is.True);
             Assert.That(stage.FigurePlace("naserian").z, Is.LessThan(stage.FigurePlace("wambui").z), "the chosen side stands nearest the visitor");
             Assert.That(naserian.Hidden, Is.True, "no choice is open once the side is chosen");
+            // Shortly before the words set the gourd down, the visitor may do it themselves.
+            stage.Seek(0.8f); yield return null; yield return null;
+            var pass = view.Panels.Single(p => p.name == "Pass the gourd");
+            Assert.That(stage.GourdInvited, Is.True); Assert.That(pass.Hidden, Is.False);
+            Assert.That(stage.GourdPlace, Is.EqualTo(TableStagingPlace.With));
+            yield return new WaitForSecondsRealtime(0.33f);
+            pass.PressFromPointer("pass"); yield return null; yield return null;
+            Assert.That(stage.VisitorPassedGourd, Is.True);
+            Assert.That(stage.GourdPlace, Is.EqualTo(Sankofa.Core.Personal.TableStaging.GourdBetween), "the visitor's hand sets it between them");
+            Assert.That(pass.Hidden, Is.True, "the invitation closes once accepted");
             stage.Seek(0.95f); yield return new WaitForSecondsRealtime(0.9f);
+            Assert.That(stage.GourdPlace, Is.EqualTo(Sankofa.Core.Personal.TableStaging.GourdBetween), "the narration's own moment does not move it again");
             Assert.That(stage.FigureShown("wambui"), Is.True);
             if (capture) { Capture("14-stage-other-side-72", 72); Capture("14-stage-other-side-82"); }
 
@@ -249,7 +260,7 @@ namespace Sankofa.Tests
             Assert.That(actions.Ids, Is.EquivalentTo(new[] { "retry", "local", "cancel" }));
             view.SetPaused(true);
             var controls = view.Panels.Single(p => p.name == "Always available controls");
-            Assert.That(controls.Ids, Is.EquivalentTo(new[] { "pause", "recenter", "room", "options", "leave" }));
+            Assert.That(controls.Ids, Is.EquivalentTo(new[] { "pause", "options", "leave" }), "pause, comfort and leaving are always within reach");
             Assert.That(controls.Hidden, Is.False);
         }
 
@@ -321,6 +332,43 @@ namespace Sankofa.Tests
                 var size = label.GetComponent<Renderer>().bounds.size;
                 Assert.That(Mathf.Max(size.x, size.y, size.z), Is.LessThan(face.bounds.size.magnitude), panel.name + ": " + label.text);
             }
+        }
+
+        /// <summary>
+        /// Static cost at the busiest moment of a telling: both figures, every plaque and a full page of actions. These are
+        /// conservative counts for a mobile headset, not a frame-time measurement; device profiling is not available.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheBusiestStageMomentStaysWithinAConservativeQuestBudget()
+        {
+            view.SetReducedMotion(true);
+            view.RenderChapter(new StoryTableChapterViewData
+            {
+                Id = "trade-household.vessel", Index = 1, Count = 3, Title = "A vessel with a source", Caption = "A National Museums of Kenya exhibit describes a Maasai gourd.",
+                ArtKey = "cast-atlas", ImageLabel = "Documented context • sources available", Questions = new[] { "What does the museum example tell us?" },
+                Choices = new[] { "Follow the one who brought less", "Wait with the one who expected more" }, ChoiceIds = new[] { "trade-household.follow.less", "trade-household.follow.more" },
+            });
+            view.SetControlState(true, true, true, false);
+            view.Stage.Seek(0.5f);
+            yield return null; yield return null;
+            var renderers = UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None).Where(r => r.enabled && r.gameObject.activeInHierarchy).ToArray();
+            long triangles = 0;
+            foreach (var renderer in renderers)
+            {
+                var mesh = renderer is SkinnedMeshRenderer skinned ? skinned.sharedMesh : renderer.GetComponent<MeshFilter>()?.sharedMesh;
+                if (mesh == null) continue;
+                for (var sub = 0; sub < mesh.subMeshCount; sub++) triangles += mesh.GetIndexCount(sub) / 3;
+            }
+            var text = renderers.Count(r => r.GetComponent<TMP_Text>() != null);
+            var blended = renderers.Where(r => r.GetComponent<TMP_Text>() == null && r.sharedMaterials.Any(m => m != null && m.renderQueue >= 3000)).Select(r => r.name).ToArray();
+            var materials = renderers.SelectMany(r => r.sharedMaterials).Where(m => m != null).Distinct().Count();
+            var report = $"Busiest table moment: {renderers.Length} renderers ({text} text), {triangles} triangles, {materials} materials, blended: {string.Join(", ", blended)}";
+            TestContext.WriteLine(report); Debug.Log("[Sankofa budget] " + report);
+            Assert.That(renderers.Length, Is.LessThanOrEqualTo(160), report);
+            Assert.That(triangles, Is.LessThanOrEqualTo(100000), report);
+            Assert.That(blended.Length, Is.LessThanOrEqualTo(8), "blended surfaces cost overdraw on a tiled mobile GPU: " + report);
+            Assert.That(renderers.Where(r => r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off).Select(r => r.name), Is.Empty, "no realtime shadow casters");
+            Assert.That(UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None).Where(l => l.isActiveAndEnabled && l.shadows != LightShadows.None).Select(l => l.name), Is.Empty, "no realtime shadows");
         }
 
         [UnityTest]
@@ -402,7 +450,8 @@ namespace Sankofa.Tests
             Assert.That(realised, Does.Contain(System.Text.RegularExpressions.Regex.Replace(sourceText, "\\s+", " ")));
             if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("06-source-context-60", 60);
             view.ComfortRequested?.Invoke(); yield return null;
-            Assert.That(actions.Ids.Count(), Is.EqualTo(6)); AssertControlsInForwardView(60);
+            Assert.That(actions.Ids, Is.SupersetOf(new[] { "recenter", "room", "lower", "raise", "listen", "motion", "text", "return" }), "placement and comfort live in Options");
+            AssertControlsInForwardView(60);
             var controls = view.Panels.Single(p => p.name == "Always available controls");
             foreach (var action in actions.GetComponentsInChildren<Renderer>().Where(r => r.name == "Face"))
             foreach (var control in controls.GetComponentsInChildren<Renderer>().Where(r => r.name == "Face"))

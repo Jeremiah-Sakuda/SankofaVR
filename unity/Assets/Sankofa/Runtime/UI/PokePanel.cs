@@ -213,6 +213,7 @@ namespace Sankofa.Runtime.UI
             face.transform.SetParent(root.transform, false);
             face.transform.localScale = new Vector3(size.x, size.y, 1f);
             var renderer = face.GetComponent<Renderer>();
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; renderer.receiveShadows = false;
             if (buttonMaterial != null) renderer.sharedMaterial = buttonMaterial;
             if(plaqueDepth>0&&plaqueBodyMaterial!=null)
             {

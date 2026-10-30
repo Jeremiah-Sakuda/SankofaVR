@@ -27,6 +27,9 @@ namespace Sankofa.EditorTools
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var rig = CreateRig();
             rig.Eye.backgroundColor = new Color(0.024f, 0.028f, 0.038f);
+            // Nothing in this scene casts a realtime shadow, the visitor's rendered hands included.
+            foreach (var renderer in rig.Head.root.GetComponentsInChildren<Renderer>(true))
+            { renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; renderer.receiveShadows = false; }
             var anchor = new GameObject("Story table world").AddComponent<Sankofa.Runtime.App.WorldAnchor>();
             Set(anchor, "head", rig.Head);
             var world = anchor.transform;
@@ -108,7 +111,7 @@ namespace Sankofa.EditorTools
             Set(view, "consentBody", TableText(consent, "Online consent notice", "Your selected place, period, question and fragment will be sent to an online story service.\n\nShare only what you are comfortable sending. The prepared stories work without this.", new Vector3(0, 0.012f, -0.006f), 0.14f, new Vector2(0.75f, 0.22f), TableInk, TextAlignmentOptions.TopLeft));
             Set(view, "consentActions", TablePanel(consent, "Online consent actions", new Vector3(0, -0.157f, -0.007f), 2, new Vector2(0.355f, 0.059f), ink));
 
-            var controls = TablePanel(page, "Always available controls", new Vector3(0, -0.133f, -0.007f), 5, new Vector2(0.112f, 0.03f), ink);
+            var controls = TablePanel(page, "Always available controls", new Vector3(0, -0.133f, -0.007f), 3, new Vector2(0.15f, 0.03f), ink);
             Set(controls, "gap", 0.008f); Set(controls, "labelSize", 0.11f);
             Set(view, "controls", controls);
             Set(view, "fire", BuildStoryTableFire(table));
@@ -122,6 +125,8 @@ namespace Sankofa.EditorTools
                 var app = new GameObject("Sankofa personal story").AddComponent(appType);
                 // The app owns the fire's sound and plays it on the headset only; the tabletop view stays silent.
                 Set(app, "fireRecording", Recording("small-fire"));
+                Set(app, "riverRecording", Recording("brook"));
+                Set(app, "nightRecording", Recording("crickets"));
             }
             else Debug.LogWarning("[Sankofa] Story table presentation built without the application adapter.");
             reading.gameObject.SetActive(false); details.gameObject.SetActive(false); progress.gameObject.SetActive(false); consent.gameObject.SetActive(false);
@@ -185,6 +190,20 @@ namespace Sankofa.EditorTools
             material.mainTexture = texture; material.SetFloat("_Opacity", 1); EditorUtility.SetDirty(material); return material;
         }
 
+        /// <summary>A whole painted texture through the illustrations' own depth-written shader: never blended, so a large
+        /// stage surface adds no transparent overdraw on a mobile GPU.</summary>
+        static Material TablePaintMaterial(string name, Texture2D texture)
+        {
+            var path = TableArtFolder + "/" + name + ".mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null) { material = new Material(Shader.Find("Sankofa/Illustration")) { name = name }; AssetDatabase.CreateAsset(material, path); }
+            material.shader = Shader.Find("Sankofa/Illustration"); material.mainTexture = texture;
+            var whole = new Vector4(0, 0, 1, 1);
+            material.SetVector("_FrameA", whole); material.SetVector("_FrameB", whole);
+            material.SetFloat("_PoseBlend", 1); material.SetFloat("_Visibility", 1); material.SetFloat("_Unfold", 1);
+            EditorUtility.SetDirty(material); return material;
+        }
+
         static Material TableAtlasMaterial(string name, string asset, Vector4 frame)
         {
             var path = TableArtFolder + "/" + name + ".mat";
@@ -211,11 +230,11 @@ namespace Sankofa.EditorTools
             var turntable = Child(root, "Turntable");
             Prim(turntable, "Brass rim", PrimitiveType.Cylinder, new Vector3(0, 0.004f, 0), new Vector3(0.585f, 0.004f, 0.585f), brass);
             Prim(turntable, "Painted ground", PrimitiveType.Cylinder, new Vector3(0, 0.007f, 0), new Vector3(0.56f, 0.006f, 0.56f),
-                TableImageMaterial("Stage earth", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/Scanned/dry_ground_01/dry_ground_01_diff_1k.jpg")));
+                TablePaintMaterial("Stage earth", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sankofa/Art/Scanned/dry_ground_01/dry_ground_01_diff_1k.jpg")));
             Prim(turntable, "Painted water", PrimitiveType.Quad, new Vector3(0, 0.0135f, 0.075f), new Vector3(0.50f, 0.11f, 1), TableAtlasMaterial("Stage water", "scenery-atlas.png", new Vector4(0.2f, 0.40f, 0.6f, 0.12f)), Quaternion.Euler(90, 0, 0));
             Set(stage, "turntable", turntable);
 
-            var sky = TableImageMaterial("Stage dusk", StageSky());
+            var sky = TablePaintMaterial("Stage dusk", StageSky());
             var hinges = new[]
             {
                 StageLayer(root, "Dusk backdrop", new Vector3(0, 0.013f, 0.235f), new Vector2(0.60f, 0.34f), sky, true),
@@ -255,6 +274,10 @@ namespace Sankofa.EditorTools
             var gourd = Point(root, "Stage gourd", new Vector3(0, 0.013f, 0));
             TableProp(gourd, "Stage gourd body", GourdWithLip(0.042f, 0.016f, 0.005f), new Color(0.60f, 0.38f, 0.19f), 811);
             Set(stage, "gourd", gourd);
+            var invite = TablePanel(root, "Pass the gourd", new Vector3(0, 0.1f, 0), 1, new Vector2(0.13f, 0.034f), ink);
+            invite.transform.localRotation = Quaternion.Euler(18, 0, 0);
+            Set(invite, "labelSize", 0.1f);
+            Set(table.GetComponent<StoryTableView>(), "gourdInvite", invite);
 
             // The heirlooms' cards follow the interest panel's own layout: three columns, centred.
             var cards = TablePanel(root, "Interest choices", new Vector3(0, 0.03f, -0.03f), 3, new Vector2(0.125f, 0.055f), TableMaterial("Woven mats", new Color(0.36f, 0.25f, 0.15f)));

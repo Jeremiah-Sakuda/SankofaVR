@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Presentation only. Positions are stage-local metres (x right, z away from the visitor); at is the fraction of each chapter's narration. A turn shows the other side of the scene, so figures there are mirrored to keep facing each other.",
+  "note": "Presentation only. Positions are stage-local metres (x right, z away from the visitor); at is the fraction of each chapter's narration. A turn shows the other side of the scene, so figures there are mirrored to keep facing each other. An invited gourd beat lets the visitor set the gourd down themselves shortly before the narration does.",
   "choices": {
     "journeys.follow.waiting": "naserian",
     "journeys.follow.late": "wambui",
@@ -40,7 +40,7 @@
         { "at": 0, "who": "gourd", "place": "with", "holder": "wambui" },
         { "at": 0.08, "who": "wambui", "pose": 1 },
         { "at": 0.45, "who": "naserian", "pose": 1 },
-        { "at": 0.45, "who": "gourd", "place": "between" },
+        { "at": 0.45, "who": "gourd", "place": "between", "invite": true },
         { "at": 0.58, "who": "naserian", "pose": 2 },
         { "at": 0.7, "who": "wambui", "pose": 2 },
         { "at": 0.82, "who": "wambui", "x": 0.14, "z": -0.02 },
@@ -58,7 +58,7 @@
         { "at": 0.42, "who": "naserian", "x": -0.09 },
         { "at": 0.68, "who": "naserian", "pose": 1 },
         { "at": 0.88, "who": "naserian", "pose": 2 },
-        { "at": 0.88, "who": "gourd", "place": "between" }
+        { "at": 0.88, "who": "gourd", "place": "between", "invite": true }
       ]
     },
     "journeys.arrival": {

@@ -60,6 +60,8 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] Transform[] heirlooms = Array.Empty<Transform>();
         [Tooltip("A plaque at each painted figure's feet, in the staging's figure order, for choosing whose side to follow.")]
         [SerializeField] PokePanel[] figureChoices = Array.Empty<PokePanel>();
+        [Tooltip("Appears over the stage's gourd when the visitor may set it down themselves.")]
+        [SerializeField] PokePanel gourdInvite;
 
         public Action<string> RouteSelected, RegionSelected, PeriodSelected, QuestionSelected, ChoiceSelected;
         public Action StartRequested, StartLocalRequested, SeedEditRequested, SourceDetailsRequested;
@@ -95,9 +97,11 @@ namespace Sankofa.Runtime.Personal
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
         public Transform TableRoot => tableRoot != null ? tableRoot : transform;
-        public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Concat(figureChoices).Where(p => p != null).ToArray();
+        public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Concat(figureChoices).Concat(new[] { gourdInvite }).Where(p => p != null).ToArray();
         public string Caption => caption != null ? caption.text : "";
         public PopUpStage Stage => stage;
+        /// <summary>Where the pop-up stage stands, for the sounds of its scene.</summary>
+        public Vector3 StagePosition => stage != null ? stage.transform.position + Vector3.up * .1f : TableRoot.position;
         /// <summary>Where the griot's fire burns, for its voice and sound.</summary>
         public Vector3 FirePosition => fire != null ? fire.transform.position : TableRoot.TransformPoint(new Vector3(-.47f, .20f, .20f));
         /// <summary>The ordinary ink buttons, as the style for panels made at runtime such as the keyboard.</summary>
@@ -126,6 +130,12 @@ namespace Sankofa.Runtime.Personal
                 if (id.StartsWith(ChoicePrefix, StringComparison.Ordinal)) ChoiceSelected?.Invoke(id.Substring(ChoicePrefix.Length));
                 else QuestionSelected?.Invoke(id);
             };
+            if (gourdInvite != null)
+            {
+                gourdInvite.Show(new[] { ("pass", "Set the gourd down") });
+                gourdInvite.Hidden = true;
+                gourdInvite.Pressed += id => { if (id == "pass" && stage != null) stage.AcceptGourd(); };
+            }
             foreach (var plaque in figureChoices.Where(p => p != null))
                 plaque.Pressed += id => { if (id.StartsWith(ChoicePrefix, StringComparison.Ordinal)) ChoiceSelected?.Invoke(id.Substring(ChoicePrefix.Length)); };
             if (controls != null) controls.Pressed += ControlAction;
@@ -459,7 +469,8 @@ namespace Sankofa.Runtime.Personal
             // Heirlooms belong to choosing; once a telling begins only the carried one is still on its way to the fire.
             for (var i = 0; i < heirlooms.Length; i++)
                 if (heirlooms[i] != null && i != carried) heirlooms[i].gameObject.SetActive(intake && !detailsOpen);
-            if (controls != null) controls.Show(new[] { ("pause", paused ? "Resume" : "Pause"), ("recenter", "Recenter"), ("room", "Fit my table"), ("options", "Options"), ("leave", "Leave") });
+            // Only what a visitor may need at any moment stays in reach; placement and comfort live in Options.
+            if (controls != null) controls.Show(new[] { ("pause", paused ? "Resume" : "Pause"), ("options", "Options"), ("leave", "Leave") });
             if (transport == null) return;
             var items = new List<(string Id, string Label)>();
             if (closing)
@@ -718,6 +729,7 @@ namespace Sankofa.Runtime.Personal
         void Update()
         {
             RefreshFigureChoices();
+            RefreshGourdInvite();
             if (paused) return;
             CarryHeirloom();
             if (popUp < 1)
@@ -744,6 +756,15 @@ namespace Sankofa.Runtime.Personal
                     && !stage.Turning && stage.FigureShown(figure) && Array.IndexOf(choiceFigures, figure) >= 0;
                 if (figureChoices[f].Hidden == open) figureChoices[f].Hidden = !open;
             }
+        }
+
+        /// <summary>The invitation hangs just above the gourd while the visitor may set it down, and nowhere else.</summary>
+        void RefreshGourdInvite()
+        {
+            if (gourdInvite == null || stage == null) return;
+            var open = stage.GourdInvited && !intake && !paused && !detailsOpen && !closing && !error;
+            if (open) gourdInvite.transform.position = stage.GourdWorldPosition + TableRoot.up * 0.075f * TableRoot.lossyScale.y;
+            if (gourdInvite.Hidden == open) gourdInvite.Hidden = !open;
         }
 
         void CarryHeirloom()

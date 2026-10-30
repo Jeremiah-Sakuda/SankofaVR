@@ -27,6 +27,8 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] string serviceAccessToken = "";
         [Tooltip("A prepared field recording of a small fire (Art/Recorded/sources.json); played on the headset only.")]
         [SerializeField] AudioClip fireRecording;
+        [Tooltip("Prepared field recordings of a brook and of night insects, heard from the stage while a telling stands; headset only.")]
+        [SerializeField] AudioClip riverRecording, nightRecording;
         StoryTableView view;
         StoryTablePlacement placement;
         StoryTableKeyboard keyboard;
@@ -43,7 +45,7 @@ namespace Sankofa.Runtime.Personal
         UnityWebRequest pendingAudio;
         bool largeText;
         string personalReason;
-        AudioSource fireSound;
+        AudioSource fireSound, riverSound, nightSound;
         readonly float[] speech = new float[256];
         readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
         public static string StoreFolderOverride;
@@ -133,16 +135,35 @@ namespace Sankofa.Runtime.Personal
         /// <summary>The fire is heard where it burns. Headset only, like the voice; the tabletop view itself creates no sound.</summary>
         void StartFireSound()
         {
-            if (Application.isEditor || fireRecording == null) return;
-            var source = new GameObject("Fire sound");
+            if (Application.isEditor) return;
+            fireSound = Loop("Fire sound", fireRecording, .28f, view.FirePosition);
+            // The stage's water and night are silent until a telling stands, and step back while the griot speaks.
+            riverSound = Loop("Stage river", riverRecording, 0, view.StagePosition);
+            nightSound = Loop("Stage night", nightRecording, 0, view.StagePosition);
+        }
+
+        AudioSource Loop(string name, AudioClip clip, float volume, Vector3 at)
+        {
+            if (clip == null) return null;
+            var source = new GameObject(name);
             source.transform.SetParent(transform, false);
-            fireSound = source.AddComponent<AudioSource>();
-            fireSound.clip = fireRecording; fireSound.loop = true; fireSound.playOnAwake = false;
-            fireSound.spatialBlend = .9f; fireSound.volume = .28f; fireSound.dopplerLevel = 0;
-            fireSound.rolloffMode = AudioRolloffMode.Logarithmic; fireSound.minDistance = .6f; fireSound.maxDistance = 12f;
-            fireSound.transform.position = view.FirePosition;
-            fireSound.timeSamples = UnityEngine.Random.Range(0, fireRecording.samples);
-            fireSound.Play();
+            var sound = source.AddComponent<AudioSource>();
+            sound.clip = clip; sound.loop = true; sound.playOnAwake = false;
+            sound.spatialBlend = .9f; sound.volume = volume; sound.dopplerLevel = 0;
+            sound.rolloffMode = AudioRolloffMode.Logarithmic; sound.minDistance = .6f; sound.maxDistance = 12f;
+            sound.transform.position = at;
+            sound.timeSamples = UnityEngine.Random.Range(0, clip.samples);
+            sound.Play();
+            return sound;
+        }
+
+        void StageSound(AudioSource sound, float full, bool speaking)
+        {
+            if (sound == null) return;
+            var standing = view.Stage != null ? view.Stage.Rise : 0;
+            var target = full * standing * (speaking ? .5f : 1);
+            sound.volume = Mathf.MoveTowards(sound.volume, target, Time.deltaTime * .25f);
+            sound.transform.position = view.StagePosition;
         }
 
         void Update()
@@ -159,6 +180,9 @@ namespace Sankofa.Runtime.Personal
             view.SetSpeechLevel(level);
             if (voice != null && voice.isPlaying && voice.clip != null) view.SetNarrationProgress(voice.time, voice.clip.length);
             if (fireSound != null) fireSound.transform.position = view.FirePosition;
+            var speaking = voice != null && voice.isPlaying;
+            StageSound(riverSound, .16f, speaking);
+            StageSound(nightSound, .09f, speaking);
         }
 
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
@@ -245,9 +269,9 @@ namespace Sankofa.Runtime.Personal
         {
             if (view == null) return;
             view.SetPaused(session.Paused); keyboard.Suspend(session.Paused);
-            if (session.Paused) { voice.Pause(); if (fireSound != null) fireSound.Pause(); return; }
+            if (session.Paused) { voice.Pause(); foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null) s.Pause(); return; }
             if (voice.clip != null && narrationEnabled && !voice.isPlaying) voice.UnPause();
-            if (fireSound != null && !fireSound.isPlaying) fireSound.UnPause();
+            foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null && !s.isPlaying) s.UnPause();
             if (decision != null || keyboard.IsOpen) return;
             var story = session.Story;
             switch (session.State)
@@ -286,7 +310,7 @@ namespace Sankofa.Runtime.Personal
             }
         }
 
-        static string TruthLabel(string truth) => truth == "historical" ? "Documented context • sources available" : truth == "personal-account" ? "Your account • not independently verified" : "Imagined scene • not an account of your ancestors";
+        static string TruthLabel(string truth) => truth == "historical" ? "Documented context • sources available" : truth == "personal-account" ? "Your account • not independently verified" : "Imagined scene";
         string Capability(PersonalStoryDocument story) => session.IsReplay
             ? "Kept telling • originally " + (story.Mode == "generated" ? "generated" : "prepared") + " • no new generation"
             : story.Mode == "generated" ? "Generated telling • prepared illustrations" : "Prepared story • works offline";
@@ -311,11 +335,11 @@ namespace Sankofa.Runtime.Personal
             if (session.Paused) return;
             StopVoice();
             Decide("How it works",
-                "Choose a thread, or add a question: recognised words in your question choose which telling the fire begins.\n\n" +
+                "Touch an heirloom to begin its telling. If you add a question first, recognised words in it choose which telling the fire begins.\n\n" +
                 "Each telling reaches a moment where you choose whose side to follow. If you simply turn the page, the fire chooses.\n\n" +
-                "Documented pages are marked and sourced. Imagined scenes are labelled; nothing here recovers a real ancestor.\n\n" +
+                "Documented pages are marked and sourced. The people and their meetings are imagined: they are not an account of anyone's ancestors, and nothing here recovers a real relative.\n\n" +
                 "At the end you can keep a telling on this device and reopen it exactly, without a connection.\n\n" +
-                "Fire sound: \u201ccampfire sound\u201d by SterckxS, Freesound, CC BY 3.0. The narrator is a synthetic voice.",
+                "Sounds from Freesound: \u201ccampfire sound\u201d by SterckxS (CC BY 3.0); \u201cBabbling Brook HQ Seamless Wav Loop\u201d by celldroid (CC BY 4.0); \u201ccrickets\u201d by selcukartut, recorded in the Maasai Mara (CC0). The narrator is a synthetic voice.",
                 new[] { ("return", "Return") }, _ => Render());
         }
 
@@ -345,13 +369,16 @@ namespace Sankofa.Runtime.Personal
             StopVoice();
             Decide("Make yourself comfortable", "These choices affect presentation. They do not change or save your story.",
                 new[] { ("motion", reducedMotion ? "Gentle motion on" : "Still pages"), ("text", largeText ? "Standard text" : "Larger text"),
-                    ("lower", "Lower the stand"), ("raise", "Raise the stand"), ("listen", narrationEnabled ? "Captions only" : "Read aloud"), ("return", "Return") }, id =>
+                    ("listen", narrationEnabled ? "Captions only" : "Read aloud"), ("lower", "Lower the stand"), ("raise", "Raise the stand"),
+                    ("recenter", "Recenter"), ("room", "Fit my table"), ("return", "Return") }, id =>
                 {
                     if (id == "motion") { reducedMotion = !reducedMotion; view.SetReducedMotion(reducedMotion); }
                     else if (id == "text") { largeText = !largeText; view.SetLargeText(largeText); }
                     else if (id == "lower") placement.AdjustHeight(-.06f);
                     else if (id == "raise") placement.AdjustHeight(.06f);
                     else if (id == "listen") { narrationEnabled = !narrationEnabled; voice.volume = narrationEnabled ? .85f : 0; }
+                    else if (id == "recenter") placement.Recenter();
+                    else if (id == "room") placement.FitRoomTable();
                     Render();
                 });
         }

@@ -32,6 +32,8 @@ namespace Sankofa.Core.Personal
             public bool? Mirror, Shown;
             /// <summary>For the gourd: with a figure, between them, lifted into the light, or hidden.</summary>
             public string Place, Holder;
+            /// <summary>The visitor may make this gourd move themselves, a little before the narration does; otherwise it happens as written.</summary>
+            public bool Invite;
         }
 
         public sealed class Chapter
@@ -93,12 +95,15 @@ namespace Sankofa.Core.Personal
             {
                 beat.Place = data.GetString("place");
                 beat.Holder = data.GetStringOrNull("holder");
+                beat.Invite = data.TryGet("invite", out var invite) && (bool)invite;
+                if (beat.Invite && beat.Place != GourdBetween) throw new FormatException($"Only setting the gourd between them can be offered to the visitor in {chapter}");
                 if (beat.Place != GourdWith && beat.Place != GourdBetween && beat.Place != GourdLifted && beat.Place != GourdHidden)
                     throw new FormatException($"The gourd in {chapter} has an unknown place");
                 if (beat.Place == GourdWith && !Figures.Contains(beat.Holder)) throw new FormatException($"The gourd in {chapter} needs a figure to hold it");
                 return beat;
             }
             if (!Figures.Contains(beat.Who)) throw new FormatException($"A beat of {chapter} names an unknown figure");
+            if (data.Contains("invite")) throw new FormatException($"Only the gourd can be offered to the visitor in {chapter}");
             if (beat.Pose.HasValue && (beat.Pose < 0 || beat.Pose >= Poses)) throw new FormatException($"A pose in {chapter} is not painted");
             if (Math.Abs(beat.X ?? 0) > StageRadius || Math.Abs(beat.Z ?? 0) > StageRadius) throw new FormatException($"A figure in {chapter} leaves the stage");
             return beat;

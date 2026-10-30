@@ -761,3 +761,21 @@ The build uses the existing privacy sanitizer, with development credentials excl
 | Shared `PokePanel` fix | The motion study showed a label lettered metres tall over the stage, and the book layout had the same blank button. A button made while its panel is set aside has its label sizes reset by TextMeshPro on first activation, so it auto-sized at 18 units. `PokePanel` now applies the label sizes again the first time each label is shown. Regression test: `LabelsMadeWhileTheirPanelIsAsideStayInsideTheirButtons`. Comparison-scene suites were rerun because the panel is shared |
 
 **Limits.** No simulator or headset run. Rendering cost has not been measured, though the stage adds only alpha-tested layers already used elsewhere. Nobody has listened to the narration. The pose and position timings are estimates against recorded clip lengths, not reviewed performance.
+
+## October 30, 2026 — go decision on the pop-up stage
+
+The user reviewed the before/after captures and the motion study and chose **go** on October 30, ahead of the planned November 5 gate. The pop-up stage is now the product; the upright-book layout at `47b8cee` remains the recorded fallback. Week 2 starts early with these items, in order: fewer controls and shorter labels on the page, a river ambience under the stage, a gourd hand-off the visitor can make, a rendering budget check, then the decision on a life-size moment.
+
+## October 30, 2026 — Week 2: a quieter page, the stage's sound, the gourd in the visitor's hand
+
+**Implemented and checked on the desktop, muted.**
+
+| Change | Requirement and criterion | Evidence and limits |
+|---|---|---|
+| The always-visible row is Pause, Options and Leave; Recenter and Fit my table move into Options | Experience (first minutes); hands-first controls stay reachable | Table tests assert the three controls and that Options holds recenter, table fit, stand height, voice, motion and text |
+| The page's truth label reads **Imagined scene** or **Documented context • sources available**. The ancestry statement now appears once, in full, in How it works ("not an account of anyone's ancestors") | Truthful labelling kept; repeated disclaimers removed from every page | The narration's own "Imagined scene:" opening is unchanged; changing it would need new recordings and a validator change, and remains a user decision |
+| While a telling stands, the stage plays a brook (celldroid, CC BY 4.0) and night insects recorded in the Maasai Mara (selcukartut, CC0). They rise with the scenery, fall to half while the griot speaks, and pause with the story. Headset only, like the fire | Polish (sound design) | How it works credits every attributed recording, and a test checks it. Nobody has listened to the mix; the volumes are starting values |
+| **Set the gourd down.** In the gourd's own telling, shortly before the words set the gourd between the two women, a plaque invites the visitor to do it, and the gourd glows. Touching or pinching it moves the gourd; otherwise the narration does, as written. Offered on both sides of the choice and nowhere else | Hands-first participation (Entertainment track); character autonomy kept, since the visitor's act matches what the women decide | Staging contract: `invite` is valid only on a gourd beat that sets it between them; .NET tests check the shipped staging. A PlayMode test presses the plaque and checks that the narration's own moment does not move the gourd again |
+| Rendering budget at the busiest moment: 72 renderers (18 of them text), about 5,900 triangles, 23 materials; blended surfaces are only the three flame cards and the two system hands | Technical (Quest performance) | New PlayMode check: at most 160 renderers, 100,000 triangles and 8 blended surfaces; no shadow casters or shadowed lights. It found and fixed blended sky and earth materials (now depth-written), button faces casting shadows (fixed in `PokePanel`) and the hands casting shadows (off in this scene). These are static counts, not device frame time |
+
+**Verification:** whole-project PlayMode 73 passed, 0 failed, 7 opt-in skips; EditMode 36/36; .NET 371/371; table PlayMode 25/25 with captures. No simulator, headset or listening review.

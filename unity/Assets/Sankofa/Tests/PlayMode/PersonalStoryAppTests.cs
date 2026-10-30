@@ -291,7 +291,7 @@ namespace Sankofa.Tests
                 yield return Press("Return and recovery actions", "modal-next");
                 shown.Add(view.ModalText);
             }
-            Assert.That(string.Join(" ", shown), Does.Contain("whose side to follow").And.Contain("CC BY 3.0"));
+            Assert.That(string.Join(" ", shown), Does.Contain("whose side to follow").And.Contain("CC BY 3.0").And.Contain("celldroid (CC BY 4.0)"), "every attributed recording the visitor hears is credited");
             Assert.That(app.Session.RequestVersion, Is.EqualTo(version), "reading how it works starts no request");
             yield return Press("Return and recovery actions", "return");
             Assert.That(view.IntakeVisible, Is.True);

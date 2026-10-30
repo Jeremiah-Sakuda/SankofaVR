@@ -31,7 +31,7 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] Transform gourd;
 
         const float FoldedAngle = 88f, RiseSeconds = 0.9f, FoldSeconds = 0.35f, SpinSeconds = 0.8f, Stagger = 0.06f;
-        const float StepSeconds = 0.7f, PoseSeconds = 0.4f, WordsPerSecond = 2.3f;
+        const float StepSeconds = 0.7f, PoseSeconds = 0.4f, WordsPerSecond = 2.3f, InviteSeconds = 6f;
         static readonly int FrameA = Shader.PropertyToID("_FrameA"), FrameB = Shader.PropertyToID("_FrameB");
         static readonly int PoseBlend = Shader.PropertyToID("_PoseBlend"), Visibility = Shader.PropertyToID("_Visibility"), Highlight = Shader.PropertyToID("_Highlight");
 
@@ -58,7 +58,9 @@ namespace Sankofa.Runtime.Personal
         int nextBeat;
         string gourdPlace = TableStaging.GourdHidden, gourdHolder;
         Vector3 gourdFrom, gourdTo;
-        float gourdMove = 1;
+        float gourdMove = 1, gourdGlow;
+        Renderer gourdPaint;
+        TableStaging.Beat accepted;
         string[] offered = Array.Empty<string>();
 
         /// <summary>0 while the scenery lies flat on the turntable, 1 once it stands.</summary>
@@ -70,6 +72,11 @@ namespace Sankofa.Runtime.Personal
         public float Progress => Mathf.Clamp01(clock / Mathf.Max(0.01f, length));
         public string GourdPlace => gourdPlace;
         public string GourdHolder => gourdHolder;
+        /// <summary>The visitor set the gourd down themselves in this chapter, before the narration did.</summary>
+        public bool VisitorPassedGourd { get; private set; }
+        /// <summary>A gourd the visitor may set down is waiting for them; if they do nothing, the story sets it down.</summary>
+        public bool GourdInvited => InvitedBeat() != null;
+        public Vector3 GourdWorldPosition => gourd != null ? gourd.position : transform.position;
         public TableStaging Staging => staging ?? (staging = stagingData != null ? TableStaging.Parse(stagingData.text) : null);
         public bool FigureShown(string id) => actors.TryGetValue(id, out var a) && a.Shown;
         public int FigurePose(string id) => actors.TryGetValue(id, out var a) ? Mathf.RoundToInt(a.Pose) : -1;
@@ -87,6 +94,7 @@ namespace Sankofa.Runtime.Personal
             sceneryRest = scenery.Select(s => s != null ? s.localPosition : Vector3.zero).ToArray();
             sceneryScale = scenery.Select(s => s != null ? s.localScale : Vector3.one).ToArray();
             sceneryPaint = scenery.Select(s => s != null ? s.GetComponentInChildren<Renderer>(true) : null).ToArray();
+            gourdPaint = gourd != null ? gourd.GetComponentInChildren<Renderer>(true) : null;
             _ = Staging;
             Apply();
         }
@@ -114,7 +122,7 @@ namespace Sankofa.Runtime.Personal
             // A page turned mid-turn settles the turntable where its current side belongs before anything else moves.
             if (Turning) SetMirror(mirrored);
             chapter = next ?? new TableStaging.Chapter { Id = chapterId, Entry = TableStaging.Stay };
-            nextBeat = 0; clock = 0; narrationDriven = false;
+            nextBeat = 0; clock = 0; narrationDriven = false; accepted = null; VisitorPassedGourd = false;
             var words = string.IsNullOrWhiteSpace(text) ? 0 : text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Length;
             length = Mathf.Max(4f, words / WordsPerSecond + 1.5f);
             offered = Array.Empty<string>();
@@ -185,7 +193,33 @@ namespace Sankofa.Runtime.Personal
         {
             if (chapter == null) return;
             var progress = Progress;
-            while (nextBeat < chapter.Beats.Count && chapter.Beats[nextBeat].At <= progress) Play(chapter.Beats[nextBeat++], reducedMotion);
+            while (nextBeat < chapter.Beats.Count && chapter.Beats[nextBeat].At <= progress)
+            {
+                var beat = chapter.Beats[nextBeat++];
+                if (beat != accepted) Play(beat, reducedMotion);
+            }
+        }
+
+        TableStaging.Beat InvitedBeat()
+        {
+            if (chapter == null || Turning || waiting || paused || rise < 1 || gourdPlace == TableStaging.GourdHidden) return null;
+            for (var i = nextBeat; i < chapter.Beats.Count; i++)
+            {
+                var beat = chapter.Beats[i];
+                if (beat.Who != TableStaging.Gourd || !beat.Invite || beat == accepted) continue;
+                return clock >= beat.At * length - InviteSeconds ? beat : null;
+            }
+            return null;
+        }
+
+        /// <summary>The visitor sets the gourd down now; the narration's own moment then passes without moving it again.</summary>
+        public bool AcceptGourd()
+        {
+            var beat = InvitedBeat();
+            if (beat == null) return false;
+            accepted = beat; VisitorPassedGourd = true;
+            Play(beat, reducedMotion);
+            return true;
         }
 
         void Play(TableStaging.Beat beat, bool snap)
@@ -275,6 +309,7 @@ namespace Sankofa.Runtime.Personal
                 a.Highlight = Mathf.MoveTowards(a.Highlight, lit ? 0.6f + 0.4f * Mathf.Sin(Time.time * 3f) : 0, dt * 3f);
             }
             if (gourdMove < 1) gourdMove = Mathf.Min(1, gourdMove + dt / StepSeconds);
+            gourdGlow = Mathf.MoveTowards(gourdGlow, GourdInvited ? 0.6f + 0.4f * Mathf.Sin(Time.time * 3f) : 0, dt * 3f);
             gourdTo = GourdTarget();
             Apply();
         }
@@ -316,6 +351,7 @@ namespace Sankofa.Runtime.Personal
                 p.y += Mathf.Sin(Ease(gourdMove) * Mathf.PI) * 0.03f * (gourdMove < 1 ? 1 : 0);
                 gourd.localPosition = p;
                 gourd.localRotation = gourdPlace == TableStaging.GourdLifted && !reducedMotion ? Quaternion.Euler(0, Time.time * 25f, 0) : Quaternion.identity;
+                if (gourdPaint != null) { gourdPaint.GetPropertyBlock(block); block.SetFloat(Highlight, gourdGlow); gourdPaint.SetPropertyBlock(block); }
             }
         }
 

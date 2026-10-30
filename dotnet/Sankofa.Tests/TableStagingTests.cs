@@ -42,6 +42,20 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void TheVisitorIsOfferedTheGourdOnlyWhereTheWordsSetItBetweenTheWomen()
+        {
+            var staging = Shipped();
+            var invited = staging.ChapterIds.Select(staging.For).SelectMany(c => c.Beats.Where(b => b.Invite).Select(b => (c.Id, b))).ToArray();
+            Assert.That(invited.Select(x => x.Id), Is.EquivalentTo(new[] { "trade-household.agreement", "trade-household.expected" }), "the gourd's own telling offers it on both sides");
+            foreach (var (id, beat) in invited)
+            {
+                var chapter = Telling("trade-household").Chapters.Single(c => c.Id == id);
+                Assert.That(beat.Place, Is.EqualTo(TableStaging.GourdBetween));
+                Assert.That(chapter.Narration, Does.Contain("between them").Or.Contain("let us begin with what is here"), id + ": the words describe the moment the visitor may make");
+            }
+        }
+
+        [Test]
         public void TheChoicePageShowsBothFiguresBeforeItsNarrationEnds()
         {
             var staging = Shipped();
@@ -65,6 +79,8 @@ namespace Sankofa.Tests
         [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"beats\":[{\"at\":1.5,\"who\":\"wambui\"}]}}}", "outside its narration")]
         [TestCase("{\"version\":1,\"choices\":{\"x\":\"nobody\"},\"chapters\":{}}", "unknown figure")]
         [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"entry\":\"spin\",\"beats\":[]}}}", "unknown entry")]
+        [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"beats\":[{\"at\":0.5,\"who\":\"wambui\",\"invite\":true}]}}}", "Only the gourd")]
+        [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"beats\":[{\"at\":0.5,\"who\":\"gourd\",\"place\":\"lifted\",\"invite\":true}]}}}", "Only setting the gourd between")]
         public void MalformedStagingIsRefusedRatherThanGuessed(string json, string problem)
         {
             Assert.That(() => TableStaging.Parse(json), Throws.TypeOf<FormatException>().With.Message.Contains(problem));

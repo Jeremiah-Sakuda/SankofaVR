@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Stage dusk
-  m_Shader: {fileID: 4800000, guid: 5e05521921a454b7baaf4e440823bbba, type: 3}
+  m_Shader: {fileID: 4800000, guid: 1d1362ad1954a459786c17e0fa65429a, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -33,14 +33,23 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _BottomTrim: 0
+    - _Cutoff: 0.22
     - _DstBlend: 0
     - _Finish: 0
+    - _Highlight: 0
     - _Opacity: 1
+    - _PoseBlend: 1
+    - _Selection: 0
     - _SrcBlend: 1
+    - _TopTrim: 1
+    - _Unfold: 1
     - _Visibility: 1
     - _Wash: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.26, g: 0.2, b: 0.27, a: 1}
+    - _FrameA: {r: 0, g: 0, b: 1, a: 1}
+    - _FrameB: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -10,7 +10,7 @@ User-approved on October 30. The table becomes a **pop-up story theatre**: an he
 
 | Dates | Goal | Work | Exit |
 |---|---|---|---|
-| Oct 30 – Nov 5 | Prove the stage | Land the October 26 iteration in Unity; record the three pending chapters; build one telling end to end as a pop-up stage with heirlooms, staged poses and the turn | **Go/no-go on November 5** from captures and a motion study. If the stage does not clearly beat the book, polish the book instead |
+| Oct 30 – Nov 5 | Prove the stage | Land the October 26 iteration in Unity; record the three pending chapters; build one telling end to end as a pop-up stage with heirlooms, staged poses and the turn | **Go chosen on October 30** from captures and a motion study; the book layout at `47b8cee` is the fallback |
 | Nov 6 – 12 | Complete and craft | Optional gourd hand-off; optional life-size moment (capped at two days); sound pass; fewer on-page disclaimers; conservative rendering budget; hand tolerances; captions, reduced motion and one-hand use | All three tellings staged and reviewed in captures; suites pass |
 | Nov 13 – 18 | Freeze and ship | Feature freeze on November 13; simulator footage and a video under three minutes; Devpost copy and adaptation summary; Competition release channel; submit on November 16 | Submitted entry with honest evidence labels; November 17–18 held in reserve |
 
