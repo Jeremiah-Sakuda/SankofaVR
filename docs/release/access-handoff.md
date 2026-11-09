@@ -1,6 +1,6 @@
 # Pop-up theatre release handoff
 
-November 8, 2026. Use the [current candidate](candidate.md), [ten-day plan](../product/delivery-plan.md#final-ten-days--november-818) and [Devpost draft](submission-draft.md). Earlier gallery footage and build IDs below are historical.
+November 8, 2026. **Start with the [manual steps](manual-steps.md)** (November 9): accounts, signing, upload, video and entry in order. No headset is available for this project; the XR Simulator path below is the primary capture path, not a fallback. Use the [current candidate](candidate.md), [ten-day plan](../product/delivery-plan.md#final-ten-days--november-818) and [Devpost draft](submission-draft.md). Earlier gallery footage and build IDs below are historical.
 
 ## One headset session: 30–45 minutes
 

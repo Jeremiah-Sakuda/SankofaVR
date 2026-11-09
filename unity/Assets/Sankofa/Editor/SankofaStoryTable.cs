@@ -82,7 +82,8 @@ namespace Sankofa.EditorTools
             // Intake and reading actions share the lower half of the page; only one set is shown at a time.
             var intake = Point(page, "Choose your story", Vector3.zero);
             Set(view, "intakeRoot", intake.gameObject);
-            Set(view, "intakeHeading", TableText(intake, "Intake heading", "", new Vector3(0, -0.024f, -0.004f), 0.07f, new Vector2(0.60f, 0.012f), TableInk));
+            // Centred between the two page labels and above the buttons (whose top edge is at -0.026), never behind them.
+            Set(view, "intakeHeading", TableText(intake, "Intake heading", "", new Vector3(0, -0.0155f, -0.004f), 0.07f, new Vector2(0.28f, 0.011f), TableInk));
             Set(view, "keptActions", TablePanel(intake, "Kept story choices", new Vector3(0, -0.094f, -0.007f), 2, new Vector2(0.29f, 0.04f), ink));
             Set(view, "intakeActions", TablePanel(intake, "Start choices", new Vector3(0, -0.047f, -0.007f), 3, new Vector2(0.19f, 0.042f), ink));
             var reading = Point(page, "Read and wonder", Vector3.zero);

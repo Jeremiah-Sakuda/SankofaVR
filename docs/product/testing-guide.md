@@ -1,26 +1,45 @@
-# Personal story table review
+# Testing Sankofa — the pop-up story table
 
-October 18–19, 2026 · Active scene `StoryTable` · Local APK `artifacts/Sankofa-StoryTable.apk`
+November 9, 2026 · Scene `StoryTable` · Read the [candidate record](../release/candidate.md) for the exact build. This guide doubles as the judges' testing instructions in the [Devpost draft](../release/submission-draft.md).
 
-Read the [current candidate identity](../release/candidate.md) and [MVP scope](personal-story-table-mvp.md). A built APK is not an installed or accepted release. All software verification has been muted. Do not enable Read aloud during the current no-playback review.
+Each telling runs about 2 to 3 minutes; the walkthrough below, which visits both sides of the gourd telling, takes about 6 to 8. It is seated and hands only. Controllers are optional. No account, network or microphone is needed. The prepared tellings are complete offline.
 
-## Complete seated visit
+## Hands
 
-1. Start seated in a clear space. The adjustable stand should be in front of you. Use Recenter and Options/height controls if needed. Select with a fingertip or point and pinch; one hand should suffice. Controllers are optional.
-2. Read the supported place/period. Choose an interest. Use Edit my question to type a short curiosity or fragment; inspect its preview. Cancel leaves the previous accepted text unchanged; Done accepts the local edit. Nothing is sent while typing. The heading shows the 500-character limit.
-3. Read a prepared story for complete offline use. Online creation first displays the full selected request and names the Sankofa/Google path. More text exposes long confirmation content. Agree & create is deliberate; returning to choices must send nothing. The checked-in Android scene has no live service endpoint/token, so release online use needs separate HTTPS configuration.
-4. Read the capability and fiction/context labels. Continue reading traverses full measured text parts before the next chapter. Previous page returns within a chapter or to its predecessor. Explore a contextual question and source detail; return to the same reading position. Contextual answers are bounded, not live factual conversation.
-5. Pause/resume. Verify story/keyboard/Keep actions stay blocked while paused and headset focus loss does not override a visitor pause. Try larger text and still pages. Do not activate narration in this muted review.
-6. At the ending, Previous page allows rereading before Keep. Leave without Keep and verify no new story persists. Keep stores one realised telling. Replacing names the previous story and asks again; cancellation preserves it.
-7. Reopen the kept telling with its original generated/prepared label. Words, local illustrations, answers and sources must match. No replacement story or remote speech request occurs on replay. Generated voice can therefore be unavailable; prepared voice is a local resource. Forget requires confirmation and leaves no retained story to reopen.
+| To | Do |
+|---|---|
+| Press a plaque or button | Touch it with a fingertip, or point and pinch. The press lands when you release the pinch |
+| Begin a story | Touch an heirloom on the stage: a bundle, a gourd or a water pot |
+| Set the gourd down | When the plaque **Set the gourd down** appears and the gourd glows, touch or pinch the gourd, or press the plaque |
+| Pause, adjust, leave | **Pause**, **Options** and **Leave** stay at the front of the page. Options holds Recenter, table fitting, stand height, voice, motion and text size |
 
-## Room and failure checks
+## Judge walkthrough
 
-Fit my table requests local scene access only after selection. A suitable near-horizontal surface must change height/footprint and hide the virtual stand. Decline permission, omit room data, use an unsuitable surface and try a different room. Each should leave Recenter and the manual stand usable. The app does not initiate a new room scan or send geometry to its service. Confirm physical reach, table containment, depth and stable placement on actual hardware.
+1. Sit, set the controllers aside and let the table settle in front of you. If it sits too high or far, open **Options** and use **Recenter** or the stand height.
+2. Touch the **gourd**. The fire takes it and a paper theatre rises from the table: dusk, a river and two women.
+3. Read or listen. At the turning point, choose whose side to follow. Plaques above each woman and buttons on the page do the same thing. Choose **Follow the one who brought less**. The stage folds, turns and brings her forward. (If you simply turn the page, the fire chooses, and the ending says so.)
+4. When **Set the gourd down** appears, move the gourd between the women with your hand. If you wait, the story continues and the women set it down themselves. Either way, they make their own agreement.
+5. At the ending, the fire names the side you followed and the side you have not heard. Press **Keep this story**.
+6. Touch the gourd again and choose **Wait with the one who expected more**. The stage turns to her side, and the same meeting shows what accepting less costs her.
+7. Optional: **Explore context** answers a question beside the page and returns to the same place. **About this story** shows what is documented and what is imagined. From the first page, **Reopen kept story** replays exactly what you kept, without generating anything new; **Forget kept story** deletes it.
 
-Interrupt online creation, leave and immediately begin a new request. A late result must not replace the new visit. Test unavailable service and labelled prepared recovery. A failed/corrupt local shelf must offer local retry/return, never start online creation. Failed saving must preserve the open story and show failure rather than claim success.
+The bundle and the water pot begin the other two prepared tellings. Each has its own choice of side.
 
-Record build/device, assistance, errors, discomfort, completion, what the person believes their input changed, and whether they want another telling. Do not count direct method tests or simulated pointer actions as real-hand/user evidence. Profile sustained Quest rendering against the official minimum 60 fps; measured editor cadence is not device evidence. Source/cultural, pronunciation/listening, rights and unfamiliar-visitor acceptance remain open.
+## What is real and what is imagined
+
+Pages marked **Documented context** quote a sourced passage (source details on request). Pages marked **Imagined scene** are fiction set in Enkare Nairobi in the 1850s. The two women are invented; the story is not an account of anyone's ancestors. The [source register](../content/enkare-nairobi/sources.md) holds the citations.
+
+## Optional checks
+
+- **Table fitting** (Quest 3/3S with a real table): Options → **Fit my table** asks for scene permission, then moves the theatre onto the detected surface. Denying permission or having no table leaves the adjustable stand in place.
+- **Pause and recovery:** Pause holds the narration and the stage. Taking the headset off pauses too.
+- **Comfort:** Options offers larger text, reduced motion (the stage appears without folding or turning) and voice off (captions only).
+
+## Known limits
+
+Tested in software and in the Meta XR Simulator; no physical Quest was available during development, so real hand-tracking feel and sustained frame rate on device are unmeasured. The story's cultural review is still open, which is why each telling says it is a draft. Online story generation exists in the codebase but is not part of the judged build.
+
+---
 
 The following walkthrough is preserved for the earlier gallery build only.
 

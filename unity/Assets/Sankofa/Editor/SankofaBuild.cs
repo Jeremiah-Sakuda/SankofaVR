@@ -36,6 +36,65 @@ namespace Sankofa.EditorTools
         [MenuItem("Sankofa/Build Personal Story Table APK")]
         public static void BuildPersonalStoryTable() => Build(SankofaSceneBuilder.StoryTableScene, OutputName);
 
+        public const string ReleaseOutputName = "Sankofa-StoryTable-release.apk";
+
+        /// <summary>
+        /// The signed upload build for the Competition release channel. Signing and the version code come only from
+        /// the environment, so no keystore path, password or alias is ever written into the project:
+        /// SANKOFA_KEYSTORE (path), SANKOFA_KEYSTORE_PASS, SANKOFA_KEY_ALIAS, SANKOFA_KEY_PASS (defaults to the
+        /// keystore password) and SANKOFA_VERSION_CODE (an integer above every code already uploaded).
+        /// Refuses to build from a working tree with uncommitted changes.
+        /// </summary>
+        [MenuItem("Sankofa/Build Release APK (signed)")]
+        public static void BuildRelease()
+        {
+            string Need(string name)
+            {
+                var value = System.Environment.GetEnvironmentVariable(name);
+                if (string.IsNullOrEmpty(value)) throw new BuildFailedException($"[Sankofa] Release build needs {name}.");
+                return value;
+            }
+            var keystore = Need("SANKOFA_KEYSTORE");
+            if (!File.Exists(keystore)) throw new BuildFailedException("[Sankofa] SANKOFA_KEYSTORE does not point to a file.");
+            var storePass = Need("SANKOFA_KEYSTORE_PASS");
+            var alias = Need("SANKOFA_KEY_ALIAS");
+            var keyPass = System.Environment.GetEnvironmentVariable("SANKOFA_KEY_PASS");
+            if (string.IsNullOrEmpty(keyPass)) keyPass = storePass;
+            if (!int.TryParse(Need("SANKOFA_VERSION_CODE"), out var versionCode) || versionCode < 1)
+                throw new BuildFailedException("[Sankofa] SANKOFA_VERSION_CODE must be a positive integer.");
+            var repository = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
+            var commit = Commit(repository);
+            if (commit == null || commit.EndsWith("-dirty"))
+                throw new BuildFailedException("[Sankofa] Release builds come from a clean, committed working tree.");
+
+            var previousCode = PlayerSettings.Android.bundleVersionCode;
+            var previousCustom = PlayerSettings.Android.useCustomKeystore;
+            var previousName = PlayerSettings.Android.keystoreName;
+            var previousAlias = PlayerSettings.Android.keyaliasName;
+            try
+            {
+                PlayerSettings.Android.bundleVersionCode = versionCode;
+                PlayerSettings.Android.useCustomKeystore = true;
+                PlayerSettings.Android.keystoreName = keystore;
+                PlayerSettings.Android.keystorePass = storePass;
+                PlayerSettings.Android.keyaliasName = alias;
+                PlayerSettings.Android.keyaliasPass = keyPass;
+                Debug.Log($"[Sankofa] Release build: version code {versionCode}, source {commit}.");
+                Build(SankofaSceneBuilder.StoryTableScene, ReleaseOutputName);
+            }
+            finally
+            {
+                // Leave the project exactly as committed: debug signing, the original code and no secrets.
+                PlayerSettings.Android.bundleVersionCode = previousCode;
+                PlayerSettings.Android.useCustomKeystore = previousCustom;
+                PlayerSettings.Android.keystoreName = previousName;
+                PlayerSettings.Android.keyaliasName = previousAlias;
+                PlayerSettings.Android.keystorePass = "";
+                PlayerSettings.Android.keyaliasPass = "";
+                AssetDatabase.SaveAssets();
+            }
+        }
+
         static void Build(string scene, string outputName)
         {
             var repository = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));

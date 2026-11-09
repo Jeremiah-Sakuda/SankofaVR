@@ -182,7 +182,9 @@ namespace Sankofa.Tests
             view.RenderChapter(expected);
             for (var deadline = Time.realtimeSinceStartup + 3f; stage.Rise < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
             Assert.That(stage.Rise, Is.EqualTo(1)); Assert.That(stage.Mirrored, Is.True, "returning keeps the chosen side");
-            view.ShowClosing("You chose to wait with the one who expected more.");
+            // The application's own closing: the side followed, the side still unheard, and Keep.
+            view.ShowClosing("You chose to wait with the one who expected more. Another time, you could follow the one who brought less.\n\nKeep these exact pages on this device, or return to your choices without saving.");
+            view.SetControlState(true, false, false, true);
             yield return new WaitForSecondsRealtime(0.3f);
             if (capture) Capture("15-stage-ending-72", 72);
 
