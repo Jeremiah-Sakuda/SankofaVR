@@ -9,16 +9,16 @@ Each telling runs about 2 to 3 minutes; the walkthrough below, which visits both
 | To | Do |
 |---|---|
 | Press a plaque or button | Touch it with a fingertip, or point and pinch. The press lands when you release the pinch |
-| Begin a story | Touch an heirloom on the stage: a bundle, a gourd or a water pot |
-| Set the gourd down | When the plaque **Set the gourd down** appears and the gourd glows, touch or pinch the gourd, or press the plaque |
+| Begin a story | Touch the label card in front of an heirloom on the stage: a bundle, a gourd or a water pot |
+| Set the gourd down | When the gourd glows and the plaque **Set the gourd down** appears over it, touch or pinch the plaque. It stays for a few seconds; if you wait, the story sets the gourd down itself |
 | Pause, adjust, leave | **Pause**, **Options** and **Leave** stay at the front of the page. Options holds Recenter, table fitting, stand height, voice, motion and text size |
 
 ## Judge walkthrough
 
 1. Sit, set the controllers aside and let the table settle in front of you. If it sits too high or far, open **Options** and use **Recenter** or the stand height.
-2. Touch the **gourd**. The fire takes it and a paper theatre rises from the table: dusk, a river and two women.
+2. Touch the **gourd** card. The fire takes the gourd and a paper theatre rises from the table: dusk, a river and two women.
 3. Read or listen. At the turning point, choose whose side to follow. Plaques above each woman and buttons on the page do the same thing. Choose **Follow the one who brought less**. The stage folds, turns and brings her forward. (If you simply turn the page, the fire chooses, and the ending says so.)
-4. When **Set the gourd down** appears, move the gourd between the women with your hand. If you wait, the story continues and the women set it down themselves. Either way, they make their own agreement.
+4. When the gourd glows and **Set the gourd down** appears, press it: the gourd moves between the women. If you wait, the story continues and the women set it down themselves. Either way, they make their own agreement.
 5. At the ending, the fire names the side you followed and the side you have not heard. Press **Keep this story**.
 6. Touch the gourd again and choose **Wait with the one who expected more**. The stage turns to her side, and the same meeting shows what accepting less costs her.
 7. Optional: **Explore context** answers a question beside the page and returns to the same place. **About this story** shows what is documented and what is imagined. From the first page, **Reopen kept story** replays exactly what you kept, without generating anything new; **Forget kept story** deletes it.
@@ -31,13 +31,13 @@ Pages marked **Documented context** quote a sourced passage (source details on r
 
 ## Optional checks
 
-- **Table fitting** (Quest 3/3S with a real table): Options → **Fit my table** asks for scene permission, then moves the theatre onto the detected surface. Denying permission or having no table leaves the adjustable stand in place.
-- **Pause and recovery:** Pause holds the narration and the stage. Taking the headset off pauses too.
+- **Table fitting** (optional; implemented but not yet tried on a headset): Options → **Fit my table** asks for scene permission, then moves the theatre onto a detected table. Denying permission or having no table leaves the adjustable stand in place.
+- **Pause and recovery:** Pause holds the narration and the stage. Taking the headset off is designed to pause as well.
 - **Comfort:** Options offers larger text, reduced motion (the stage appears without folding or turning) and voice off (captions only).
 
 ## Known limits
 
-Tested in software and in the Meta XR Simulator; no physical Quest was available during development, so real hand-tracking feel and sustained frame rate on device are unmeasured. The story's cultural review is still open, which is why each telling says it is a draft. Online story generation exists in the codebase but is not part of the judged build.
+Verified with automated tests and desktop renders. No physical Quest was available during development, so real hand-tracking feel, table fitting and sustained frame rate on a headset are unmeasured. The story's cultural review is still open, which is why each telling says it is a draft. Online story generation exists in the codebase but is not part of the judged build.
 
 ---
 

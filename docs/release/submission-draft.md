@@ -24,17 +24,17 @@ When the women reach their agreement, an invitation lets you set the gourd betwe
 
 You can also type a question to steer the choice of prepared telling. The judged experience works offline and uses authored stories. Captions distinguish imagined scenes from documented context, and source details are available as you read. The stories do not identify relatives or establish ancestry.
 
-On supported hardware, the theatre can fit to a detected table. The adjustable stand keeps the seated visit available when room data is missing or access is denied. The [candidate record](candidate.md) distinguishes implemented placement from verified hardware behavior.
+Optionally, on Quest 3 and 3S, the theatre can fit itself to a detected table; this mode has not yet been tried on a headset. The adjustable stand keeps the seated visit available when room data is missing or access is denied.
 
 ## How we built it
 
 We built a Unity paper theatre with staged scenery, painted figures, captions and a voice at the fire. The application controls the story, the perspective turn, the optional gourd cue, pause and local replay. The story contract separates source-linked history from imagined characters and dialogue. Meta OpenXR handles hands, and MR Utility Kit handles optional local table fitting. No room geometry is sent to a story provider.
 
-The paintings reuse project-generated illustrations; the new stage, motion and choices are built in Unity. Prepared narration uses Google Cloud Text-to-Speech; the fire, river and night ambience use attributed recordings. No AI-generated music is used. See the [asset register](../asset-register.md) and [rights review](rights-review.md) for provenance and clearance still needed.
+The painted scenery and the two women are AI-generated illustrations (OpenAI image generation) that we cut into layers and staged; the stage, motion and choices are built in Unity. The narration is synthetic speech from Google Cloud Text-to-Speech. The fire, river and night ambience are attributed field recordings. No AI-generated music is used.
 
 ## What changed from the original Sankofa
 
-The [original web project](https://github.com/jeremiah-Sakuda/sankofa) established the warm storyteller and the invitation to bring a question. SankofaVR is a separate Unity implementation and imports no web code, backend or media. It adds a theatre that unfolds in front of you, hands-only perspective choices that physically turn the stage, participation in the gourd scene, optional local table fitting and offline replay. The [adaptation summary](../product/adaptation.md) records the lineage.
+The [original web project](https://github.com/jeremiah-Sakuda/sankofa) established the warm storyteller and the invitation to bring a question. SankofaVR is a separate Unity implementation and imports no web code, backend or media. It adds a theatre that unfolds in front of you, hands-only perspective choices that physically turn the stage, participation in the gourd scene, optional local table fitting and offline replay.
 
 ## What's next
 
