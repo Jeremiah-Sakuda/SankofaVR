@@ -1,22 +1,31 @@
 # Sankofa — delivery and validation plan
 
-Updated October 30, 2026 · Pop-up story theatre on the personal story table; prior plans are preserved below
+Updated November 8, 2026 · Pop-up story theatre on the personal story table; prior plans are preserved below
 
 The [personal story table scope](personal-story-table-mvp.md) and [current PRD contract](prd.md#current-mvp-contract) guide delivery. The user authorised an illustrated personal telling shaped by inherited fragments/questions, a warm fire narrator, real-table presence where available, contextual follow-up and explicit save/reopen. This replaces the gallery as the primary journey. It does not delete its scenes, art, recordings or historical evidence.
 
-## Final three weeks — October 30 to November 18
+## Final ten days — November 8–18
 
-User-approved on October 30. The table becomes a **pop-up story theatre**: an heirloom chosen at the fire begins a telling that rises from the table as painted paper scenery, performs to the griot's voice, and turns to show the other side when the visitor chooses whose side to follow. No headset is available; verification is batch tests, desktop captures and the Meta XR Simulator, with simulator footage for the video. The entry deadline is November 18 at noon PST; the internal submission target is November 16.
+**Ship the pop-up theatre.** Use the prepared, offline gourd telling as the judge and video path. Choose the gourd, see the stage rise, choose whose side to follow, watch the stage turn, then set the gourd between the women at the invitation. A second visit reveals the other woman's stakes. The visitor chooses what to see and can help at the table; the women make their own agreement. The other two prepared tellings remain in the build.
 
-| Dates | Goal | Work | Exit |
-|---|---|---|---|
-| Oct 30 – Nov 5 | Prove the stage | Land the October 26 iteration in Unity; record the three pending chapters; build one telling end to end as a pop-up stage with heirlooms, staged poses and the turn | **Go chosen on October 30** from captures and a motion study; the book layout at `47b8cee` is the fallback |
-| Nov 6 – 12 | Complete and craft | Optional gourd hand-off; optional life-size moment (capped at two days); sound pass; fewer on-page disclaimers; conservative rendering budget; hand tolerances; captions, reduced motion and one-hand use | All three tellings staged and reviewed in captures; suites pass |
-| Nov 13 – 18 | Freeze and ship | Feature freeze on November 13; simulator footage and a video under three minutes; Devpost copy and adaptation summary; Competition release channel; submit on November 16 | Submitted entry with honest evidence labels; November 17–18 held in reserve |
+| Date (Eastern) | Work | Exit evidence |
+|---|---|---|
+| Nov 8–9 | Build the approved pop-up branch; confirm Start membership, app ownership, signing/version requirements, Devpost draft and Quest 3/3S access | Installable review APK with recorded identity; named device slot and dashboard owner, or explicit missing access |
+| Nov 10–12 | Do a seated hands-only visit on a Quest 3/3S, including gourd interaction and a denied-room run; listen once; profile sustained gameplay; get one unfamiliar visitor if practical | Device/build notes, measured frame rate, one uncoached completion if available, and only reproducible fixes in scope |
+| Nov 13 | Freeze experience and build; prioritize hands, readability, crashes, permission recovery or audio issues actually found | Exact release APK signed as the dashboard requires, retested after changes and bound to its source/hash |
+| Nov 14–15 | Install through the Competition release link; cut the two-perspective demo from real headset footage or clearly labeled XR Simulator footage | Independent access and install; public YouTube/Vimeo link; Devpost draft with track, division, adaptation, testing instructions, and confirmed launch plan |
+| Nov 16 | Submit after the account owner has verified the final links and approved the entry | Recorded submission state; preserve artifact and judge access through the announcement |
+| Nov 17–18 | Reserve for access, upload or release-blocking fixes | Hard close **Nov 18, 3 p.m. Eastern / noon Pacific**; no changes after close |
 
-User actions: confirm eligibility and Start membership; create the release channel; listen to the narration; decide on hosting online generation; decide what happens to the stashed gallery-layout work.
+**Scope cut:** skip the life-size scene and hosted generation for this submission plan. Keep the pop-up stage and the adjustable stand. Review Quest footage first; if hardware access cannot be scheduled by Nov 10, prepare the allowed simulator capture path in parallel so the video does not become a last-day dependency. Simulator footage does not verify real hands, fitting, listening or performance. Revisit the earlier book fallback only if the stage prevents a reliable complete visit after a focused fix, and verify it as its own build before switching.
 
-## Current personal-story sequence
+The [official rules](https://start-developer-competition-26.devpost.com/rules), [FAQ](https://start-developer-competition-26.devpost.com/details/faqs) and [judging criteria](https://start-developer-competition-26.devpost.com/details/judging) were rechecked November 8. Use the [handoff](../release/access-handoff.md), [candidate identity](../release/candidate.md) and [submission draft](../release/submission-draft.md) for execution. The remaining gates are real device/participant review, content and rights, account eligibility, upload/access and publishable footage. Software checks do not close them.
+
+## October 30 baseline — historical
+
+The user selected the pop-up stage from captures and a motion study on October 30, before the original November 5 decision date. The upright-book build at `47b8cee` is the comparison fallback. Week 2 implemented the quieter controls, ambience and gourd invitation. See the [October 30 decision and checks](../decisions.md#october-30-2026--week-2-a-quieter-page-the-stages-sound-the-gourd-in-the-visitors-hand).
+
+## Earlier personal-story evidence sequence
 
 | Step | Current state | Exit evidence |
 |---|---|---|

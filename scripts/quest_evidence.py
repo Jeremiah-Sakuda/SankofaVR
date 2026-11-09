@@ -14,15 +14,15 @@ def run(args):
         raise SystemExit(1) from error
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--serial');p.add_argument('--out',type=Path,default=ROOT/'artifacts/quest-evidence');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--serial');p.add_argument('--out',type=Path,default=ROOT/'artifacts/quest-evidence');p.add_argument('--apk',type=Path,default=ROOT/'artifacts/Sankofa-StoryTable.apk',help='local candidate to fingerprint when collecting device evidence');a=p.parse_args()
     devices=run(['devices']);print(devices.strip())
     if not a.serial:return
     ready=[line.split()[0] for line in devices.splitlines()[1:] if len(line.split())==2 and line.split()[1]=='device']
     if a.serial not in ready:raise SystemExit('Selected device is not connected and authorised.')
+    if not a.apk.is_file():raise SystemExit('Candidate APK not found; provide its exact path with --apk.')
     a.out.mkdir(parents=True,exist_ok=True)
     def shell(*args):return run(['-s',a.serial,'shell',*args])
-    apk=ROOT/'artifacts/Sankofa-LivingGallery.apk'
-    result={'captured_unix':int(time.time()),'device_model':shell('getprop','ro.product.model').strip(),'os':shell('getprop','ro.build.version.release').strip(),'host_apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest() if apk.is_file() else None,'installed_package':shell('dumpsys','package','com.sankofa.quest'),'display':shell('dumpsys','display'),'thermal':shell('dumpsys','thermalservice'),'status':'Raw observations; human protocol and sustained run not performed by this script'}
+    result={'captured_unix':int(time.time()),'device_model':shell('getprop','ro.product.model').strip(),'os':shell('getprop','ro.build.version.release').strip(),'host_apk_name':a.apk.name,'host_apk_sha256':hashlib.sha256(a.apk.read_bytes()).hexdigest(),'installed_package':shell('dumpsys','package','com.sankofa.quest'),'display':shell('dumpsys','display'),'thermal':shell('dumpsys','thermalservice'),'status':'Raw observations; verify installed build identity separately. Human protocol and sustained run not performed by this script.'}
     # Keep identifiers and device logs in ignored local artifacts, never in the public repository.
     (a.out/'device-observations.json').write_text(json.dumps(result,indent=2))
     (a.out/'sankofa-log.txt').write_text(run(['-s',a.serial,'logcat','-d','-t','5000','-s','Unity']))

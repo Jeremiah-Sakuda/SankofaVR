@@ -1,6 +1,29 @@
 # Sankofa candidate builds
 
-## Active personal story table — October 18–19, 2026
+## Active pop-up theatre review APK — November 8, 2026
+
+Built the approved pop-up theatre at **90891cd**, the current working branch, with Unity 6000.3.25f1 in muted batch mode. This replaces the October 18 flat-table APK at the usual local path; the earlier file is preserved as `artifacts/release/archive/Sankofa-StoryTable-7fc1988-dirty.apk`. These are local review builds.
+
+| Identity | Active local review artifact |
+|---|---|
+| Output / scene | `artifacts/Sankofa-StoryTable.apk` / `StoryTable.unity` |
+| Source / package | `90891cd` / `com.sankofa.quest` |
+| Android version | `0.1.0+90891cd`, version code 1, ARM64/IL2CPP |
+| Signing | Signature verified; Android Debug certificate. Confirm release signing and next version code with the dashboard owner. |
+| Size | 65,710,082 bytes (62.67 MiB) |
+| SHA-256 | `92b0b6eade58d5204dadf6797ec7653fd382b4db77623a98128d6cd85cc8f692` |
+| Build result | Succeeded, zero errors, one optional OpenXR input-polling recommendation |
+| Local evidence | `artifacts/logs/nov08-pop-up-build.log`; `artifacts/release/pop-up-theatre-90891cd-apk.json` |
+
+The APK guard passed, and the archive-name scan found no private brief/reference/LocalOnly/credential paths. This is not a general audit of arbitrary data. ADB found no connected Quest. No install, sound playback, simulator capture, upload or submission occurred today.
+
+**Evidence for this source:** November 8: 371/371 core and 32/32 service checks, plus text/audio hash matches for 12 current and six retained narration clips. October 30 logs for the pop-up/gourd changes: 36/36 editor, 25/25 focused table runtime and 73 whole-project runtime checks passed (seven opt-in skips). Desktop stills and motion studies establish software presentation only. Hosted generation is outside the proposed judged path; prepared tellings are the offline product.
+
+Use the [headset and release handoff](access-handoff.md). Device install, hands-only completion, readability/reach, performance, room recovery, listening, cultural and rights review, dashboard access and valid final footage remain open.
+
+---
+
+## Previous flat story table — October 18–19, 2026
 
 Local review APK built from source **7fc1988 with a dirty working tree**. Eight pre-existing gallery/font/animation modifications from another session were preserved and excluded from these commits; documentation edits were also pending. In particular the font files used by this build were modified. This is a review artifact, not a clean-source competition freeze. The earlier gallery builds below remain historical records.
 

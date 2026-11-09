@@ -1,10 +1,37 @@
-# Personal story table release access — current handoff
+# Pop-up theatre release handoff
 
-October 18–19, 2026. Use the [StoryTable candidate record](candidate.md), [current Devpost copy](submission-draft.md) and [table walkthrough](../product/testing-guide.md). The earlier gallery account/video plan below is a historical reference; its APK and footage do not demonstrate the new experience.
+November 8, 2026. Use the [current candidate](candidate.md), [ten-day plan](../product/delivery-plan.md#final-ten-days--november-818) and [Devpost draft](submission-draft.md). Earlier gallery footage and build IDs below are historical.
 
-The local table APK completes prepared stories. Before judge access, configure a reachable HTTPS service and limited client access if online generation is included, maintain that access through judging, confirm eligibility/division, upload the exact hashed APK to the required Competition channel, and independently install it. Neither local generation nor a built file establishes that deployment. No channel upload or final entry submission has occurred.
+## One headset session: 30–45 minutes
 
-The video must show the actual current table intake, question/consent, two tellings with observable differences, contextual/source recovery, deliberate Keep/reopen and purposeful real table use if claimed. Use actual headset or clearly identified XR simulator footage, within the official duration limit. Current desktop/synthetic captures are review material, not an unlabeled substitute. Listening remains unreviewed and no sound playback was performed during implementation.
+1. Connect an authorized Quest 3 or 3S. Install the exact review APK and compare its version with the [candidate record](candidate.md). Sit, enable hands and set the controllers aside. Start with the service unconfigured. Use Options → Recenter or adjust the stand if needed.
+2. Pick the gourd. Watch the stage rise. Follow the woman who brought less. At **Set the gourd down**, use the gourd or its labeled action and confirm it moves once. Finish, Keep, reopen the same telling, then Forget. Check that using a hand, not waiting for the cue, actually triggers the move.
+3. Return to the gourd and choose the other perspective. Check that the chosen woman comes forward and the scene shows what accepting less costs her. Let the gourd cue resolve on its own this time. Try a brief pause/resume, the source panel and leaving hands-only.
+4. If room fitting is included in the demo, try it on a real table and confirm what height or footprint changes. Also check denied/missing room data and recovery to the stand. Check text and reach in each tested setup.
+5. Record device model, exact version, failed gestures, real frame rate over a sustained representative run and any discomfort. The judging rubric calls for at least 60 fps. Check the narration/ambience mix separately with an authorized listener; silent desktop tests establish neither pronunciation nor balance. If possible, ask a first-time visitor what changed when they chose a side before telling them the intended answer.
+
+`python3 scripts/quest_evidence.py` lists attached devices. With an authorized device, pass `--serial` and the exact local `--apk` to record a fingerprint and device observations. It neither installs nor launches; compare the observed installed version to the candidate. Capture actual app frame-rate data separately.
+
+## Capture one story well — target 2:15
+
+| Edit | Record from the final reviewed build |
+|---|---|
+| 0:00–0:12 | Open on the pop-up stage unfolding or turning. “The same meeting looks different from the other side.” |
+| 0:12–0:32 | Seated hands choose the gourd. Briefly show the fire and the paper scenery rising. |
+| 0:32–0:57 | Choose whose side to follow. Hold on the fold/turn and the selected figure coming forward. |
+| 0:57–1:20 | Cut between the two visits with labels. One woman has kept flour at home; the other has planned a meal around what she expected. Let one concrete line or caption explain the difference. |
+| 1:20–1:43 | Show the invitation and the hand action setting the gourd down, then the women reaching their own agreement. |
+| 1:43–2:05 | Show Keep and the other side invitation or reopen. If verified, use a few seconds for a real table fit and the stand recovery. |
+| 2:05–2:15 | Title, Enkare Nairobi setting, and clear disclosure of sourced context and imagined characters. |
+
+Record actual Quest gameplay where possible. If needed, the [official FAQ](https://start-developer-competition-26.devpost.com/details/faqs) allows XR Simulator footage. Use Unity's **Sankofa → Play Personal Story Table in XR Simulator** with the muted launch command in the [Unity guide](../../unity/README.md#personal-story-table). Capture the prepared route, label the simulator footage and do not infer real-hand reliability from it. October 30 desktop stills and the fixed-cadence motion study are editing references, not submission footage. Capture without external participants' identifiable faces, voices, or personal details. Keep speech legible via captions. No local sound playback or public upload is authorized by this checklist.
+
+## Dashboard and Devpost
+
+- Confirm active Start membership and the app owner now. Check the package, signing identity and next accepted version code against the actual dashboard before producing the upload build. A local debug-signed APK is a review candidate until accepted by that channel.
+- Upload the exact release APK to the new **Competition** channel and use its judge-access link. Have a separate authorized account install and cold-launch through that link. A cable install does not verify that access.
+- Use the active Devpost draft, **Entertainment / Adapted or Significantly Updated** proposed, and a public YouTube or Vimeo video under three minutes. Complete the confirmed launch plan and verify both links before submitting. Preserve access through the winner announcement. The [official rules](https://start-developer-competition-26.devpost.com/rules) control if dashboard guidance differs.
+- Target November 16, with the November 18 **3 p.m. Eastern** hard close. No channel upload, publication or entry submission is implied.
 
 ---
 
