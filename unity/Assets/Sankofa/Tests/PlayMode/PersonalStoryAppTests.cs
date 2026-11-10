@@ -115,6 +115,80 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator TheGriotWelcomesAFirstVisitAndChoosingNeverWaitsForIt()
+        {
+            Assert.That(app.Welcoming, Is.False, "editor and batch sessions start on the standing invitation");
+            Assert.That(view.Caption, Is.EqualTo(StoryTableView.StandingInvitation));
+            Time.timeScale = 6;
+            try
+            {
+                app.BeginWelcome(); yield return null;
+                Assert.That(app.Welcoming, Is.True);
+                Assert.That(Panel("Interest choices").Hidden, Is.False, "an heirloom can be chosen while the griot is still speaking");
+                var seen = new List<string>();
+                for (var waited = 0f; waited < 30f && app.Welcoming; waited += Time.unscaledDeltaTime)
+                {
+                    if (seen.Count == 0 || seen[seen.Count - 1] != view.Caption) seen.Add(view.Caption);
+                    Assert.That(view.Caption, Is.EqualTo(app.WelcomeLine), "the page shows the line being said");
+                    yield return null;
+                }
+                Assert.That(seen, Is.EqualTo(PersonalStoryApp.FirstWelcome), "every line is shown once, in order");
+                Assert.That(string.Join(" ", seen), Does.Contain("imagined").And.Contain("documented"), "the disclosure is part of the welcome");
+                Assert.That(view.Caption, Is.EqualTo(StoryTableView.StandingInvitation), "the invitation to choose remains once the welcome is said");
+
+                app.BeginWelcome(); yield return null;
+                yield return Press("Interest choices", "trade-household");
+                yield return null;
+                Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading), "choosing during the welcome begins the telling at once");
+                Assert.That(app.Welcoming, Is.False);
+                Assert.That(view.Caption, Does.Not.Contain("Sit with me"));
+            }
+            finally { Time.timeScale = 1; }
+        }
+
+        [UnityTest]
+        public IEnumerator PagesTurnThemselvesOnceToldAndAnUnansweredChoiceGoesToTheFire()
+        {
+            Assert.That(app.TurnsPages, Is.False, "editor and batch sessions are hand-turned unless the presentation is asked for");
+            app.TurnsPages = true;
+            Time.timeScale = 8;
+            try
+            {
+                yield return Press("Interest choices", "journeys");
+                var pages = new List<string>(); var part = 0; var parts = 1;
+                for (var waited = 0f; waited < 90f && app.Session.State == PersonalStoryState.Reading; waited += Time.unscaledDeltaTime)
+                {
+                    var id = app.Session.Chapter.Id;
+                    if (pages.Count == 0 || pages[pages.Count - 1] != id)
+                    {
+                        if (pages.Count > 0) Assert.That(part, Is.EqualTo(parts - 1), "every part of " + pages[pages.Count - 1] + " was shown before it turned");
+                        pages.Add(id);
+                    }
+                    part = view.ReadingPart; parts = view.ReadingPartCount;
+                    yield return null;
+                }
+                Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing), "a visitor who only watches reaches the ending");
+                Assert.That(pages.Count, Is.EqualTo(3), string.Join(", ", pages));
+                Assert.That(app.Session.FollowedByChoice, Is.False, "an unanswered choice is the fire's, never recorded as the visitor's");
+                Assert.That(view.Caption, Does.StartWith("The fire chose"));
+                Assert.That(app.HasKept, Is.False, "watching never saves");
+                yield return new WaitForSecondsRealtime(1f);
+                Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing), "the ending waits for the visitor");
+
+                // A pause holds the page: nothing turns while the visitor is away.
+                app.Session.Cancel(); yield return null;
+                yield return Press("Interest choices", "journeys");
+                var first = app.Session.Chapter.Id;
+                yield return Press("Always available controls", "pause");
+                yield return new WaitForSecondsRealtime(4f);
+                Assert.That(app.Session.Chapter.Id, Is.EqualTo(first));
+                Assert.That(app.Session.PageNumber, Is.EqualTo(1));
+                yield return Press("Always available controls", "pause");
+            }
+            finally { Time.timeScale = 1; }
+        }
+
+        [UnityTest]
         public IEnumerator FreeformQuestionChangesPreparedThreadWithoutAssumingFamilyIdentity()
         {
             app.SetSeed("What could a household carry in a gourd?");

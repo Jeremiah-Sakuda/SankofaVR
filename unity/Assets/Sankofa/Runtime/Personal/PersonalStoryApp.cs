@@ -64,6 +64,38 @@ namespace Sankofa.Runtime.Personal
         public string ServiceAccessToken { set => serviceAccessToken = value ?? ""; }
         public bool NarrationEnabled => narrationEnabled;
 
+        /// <summary>
+        /// The headset presentation: the griot speaks, welcomes the visitor and turns the pages. Editor, simulator and
+        /// batch sessions start silent and hand-turned unless SANKOFA_PRESENT=1 asks for the presentation, as when
+        /// recording the simulator.
+        /// </summary>
+        static bool Presenting => !Application.isEditor || Environment.GetEnvironmentVariable("SANKOFA_PRESENT") == "1";
+
+        /// <summary>What a first-time visitor hears and reads before choosing. The disclosure is said once, here.</summary>
+        public static readonly string[] FirstWelcome =
+        {
+            "Come. Sit with me.",
+            "I keep stories from many fires. Tonight's comes from Enkare Nairobi, before the railway.",
+            "The people in it are imagined. What is documented, I will mark.",
+        };
+        /// <summary>What a visitor with a kept telling hears instead.</summary>
+        public static readonly string[] ReturnWelcome = { "You came back. Sit with me." };
+        const float TurnAfterSeconds = 1.6f, ChoiceWaitSeconds = 14f;
+        string[] welcome;
+        int welcomeLine = -1;
+        float welcomeClock, welcomeLength, pageRest;
+        bool pageSpoken, pageTold;
+        string turnKey;
+        /// <summary>The griot is still saying the welcome; the heirlooms can be chosen throughout.</summary>
+        public bool Welcoming => welcome != null;
+        /// <summary>The welcome line now on the page, or null once the standing invitation has returned.</summary>
+        public string WelcomeLine => welcome != null && welcomeLine >= 0 && welcomeLine < welcome.Length ? welcome[welcomeLine] : null;
+        /// <summary>
+        /// A page turns itself once the griot has finished it, and an unanswered choice is left to the fire. The
+        /// visitor can still turn sooner, go back or pause. On by default wherever the headset presentation is.
+        /// </summary>
+        public bool TurnsPages { get; set; }
+
         void Awake()
         {
             view = FindFirstObjectByType<StoryTableView>(FindObjectsInactive.Include);
@@ -80,7 +112,8 @@ namespace Sankofa.Runtime.Personal
             store = new PersonalStoryStore(StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story"));
             // On the headset the griot reads aloud by default, beside full captions. Editor, simulator and batch sessions
             // start silently; Options switches either way.
-            narrationEnabled = !Application.isEditor;
+            narrationEnabled = Presenting;
+            TurnsPages = Presenting;
             voice = gameObject.AddComponent<AudioSource>(); voice.playOnAwake = false; voice.volume = narrationEnabled ? .85f : 0; voice.spatialBlend = .75f;
             view.StartLocalRequested += StartPrepared;
             view.StartRequested += StartGenerated;
@@ -130,12 +163,82 @@ namespace Sankofa.Runtime.Personal
             view.SetReducedMotion(reducedMotion);
             StartFireSound();
             Render();
+            if (Presenting) BeginWelcome();
+        }
+
+        /// <summary>Begins the spoken welcome on the intake. A first visit and a return are greeted differently.</summary>
+        public void BeginWelcome()
+        {
+            if (view == null || session.State != PersonalStoryState.Intake) return;
+            welcome = HasKept ? ReturnWelcome : FirstWelcome;
+            welcomeLine = -1;
+            NextWelcomeLine();
+        }
+
+        void NextWelcomeLine()
+        {
+            welcomeLine++;
+            if (welcome == null || welcomeLine >= welcome.Length) { EndWelcome(); return; }
+            var line = welcome[welcomeLine];
+            var clip = narrationEnabled ? Resources.Load<AudioClip>("Narration/personal-table/" + AudioKey(line)) : null;
+            var words = line.Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Length;
+            // A recorded line holds for its own length; an unrecorded one for long enough to be read.
+            welcomeLength = clip != null ? clip.length + .6f : Mathf.Max(2.6f, words / 2.6f + 1.2f);
+            welcomeClock = 0;
+            view.SetInvitation(line);
+            if (clip != null) PlayClip(clip);
+        }
+
+        void EndWelcome()
+        {
+            if (welcome == null) return;
+            welcome = null; welcomeLine = -1;
+            view.SetInvitation(null);
+        }
+
+        void TellWelcome()
+        {
+            if (welcome == null) return;
+            if (session.State != PersonalStoryState.Intake) { EndWelcome(); return; }
+            if (session.Paused || decision != null || keyboard.IsOpen) return;
+            welcomeClock += Time.deltaTime;
+            if (welcomeClock >= welcomeLength) NextWelcomeLine();
+        }
+
+        /// <summary>
+        /// Turns the page once it has been told: when its recording ends, or, without a voice, when the stage has
+        /// finished performing it. A page that offers a choice waits longer, then the fire chooses.
+        /// </summary>
+        void TurnPageWhenTold()
+        {
+            var reading = session.State == PersonalStoryState.Reading && session.Chapter != null;
+            var key = reading ? session.RequestVersion + ":" + session.PageNumber + ":" + session.Chapter.Id : null;
+            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; }
+            if (!TurnsPages || !reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
+            var speaking = voice != null && voice.isPlaying;
+            if (pageSpoken && !speaking && voice.clip != null && voice.time <= 0.01f)
+            {
+                // The recording has ended: the stage and captions reach the end of the page with it.
+                view.SetNarrationProgress(voice.clip.length, voice.clip.length);
+                pageSpoken = false; pageTold = true;
+            }
+            var stage = view.Stage;
+            var voiced = voice != null && voice.clip != null;
+            if (!voiced && voiceRequest == null) view.FollowStageClock();
+            var told = !speaking && voiceRequest == null
+                && (voiced ? pageTold : stage != null && stage.Progress >= 1f)
+                && (stage == null || (!stage.Turning && !stage.Waiting));
+            if (!told) { pageRest = 0; return; }
+            pageRest += Time.deltaTime;
+            if (pageRest < (session.OffersChoice ? ChoiceWaitSeconds : TurnAfterSeconds)) return;
+            pageRest = 0;
+            StopVoice(); session.Next();
         }
 
         /// <summary>The fire is heard where it burns. Headset only, like the voice; the tabletop view itself creates no sound.</summary>
         void StartFireSound()
         {
-            if (Application.isEditor) return;
+            if (!Presenting) return;
             fireSound = Loop("Fire sound", fireRecording, .28f, view.FirePosition);
             // The stage's water and night are silent until a telling stands, and step back while the griot speaks.
             riverSound = Loop("Stage river", riverRecording, 0, view.StagePosition);
@@ -183,6 +286,8 @@ namespace Sankofa.Runtime.Personal
             var speaking = voice != null && voice.isPlaying;
             StageSound(riverSound, .16f, speaking);
             StageSound(nightSound, .09f, speaking);
+            TellWelcome();
+            TurnPageWhenTold();
         }
 
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
@@ -483,6 +588,7 @@ namespace Sankofa.Runtime.Personal
             if (!narrationEnabled || clip == null || session.Paused) return;
             voice.transform.position = view.FirePosition;
             voice.clip = clip; voice.volume = .85f; voice.Play();
+            pageSpoken = session.State == PersonalStoryState.Reading;
         }
         void ClearClips() { foreach (var clip in clips.Values) if (clip != null) Destroy(clip); clips.Clear(); }
         void OnDestroy()

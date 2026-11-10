@@ -94,6 +94,11 @@ namespace Sankofa.Runtime.Personal
         GameObject raisedPrint;
         float popUp = 1, viewingDistance = NominalViewingDistance;
 
+        /// <summary>What the page says while the visitor chooses, once the griot's welcome has been said.</summary>
+        public const string StandingInvitation = "Every family carries something. Choose what you would carry back to the fire, and its story will rise.";
+        string invitation;
+        bool welcoming;
+
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
         public Transform TableRoot => tableRoot != null ? tableRoot : transform;
@@ -183,13 +188,26 @@ namespace Sankofa.Runtime.Personal
             if (stage != null)
             {
                 stage.Rest(); ReturnHeirlooms();
-                SetText(caption, "Every family carries something. Choose what you would carry back to the fire, and its story will rise.");
+                SetText(caption, invitation ?? StandingInvitation);
                 SetText(illustrationLabel, "Imagined scenes • sourced context");
             }
             SetPreviousPages(Array.Empty<string>());
             RefreshIntake();
             RefreshControls();
-            SetFire(Sankofa.Core.Story.FireState.Listening);
+            SetFire(welcoming ? Sankofa.Core.Story.FireState.Welcoming : Sankofa.Core.Story.FireState.Listening);
+        }
+
+        /// <summary>
+        /// The griot's welcome, one line at a time, where the standing invitation otherwise is. The heirlooms stay in
+        /// reach throughout: choosing one never waits for the welcome to finish. Null returns the standing invitation.
+        /// </summary>
+        public void SetInvitation(string line)
+        {
+            invitation = string.IsNullOrWhiteSpace(line) ? null : line;
+            welcoming = invitation != null;
+            if (!intake || detailsOpen || stage == null) return;
+            SetText(caption, invitation ?? StandingInvitation);
+            SetFire(welcoming ? Sankofa.Core.Story.FireState.Welcoming : Sankofa.Core.Story.FireState.Listening);
         }
 
         public void SetIntakeSelection(string route, string region, string period)
@@ -222,8 +240,23 @@ namespace Sankofa.Runtime.Personal
         {
             if (length <= 0 || intake || detailsOpen || closing) return;
             if (stage != null) stage.SetNarration(seconds, length);
+            KeepCaptionsWith(seconds / length);
+        }
+
+        /// <summary>
+        /// When pages turn themselves and no voice is reading, the captions keep pace with the stage's own clock, so
+        /// every part of a page is shown before it turns.
+        /// </summary>
+        public void FollowStageClock()
+        {
+            if (stage == null || intake || detailsOpen || closing) return;
+            KeepCaptionsWith(stage.Progress);
+        }
+
+        void KeepCaptionsWith(float fraction)
+        {
             if (captionPages.Count < 2) return;
-            var spoken = Mathf.Clamp01(seconds / length) * captionPages.Sum(p => p.Length);
+            var spoken = Mathf.Clamp01(fraction) * captionPages.Sum(p => p.Length);
             var part = 0;
             for (var reached = captionPages[0].Length; part < captionPages.Count - 1 && spoken > reached; reached += captionPages[++part].Length) { }
             if (part > captionPage) SetReadingPart(part);

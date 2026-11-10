@@ -779,3 +779,17 @@ The user reviewed the before/after captures and the motion study and chose **go*
 | Rendering budget at the busiest moment: 72 renderers (18 of them text), about 5,900 triangles, 23 materials; blended surfaces are only the three flame cards and the two system hands | Technical (Quest performance) | New PlayMode check: at most 160 renderers, 100,000 triangles and 8 blended surfaces; no shadow casters or shadowed lights. It found and fixed blended sky and earth materials (now depth-written), button faces casting shadows (fixed in `PokePanel`) and the hands casting shadows (off in this scene). These are static counts, not device frame time |
 
 **Verification:** whole-project PlayMode 73 passed, 0 failed, 7 opt-in skips; EditMode 36/36; .NET 371/371; table PlayMode 25/25 with captures. No simulator, headset or listening review.
+
+## November 10, 2026 — the griot's welcome, pages that turn themselves, and a lower page
+
+First slice of the [winning rework](reviews/2026-11-10-winning-rework-audit.md), on `feature/griot-visit`. The entrant chose Sankofa as their entry and asked for the rework; the remaining decisions in that audit (voice, new recordings, saying the disclosure once) are still open.
+
+| Change | Requirement | Criterion | Evidence |
+|---|---|---|---|
+| **A spoken welcome.** On the headset the intake opens with "Come. Sit with me.", a line saying the griot keeps stories from many fires, and one disclosure that the people are imagined and documented pages are marked. A visitor with a kept telling hears "You came back. Sit with me." The heirlooms can be chosen throughout | SK-01 | Experience, first five minutes | New PlayMode test: every line shown once in order; choosing mid-welcome begins the telling |
+| **Pages turn themselves.** A page turns shortly after its recording ends, or after the stage has performed it when there is no voice. An unanswered choice waits fourteen seconds, then the fire chooses, recorded as the fire's choice. Pause holds the page. Hand turning remains | SK-08, SK-15 | Experience | New PlayMode test: a visitor who only watches reaches the ending with every caption part shown; nothing saves or closes by itself |
+| **A lower page and a fuller fire.** The page loses its title rows and leans with its far edge just over the stage rim, so the scenery and both figures are seen whole. The fire is larger and stands beside the stage, inside a 60° forward view | SK-07 | Polish, field of view | November 10 captures under `artifacts/story-table`; existing lens-fit tests pass unchanged |
+
+The welcome lines after the first have no recording yet, so they are captions only until the entrant approves new recordings. The per-page spoken "Imagined scene:" is unchanged for the same reason. `SANKOFA_PRESENT=1` turns the headset presentation on in the editor, for recording in the simulator.
+
+Verified in batch mode, muted: 27 of 27 story-table PlayMode checks, 36 of 36 EditMode and 371 of 371 core checks. An earlier attempt placed the controls and questions at the table's sides; the 60° lens test failed it, and they returned to the page. A flatter page slid under the stage and hid its caption; the capture caught it. No sound was played and nothing ran in the simulator or on a headset.
