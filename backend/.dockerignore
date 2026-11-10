@@ -1,0 +1,9 @@
+# The image takes only the files its Dockerfile names. Everything else stays out of the build context.
+*
+!__init__.py
+!ask.py
+!content.py
+!contracts.py
+!providers.py
+!server.py
+!authored_tellings.json

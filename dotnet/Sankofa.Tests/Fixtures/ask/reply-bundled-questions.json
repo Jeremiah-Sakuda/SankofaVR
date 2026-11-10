@@ -1,0 +1,11 @@
+{
+  "schema": "sankofa.personal-answer.v1",
+  "mode": "bundled",
+  "kind": "questions",
+  "questions": [
+    {
+      "id": "journeys.context.more",
+      "label": "What supports the regional context?"
+    }
+  ]
+}
