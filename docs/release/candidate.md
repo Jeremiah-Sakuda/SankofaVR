@@ -1,5 +1,23 @@
 # Sankofa candidate builds
 
+## Griot visit review APK — November 10, 2026
+
+Built from clean committed source **f7ec6d8** on `feature/griot-visit` with Unity 6000.3.25f1 in muted batch mode. It carries the spoken welcome, self-turning pages, the thinner page, the re-recorded narration and the kept strand described in the [decision record](../decisions.md). The November 8 pop-up build it replaces at the usual path is preserved as `artifacts/release/archive/Sankofa-StoryTable-90891cd.apk`.
+
+| Identity | Local review artifact |
+|---|---|
+| Output / scene | `artifacts/Sankofa-StoryTable.apk` / `StoryTable.unity` |
+| Source / package | `f7ec6d8` / `com.sankofa.quest` |
+| Signing | Android Debug certificate, as before. The dashboard needs a release-signed build |
+| Size | 67,295,678 bytes |
+| SHA-256 | `4e6aaeae735cd3776bec0d239c9315726395d14c9cc4fb74394d7074071f6ede` |
+| Build result | Succeeded, zero errors, one warning |
+| Local evidence | `artifacts/logs/griot-apk-build.log` |
+
+The build guard reported local development credentials absent, and the source tree was clean after the build. The APK has no microphone permission and no service endpoint. It was not installed, played, run in the simulator or uploaded. Every open gate listed below still applies, and none of the twenty new recordings has been listened to.
+
+---
+
 ## Active pop-up theatre review APK — November 8, 2026
 
 Built the approved pop-up theatre at **90891cd**, the current working branch, with Unity 6000.3.25f1 in muted batch mode. This replaces the October 18 flat-table APK at the usual local path; the earlier file is preserved as `artifacts/release/archive/Sankofa-StoryTable-7fc1988-dirty.apk`. These are local review builds.
