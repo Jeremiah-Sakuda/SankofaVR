@@ -154,8 +154,10 @@ namespace Sankofa.Tests
             Time.timeScale = 8;
             try
             {
+                Assert.That(Panel("Start choices").Ids, Does.Not.Contain("local"), "an heirloom begins the telling; the page offers no second start");
                 yield return Press("Interest choices", "journeys");
-                var pages = new List<string>(); var part = 0; var parts = 1;
+                Assert.That(Panel("Turn a page").Ids, Has.None.EqualTo("next").And.None.EqualTo("back"), "self-turning pages carry no page-turning buttons");
+                var pages = new List<string>(); var part = 0; var parts = 1; var choiceAtFigures = false;
                 for (var waited = 0f; waited < 90f && app.Session.State == PersonalStoryState.Reading; waited += Time.unscaledDeltaTime)
                 {
                     var id = app.Session.Chapter.Id;
@@ -165,8 +167,14 @@ namespace Sankofa.Tests
                         pages.Add(id);
                     }
                     part = view.ReadingPart; parts = view.ReadingPartCount;
+                    if (app.Session.OffersChoice && !Panel("Follow wambui").Hidden)
+                    {
+                        choiceAtFigures = true;
+                        Assert.That(Panel("Questions beside the story").Ids, Is.Empty, "the choice stands at the figures, not twice");
+                    }
                     yield return null;
                 }
+                Assert.That(choiceAtFigures, Is.True, "both sides were offered at the figures before the fire chose");
                 Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing), "a visitor who only watches reaches the ending");
                 Assert.That(pages.Count, Is.EqualTo(3), string.Join(", ", pages));
                 Assert.That(app.Session.FollowedByChoice, Is.False, "an unanswered choice is the fire's, never recorded as the visitor's");

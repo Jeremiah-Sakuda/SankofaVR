@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using Sankofa.Core.Personal;
 using Sankofa.Runtime.Personal;
 using TMPro;
 using UnityEngine;
@@ -149,6 +150,13 @@ namespace Sankofa.Tests
             Assert.That(naserian.Hidden, Is.False, "each perspective stands at the feet of the figure it follows");
             yield return new WaitForSecondsRealtime(0.7f);
             if (capture) { Capture("13-stage-choice-72", 72); Capture("13-stage-choice-82"); }
+            if (capture)
+            {
+                // The headset presentation: pages turn themselves, so the page carries no turning buttons or second choice.
+                view.SetSelfTurning(true); view.RenderChapter(view.LastChapter); yield return null; yield return null;
+                Capture("16-self-turning-choice-72", 72);
+                view.SetSelfTurning(false); view.RenderChapter(view.LastChapter); yield return null;
+            }
             var chosen = ""; view.ChoiceSelected = id => chosen = id;
             yield return new WaitForSecondsRealtime(0.33f);
             naserian.PressFromPointer("choice:1"); yield return null;
@@ -403,7 +411,11 @@ namespace Sankofa.Tests
             app.SetSeed("What did a household carry for trade?"); app.StartPrepared();
             yield return null;
             Assert.That(app.Session.Story.Interest, Is.EqualTo("trade-household"));
-            Assert.That(view.Caption, Does.StartWith(app.Session.Chapter.Narration.Substring(0, 30)));
+            // The page shows the words the griot speaks; the stored disclosure is the page's label, not part of the caption.
+            Assert.That(app.Session.Chapter.Narration, Does.StartWith(PersonalStoryCatalog.ReconstructionPrefix));
+            Assert.That(view.Caption, Does.StartWith(PersonalStoryVoice.Spoken(app.Session.Chapter.Narration).Substring(0, 30)));
+            Assert.That(view.Caption, Does.Not.Contain("Imagined scene"));
+            Assert.That(view.GetComponentsInChildren<TMP_Text>(true).Single(t => t.name == "Illustration context").text, Is.EqualTo("Imagined scene"));
             foreach (var fov in new[] { 60, 72, 82 }) AssertControlsInForwardView(fov);
             if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1")
                 foreach (var fov in new[] { 60, 72, 82 }) Capture("04-actual-story-" + fov, fov);

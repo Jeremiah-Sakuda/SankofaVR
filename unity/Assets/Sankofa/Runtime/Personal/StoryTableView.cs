@@ -95,9 +95,9 @@ namespace Sankofa.Runtime.Personal
         float popUp = 1, viewingDistance = NominalViewingDistance;
 
         /// <summary>What the page says while the visitor chooses, once the griot's welcome has been said.</summary>
-        public const string StandingInvitation = "Every family carries something. Choose what you would carry back to the fire, and its story will rise.";
+        public const string StandingInvitation = PersonalStoryVoice.Invitation;
         string invitation;
-        bool welcoming;
+        bool welcoming, selfTurning;
 
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
@@ -105,6 +105,8 @@ namespace Sankofa.Runtime.Personal
         public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Concat(figureChoices).Concat(new[] { gourdInvite }).Where(p => p != null).ToArray();
         public string Caption => caption != null ? caption.text : "";
         public PopUpStage Stage => stage;
+        /// <summary>The page last rendered, so presentation can be redrawn when only how it is shown has changed.</summary>
+        public StoryTableChapterViewData LastChapter { get; private set; }
         /// <summary>Where the pop-up stage stands, for the sounds of its scene.</summary>
         public Vector3 StagePosition => stage != null ? stage.transform.position + Vector3.up * .1f : TableRoot.position;
         /// <summary>Where the griot's fire burns, for its voice and sound.</summary>
@@ -210,6 +212,22 @@ namespace Sankofa.Runtime.Personal
             SetFire(welcoming ? Sankofa.Core.Story.FireState.Welcoming : Sankofa.Core.Story.FireState.Listening);
         }
 
+        /// <summary>
+        /// When pages turn themselves the page carries less: no page-turning buttons, no second copy of a choice that
+        /// already stands at each figure, and no start button beside heirlooms that begin a telling when touched.
+        /// </summary>
+        public void SetSelfTurning(bool value)
+        {
+            if (selfTurning == value) return;
+            selfTurning = value;
+            RefreshIntake();
+            RefreshControls();
+            if (offeringChoice && LastChapter != null && !intake && !detailsOpen && !closing) SetChoices(LastChapter.Choices ?? Array.Empty<string>());
+        }
+
+        /// <summary>The griot's fire answers a hand held near it, before any word is said.</summary>
+        public void AcknowledgeHand() { if (fire != null && !paused) fire.Acknowledge(); }
+
         public void SetIntakeSelection(string route, string region, string period)
         {
             if (!string.IsNullOrEmpty(route)) selectedRoute = route;
@@ -284,6 +302,7 @@ namespace Sankofa.Runtime.Personal
         public void RenderChapter(StoryTableChapterViewData chapter)
         {
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
+            LastChapter = chapter;
             intake = false; error = closing = detailsOpen = decisionOpen = false;
             ShowOnly(readingRoot);
             var choices = chapter.Choices ?? Array.Empty<string>();
@@ -417,7 +436,9 @@ namespace Sankofa.Runtime.Personal
             RefreshFigureChoices();
             if (questions == null) return;
             var items = new List<(string Id, string Label)>();
-            for (var i = 0; i < Mathf.Min(2, labels.Count); i++)
+            // With self-turning pages the choice stands at the figures alone; waiting leaves it to the fire.
+            var atFigures = selfTurning && stage != null && figureChoices.Any(p => p != null && p.Ids.Any());
+            for (var i = 0; i < Mathf.Min(2, labels.Count) && !atFigures; i++)
                 if (!string.IsNullOrWhiteSpace(labels[i])) items.Add((ChoicePrefix + i, labels[i]));
             questions.Show(items);
             questions.Hidden = intake || detailsOpen || paused || items.Count == 0;
@@ -470,6 +491,7 @@ namespace Sankofa.Runtime.Personal
             var edit = ("edit", seed.Length == 0 ? "Add my question" : "Edit my question");
             if (intakeActions != null) intakeActions.Show(onlineAvailable
                 ? new[] { ("local", "Read prepared story"), edit, ("create", "Create my story") }
+                : selfTurning && stage != null && seed.Length == 0 ? new[] { edit, ("about", "How it works") }
                 : new[] { ("local", seed.Length == 0 ? "Begin the story" : "Begin with my question"), edit, ("about", "How it works") });
             if (keptActions != null) { keptActions.Show(new[] { ("reopen", "Reopen kept story"), ("forget", "Forget kept story") }); keptActions.Hidden = !hasKeptStory || paused || detailsOpen || intakeRoot == null || !intakeRoot.activeSelf; }
             if (intakeHeading != null) intakeHeading.gameObject.SetActive(!hasKeptStory);
@@ -508,15 +530,15 @@ namespace Sankofa.Runtime.Personal
             var items = new List<(string Id, string Label)>();
             if (closing)
             {
-                if (canBack) items.Add(("back", "Previous page"));
+                if (canBack && !selfTurning) items.Add(("back", "Previous page"));
                 if (canSave) items.Add(("save", "Keep this story"));
-                items.Add(("again", "Another question"));
+                items.Add(("again", selfTurning ? "Another story" : "Another question"));
             }
             else
             {
-                if (canBack || captionPage > 0) items.Add(("back", "Previous page"));
+                if (!selfTurning && (canBack || captionPage > 0)) items.Add(("back", "Previous page"));
                 var morePage = captionPage + 1 < captionPages.Count;
-                if (canNext || morePage) items.Add(("next", morePage ? "Continue reading" : offeringChoice ? "Let the fire choose" : "Next page"));
+                if (!selfTurning && (canNext || morePage)) items.Add(("next", morePage ? "Continue reading" : offeringChoice ? "Let the fire choose" : "Next page"));
                 if (canAsk) items.Add(("ask", "Explore context"));
                 items.Add(("sources", "About this story"));
             }

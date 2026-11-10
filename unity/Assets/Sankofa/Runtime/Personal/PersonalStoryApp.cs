@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Sankofa.Core.Json;
 using Sankofa.Core.Personal;
@@ -71,15 +70,10 @@ namespace Sankofa.Runtime.Personal
         /// </summary>
         static bool Presenting => !Application.isEditor || Environment.GetEnvironmentVariable("SANKOFA_PRESENT") == "1";
 
-        /// <summary>What a first-time visitor hears and reads before choosing. The disclosure is said once, here.</summary>
-        public static readonly string[] FirstWelcome =
-        {
-            "Come. Sit with me.",
-            "I keep stories from many fires. Tonight's comes from Enkare Nairobi, before the railway.",
-            "The people in it are imagined. What is documented, I will mark.",
-        };
+        /// <summary>What a first-time visitor hears and reads before choosing, ending on the invitation that stays.</summary>
+        public static readonly string[] FirstWelcome = PersonalStoryVoice.Welcome.ToArray();
         /// <summary>What a visitor with a kept telling hears instead.</summary>
-        public static readonly string[] ReturnWelcome = { "You came back. Sit with me." };
+        public static readonly string[] ReturnWelcome = PersonalStoryVoice.ReturnWelcome.ToArray();
         const float TurnAfterSeconds = 1.6f, ChoiceWaitSeconds = 14f;
         string[] welcome;
         int welcomeLine = -1;
@@ -94,7 +88,15 @@ namespace Sankofa.Runtime.Personal
         /// A page turns itself once the griot has finished it, and an unanswered choice is left to the fire. The
         /// visitor can still turn sooner, go back or pause. On by default wherever the headset presentation is.
         /// </summary>
-        public bool TurnsPages { get; set; }
+        public bool TurnsPages
+        {
+            get => turnsPages;
+            set { turnsPages = value; if (view != null) view.SetSelfTurning(value); }
+        }
+        bool turnsPages;
+        HandSource[] hands;
+        float handWarmth;
+        const float HandWarmthMetres = 0.26f;
 
         void Awake()
         {
@@ -106,7 +108,7 @@ namespace Sankofa.Runtime.Personal
             keyboard = gameObject.AddComponent<StoryTableKeyboard>();
             keyboard.Configure(view, view.StylePanel);
             var panels = view.Panels.Concat(new[] { keyboard.Panel }).ToArray();
-            var hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
+            hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
             foreach (var panel in panels) foreach (var hand in hands) { var source = hand; panel.AddFingertip(() => source.Fingertip); }
             foreach (var pointer in FindObjectsByType<PointerSource>(FindObjectsSortMode.None)) pointer.ConfigurePanels(panels);
             store = new PersonalStoryStore(StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story"));
@@ -180,7 +182,7 @@ namespace Sankofa.Runtime.Personal
             welcomeLine++;
             if (welcome == null || welcomeLine >= welcome.Length) { EndWelcome(); return; }
             var line = welcome[welcomeLine];
-            var clip = narrationEnabled ? Resources.Load<AudioClip>("Narration/personal-table/" + AudioKey(line)) : null;
+            var clip = narrationEnabled ? Resources.Load<AudioClip>("Narration/personal-table/" + PersonalStoryVoice.ClipName(line)) : null;
             var words = line.Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Length;
             // A recorded line holds for its own length; an unrecorded one for long enough to be read.
             welcomeLength = clip != null ? clip.length + .6f : Mathf.Max(2.6f, words / 2.6f + 1.2f);
@@ -288,6 +290,21 @@ namespace Sankofa.Runtime.Personal
             StageSound(nightSound, .09f, speaking);
             TellWelcome();
             TurnPageWhenTold();
+            WarmToHands();
+        }
+
+        /// <summary>A hand held to the fire makes it swell and throw sparks: the first thing a visitor's hands do here.</summary>
+        void WarmToHands()
+        {
+            handWarmth -= Time.deltaTime;
+            if (handWarmth > 0 || hands == null || session.Paused) return;
+            var flame = view.FirePosition + Vector3.up * 0.14f;
+            foreach (var hand in hands)
+            {
+                if (hand == null || !hand.Tracked || (hand.PalmCenter - flame).sqrMagnitude > HandWarmthMetres * HandWarmthMetres) continue;
+                view.AcknowledgeHand(); handWarmth = 0.9f;
+                return;
+            }
         }
 
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
@@ -395,7 +412,7 @@ namespace Sankofa.Runtime.Personal
                     view.RenderChapter(new StoryTableChapterViewData
                     {
                         Index = session.PageNumber - 1, Count = session.PageCount, Id = session.Chapter.Id, Title = session.Chapter.Title,
-                        Caption = session.Chapter.Narration, ArtKey = session.Chapter.Illustration,
+                        Caption = PersonalStoryVoice.Spoken(session.Chapter.Narration), ArtKey = session.Chapter.Illustration,
                         ImageLabel = TruthLabel(session.Chapter.Truth),
                         PreviousPageTitles = session.PagesBefore.Select(c => c.Title).TakeLast(2).ToArray(),
                         Questions = session.Chapter.Questions.Select(q => q.Label).ToArray(),
@@ -406,7 +423,7 @@ namespace Sankofa.Runtime.Personal
                     if (narrationEnabled && voice.clip == null && voiceRequest == null) SpeakCurrent();
                     break;
                 case PersonalStoryState.Question:
-                    view.RenderQuestion(session.Question.Label, session.Question.Answer, TruthLabel(session.Question.Truth)); break;
+                    view.RenderQuestion(session.Question.Label, PersonalStoryVoice.Spoken(session.Question.Answer), TruthLabel(session.Question.Truth)); break;
                 case PersonalStoryState.Sources:
                     view.ShowSourceDetails("What this telling knows", SourcesText()); break;
                 case PersonalStoryState.Closing:
@@ -546,15 +563,14 @@ namespace Sankofa.Runtime.Personal
             if (pendingAudio != null) { pendingAudio.Abort(); pendingAudio = null; }
             if (voiceRequest != null) { StopCoroutine(voiceRequest); voiceRequest = null; }
         }
-        static string AudioKey(string text)
-        {
-            using (var hash = SHA256.Create()) return "p-" + BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(text))).Replace("-", "").ToLowerInvariant().Substring(0, 16);
-        }
         void SpeakCurrent()
         {
             if (!narrationEnabled || session.State != PersonalStoryState.Reading || session.Paused || session.Chapter == null) return;
-            var key = AudioKey(session.Chapter.Narration);
+            // The recording is of the spoken words. A telling kept before the label left the recordings still finds its
+            // earlier clip by its full stored text.
+            var key = PersonalStoryVoice.ClipName(PersonalStoryVoice.Spoken(session.Chapter.Narration));
             var clip = Resources.Load<AudioClip>("Narration/personal-table/" + key);
+            if (clip == null) clip = Resources.Load<AudioClip>("Narration/personal-table/" + PersonalStoryVoice.ClipName(session.Chapter.Narration));
             if (clip == null) clips.TryGetValue(key, out clip);
             if (clip != null) { PlayClip(clip); return; }
             var endpoint = Endpoint();
