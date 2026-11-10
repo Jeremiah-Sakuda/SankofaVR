@@ -116,6 +116,25 @@ namespace Sankofa.EditorTools
             Set(view, "controls", controls);
             Set(view, "fire", BuildStoryTableFire(table));
 
+            // The kept strand: six beads along the stage's rim on the fire's side, one for each side of a telling. A
+            // kept side's bead takes its heirloom's colour. They sit on the drum, which does not turn with the stage.
+            var strand = Point(table, "Kept strand", new Vector3(0.02f, 0.089f, 0.11f));
+            var beadEmpty = TableMaterial("Bead unthreaded", new Color(0.33f, 0.27f, 0.20f));
+            var beadTones = new Object[]
+            {
+                TableMaterial("Bead bundle", new Color(0.17f, 0.22f, 0.50f)),
+                TableMaterial("Bead gourd", new Color(0.72f, 0.46f, 0.20f)),
+                TableMaterial("Bead water pot", new Color(0.62f, 0.27f, 0.14f)),
+            };
+            var beads = new Object[6];
+            for (var i = 0; i < beads.Length; i++)
+            {
+                var angle = (-60f - i * 8f) * Mathf.Deg2Rad;
+                beads[i] = Prim(strand, "Bead " + (i + 1), PrimitiveType.Sphere, new Vector3(Mathf.Sin(angle) * 0.306f, 0, -Mathf.Cos(angle) * 0.306f),
+                    Vector3.one * StoryTableView.BeadSize * 0.55f, beadEmpty).GetComponent<Renderer>();
+            }
+            SetArray(view, "beads", beads); Set(view, "beadEmpty", beadEmpty); SetArray(view, "beadTones", beadTones);
+
             var pointerArt = new SankofaArtSet { Pointer = AssetDatabase.LoadAssetAtPath<Material>(SankofaArt.Folder + "/Pointer.mat") };
             BuildPointers(rig, pointerArt, view.Panels);
             table.gameObject.AddComponent<StoryTableAtmosphere>();

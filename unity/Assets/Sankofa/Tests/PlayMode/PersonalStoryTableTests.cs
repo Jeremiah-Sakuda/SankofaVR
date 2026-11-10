@@ -153,8 +153,11 @@ namespace Sankofa.Tests
             if (capture)
             {
                 // The headset presentation: pages turn themselves, so the page carries no turning buttons or second choice.
-                view.SetSelfTurning(true); view.RenderChapter(view.LastChapter); yield return null; yield return null;
+                view.SetSelfTurning(true); view.RenderChapter(view.LastChapter);
+                view.SetStrand(new[] { "trade-household", "journeys" });
+                for (var settle = Time.realtimeSinceStartup + 0.6f; Time.realtimeSinceStartup < settle;) yield return null;
                 Capture("16-self-turning-choice-72", 72);
+                view.SetStrand(new string[0]);
                 view.SetSelfTurning(false); view.RenderChapter(view.LastChapter); yield return null;
             }
             var chosen = ""; view.ChoiceSelected = id => chosen = id;

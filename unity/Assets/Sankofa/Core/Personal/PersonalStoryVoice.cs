@@ -31,6 +31,27 @@ namespace Sankofa.Core.Personal
         /// <summary>What a visitor with a kept telling hears instead.</summary>
         public static IReadOnlyList<string> ReturnWelcome => Array.AsReadOnly(returning);
 
+        /// <summary>The heirloom that begins each telling, as the griot names it.</summary>
+        public static string Heirloom(string telling) => telling == "journeys" ? "bundle" : telling == "place-water" ? "water pot" : "gourd";
+
+        /// <summary>What the griot tells a returning visitor about a side they have not heard, and how to reach it.</summary>
+        public static string ReturnInvitation(string telling, string sideLabel)
+        {
+            var side = string.IsNullOrEmpty(sideLabel) ? "" : char.ToLowerInvariant(sideLabel[0]) + sideLabel.Substring(1);
+            return "Choose the " + Heirloom(telling) + ", and you could " + side + ".";
+        }
+
+        /// <summary>
+        /// The welcome for a visitor whose strand has beads: the greeting, the side the strand suggests next, then the
+        /// invitation. A complete or empty strand has no side to name.
+        /// </summary>
+        public static IReadOnlyList<string> ReturnWelcomeFor(KeptStrand strand)
+        {
+            var next = strand != null && strand.Count > 0 ? strand.NextUnheard() : null;
+            var side = next == null ? null : KeptStrand.Sides(next.Telling).FirstOrDefault(s => s.Id == next.Side);
+            return side == null ? ReturnWelcome : Array.AsReadOnly(new[] { returning[0], ReturnInvitation(next.Telling, side.Label), Invitation });
+        }
+
         /// <summary>Every line the griot says outside a telling, with a stable id for its recording.</summary>
         public static IReadOnlyList<KeyValuePair<string, string>> Lines => new[]
         {
@@ -39,7 +60,8 @@ namespace Sankofa.Core.Personal
             new KeyValuePair<string, string>("welcome.imagined", welcome[2]),
             new KeyValuePair<string, string>("welcome.invitation", Invitation),
             new KeyValuePair<string, string>("welcome.return", returning[0]),
-        };
+        }.Concat(KeptStrand.Tellings.SelectMany(telling => KeptStrand.Sides(telling)
+            .Select(side => new KeyValuePair<string, string>("return." + side.Id, ReturnInvitation(telling, side.Label))))).ToArray();
 
         /// <summary>A chapter's or answer's words as spoken and captioned: its stored text without the leading disclosure.</summary>
         public static string Spoken(string stored)

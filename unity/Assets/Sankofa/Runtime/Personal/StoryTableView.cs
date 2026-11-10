@@ -62,6 +62,11 @@ namespace Sankofa.Runtime.Personal
         [SerializeField] PokePanel[] figureChoices = Array.Empty<PokePanel>();
         [Tooltip("Appears over the stage's gourd when the visitor may set it down themselves.")]
         [SerializeField] PokePanel gourdInvite;
+        [Tooltip("The kept strand on the stage's rim: one bead for each side of a telling the visitor has kept.")]
+        [SerializeField] Renderer[] beads = Array.Empty<Renderer>();
+        [SerializeField] Material beadEmpty;
+        [Tooltip("A bead's colour is its heirloom's, in the same order as the interests.")]
+        [SerializeField] Material[] beadTones = Array.Empty<Material>();
 
         public Action<string> RouteSelected, RegionSelected, PeriodSelected, QuestionSelected, ChoiceSelected;
         public Action StartRequested, StartLocalRequested, SeedEditRequested, SourceDetailsRequested;
@@ -224,6 +229,27 @@ namespace Sankofa.Runtime.Personal
             RefreshControls();
             if (offeringChoice && LastChapter != null && !intake && !detailsOpen && !closing) SetChoices(LastChapter.Choices ?? Array.Empty<string>());
         }
+
+        /// <summary>How many beads the strand shows as kept.</summary>
+        public int StrandKept { get; private set; }
+
+        /// <summary>
+        /// Shows the kept strand: a coloured bead for each kept side, in the order kept, and a small plain bead for
+        /// each side not yet heard, so the strand itself says how much of the stories remains.
+        /// </summary>
+        public void SetStrand(IReadOnlyList<string> keptTellings)
+        {
+            StrandKept = Mathf.Min(keptTellings?.Count ?? 0, beads.Length);
+            for (var i = 0; i < beads.Length; i++)
+            {
+                if (beads[i] == null) continue;
+                var tone = i < StrandKept ? Array.IndexOf(RouteIds, keptTellings[i]) : -1;
+                var kept = tone >= 0 && tone < beadTones.Length && beadTones[tone] != null;
+                beads[i].sharedMaterial = kept ? beadTones[tone] : beadEmpty;
+                beads[i].transform.localScale = Vector3.one * (kept ? BeadSize : BeadSize * 0.55f);
+            }
+        }
+        public const float BeadSize = 0.024f;
 
         /// <summary>The griot's fire answers a hand held near it, before any word is said.</summary>
         public void AcknowledgeHand() { if (fire != null && !paused) fire.Acknowledge(); }

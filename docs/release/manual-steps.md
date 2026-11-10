@@ -46,7 +46,7 @@ The output is `artifacts/Sankofa-StoryTable-release.apk`. The build refuses to r
 
 ## 5. Listen once (Wednesday Nov 11, about 30 minutes)
 
-Nobody has listened to the narration yet. Play the 12 clips in `unity/Assets/Sankofa/Resources/Narration/personal-table/` (`personal-table.narration.json` maps each file to its chapter), and note any mispronounced names, odd pacing or clipping. Then play the brook and night recordings together at the same time and judge the balance. Tell me what is wrong; I fix it in the build, but new recordings need your approval.
+Nobody has listened to the narration yet. On November 10 the welcome and return lines were recorded and the imagined chapters were re-read without the spoken label, so there are now 23 current clips: 12 chapters and 11 lines. `personal-table.narration.json` maps each file to its chapter (`chapters`) or line (`lines`); ignore `archived_chapters`. Play them from `unity/Assets/Sankofa/Resources/Narration/personal-table/` and note any mispronounced names, odd pacing or clipping. Listen to the welcome first: `welcome.come`, `welcome.fires`, `welcome.imagined`, `welcome.invitation`. It is the first thing a judge hears. Then play the brook and night recordings together at the same time and judge the balance. Tell me what is wrong; I fix it in the build, but new recordings need your approval.
 
 ## 6. Record the video (Saturday–Sunday Nov 14–15)
 

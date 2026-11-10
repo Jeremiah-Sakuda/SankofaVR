@@ -32,6 +32,8 @@ namespace Sankofa.Runtime.Personal
         StoryTablePlacement placement;
         StoryTableKeyboard keyboard;
         PersonalStoryStore store;
+        PersonalStrandStore strands;
+        KeptStrand strand = new KeptStrand();
         readonly PersonalStorySession session = new PersonalStorySession();
         string region = "enkare-nairobi", period = "1850s", interest = "trade-household", seed = "";
         UnityWebRequest pending;
@@ -58,6 +60,8 @@ namespace Sankofa.Runtime.Personal
             get => serviceEndpoint;
             set { serviceEndpoint = value ?? ""; if (view != null && session.State == PersonalStoryState.Intake && decision == null) Render(); }
         }
+        /// <summary>The sides of tellings this visitor has kept: one bead each, at most six.</summary>
+        public KeptStrand Strand => strand;
         public bool OnlineAvailable => Endpoint() != null;
         public string PersonalReason => personalReason;
         public string ServiceAccessToken { set => serviceAccessToken = value ?? ""; }
@@ -111,7 +115,10 @@ namespace Sankofa.Runtime.Personal
             hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
             foreach (var panel in panels) foreach (var hand in hands) { var source = hand; panel.AddFingertip(() => source.Fingertip); }
             foreach (var pointer in FindObjectsByType<PointerSource>(FindObjectsSortMode.None)) pointer.ConfigurePanels(panels);
-            store = new PersonalStoryStore(StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story"));
+            var folder = StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story");
+            store = new PersonalStoryStore(folder);
+            strands = new PersonalStrandStore(folder);
+            strand = strands.Load();
             // On the headset the griot reads aloud by default, beside full captions. Editor, simulator and batch sessions
             // start silently; Options switches either way.
             narrationEnabled = Presenting;
@@ -172,7 +179,7 @@ namespace Sankofa.Runtime.Personal
         public void BeginWelcome()
         {
             if (view == null || session.State != PersonalStoryState.Intake) return;
-            welcome = HasKept ? ReturnWelcome : FirstWelcome;
+            welcome = strand.Count > 0 ? PersonalStoryVoice.ReturnWelcomeFor(strand).ToArray() : HasKept ? ReturnWelcome : FirstWelcome;
             welcomeLine = -1;
             NextWelcomeLine();
         }
@@ -390,6 +397,7 @@ namespace Sankofa.Runtime.Personal
         void Render()
         {
             if (view == null) return;
+            view.SetStrand(strand.Beads.Select(b => b.Telling).ToArray());
             view.SetPaused(session.Paused); keyboard.Suspend(session.Paused);
             if (session.Paused) { voice.Pause(); foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null) s.Pause(); return; }
             if (voice.clip != null && narrationEnabled && !voice.isPlaying) voice.UnPause();
@@ -516,9 +524,27 @@ namespace Sankofa.Runtime.Personal
         }
         void Keep()
         {
-            try { store.Keep(session.Story); view.ShowClosing("Kept on this device. You can reopen the same telling or forget it from your story table."); }
+            try
+            {
+                store.Keep(session.Story);
+                var bead = ThreadBead();
+                view.SetStrand(strand.Beads.Select(b => b.Telling).ToArray());
+                view.ShowClosing("Kept on this device. " + bead + "You can reopen the same telling or forget it from your story table.");
+            }
             catch (Exception) { view.ShowClosing("This story could not be kept. It is still open; try Keep again or leave without saving."); }
             view.SetControlState(true, false, false, true);
+        }
+        /// <summary>
+        /// Keeping a prepared telling threads a bead for the side that was followed, whoever chose it. A side already
+        /// on the strand adds nothing. A generated telling has no sides and no bead.
+        /// </summary>
+        string ThreadBead()
+        {
+            var story = session.Story; var side = session.Followed;
+            if (story == null || side == null || story.Mode != "bundled" || !KeptStrand.IsKnown(story.Interest, side.Id)) return "";
+            try { if (strand.Add(story.Interest, side.Id)) strands.Save(strand); }
+            catch (Exception) { strand = strands.Load(); return "Its bead could not be threaded this time. "; }
+            return strand.IsComplete ? "Your strand now holds all six sides. " : "A bead is threaded for this side: " + strand.Count + " of " + KeptStrand.Capacity + ". ";
         }
         public bool Reopen()
         {
@@ -529,9 +555,10 @@ namespace Sankofa.Runtime.Personal
         public void Forget()
         {
             if (session.Paused) return;
-            Decide("Forget your kept story?", "This removes the story kept on this device.", new[] { ("forget", "Forget kept story"), ("cancel", "Keep it") }, id =>
+            Decide("Forget your kept story?", "This removes the story kept on this device and the beads on your strand.", new[] { ("forget", "Forget kept story"), ("cancel", "Keep it") }, id =>
             {
-                if (id == "forget") { try { store.Forget(); } catch (Exception) { ShelfProblem("The kept story could not be removed.", Forget); return; } }
+                // Forgetting removes everything kept about earlier visits: the telling and the strand of sides heard.
+                if (id == "forget") { try { store.Forget(); strands.Forget(); strand = new KeptStrand(); } catch (Exception) { ShelfProblem("The kept story could not be removed.", Forget); return; } }
                 Render();
             });
         }

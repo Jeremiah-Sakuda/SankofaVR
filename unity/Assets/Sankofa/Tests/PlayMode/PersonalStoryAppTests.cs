@@ -197,6 +197,53 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator KeepingThreadsABeadAndTheGriotNamesAnUnheardSideOnReturn()
+        {
+            Assert.That(app.Strand.Count, Is.Zero);
+            Assert.That(view.StrandKept, Is.Zero);
+            yield return Press("Interest choices", "journeys");
+            yield return ReachEnding();
+            Assert.That(app.Strand.Count, Is.Zero, "reading to the end threads nothing; only Keep does");
+            yield return Press("Turn a page", "save");
+            Assert.That(app.HasKept, Is.True);
+            Assert.That(app.Strand.Beads.Select(b => b.ToString()), Is.EqualTo(new[] { "journeys/journeys.follow.waiting" }), "the fire's side earns a bead once the visitor keeps it");
+            Assert.That(view.StrandKept, Is.EqualTo(1));
+            Assert.That(view.Caption, Does.Contain("1 of 6"));
+            Assert.That(new Sankofa.Storage.PersonalStrandStore(directory).Load().Count, Is.EqualTo(1), "the strand is on the device, not only in memory");
+
+            yield return Press("Turn a page", "again");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            Time.timeScale = 6;
+            try
+            {
+                app.BeginWelcome(); yield return null;
+                Assert.That(view.Caption, Is.EqualTo("You came back. Sit with me."));
+                var seen = new List<string>();
+                for (var waited = 0f; waited < 30f && app.Welcoming; waited += Time.unscaledDeltaTime)
+                {
+                    if (seen.Count == 0 || seen[seen.Count - 1] != view.Caption) seen.Add(view.Caption);
+                    yield return null;
+                }
+                Assert.That(seen, Is.EqualTo(new[] { "You came back. Sit with me.", "Choose the bundle, and you could find the one who is late.", StoryTableView.StandingInvitation }));
+            }
+            finally { Time.timeScale = 1; }
+
+            // Keeping the same side again adds no second bead; forgetting removes the telling and the strand.
+            yield return Press("Kept story choices", "reopen");
+            yield return ReachEnding();
+            yield return Press("Turn a page", "save");
+            yield return Press("Return and recovery actions", "replace");
+            Assert.That(app.Strand.Count, Is.EqualTo(1));
+            yield return Press("Turn a page", "again");
+            yield return Press("Kept story choices", "forget");
+            yield return Press("Return and recovery actions", "forget");
+            Assert.That(app.HasKept, Is.False);
+            Assert.That(app.Strand.Count, Is.Zero);
+            Assert.That(view.StrandKept, Is.Zero);
+            Assert.That(new Sankofa.Storage.PersonalStrandStore(directory).Load().Count, Is.Zero);
+        }
+
+        [UnityTest]
         public IEnumerator FreeformQuestionChangesPreparedThreadWithoutAssumingFamilyIdentity()
         {
             app.SetSeed("What could a household carry in a gourd?");

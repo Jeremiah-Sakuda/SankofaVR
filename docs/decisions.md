@@ -793,3 +793,21 @@ First slice of the [winning rework](reviews/2026-11-10-winning-rework-audit.md),
 The welcome lines after the first have no recording yet, so they are captions only until the entrant approves new recordings. The per-page spoken "Imagined scene:" is unchanged for the same reason. `SANKOFA_PRESENT=1` turns the headset presentation on in the editor, for recording in the simulator.
 
 Verified in batch mode, muted: 27 of 27 story-table PlayMode checks, 36 of 36 EditMode and 371 of 371 core checks. An earlier attempt placed the controls and questions at the table's sides; the 60° lens test failed it, and they returned to the page. A flatter page slid under the stage and hid its caption; the capture caught it. No sound was played and nothing ran in the simulator or on a headset.
+
+## November 10, 2026 — the griot's recorded welcome, the label said once, and the kept strand
+
+Second slice of the [winning rework](reviews/2026-11-10-winning-rework-audit.md). The entrant approved new recordings and removing the spoken "Imagined scene:" from every page.
+
+| Change | Requirement | Criterion | Evidence |
+|---|---|---|---|
+| **The disclosure is said once and shown always.** A story's stored text still opens with "Imagined scene: " and validation still requires it. The caption and the recording use the words without it. The page's label marks every imagined page, and the welcome says the people are imagined | SK-05, SK-06 | Experience, Polish | Core test ties each recording to the words spoken; a PlayMode test checks the caption omits the label and the page shows it |
+| **Recorded welcome and return lines.** Eleven lines and nine re-read chapters, same model, voice and direction as before. Clips recorded with the label are retained for tellings kept earlier | SK-01, SK-11 | Polish (sound) | 20 clips generated and hash-checked; lengths within the script's bounds. **Nobody has listened to them** |
+| **A thinner page on the headset.** With self-turning pages there are no page-turning buttons, the choice stands only at the figures, and an heirloom is the only way to begin | SK-02, SK-08 | Experience, field of view | PlayMode test and the `16-self-turning-choice-72` capture |
+| **A hand held to the fire makes it swell.** | SK-01 | First five minutes | Compiles and runs; no test and no device evidence |
+| **The kept strand.** Keeping a prepared telling threads a bead for the side followed, whoever chose it. Six beads sit on the stage rim beside the fire, coloured by heirloom. A returning visitor is told which heirloom leads to a side they have not heard. Forgetting removes the telling and the strand | SK-12 | Innovation (repeat use) | PlayMode test: keep, persisted strand, return greeting, no second bead for the same side, forget |
+
+The strand and answer types and the `/ask` service came from the cloud session's pull request, merged into this branch after its checks passed here. The pull request against `main` stays open for the entrant's review. Nothing in the scene calls `/ask` yet, the build has no microphone permission, and no service is hosted.
+
+Two choices here are the entrant's to reverse: a side the fire chose earns a bead once kept, and Forget clears the strand as well as the telling.
+
+Verified in batch mode, muted: 27 story-table PlayMode checks with one capture-only case skipped, 36 EditMode, 416 core and 66 service checks. One EditMode check failed first: it bounded clip length by current chapters only, and a retained 60-second clip fell outside; it now covers retained clips and lines. No sound was played and nothing ran in the simulator or on a headset.
