@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline unit and real loopback HTTP integration checks. No provider calls/audio."""
+"""Offline unit and real loopback HTTP integration checks. No provider calls; recordings are synthetic silence and nothing is played."""
 
 import base64
 from copy import deepcopy
