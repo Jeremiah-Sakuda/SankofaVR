@@ -3,7 +3,15 @@
 Only these exact historical passages may enter the personal-story response. They
 mirror PersonalStoryCatalog in the engine-free core. No research files or private
 development brief are read or sent to the provider.
+
+authored_tellings.json holds the app's three prepared tellings exactly as
+BundledPersonalStoryComposer writes them, so a question about one can be accepted
+without a story token. The .NET suite rewrites and checks that file; it is never
+edited by hand.
 """
+
+import json
+from pathlib import Path
 
 SCHEMA = "sankofa.personal-story.v1"
 REGION = "enkare-nairobi"
@@ -23,6 +31,20 @@ SOURCES = {
 DISCLOSURE = "Imagined scene: "
 ACCOUNT_DISCLOSURE = "Visitor-provided account, not independently verified: "
 UNANSWERED = "Imagined scene: This telling cannot establish an answer to your question from its reviewed context. A personal account is not independent historical evidence."
+ANSWER_SCHEMA = "sankofa.personal-answer.v1"
+# The fire's fixed reply to a question outside this place and period. PersonalAnswer.UnknownReply mirrors it.
+UNKNOWN_STORY = "The fire does not know that story. Tonight it keeps only the tellings of Enkare Nairobi, before the railway. Ask me about this one."
+
+
+def _authored_tellings():
+    with open(Path(__file__).with_name("authored_tellings.json"), encoding="utf-8") as source:
+        document = json.load(source)
+    if document.get("schema") != "sankofa.authored-tellings.v1":
+        raise ValueError("Unsupported authored-tellings file")
+    return {story["id"]: story for story in document["tellings"]}
+
+
+AUTHORED_TELLINGS = _authored_tellings()
 
 
 def coverage():
@@ -31,6 +53,6 @@ def coverage():
         "regions": [{"id": REGION, "label": "Enkare Nairobi, Kenya", "periods": [PERIOD], "interests": list(INTERESTS)}],
         "language": "en",
         "review_status": "Draft sourced context; family, community and pronunciation review pending.",
-        "capabilities": {"generated_text": True, "approved_illustrations": True, "generated_images": False, "generated_audio": False, "live_conversation": False},
-        "privacy": "This service stores no story requests and logs no request content. Live generation sends the fragment and question to Google; provider retention and applicable terms require separate review.",
+        "capabilities": {"generated_text": True, "approved_illustrations": True, "generated_images": False, "generated_audio": False, "generated_answers": False, "spoken_questions": False, "live_conversation": False},
+        "privacy": "This service stores no story requests, questions or recordings and logs no request content. Live generation sends the fragment and question to Google; a question asked of the fire, typed or recorded, is sent to Google with the pages read so far when answers are generated. Provider retention and applicable terms require separate review.",
     }
