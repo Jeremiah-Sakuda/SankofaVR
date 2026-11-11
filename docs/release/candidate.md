@@ -1,5 +1,23 @@
 # Sankofa candidate builds
 
+## Griot visit with spoken questions, switched off — November 10, 2026
+
+Built from clean committed source **6f40764** on `feature/griot-visit` with Unity 6000.3.25f1 in muted batch mode. It replaces the build from `f7ec6d8` recorded below and adds the ask-the-fire path described in the [decision record](../decisions.md). The switch is off and no service endpoint is set in the scene, so this build behaves as the earlier one: the page's question button opens the page's own questions.
+
+| Identity | Local review artifact |
+|---|---|
+| Output / scene | `artifacts/Sankofa-StoryTable.apk` / `StoryTable.unity` |
+| Source / package | `6f40764` / `com.sankofa.quest` |
+| Signing | Android Debug certificate. The dashboard needs a release-signed build |
+| Size | 67,321,930 bytes |
+| SHA-256 | `d2c62b9b3f3d6f942764c4ca3d209e88f17ad923b4fe468d10add90d253cecc9` |
+| Build result | Succeeded, zero errors, one warning |
+| Permissions declared | `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `BLUETOOTH`, `INTERNET`, `com.oculus.permission.HAND_TRACKING`, `USE_SCENE`, `USE_ANCHOR_API` |
+
+`RECORD_AUDIO` is declared in the project manifest and requested only when a visitor first agrees to ask aloud. Unity added `MODIFY_AUDIO_SETTINGS` and `BLUETOOTH` because the build now uses the microphone; whether the store accepts them, and whether `BLUETOOTH` can be removed without breaking recording on a headset, has not been checked. The build was not installed, played, run in the simulator or uploaded. No microphone, hosted service or model has been used with it.
+
+---
+
 ## Griot visit review APK — November 10, 2026
 
 Built from clean committed source **f7ec6d8** on `feature/griot-visit` with Unity 6000.3.25f1 in muted batch mode. It carries the spoken welcome, self-turning pages, the thinner page, the re-recorded narration and the kept strand described in the [decision record](../decisions.md). The November 8 pop-up build it replaces at the usual path is preserved as `artifacts/release/archive/Sankofa-StoryTable-90891cd.apk`.

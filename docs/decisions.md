@@ -811,3 +811,18 @@ The strand and answer types and the `/ask` service came from the cloud session's
 Two choices here are the entrant's to reverse: a side the fire chose earns a bead once kept, and Forget clears the strand as well as the telling.
 
 Verified in batch mode, muted: 27 story-table PlayMode checks with one capture-only case skipped, 36 EditMode, 416 core and 66 service checks. One EditMode check failed first: it bounded clip length by current chapters only, and a retained 60-second clip fell outside; it now covers retained clips and lines. No sound was played and nothing ran in the simulator or on a headset.
+
+## November 10, 2026 — asking the fire aloud, behind a switch
+
+The entrant approved adding the microphone and the spoken question path. It is built and off: the scene has no service endpoint and the switch is unset, so the shipped behaviour is unchanged until the entrant hosts a service and turns it on.
+
+| Change | Requirement | Criterion | Evidence |
+|---|---|---|---|
+| **Ask the fire.** With the switch, a service and a microphone, the page's question button becomes Ask the fire. The visitor agrees once in a visit, the fire listens for up to twelve seconds, and the recording and the pages reached go to `/ask`. A generated answer shows with its label and is voiced when the service offers it | SK-09, SK-16 | Innovation, Experience | PlayMode tests with a fake microphone; an opt-in test posts Unity's own recorded request to the real service process on this machine, with no provider, and reads its reply |
+| **The page's own questions are always the fallback.** No service, no microphone, a refusal, a silent or too-short recording, a failed or late request, and any reply the validator rejects all show the authored questions. Cancelling, pausing or leaving discards the recording unsent | SK-13/14 | Experience, Technical | PlayMode tests for each of these |
+| **A spoken question waits for its page.** The service receives the current page in full, so a question asked while it is still being told could be answered with what it has not said. The fire offers to listen when the page is told | SK-09 | Experience | PlayMode test |
+| **One prompt.** A refused microphone permission is not asked for again in the visit. Online creation has its own switch, so a question-only service adds nothing to the intake | SK-02, SK-16 | Experience | Permission flow is Android-only and unexercised; the creation switch is covered by the opt-in test |
+
+Limits worth knowing. Returning from an answer tells the page again from its beginning; it does not resume mid-sentence. Answers are not saved with a kept telling. The recorder, the permission prompt, the answer's voice and every model reply are untried on a headset or against a real provider. A service test that failed about one run in three was traced to the service refusing an oversized body unread; it now drains a slightly oversized body first, and the suite passed fifteen runs in a row.
+
+Verified in batch mode, muted: 31 story-table PlayMode checks with one capture-only case skipped, 36 EditMode, 416 core and 66 service checks. The PRD and MVP scope still describe voice as deferred and need a scoped update once the entrant decides whether it ships enabled.
