@@ -102,7 +102,7 @@ namespace Sankofa.Runtime.Personal
         /// <summary>What the page says while the visitor chooses, once the griot's welcome has been said.</summary>
         public const string StandingInvitation = PersonalStoryVoice.Invitation;
         string invitation;
-        bool welcoming, selfTurning;
+        bool welcoming, selfTurning, spokenQuestions;
 
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
@@ -250,6 +250,17 @@ namespace Sankofa.Runtime.Personal
             }
         }
         public const float BeadSize = 0.024f;
+
+        /// <summary>When the fire can be asked aloud, the page's question button says so.</summary>
+        public void SetSpokenQuestions(bool value)
+        {
+            if (spokenQuestions == value) return;
+            spokenQuestions = value;
+            RefreshControls();
+        }
+
+        /// <summary>The app directs the fire while it listens to a question and prepares an answer.</summary>
+        public void SetFireState(Sankofa.Core.Story.FireState state) => SetFire(state);
 
         /// <summary>The griot's fire answers a hand held near it, before any word is said.</summary>
         public void AcknowledgeHand() { if (fire != null && !paused) fire.Acknowledge(); }
@@ -565,7 +576,7 @@ namespace Sankofa.Runtime.Personal
                 if (!selfTurning && (canBack || captionPage > 0)) items.Add(("back", "Previous page"));
                 var morePage = captionPage + 1 < captionPages.Count;
                 if (!selfTurning && (canNext || morePage)) items.Add(("next", morePage ? "Continue reading" : offeringChoice ? "Let the fire choose" : "Next page"));
-                if (canAsk) items.Add(("ask", "Explore context"));
+                if (canAsk) items.Add(("ask", spokenQuestions ? "Ask the fire" : "Explore context"));
                 items.Add(("sources", "About this story"));
             }
             transport.Show(items);

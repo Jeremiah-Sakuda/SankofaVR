@@ -243,6 +243,149 @@ namespace Sankofa.Tests
             Assert.That(new Sankofa.Storage.PersonalStrandStore(directory).Load().Count, Is.Zero);
         }
 
+        /// <summary>A microphone that records a short tone, so no real audio device is touched.</summary>
+        sealed class FakeRecorder : IQuestionRecorder
+        {
+            public int Begun, Ended, Cancelled;
+            public float[] Samples = Enumerable.Range(0, PersonalAnswerAudio.SampleRate).Select(i => Mathf.Sin(i * 0.05f) * 0.3f).ToArray();
+            public bool Available { get; set; } = true;
+            public bool Recording { get; private set; }
+            public float Seconds { get; set; }
+            public bool Begin() { Begun++; Recording = true; return true; }
+            public float[] End(out int count) { Ended++; Recording = false; count = Samples.Length; return Samples; }
+            public void Cancel() { if (Recording) Cancelled++; Recording = false; }
+        }
+
+        IEnumerator ReachAPageWithQuestions()
+        {
+            for (var step = 0; step < 20 && app.Session.Chapter.Questions.Count == 0; step++) yield return Press("Turn a page", "next");
+            Assert.That(app.Session.Chapter.Questions.Count, Is.GreaterThan(0));
+        }
+
+        IEnumerator WaitForAction(string id, float seconds)
+        {
+            var actions = Panel("Return and recovery actions");
+            for (var deadline = Time.realtimeSinceStartup + seconds; Time.realtimeSinceStartup < deadline && !(actions.Ids.Contains(id) && !actions.Hidden);) yield return null;
+            Assert.That(actions.Ids, Does.Contain(id));
+        }
+
+        [UnityTest]
+        public IEnumerator AskingTheFireAloudNeedsConsentAndFallsBackToThePagesOwnQuestions()
+        {
+            var microphone = new FakeRecorder(); app.UseRecorder(microphone);
+            yield return Press("Interest choices", "journeys");
+            yield return ReachAPageWithQuestions();
+            var page = app.Session.Chapter.Id;
+
+            // Without the switch and a service, asking opens the page's own question and records nothing.
+            Assert.That(app.SpokenQuestionsAvailable, Is.False);
+            yield return Press("Turn a page", "ask");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
+            Assert.That(microphone.Begun, Is.Zero);
+            yield return Press("Return and recovery actions", "continue");
+
+            // With both, the visitor is asked first, and nothing is recorded until they agree.
+            app.SpokenQuestions = true; app.ServiceEndpoint = "http://127.0.0.1:9"; yield return null;
+            Assert.That(app.SpokenQuestionsAvailable, Is.True);
+            yield return Press("Turn a page", "ask");
+            Assert.That(view.ModalText, Does.Contain("sent to the Sankofa service"));
+            Assert.That(microphone.Begun, Is.Zero, "nothing is recorded before the visitor agrees");
+            yield return Press("Return and recovery actions", "agree");
+            Assert.That(app.Listening, Is.True);
+            Assert.That(microphone.Begun, Is.EqualTo(1));
+            yield return Press("Return and recovery actions", "cancel");
+            Assert.That(app.Listening, Is.False);
+            Assert.That(microphone.Cancelled, Is.EqualTo(1), "a question the visitor abandons is discarded, not sent");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
+
+            // Pausing while the fire listens also discards the recording.
+            yield return Press("Turn a page", "ask");
+            Assert.That(app.Listening, Is.True, "consent is asked once in a visit");
+            app.Session.Pause(true); yield return null; yield return null;
+            Assert.That(app.Listening, Is.False);
+            Assert.That(microphone.Cancelled, Is.EqualTo(2));
+            app.Session.Pause(false); yield return null;
+
+            // Sent to a service that cannot be reached, the question falls back to what the page itself can answer.
+            yield return Press("Turn a page", "ask");
+            yield return Press("Return and recovery actions", "send");
+            Assert.That(microphone.Ended, Is.EqualTo(1));
+            yield return WaitForAction("q0", 25f);
+            Assert.That(view.ModalText, Does.Contain("could not answer"));
+            yield return Press("Return and recovery actions", "q0");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo(page));
+        }
+
+        [UnityTest]
+        public IEnumerator AnAnswerIsShownWithItsLabelAndARefusedOneNeverReachesThePage()
+        {
+            yield return Press("Interest choices", "journeys");
+            yield return ReachAPageWithQuestions();
+            var page = app.Session.Chapter.Id;
+            string Reply(string answer, string truth, params string[] sources) => PersonalAnswerJson.Write(new PersonalAnswer
+                { Mode = PersonalAnswer.Generated, Kind = PersonalAnswer.AnswerKind, Answer = answer, Truth = truth, Sources = sources });
+
+            app.ReceiveAnswer(Reply("She stayed because leaving would mean nobody was there to meet her friend.", PersonalAnswer.Reconstructed), null);
+            yield return null;
+            Assert.That(view.ModalText, Does.Contain("She stayed because").And.Contain("imagined"), "an imagined answer always shows its label");
+            yield return Press("Return and recovery actions", "return");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo(page));
+
+            app.ReceiveAnswer(Reply(PersonalAnswer.UnknownReply, PersonalAnswer.Unknown), null);
+            yield return null;
+            Assert.That(view.ModalText, Does.Contain("does not know that story").And.Contain("Outside tonight's story"));
+            yield return Press("Return and recovery actions", "return");
+
+            // New words that claim to be documented history are refused; the page's own questions are offered instead.
+            app.ReceiveAnswer(Reply("Forty traders met at this river every dry season.", PersonalAnswer.Historical, "C6"), null);
+            yield return null;
+            Assert.That(view.ModalText, Does.Not.Contain("Forty traders"));
+            Assert.That(view.ModalText, Does.Contain("could not answer"));
+            Assert.That(Panel("Return and recovery actions").Ids, Does.Contain("q0"));
+            yield return Press("Return and recovery actions", "return");
+
+            // A reply that is not the service's format at all is refused the same way.
+            app.ReceiveAnswer("{\"answer\":\"Anything\"}", null);
+            yield return null;
+            Assert.That(view.ModalText, Does.Not.Contain("Anything"));
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo(page));
+        }
+
+        [Test]
+        public void ARecordingAtAnotherRateOrInStereoBecomesMonoAtTheServicesRate()
+        {
+            var stereo48k = new float[48000 * 2];
+            for (var i = 0; i < 48000; i++) { stereo48k[i * 2] = Mathf.Sin(i * 0.01f); stereo48k[i * 2 + 1] = -1; }
+            var mono = MicrophoneRecorder.Mono16k(stereo48k, 2, 48000, out var count);
+            Assert.That(count, Is.EqualTo(PersonalAnswerAudio.SampleRate), "one second stays one second");
+            Assert.That(mono.Take(count).Min(), Is.GreaterThan(-1f), "only the first channel is used");
+            Assert.That(PersonalAnswerAudio.IsAccepted(PersonalAnswerAudio.EncodeWav(mono, count)), Is.True);
+            var native = new float[8000];
+            Assert.That(MicrophoneRecorder.Mono16k(native, 1, PersonalAnswerAudio.SampleRate, out count), Is.SameAs(native));
+            Assert.That(count, Is.EqualTo(8000));
+            Assert.That(MicrophoneRecorder.Mono16k(new float[0], 1, 16000, out count), Is.Null);
+        }
+
+        /// <summary>Opt-in: the real service process on this machine, with no provider, answers Unity's own request.</summary>
+        [UnityTest]
+        public IEnumerator ALocalServiceAnswersUnitysRecordedQuestionWithThePagesOwnQuestions()
+        {
+            var service = Environment.GetEnvironmentVariable("SANKOFA_TEST_LOCAL_ASK");
+            if (string.IsNullOrEmpty(service)) { Assert.Ignore("Set SANKOFA_TEST_LOCAL_ASK to a loopback story service to run this."); yield break; }
+            var microphone = new FakeRecorder(); app.UseRecorder(microphone);
+            app.SpokenQuestions = true; app.ServiceEndpoint = service; app.OnlineCreation = false; yield return null;
+            Assert.That(Panel("Start choices").Ids, Does.Not.Contain("create"), "a question-only service adds no online creation at the intake");
+            yield return Press("Interest choices", "journeys");
+            yield return ReachAPageWithQuestions();
+            yield return Press("Turn a page", "ask");
+            yield return Press("Return and recovery actions", "agree");
+            yield return Press("Return and recovery actions", "send");
+            yield return WaitForAction("q0", 25f);
+            Assert.That(view.ModalText, Does.Contain("offers what it can answer"), "the service's own reply was read and accepted, not a transport failure");
+        }
+
         [UnityTest]
         public IEnumerator FreeformQuestionChangesPreparedThreadWithoutAssumingFamilyIdentity()
         {

@@ -18,7 +18,7 @@ namespace Sankofa.Runtime.Personal
 {
     /// <summary>Composition for personal intake, checked content, a reusable room-aware table and explicit Keep.</summary>
     [DefaultExecutionOrder(500)]
-    public sealed class PersonalStoryApp : MonoBehaviour
+    public sealed partial class PersonalStoryApp : MonoBehaviour
     {
         [Tooltip("Public HTTPS service root. Never place provider credentials in this scene.")]
         [SerializeField] string serviceEndpoint = "";
@@ -62,7 +62,10 @@ namespace Sankofa.Runtime.Personal
         }
         /// <summary>The sides of tellings this visitor has kept: one bead each, at most six.</summary>
         public KeptStrand Strand => strand;
-        public bool OnlineAvailable => Endpoint() != null;
+        [Tooltip("Offers Create my story at the intake when a story service is configured. Turn off for a build whose service only answers questions.")]
+        [SerializeField] bool onlineCreation = true;
+        public bool OnlineCreation { get => onlineCreation; set { onlineCreation = value; if (view != null && session.State == PersonalStoryState.Intake && decision == null) Render(); } }
+        public bool OnlineAvailable => onlineCreation && Endpoint() != null;
         public string PersonalReason => personalReason;
         public string ServiceAccessToken { set => serviceAccessToken = value ?? ""; }
         public bool NarrationEnabled => narrationEnabled;
@@ -135,7 +138,7 @@ namespace Sankofa.Runtime.Personal
             view.QuestionSelected += id => { if (int.TryParse(id, out var index)) { StopVoice(); session.Ask(index); } };
             view.ChoiceSelected += id => { if (int.TryParse(id, out var index) && session.OffersChoice) { StopVoice(); session.Choose(index); } };
             view.AboutRequested += ShowAbout;
-            view.AskRequested += () => { StopVoice(); session.Ask(0); };
+            view.AskRequested += AskTheFire;
             view.SourceDetailsRequested += ShowSources;
             view.SaveRequested += RequestKeep;
             view.PauseRequested += () => session.Pause(!session.Paused);
@@ -298,6 +301,7 @@ namespace Sankofa.Runtime.Personal
             TellWelcome();
             TurnPageWhenTold();
             WarmToHands();
+            TickVoice();
         }
 
         /// <summary>A hand held to the fire makes it swell and throw sparks: the first thing a visitor's hands do here.</summary>
@@ -321,7 +325,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (session.Paused) return;
             AbortPending(); StopVoice(); ClearClips();
-            keyboard.Close(); decision = null; narrationToken = null; view.ResetReadingPosition();
+            keyboard.Close(); decision = null; narrationToken = null; storyToken = null; view.ResetReadingPosition();
             var request = Request(); var version = session.Begin(request);
             if (session.State != PersonalStoryState.Preparing) return;
             var result = BundledPersonalStoryComposer.Compose(request);
@@ -333,7 +337,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (session.Paused) return;
             AbortPending(); StopVoice(); ClearClips(); keyboard.Close(); decision = null; narrationToken = null; view.ResetReadingPosition();
-            personalReason = null;
+            personalReason = null; storyToken = null;
             var input = Request(); var version = session.Begin(input);
             if (session.State != PersonalStoryState.Preparing) return;
             var endpoint = Endpoint();
@@ -384,6 +388,7 @@ namespace Sankofa.Runtime.Personal
                 if (story != null && session.Accept(version, story))
                 {
                     narrationToken = call.GetResponseHeader("X-Sankofa-Narration-Token");
+                    storyToken = call.GetResponseHeader("X-Sankofa-Story-Token");
                     if (story.Mode == "bundled")
                     {
                         if (!string.IsNullOrWhiteSpace(seed)) personalReason = BundledPersonalStoryComposer.Compose(input).Reason;
@@ -427,7 +432,8 @@ namespace Sankofa.Runtime.Personal
                         Choices = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Label).ToArray() : Array.Empty<string>(),
                         ChoiceIds = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Id).ToArray() : Array.Empty<string>(),
                     });
-                    view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0, false);
+                    view.SetSpokenQuestions(SpokenQuestionsAvailable);
+                    view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0 || SpokenQuestionsAvailable, false);
                     if (narrationEnabled && voice.clip == null && voiceRequest == null) SpeakCurrent();
                     break;
                 case PersonalStoryState.Question:
@@ -549,7 +555,7 @@ namespace Sankofa.Runtime.Personal
         public bool Reopen()
         {
             if (session.Paused) return false;
-            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; personalReason = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
+            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; storyToken = null; personalReason = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
             catch (Exception) { ShelfProblem("Your kept story could not be opened. It has not been replaced.", () => Reopen()); return false; }
         }
         public void Forget()
@@ -636,7 +642,7 @@ namespace Sankofa.Runtime.Personal
         void ClearClips() { foreach (var clip in clips.Values) if (clip != null) Destroy(clip); clips.Clear(); }
         void OnDestroy()
         {
-            AbortPending(); StopVoice(); ClearClips();
+            AbortPending(); AbortAsk(); StopListening(false); StopVoice(); ClearClips();
             OVRManager.HMDUnmounted -= OnFocusLost; OVRManager.InputFocusLost -= OnFocusLost;
             OVRManager.HMDMounted -= OnFocusRestored; OVRManager.InputFocusAcquired -= OnFocusRestored;
             session.Changed -= Render;

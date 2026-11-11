@@ -315,6 +315,18 @@ class PersonalStoryHandler(BaseHTTPRequestHandler):
             raise RequestError("invalid_content_length", "A single Content-Length is required.", 411) from None
         limit = {"/narration": MAX_NARRATION_REQUEST_BYTES, "/ask": MAX_ASK_REQUEST_BYTES}.get(self.path, MAX_REQUEST_BYTES)
         if length < 1 or length > limit:
+            # A client still sending a slightly oversized body would see a dropped connection instead of this status,
+            # so up to twice the limit is read and discarded first. Anything larger is refused unread.
+            if 0 < length <= limit * 2:
+                try:
+                    remaining = length
+                    while remaining > 0:
+                        chunk = self.rfile.read(min(65536, remaining))
+                        if not chunk:
+                            break
+                        remaining -= len(chunk)
+                except (TimeoutError, OSError):
+                    pass
             raise RequestError("request_too_large", "Request exceeds the endpoint size limit.", 413)
         try:
             raw = self.rfile.read(length)
