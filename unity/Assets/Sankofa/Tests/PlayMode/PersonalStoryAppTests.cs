@@ -284,10 +284,19 @@ namespace Sankofa.Tests
             Assert.That(microphone.Begun, Is.Zero);
             yield return Press("Return and recovery actions", "continue");
 
-            // With both, the visitor is asked first, and nothing is recorded until they agree.
+            // With both, a page still being told takes no spoken question: the answer could say what the page has not.
             app.SpokenQuestions = true; app.ServiceEndpoint = "http://127.0.0.1:9"; yield return null;
             Assert.That(app.SpokenQuestionsAvailable, Is.True);
+            Assert.That(view.Stage.Progress, Is.LessThan(1f));
             yield return Press("Turn a page", "ask");
+            Assert.That(view.ModalText, Does.Contain("then listen for your question"));
+            yield return Press("Return and recovery actions", "wait");
+            Assert.That(app.Listening, Is.False);
+            Assert.That(microphone.Begun, Is.Zero);
+
+            // Once the page is told, the visitor is asked first, and nothing is recorded until they agree.
+            view.Stage.Seek(1);
+            yield return WaitForAction("agree", 5f);
             Assert.That(view.ModalText, Does.Contain("sent to the Sankofa service"));
             Assert.That(microphone.Begun, Is.Zero, "nothing is recorded before the visitor agrees");
             yield return Press("Return and recovery actions", "agree");
@@ -314,6 +323,14 @@ namespace Sankofa.Tests
             Assert.That(view.ModalText, Does.Contain("could not answer"));
             yield return Press("Return and recovery actions", "q0");
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo(page));
+
+            // A recording with nothing in it, as from a muted microphone, is not sent at all.
+            yield return Press("Return and recovery actions", "continue");
+            microphone.Samples = new float[PersonalAnswerAudio.SampleRate];
+            yield return Press("Turn a page", "ask");
+            yield return Press("Return and recovery actions", "send");
+            Assert.That(view.ModalText, Does.Contain("did not hear a question"));
             Assert.That(app.Session.Chapter.Id, Is.EqualTo(page));
         }
 
@@ -379,6 +396,7 @@ namespace Sankofa.Tests
             Assert.That(Panel("Start choices").Ids, Does.Not.Contain("create"), "a question-only service adds no online creation at the intake");
             yield return Press("Interest choices", "journeys");
             yield return ReachAPageWithQuestions();
+            view.Stage.Seek(1); yield return null;
             yield return Press("Turn a page", "ask");
             yield return Press("Return and recovery actions", "agree");
             yield return Press("Return and recovery actions", "send");

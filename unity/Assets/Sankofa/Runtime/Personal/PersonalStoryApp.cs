@@ -225,8 +225,8 @@ namespace Sankofa.Runtime.Personal
         {
             var reading = session.State == PersonalStoryState.Reading && session.Chapter != null;
             var key = reading ? session.RequestVersion + ":" + session.PageNumber + ":" + session.Chapter.Id : null;
-            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; }
-            if (!TurnsPages || !reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
+            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; }
+            if (!reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
             var speaking = voice != null && voice.isPlaying;
             if (pageSpoken && !speaking && voice.clip != null && voice.time <= 0.01f)
             {
@@ -236,11 +236,14 @@ namespace Sankofa.Runtime.Personal
             }
             var stage = view.Stage;
             var voiced = voice != null && voice.clip != null;
-            if (!voiced && voiceRequest == null) view.FollowStageClock();
+            if (TurnsPages && !voiced && voiceRequest == null) view.FollowStageClock();
             var told = !speaking && voiceRequest == null
                 && (voiced ? pageTold : stage != null && stage.Progress >= 1f)
                 && (stage == null || (!stage.Turning && !stage.Waiting));
             if (!told) { pageRest = 0; return; }
+            // A question held until the page was told is heard now, before any page turns.
+            if (askWhenTold) { askWhenTold = false; pageRest = 0; BeginSpokenQuestion(); return; }
+            if (!TurnsPages) return;
             pageRest += Time.deltaTime;
             if (pageRest < (session.OffersChoice ? ChoiceWaitSeconds : TurnAfterSeconds)) return;
             pageRest = 0;

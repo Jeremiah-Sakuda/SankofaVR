@@ -21,7 +21,7 @@ namespace Sankofa.Runtime.Personal
         [Tooltip("Lets a visitor ask the fire aloud when a story service is configured. A question is recorded only after the visitor agrees, and only while the fire is listening.")]
         [SerializeField] bool spokenQuestions;
         IQuestionRecorder recorder = new MicrophoneRecorder();
-        bool voiceConsent, listening;
+        bool voiceConsent, listening, microphoneRefused, askWhenTold;
         int askVersion;
         UnityWebRequest pendingAsk;
         string storyToken;
@@ -35,7 +35,7 @@ namespace Sankofa.Runtime.Personal
         /// <summary>The fire is recording a question now.</summary>
         public bool Listening => listening;
         /// <summary>A switch, a configured service and a microphone are all present.</summary>
-        public bool SpokenQuestionsAvailable => SpokenQuestionsWanted && Endpoint() != null && recorder != null && recorder.Available;
+        public bool SpokenQuestionsAvailable => SpokenQuestionsWanted && !microphoneRefused && Endpoint() != null && recorder != null && recorder.Available;
         bool SpokenQuestionsWanted
         {
             get
@@ -52,14 +52,44 @@ namespace Sankofa.Runtime.Personal
         void AskTheFire()
         {
             if (session.State != PersonalStoryState.Reading || session.Paused || session.Chapter == null) return;
+            var told = PageTold();
             StopVoice();
             if (!SpokenQuestionsAvailable) { if (session.Chapter.Questions.Count > 0) session.Ask(0); return; }
+            if (told) { BeginSpokenQuestion(); return; }
+            // The service is given every page reached, the current one in full. A spoken question about a page still
+            // being told could be answered with what the page has not yet said, so it waits for the page to finish.
+            var options = new List<(string, string)> { ("wait", "Ask when it is told") };
+            if (session.Chapter.Questions.Count > 0) options.Add(("questions", "Show the questions"));
+            options.Add(("return", "Return to the story"));
+            Decide("The fire is still telling this page",
+                "It will tell the page again from its beginning, then listen for your question. The page's own questions can be read now.",
+                options, id =>
+                {
+                    if (id == "wait") { askWhenTold = true; Render(); }
+                    else if (id == "questions") ShowOwnQuestions(null);
+                    else Render();
+                });
+        }
+
+        /// <summary>The current page has been told to its end: its recording finished, or without a voice the stage has performed it.</summary>
+        bool PageTold()
+        {
+            if (voice != null && voice.isPlaying) return false;
+            var stage = view.Stage;
+            return voice != null && voice.clip != null ? pageTold : stage == null || stage.Progress >= 1f;
+        }
+
+        void BeginSpokenQuestion()
+        {
+            if (session.State != PersonalStoryState.Reading || session.Paused || session.Chapter == null) return;
+            StopVoice();
+            if (!SpokenQuestionsAvailable) { ShowOwnQuestions(null); return; }
             if (voiceConsent) { StartCoroutine(Listen()); return; }
             var actions = new List<(string, string)> { ("agree", "Ask aloud") };
             if (session.Chapter.Questions.Count > 0) actions.Add(("questions", "Show the questions"));
             actions.Add(("return", "Return to the story"));
             Decide("Ask the fire aloud?",
-                "Your spoken question, up to twelve seconds, and the pages of this telling you have reached are sent to the Sankofa service, which uses Google Gemini to answer. The recording is not kept on this device. The page's own questions need no recording.",
+                "Your spoken question, up to twelve seconds, and the pages of this telling you have reached are sent to the Sankofa service, which uses Google Gemini to answer. The recording is not kept on this device, and answers are not saved with a kept telling. The page's own questions need no recording.",
                 actions, id =>
                 {
                     if (id == "agree") { voiceConsent = true; StartCoroutine(Listen()); }
@@ -82,6 +112,8 @@ namespace Sankofa.Runtime.Personal
                 for (var waited = 0f; granted == null && waited < 30f; waited += Time.unscaledDeltaTime) yield return null;
                 if (granted != true)
                 {
+                    // Asked once in a visit: after a refusal the page offers its own questions, with no second prompt.
+                    microphoneRefused = true;
                     if (version == askVersion) ShowOwnQuestions("The fire cannot hear you without the microphone.");
                     yield break;
                 }
@@ -115,7 +147,10 @@ namespace Sankofa.Runtime.Personal
             if (!listening) return;
             listening = false;
             var samples = recorder.End(out var count);
-            if (samples == null || count < ShortestQuestionSeconds * PersonalAnswerAudio.SampleRate) { ShowOwnQuestions("The fire did not hear a question."); return; }
+            var loudest = 0f;
+            for (var i = 0; samples != null && i < count; i++) loudest = Mathf.Max(loudest, Mathf.Abs(samples[i]));
+            // Too short, or silent as a muted microphone is: nothing is sent.
+            if (samples == null || count < ShortestQuestionSeconds * PersonalAnswerAudio.SampleRate || loudest < 0.004f) { ShowOwnQuestions("The fire did not hear a question."); return; }
             var endpoint = Endpoint();
             string body = null;
             try { body = PersonalAnswerJson.WriteAudioRequest(session.Story, storyToken, session.Chapter.Id, PersonalAnswerAudio.EncodeWav(samples, count)); }
@@ -126,21 +161,26 @@ namespace Sankofa.Runtime.Personal
 
         IEnumerator Ask(string body, string endpoint, int version, int request, string chapterId)
         {
-            Decide("The fire turns your question over", "A moment. You can return to the story at any time.",
-                new[] { ("cancel", "Return to the story") }, id => { askVersion++; AbortAsk(); Render(); });
+            var choices = new List<(string, string)>();
+            if (session.Chapter.Questions.Count > 0) choices.Add(("questions", "Show the questions"));
+            choices.Add(("cancel", "Return to the story"));
+            Decide("The fire turns your question over", "A moment. You can return to the story at any time.", choices,
+                id => { askVersion++; AbortAsk(); if (id == "questions") ShowOwnQuestions(null); else Render(); });
+            var waiting = decision;
             view.SetFireState(FireState.Gathering);
             using (var call = new UnityWebRequest(endpoint + "/ask", "POST"))
             {
                 pendingAsk = call;
                 call.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
-                call.downloadHandler = new DownloadHandlerBuffer(); call.timeout = 20; call.redirectLimit = 0;
+                call.downloadHandler = new DownloadHandlerBuffer(); call.timeout = 15; call.redirectLimit = 0;
                 call.SetRequestHeader("Content-Type", "application/json");
                 Authorize(call);
                 yield return call.SendWebRequest();
                 if (pendingAsk == call) pendingAsk = null;
                 // A late reply never interrupts a different page, a new telling or a visitor who went back to the story.
+                // Nor does it replace another notice the visitor has opened since, such as leaving.
                 if (version != askVersion || request != session.RequestVersion || session.State != PersonalStoryState.Reading
-                    || session.Chapter == null || session.Chapter.Id != chapterId) yield break;
+                    || session.Chapter == null || session.Chapter.Id != chapterId || decision != waiting) yield break;
                 var ok = call.result == UnityWebRequest.Result.Success && call.responseCode == 200 && call.downloadedBytes <= 64 * 1024;
                 ReceiveAnswer(ok ? call.downloadHandler.text : null, ok ? call.GetResponseHeader("X-Sankofa-Answer-Token") : null);
             }
