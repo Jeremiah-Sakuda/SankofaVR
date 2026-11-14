@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    A type-check of the Unity runtime scripts where Unity is not installed. It compiles them against Unity's own
+    reference assemblies (2021.3, the newest published on NuGet) and hand-written stand-ins for the packages that
+    are not on NuGet: TextMesh Pro, the Meta XR SDK, MR Utility Kit and the Input System. The stand-ins carry
+    signatures only. Passing means the scripts' own C# is consistent; it is not a Unity compile and runs nothing.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NoWarn>CS0649;CS0169;CS0414;CS0067;CS0108;CS0618;NU1701;CS1701;CS1702</NoWarn>
+    <DefineConstants>$(DefineConstants);UNITY_ANDROID;UNITY_6000_0_OR_NEWER;$(ExtraDefines)</DefineConstants>
+    <AssemblyName>Sankofa.Runtime</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" IncludeAssets="compile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../../unity/Assets/Sankofa/Runtime/**/*.cs" />
+    <Compile Include="*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Sankofa.Core/Sankofa.Core.csproj" />
+    <ProjectReference Include="../../Sankofa.Flow/Sankofa.Flow.csproj" />
+    <ProjectReference Include="../../Sankofa.Interaction/Sankofa.Interaction.csproj" />
+    <ProjectReference Include="../../Sankofa.Storage/Sankofa.Storage.csproj" />
+  </ItemGroup>
+</Project>

@@ -12,7 +12,7 @@ November 14, 2026. For the Adapted / Significantly Updated division, which asks 
 | October 26 | Two sides to every telling: the visitor chooses whose side of a meeting to follow, and the ending says honestly who chose | Software-checked |
 | October 30 | The pop-up paper stage: painted scenery and figures stand up from the table, perform each page and turn to the chosen side. In the gourd's telling the visitor can set the gourd down | Software-checked |
 | November 10 | The griot's spoken welcome, pages that turn themselves when told, a strand of six beads for the sides kept across visits, and a return greeting that names a side not yet heard | Software-checked; nobody has listened |
-| November 14 | Both sides of a meeting in one sitting; a hand swept across the stage turns it; a hand closed on an heirloom begins its telling; the story set on the visitor's own table from the room scan or from a resting hand; nothing asked at launch | Written and type-checked; not yet run in Unity |
+| November 14 | Both sides of a meeting in one sitting; a hand swept across the stage turns it; a hand closed on an heirloom begins its telling; the story set on the visitor's own table from the room scan or from a resting hand; no permission asked for until the visitor chooses that; short sounds for the stage as it folds and stands | Written and type-checked; not yet run in Unity, and the new sounds not yet listened to |
 
 Earlier presentations of the same story (a hearth, an illustrated theatre and a gallery, October 3–15) remain in the repository as comparison scenes. They are not in the judged build.
 
