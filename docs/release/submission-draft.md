@@ -58,6 +58,7 @@ Sit and set the controllers aside; nothing is asked for at launch. Close a hand 
 
 - Inspiration, What it does, How we built it and What's next come to 492 words; Devpost suggests 500 or fewer. The target launch date is its own field: confirm it with the entrant.
 - Every interaction named above is implemented and software-tested only. None has run on a headset, and the November 14 changes have not yet run in Unity. Before publishing, decide whether to say so in the entry. Do not add any sentence that implies device testing.
+- The division recommends a changelog: [what was added during the window](changelog.md) is written to be quoted or linked.
 - The video may use Meta XR Simulator footage and must be labelled as such. The [shot list](access-handoff.md#capture-one-story-well--target-230) follows this copy.
 - Active [APK identity](candidate.md): the recorded candidate predates these changes. A new release build is needed after the Unity verification.
 - Still needed: Start membership confirmed, the Competition channel and its invite link opened from a second account, a public YouTube or Vimeo link under three minutes, the launch date, cultural-review status for the draft label, and rights confirmation for the generated art and voice.

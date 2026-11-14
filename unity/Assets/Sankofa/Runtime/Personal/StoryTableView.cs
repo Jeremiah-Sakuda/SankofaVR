@@ -198,8 +198,15 @@ namespace Sankofa.Runtime.Personal
             SetText(heading, currentTitle);
             SetText(subheading, subtitle);
             SetText(capability, capabilityLabel);
-            SetText(intakeHeading, "What would you like to understand?");
+            RefreshIntakeHeading();
         }
+
+        /// <summary>
+        /// The one line above the first page's actions. Where the griot speaks the invitation, it says how hands choose,
+        /// so nobody needs a tutorial; elsewhere it introduces the typed question.
+        /// </summary>
+        public const string HandsHint = "Reach for an heirloom, or point and pinch its card.";
+        void RefreshIntakeHeading() => SetText(intakeHeading, selfTurning && stage != null ? HandsHint : "What would you like to understand?");
 
         public void ShowIntake()
         {
@@ -246,6 +253,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (selfTurning == value) return;
             selfTurning = value;
+            RefreshIntakeHeading();
             RefreshIntake();
             RefreshControls();
             if (offeringChoice && LastChapter != null && !intake && !detailsOpen && !closing) SetChoices(LastChapter.Choices ?? Array.Empty<string>());

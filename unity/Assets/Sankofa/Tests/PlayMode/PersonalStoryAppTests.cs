@@ -518,6 +518,12 @@ namespace Sankofa.Tests
             var placement = UnityEngine.Object.FindFirstObjectByType<StoryTablePlacement>();
             app.TurnsPages = true; yield return null;
             Assert.That(Panel("Start choices").Ids, Is.EqualTo(new[] { "edit", "about", "room" }), "using the visitor's own table is offered on the first page, not buried in a menu");
+            // One line says how hands choose, and it is whole.
+            var hint = view.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(t => t.name == "Intake heading");
+            Assert.That(hint.gameObject.activeInHierarchy, Is.True);
+            Assert.That(hint.text, Is.EqualTo(StoryTableView.HandsHint));
+            hint.ForceMeshUpdate(true, true);
+            Assert.That(hint.isTextOverflowing, Is.False, "the hint fits its line");
             yield return Press("Start choices", "room");
             Assert.That(placement.AwaitingHand, Is.True);
             yield return Press("Return and recovery actions", "stand");
