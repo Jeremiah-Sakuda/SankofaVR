@@ -82,6 +82,16 @@ namespace Sankofa.Runtime.Personal
             return forward.sqrMagnitude < .5f ? Vector3.forward : forward;
         }
 
+        /// <summary>
+        /// The way the story already faces, level. A visitor resting a hand looks down and toward that hand, so the
+        /// head's direction at that moment is not where they sit facing; the story they have been reading is.
+        /// </summary>
+        Vector3 StoryFacing()
+        {
+            var forward = view != null ? Vector3.ProjectOnPlane(view.TableRoot.forward, Vector3.up).normalized : Vector3.zero;
+            return forward.sqrMagnitude < .5f ? Facing() : forward;
+        }
+
         /// <summary>Returns the story to its virtual stand in front of the visitor, in its own dark room.</summary>
         public void Recenter()
         {
@@ -204,7 +214,7 @@ namespace Sankofa.Runtime.Personal
         {
             handWaited += Time.unscaledDeltaTime;
             if (handWaited > HandWaitSeconds) { Recenter(); SetStatus("No table was set • the story stand is ready"); return; }
-            var eye = Eye(); var forward = Facing();
+            var eye = Eye(); var forward = StoryFacing();
             for (var i = 0; i < hands.Length; i++)
             {
                 var hand = hands[i];
@@ -220,13 +230,14 @@ namespace Sankofa.Runtime.Personal
         static Num.Vector3 N(Vector3 v) => new Num.Vector3(v.x, v.y, v.z);
 
         /// <summary>
-        /// The table is as high as the resting palm. The story stays straight ahead of the visitor, as far away as the
-        /// hand shows the table to begin, so a hand resting off to one side never pulls the stage out of view.
+        /// The table is as high as the resting palm. The story keeps the direction it already faced and stays in front
+        /// of the visitor, as far away as the hand shows the table to begin, so a hand resting off to one side, or a
+        /// head turned to look at it, never pulls the stage round or out of view.
         /// </summary>
         void SetOnSurfaceUnderHand(Vector3 palm)
         {
             placementVersion++;
-            var eye = Eye(); var forward = Facing();
+            var eye = Eye(); var forward = StoryFacing();
             var ahead = Vector3.Dot(Vector3.ProjectOnPlane(palm - eye, Vector3.up), forward);
             var center = eye + forward * Mathf.Clamp(ahead + BeyondHand, NearestCentre, FarthestCentre);
             center.y = palm.y - PalmAboveSurface;
