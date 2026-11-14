@@ -70,7 +70,15 @@ namespace Sankofa.Core.Personal
         public static bool IsBranchTarget(PersonalStoryDocument story, int index)
         {
             var id = story.Chapters[index]?.Id;
-            return id != null && story.Chapters.Any(c => HasChoices(c) && c.Choices.Any(x => x?.Next == id));
+            if (id == null) return false;
+            // Plain loops: a telling asks this while a page is being told, and must not leave garbage each time.
+            for (var c = 0; c < story.Chapters.Count; c++)
+            {
+                var chapter = story.Chapters[c];
+                if (!HasChoices(chapter)) continue;
+                for (var x = 0; x < chapter.Choices.Count; x++) if (chapter.Choices[x]?.Next == id) return true;
+            }
+            return false;
         }
 
         /// <summary>The chapter after <paramref name="index"/> without a visitor choice; -1 ends the telling.</summary>

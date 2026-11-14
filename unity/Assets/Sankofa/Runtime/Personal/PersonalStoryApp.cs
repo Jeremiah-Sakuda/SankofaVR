@@ -7,6 +7,7 @@ using System.Text;
 using Sankofa.Core.Json;
 using Sankofa.Core.Personal;
 using Sankofa.Flow;
+using Sankofa.Interaction;
 using Sankofa.Runtime.App;
 using Sankofa.Runtime.Input;
 using Sankofa.Runtime.UI;
@@ -82,11 +83,24 @@ namespace Sankofa.Runtime.Personal
         /// <summary>What a visitor with a kept telling hears instead.</summary>
         public static readonly string[] ReturnWelcome = PersonalStoryVoice.ReturnWelcome.ToArray();
         const float TurnAfterSeconds = 1.6f, ChoiceWaitSeconds = 14f;
+        /// <summary>How long the fire waits, once one side is told, before it turns the stage to the other itself.</summary>
+        public const float OtherSideWaitSeconds = 10f;
+        /// <summary>What the page adds once one side of a meeting is told. Presentation: never part of the story or its narration.</summary>
+        public const string OtherSidePrompt = "This meeting has another side. Sweep a hand across the stage to turn it.";
+        /// <summary>What ending a telling after one side is called.</summary>
+        public const string EndHereLabel = "End here";
         string[] welcome;
         int welcomeLine = -1;
         float welcomeClock, welcomeLength, pageRest;
-        bool pageSpoken, pageTold;
+        bool pageSpoken, pageTold, otherSideOpen, askingForHand;
         string turnKey;
+        TurnGesture[] turns = Array.Empty<TurnGesture>();
+        TouchGesture[,] reaches = new TouchGesture[0, 0];
+        /// <summary>
+        /// One side of the meeting has been told and the other may be heard now: at its figure, by a hand sweeping the
+        /// stage round, or left to the fire. Hand-turned pages offer it as soon as the side's page opens.
+        /// </summary>
+        public bool OtherSideOffered => session.OffersOtherSide && (!TurnsPages || otherSideOpen);
         /// <summary>The griot is still saying the welcome; the heirlooms can be chosen throughout.</summary>
         public bool Welcoming => welcome != null;
         /// <summary>The welcome line now on the page, or null once the standing invitation has returned.</summary>
@@ -104,6 +118,8 @@ namespace Sankofa.Runtime.Personal
         HandSource[] hands;
         float handWarmth;
         const float HandWarmthMetres = 0.26f;
+        /// <summary>A hand closes on an heirloom within this distance of its middle, held for a moment.</summary>
+        static readonly TouchSettings HeirloomTouch = new TouchSettings { Radius = 0.07f, Dwell = 0.2, FeedbackRange = 0.30f };
 
         void Awake()
         {
@@ -116,6 +132,9 @@ namespace Sankofa.Runtime.Personal
             keyboard.Configure(view, view.StylePanel);
             var panels = view.Panels.Concat(new[] { keyboard.Panel }).ToArray();
             hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
+            turns = hands.Select(_ => new TurnGesture()).ToArray();
+            reaches = new TouchGesture[hands.Length, view.HeirloomCount];
+            for (var h = 0; h < hands.Length; h++) for (var i = 0; i < view.HeirloomCount; i++) reaches[h, i] = new TouchGesture(HeirloomTouch);
             foreach (var panel in panels) foreach (var hand in hands) { var source = hand; panel.AddFingertip(() => source.Fingertip); }
             foreach (var pointer in FindObjectsByType<PointerSource>(FindObjectsSortMode.None)) pointer.ConfigurePanels(panels);
             var folder = StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story");
@@ -136,7 +155,12 @@ namespace Sankofa.Runtime.Personal
             view.NextRequested += () => { StopVoice(); session.Next(); };
             view.BackRequested += () => { StopVoice(); session.Back(); };
             view.QuestionSelected += id => { if (int.TryParse(id, out var index)) { StopVoice(); session.Ask(index); } };
-            view.ChoiceSelected += id => { if (int.TryParse(id, out var index) && session.OffersChoice) { StopVoice(); session.Choose(index); } };
+            view.ChoiceSelected += id =>
+            {
+                if (!int.TryParse(id, out var index)) return;
+                if (session.OffersChoice) { StopVoice(); session.Choose(index); }
+                else if (OtherSideOffered) HearOtherSide(index, true, 0);
+            };
             view.AboutRequested += ShowAbout;
             view.AskRequested += AskTheFire;
             view.SourceDetailsRequested += ShowSources;
@@ -150,16 +174,19 @@ namespace Sankofa.Runtime.Personal
             view.ContinueRequested += Continue;
             view.RetryRequested += StartGenerated;
             view.LeaveRequested += RequestLeave;
-            view.DecisionSelected += id => { var action = decision; decision = null; action?.Invoke(id); };
+            view.DecisionSelected += id => { var action = decision; decision = null; askingForHand = false; action?.Invoke(id); };
             keyboard.Edited += value => view.ShowDecision(value.Length >= StoryTableKeyboard.MaximumLength ? "Limit reached • 500 / 500" : $"Your question • {value.Length} / 500", (value.Length == 0 ? "What would you like to understand?" : value) + "\n\nNothing is sent while you type. Delete text to make room if you reach the limit.", Array.Empty<(string, string)>());
             keyboard.Committed += value => { seed = value; decision = null; session.Cancel(); };
             keyboard.Cancelled += () => { decision = null; Render(); };
             session.Changed += Render;
             placement.StatusChanged += message =>
             {
+                view.SetOwnTable(placement.UsesSurface);
                 if (session.State == PersonalStoryState.Intake) view.SetStatus(message);
                 else if (session.State == PersonalStoryState.Reading) view.SetStatus(Capability(session.Story) + " • " + message);
             };
+            placement.HandAsked += AskForARestingHand;
+            placement.HandSettled += () => { view.SetOwnTable(placement.UsesSurface); if (askingForHand) { askingForHand = false; decision = null; Render(); } };
             OVRManager.HMDUnmounted += OnFocusLost;
             OVRManager.InputFocusLost += OnFocusLost;
             OVRManager.HMDMounted += OnFocusRestored;
@@ -170,7 +197,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (view == null) return;
             var eye = Camera.main;
-            placement.Configure(view, eye != null ? eye.transform : null);
+            placement.Configure(view, eye != null ? eye.transform : null, hands);
             reducedMotion = ExperienceSettings.Load().ReducedMotion;
             view.SetReducedMotion(reducedMotion);
             StartFireSound();
@@ -225,7 +252,7 @@ namespace Sankofa.Runtime.Personal
         {
             var reading = session.State == PersonalStoryState.Reading && session.Chapter != null;
             var key = reading ? session.RequestVersion + ":" + session.PageNumber + ":" + session.Chapter.Id : null;
-            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; }
+            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; otherSideOpen = false; }
             if (!reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
             var speaking = voice != null && voice.isPlaying;
             if (pageSpoken && !speaking && voice.clip != null && voice.time <= 0.01f)
@@ -244,10 +271,91 @@ namespace Sankofa.Runtime.Personal
             // A question held until the page was told is heard now, before any page turns.
             if (askWhenTold) { askWhenTold = false; pageRest = 0; BeginSpokenQuestion(); return; }
             if (!TurnsPages) return;
+            // One side of the meeting is told: the page now offers the other, and its last words stay in view.
+            if (session.OffersOtherSide && !otherSideOpen) { otherSideOpen = true; pageRest = 0; Render(); view.ShowLastReadingPart(); return; }
             pageRest += Time.deltaTime;
-            if (pageRest < (session.OffersChoice ? ChoiceWaitSeconds : TurnAfterSeconds)) return;
+            if (pageRest < (session.OffersChoice ? ChoiceWaitSeconds : session.OffersOtherSide ? OtherSideWaitSeconds : TurnAfterSeconds)) return;
             pageRest = 0;
+            // Left alone, the fire turns the stage itself, so a visitor who only watches still hears both sides.
+            if (session.OffersOtherSide) { HearOtherSide(0, false, 0); return; }
             StopVoice(); session.Next();
+        }
+
+        /// <summary>
+        /// Turns the stage to the side of the meeting not yet heard. <paramref name="chosen"/> records whether the
+        /// visitor asked for it; <paramref name="direction"/> is the way their hand swept, or 0.
+        /// </summary>
+        void HearOtherSide(int index, bool chosen, int direction)
+        {
+            if (!session.OffersOtherSide || session.Paused) return;
+            if (direction != 0 && view.Stage != null) view.Stage.TurnToward(direction);
+            StopVoice();
+            session.HearOtherSide(index, chosen);
+        }
+
+        /// <summary>
+        /// While the other side is offered, a hand swept sideways in front of the stage turns it. The stage leans with
+        /// the hand first, so the visitor feels it give before it turns.
+        /// </summary>
+        void TurnByHand()
+        {
+            var stage = view.Stage;
+            if (stage == null) return;
+            var armed = OtherSideOffered && session.State == PersonalStoryState.Reading && !session.Paused && decision == null && !keyboard.IsOpen && stage.Standing;
+            if (!armed)
+            {
+                foreach (var turn in turns) turn.Reset();
+                stage.SetLean(0);
+                return;
+            }
+            var lean = 0f;
+            var table = stage.transform.parent;
+            for (var i = 0; i < hands.Length; i++)
+            {
+                var tracked = hands[i] != null && hands[i].Tracked;
+                // The hand in the stage's own space, taken from its parent so the stage's lean never feeds back into it.
+                var palm = tracked ? (table != null ? table.InverseTransformPoint(hands[i].PalmCenter) : hands[i].PalmCenter) - stage.transform.localPosition : Vector3.zero;
+                var swept = turns[i].Update(tracked, new System.Numerics.Vector3(palm.x, palm.y, palm.z), Time.deltaTime);
+                if (swept != 0) { stage.SetLean(0); HearOtherSide(0, true, swept); return; }
+                if (Mathf.Abs(turns[i].Lean) > Mathf.Abs(lean)) lean = turns[i].Lean;
+            }
+            stage.SetLean(lean);
+        }
+
+        /// <summary>
+        /// A hand that reaches an heirloom itself, rather than its card, begins that telling. The heirloom rises a little
+        /// to meet the hand first.
+        /// </summary>
+        void ReachForHeirlooms()
+        {
+            var offered = view.HeirloomsOffered && session.State == PersonalStoryState.Intake && !session.Paused && decision == null && !keyboard.IsOpen;
+            for (var i = 0; i < view.HeirloomCount; i++)
+            {
+                var nearness = 0f; var taken = false;
+                var middle = view.HeirloomPosition(i);
+                for (var h = 0; h < hands.Length; h++)
+                {
+                    var touch = reaches[h, i];
+                    if (!offered || hands[h] == null || !hands[h].Tracked) { touch.Reset(); continue; }
+                    taken |= touch.Update(hands[h].Sample, new System.Numerics.Vector3(middle.x, middle.y, middle.z), Time.deltaTime);
+                    nearness = Mathf.Max(nearness, touch.Proximity);
+                }
+                view.SetHeirloomReach(i, nearness);
+                if (!taken) continue;
+                foreach (var touch in reaches) touch.Reset();
+                view.ChooseHeirloom(i);
+                return;
+            }
+        }
+
+        /// <summary>The visitor is asked to rest a hand on their own table; the room is showing so they can see it.</summary>
+        void AskForARestingHand()
+        {
+            StopVoice();
+            Decide("Use your own table",
+                "Reach forward and rest an open hand on your table. Hold it still for a moment and the story will stand there.\n\nOnly your hand's position is read, on this headset.",
+                new[] { ("stand", "Keep the story stand") }, _ => { placement.Recenter(); Render(); });
+            askingForHand = true;
         }
 
         /// <summary>The fire is heard where it burns. Headset only, like the voice; the tabletop view itself creates no sound.</summary>
@@ -303,6 +411,8 @@ namespace Sankofa.Runtime.Personal
             StageSound(nightSound, .09f, speaking);
             TellWelcome();
             TurnPageWhenTold();
+            TurnByHand();
+            ReachForHeirlooms();
             WarmToHands();
             TickVoice();
         }
@@ -425,6 +535,9 @@ namespace Sankofa.Runtime.Personal
                 case PersonalStoryState.Reading:
                     // The first page says what the visitor's own words changed; later pages return to the setting.
                     view.RenderStory(story.Title, session.PageNumber == 1 && personalReason != null ? personalReason : "Enkare Nairobi • around the 1850s", Capability(story));
+                    // A page offers the sides of its meeting to follow, or, once one side is told, the side still unheard.
+                    var otherSide = OtherSideOffered;
+                    var sides = session.OffersChoice ? session.Chapter.Choices : otherSide ? session.NotFollowed : Array.Empty<PersonalStoryChoice>();
                     view.RenderChapter(new StoryTableChapterViewData
                     {
                         Index = session.PageNumber - 1, Count = session.PageCount, Id = session.Chapter.Id, Title = session.Chapter.Title,
@@ -432,8 +545,10 @@ namespace Sankofa.Runtime.Personal
                         ImageLabel = TruthLabel(session.Chapter.Truth),
                         PreviousPageTitles = session.PagesBefore.Select(c => c.Title).TakeLast(2).ToArray(),
                         Questions = session.Chapter.Questions.Select(q => q.Label).ToArray(),
-                        Choices = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Label).ToArray() : Array.Empty<string>(),
-                        ChoiceIds = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Id).ToArray() : Array.Empty<string>(),
+                        Choices = sides.Select(c => c.Label).ToArray(),
+                        ChoiceIds = sides.Select(c => c.Id).ToArray(),
+                        ChoicePrompt = otherSide ? OtherSidePrompt : null,
+                        ContinueLabel = otherSide ? EndHereLabel : null,
                     });
                     view.SetSpokenQuestions(SpokenQuestionsAvailable);
                     view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0 || SpokenQuestionsAvailable, false);
@@ -444,7 +559,7 @@ namespace Sankofa.Runtime.Personal
                 case PersonalStoryState.Sources:
                     view.ShowSourceDetails("What this telling knows", SourcesText()); break;
                 case PersonalStoryState.Closing:
-                    view.ShowClosing(Followed(story) + "\n\nKeep these exact pages on this device, or return to your choices without saving.");
+                    view.ShowClosing(Followed(story) + "\n\n" + KeepInvitation(story));
                     view.SetControlState(true, false, false, true); break;
             }
         }
@@ -458,15 +573,30 @@ namespace Sankofa.Runtime.Personal
             : thread == "place-water"
                 ? "Who followed the path beside the water? A question about journeys can follow the people next."
                 : "What did the travellers bring to their meeting? A question about trade can follow what they carried.";
-        /// <summary>Names the side the visitor followed, honestly distinguishing their choice from the fire's default, and the side still unheard.</summary>
+        /// <summary>
+        /// Names what was heard: both sides of the meeting, or the one side followed, honestly distinguishing the
+        /// visitor's choice from the fire's default, with the side still unheard.
+        /// </summary>
         string Followed(PersonalStoryDocument story)
         {
             var followed = session.Followed;
             if (followed == null) return ReturnInvitation(story.Interest);
+            if (session.Heard.Count > 1 && session.NotFollowed.Count == 0) return "You heard both sides of this meeting.";
             var text = (session.FollowedByChoice ? "You chose to " : "The fire chose to ") + Lower(followed.Label) + ".";
             if (session.NotFollowed.Count > 0) text += " Another time, you could " + Lower(session.NotFollowed[0].Label) + ".";
             return text;
         }
+        /// <summary>What keeping would do, said before the visitor decides. Saving stays an explicit choice.</summary>
+        string KeepInvitation(PersonalStoryDocument story)
+        {
+            var beads = BeadsToThread(story).Count;
+            return beads == 0 ? "Keep these exact pages on this device, or leave them unsaved."
+                : "Keep this telling to thread " + (beads == 1 ? "its bead" : "both beads") + " on your strand, or leave it unsaved.";
+        }
+        /// <summary>The sides heard in this sitting that a prepared telling can thread as beads, whether or not they are on the strand already.</summary>
+        List<PersonalStoryChoice> BeadsToThread(PersonalStoryDocument story) =>
+            story == null || story.Mode != "bundled" ? new List<PersonalStoryChoice>()
+                : session.Heard.Where(side => side != null && KeptStrand.IsKnown(story.Interest, side.Id)).ToList();
         static string Lower(string label) => string.IsNullOrEmpty(label) ? "" : char.ToLowerInvariant(label[0]) + label.Substring(1);
 
         void ShowAbout()
@@ -475,9 +605,10 @@ namespace Sankofa.Runtime.Personal
             StopVoice();
             Decide("How it works",
                 "Touch an heirloom to begin its telling. If you add a question first, recognised words in it choose which telling the fire begins.\n\n" +
-                "Each telling reaches a moment where you choose whose side to follow. If you simply turn the page, the fire chooses.\n\n" +
+                "Each telling reaches a meeting with two sides. You choose whose side to follow, then sweep a hand across the stage to turn it and hear the other. If you only watch, the fire chooses and turns the stage for you.\n\n" +
                 "Documented pages are marked and sourced. The people and their meetings are imagined: they are not an account of anyone's ancestors, and nothing here recovers a real relative.\n\n" +
-                "At the end you can keep a telling on this device and reopen it exactly, without a connection.\n\n" +
+                "At the end you can keep a telling on this device and reopen it exactly, without a connection. Each side you keep threads a bead on your strand.\n\n" +
+                "Use my table sets the story on your own table: one found in your room scan, or wherever you rest a hand. Nothing about your room leaves the headset.\n\n" +
                 "Sounds from Freesound: \u201ccampfire sound\u201d by SterckxS (CC BY 3.0); \u201cBabbling Brook HQ Seamless Wav Loop\u201d by celldroid (CC BY 4.0); \u201ccrickets\u201d by selcukartut, recorded in the Maasai Mara (CC0). The narrator is a synthetic voice.",
                 new[] { ("return", "Return") }, _ => Render());
         }
@@ -509,7 +640,7 @@ namespace Sankofa.Runtime.Personal
             Decide("Make yourself comfortable", "These choices affect presentation. They do not change or save your story.",
                 new[] { ("motion", reducedMotion ? "Gentle motion on" : "Still pages"), ("text", largeText ? "Standard text" : "Larger text"),
                     ("listen", narrationEnabled ? "Captions only" : "Read aloud"), ("lower", "Lower the stand"), ("raise", "Raise the stand"),
-                    ("recenter", "Recenter"), ("room", "Fit my table"), ("return", "Return") }, id =>
+                    ("recenter", "Recenter"), ("room", "Use my table"), ("return", "Return") }, id =>
                 {
                     if (id == "motion") { reducedMotion = !reducedMotion; view.SetReducedMotion(reducedMotion); }
                     else if (id == "text") { largeText = !largeText; view.SetLargeText(largeText); }
@@ -522,7 +653,11 @@ namespace Sankofa.Runtime.Personal
                 });
         }
         void Decide(string title, string text, IReadOnlyList<(string Id, string Label)> actions, Action<string> onAnswer)
-        { decision = onAnswer; view.ShowDecision(title, text, actions); }
+        {
+            // Any other notice takes the place of the request to rest a hand; a hand that then settles closes nothing.
+            askingForHand = false;
+            decision = onAnswer; view.ShowDecision(title, text, actions);
+        }
 
         void RequestKeep()
         {
@@ -544,16 +679,22 @@ namespace Sankofa.Runtime.Personal
             view.SetControlState(true, false, false, true);
         }
         /// <summary>
-        /// Keeping a prepared telling threads a bead for the side that was followed, whoever chose it. A side already
-        /// on the strand adds nothing. A generated telling has no sides and no bead.
+        /// Keeping a prepared telling threads a bead for each side heard in this sitting, whoever chose it. A side
+        /// already on the strand adds nothing. A generated telling has no sides and no bead.
         /// </summary>
         string ThreadBead()
         {
-            var story = session.Story; var side = session.Followed;
-            if (story == null || side == null || story.Mode != "bundled" || !KeptStrand.IsKnown(story.Interest, side.Id)) return "";
-            try { if (strand.Add(story.Interest, side.Id)) strands.Save(strand); }
+            var story = session.Story; var sides = BeadsToThread(story);
+            if (sides.Count == 0) return "";
+            try
+            {
+                var added = false;
+                foreach (var side in sides) added |= strand.Add(story.Interest, side.Id);
+                if (added) strands.Save(strand);
+            }
             catch (Exception) { strand = strands.Load(); return "Its bead could not be threaded this time. "; }
-            return strand.IsComplete ? "Your strand now holds all six sides. " : "A bead is threaded for this side: " + strand.Count + " of " + KeptStrand.Capacity + ". ";
+            if (strand.IsComplete) return "Your strand now holds all six sides. ";
+            return (sides.Count > 1 ? "Both sides are threaded on your strand: " : "A bead is threaded for this side: ") + strand.Count + " of " + KeptStrand.Capacity + ". ";
         }
         public bool Reopen()
         {

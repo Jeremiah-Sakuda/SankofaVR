@@ -54,8 +54,26 @@ namespace Sankofa.Flow
         /// One side has been told to its end and another has not been heard on this visit. The visitor may hear it
         /// now, from where the sides part, without the opening again; or finish with <see cref="Next"/>.
         /// </summary>
-        public bool OffersOtherSide => State == PersonalStoryState.Reading && steps.Count > 0 && NotFollowed.Count > 0
-            && !PersonalStoryRoutes.HasChoices(Chapter) && PersonalStoryRoutes.Continue(Story, ChapterIndex) < 0;
+        public bool OffersOtherSide
+        {
+            get
+            {
+                // Asked every frame while a side is told, so it allocates nothing.
+                if (State != PersonalStoryState.Reading || steps.Count == 0 || PersonalStoryRoutes.HasChoices(Chapter)) return false;
+                return HasUnheardSide() && PersonalStoryRoutes.Continue(Story, ChapterIndex) < 0;
+            }
+        }
+        bool HasUnheardSide()
+        {
+            var offered = steps[steps.Count - 1].Offered;
+            for (var i = 0; i < offered.Count; i++)
+            {
+                var heard = false;
+                for (var s = 0; s < steps.Count && !heard; s++) heard = ReferenceEquals(steps[s].Offered, offered) && steps[s].Side == offered[i];
+                if (!heard) return true;
+            }
+            return false;
+        }
         public PersonalStoryQuestion Question { get; private set; }
         public bool Paused { get; private set; }
         public string Problem { get; private set; }

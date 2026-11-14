@@ -9,7 +9,7 @@
       </intent-filter>
       <meta-data android:name="com.oculus.vr.focusaware" android:value="true" />
     </activity>
-    <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="false" />
+    <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="true" />
     <meta-data android:name="com.oculus.handtracking.frequency" android:value="HIGH" />
     <meta-data android:name="com.oculus.ossplash.background" android:value="black" />
     <meta-data android:name="com.oculus.telemetry.project_guid" android:value="7928c542-968f-4c21-a6e1-cb8f07d35fd1" />

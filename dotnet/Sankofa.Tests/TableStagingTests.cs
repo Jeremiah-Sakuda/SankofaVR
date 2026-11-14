@@ -71,6 +71,32 @@ namespace Sankofa.Tests
             }
         }
 
+        [Test]
+        public void WhenOneSideIsToldTheOtherWomanStandsThereToBeTurnedTo()
+        {
+            // Once a side has been told the page offers the other at her figure, so she must be on the stage by then.
+            // Both sides are staged for the same facing: going from one to the other turns the stage all the way round.
+            var staging = Shipped();
+            foreach (var interest in PersonalStoryCatalog.Interests)
+            {
+                var sides = Telling(interest).Chapters.Single(c => c.Choices != null && c.Choices.Count > 0).Choices;
+                Assert.That(sides.Count, Is.EqualTo(2), interest);
+                foreach (var side in sides)
+                {
+                    var other = sides.Single(s => s.Id != side.Id);
+                    var chapter = staging.For(side.Next);
+                    Assert.That(chapter.Entry, Is.EqualTo(TableStaging.Turn), side.Next);
+                    var last = chapter.Beats.LastOrDefault(b => b.Who == staging.FigureFor(other.Id) && b.Shown.HasValue);
+                    Assert.That(last?.Shown, Is.True, side.Next + ": " + staging.FigureFor(other.Id) + " must be there when her side is offered");
+                    // Each side's own chapter says where everyone stands from its first moment, so arriving from the other
+                    // side never leaves someone where the last telling put her.
+                    foreach (var figure in TableStaging.Figures)
+                        Assert.That(chapter.Beats.Any(b => b.Who == figure && b.At <= 0 && b.Shown.HasValue), Is.True, side.Next + " places " + figure + " as it opens");
+                    Assert.That(chapter.Beats.Any(b => b.Who == TableStaging.Gourd && b.At <= 0) || interest == "place-water", Is.True, side.Next + " places the gourd as it opens");
+                }
+            }
+        }
+
         [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"beats\":[{\"at\":0.5,\"who\":\"wambui\"},{\"at\":0.2,\"who\":\"wambui\"}]}}}", "out of order")]
         [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"beats\":[{\"at\":0,\"who\":\"stranger\"}]}}}", "unknown figure")]
         [TestCase("{\"version\":1,\"choices\":{},\"chapters\":{\"a\":{\"beats\":[{\"at\":0,\"who\":\"wambui\",\"x\":0.6}]}}}", "leaves the stage")]

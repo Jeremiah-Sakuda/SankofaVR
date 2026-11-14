@@ -24,6 +24,11 @@ namespace Sankofa.Runtime.Personal
         /// <summary>Ids of <see cref="Choices"/>, in order, so each perspective can stand at its painted figure.</summary>
         public string[] ChoiceIds = Array.Empty<string>();
         public string ChoicePrompt;
+        /// <summary>
+        /// What continuing without choosing is called. When set, that action is offered even where pages turn
+        /// themselves, as when a visitor may end a telling rather than hear its other side.
+        /// </summary>
+        public string ContinueLabel;
     }
 
     /// <summary>A seated illustrated journal. Every essential action has a labelled hand/pointer button.</summary>
@@ -74,13 +79,18 @@ namespace Sankofa.Runtime.Personal
         public Action ReopenRequested, ForgetRequested, ComfortRequested, AboutRequested;
         public Action<string> DecisionSelected;
 
+        /// <summary>How long a newly threaded bead swells before it settles on the strand.</summary>
+        public const float BeadSwellSeconds = 0.9f;
+        /// <summary>How far an heirloom rises to meet a reaching hand.</summary>
+        public const float HeirloomLift = 0.014f;
         string selectedRoute = "trade-household", selectedRegion = "enkare-nairobi", selectedPeriod = "1850s";
         string seed = "", currentTitle = "A question worth carrying";
         bool paused, reducedMotion, canBack, canNext, canAsk, canSave, detailsOpen, intake = true;
         bool error, closing, decisionOpen, hasKeptStory, offeringChoice, onlineAvailable = true;
         readonly List<string> captionPages = new List<string>();
         int captionPage, chapterIndex, chapterCount;
-        string previousCaption, previousChapterTitle;
+        string previousCaption, previousChapterTitle, closingMessage;
+        int partBeforeClosing;
         float authoredCaptionSize, authoredChapterSize, authoredDetailSize;
         readonly List<string> modalPages = new List<string>();
         (string Id, string Label)[] modalActions = Array.Empty<(string Id, string Label)>();
@@ -102,7 +112,11 @@ namespace Sankofa.Runtime.Personal
         /// <summary>What the page says while the visitor chooses, once the griot's welcome has been said.</summary>
         public const string StandingInvitation = PersonalStoryVoice.Invitation;
         string invitation;
-        bool welcoming, selfTurning, spokenQuestions;
+        bool welcoming, selfTurning, spokenQuestions, ownTable, strandShown;
+        float[] beadSwell = Array.Empty<float>();
+        bool[] beadKept = Array.Empty<bool>();
+        Vector3[] heirloomRest = Array.Empty<Vector3>();
+        float[] heirloomReach = Array.Empty<float>();
 
         const string ChoicePrefix = "choice:";
         public const string DefaultChoicePrompt = "Whose side will you follow?";
@@ -154,6 +168,9 @@ namespace Sankofa.Runtime.Personal
             if (detailActions != null) detailActions.Pressed += DetailAction;
             if (consentActions != null) consentActions.Pressed += ConsentAction;
             restingPageRotations = turningPages.Select(p => p.localRotation).ToArray();
+            heirloomRest = heirlooms.Select(h => h != null ? h.localPosition : Vector3.zero).ToArray();
+            heirloomReach = new float[heirlooms.Length];
+            beadSwell = new float[beads.Length]; beadKept = new bool[beads.Length];
             CollectPrints();
             authoredCaptionSize = caption != null ? caption.fontSize : 0.23f;
             authoredChapterSize = chapterTitle != null ? chapterTitle.fontSize : 0.22f;
@@ -162,12 +179,16 @@ namespace Sankofa.Runtime.Personal
 
         void Start() => RefreshControls();
 
+        /// <summary>The deck's own size in metres before it is fitted to a surface.</summary>
+        public const float DeckWidth = 1.25f, DeckDepth = 0.72f;
+        /// <summary>How large the deck is drawn on a surface with this much room, never too small to read.</summary>
+        public static float SurfaceScale(float width, float depth) => Mathf.Clamp(Mathf.Min(width / DeckWidth, depth / DeckDepth), 0.65f, 1.15f);
+
         /// <summary>Fits only the physical deck; it never moves the visitor or follows their head.</summary>
         public void FitToSurface(Vector3 center, Quaternion rotation, float width, float depth)
         {
             TableRoot.SetPositionAndRotation(center, rotation);
-            var scale = Mathf.Clamp(Mathf.Min(width / 1.25f, depth / 0.72f), 0.65f, 1.15f);
-            TableRoot.localScale = Vector3.one * scale;
+            TableRoot.localScale = Vector3.one * SurfaceScale(width, depth);
             if (raisedPrint != null) { viewingDistance = MeasureViewingDistance(raisedPrint.transform); ApplyDepth(); }
         }
 
@@ -240,16 +261,53 @@ namespace Sankofa.Runtime.Personal
         public void SetStrand(IReadOnlyList<string> keptTellings)
         {
             StrandKept = Mathf.Min(keptTellings?.Count ?? 0, beads.Length);
+            if (beadKept.Length != beads.Length) { beadKept = new bool[beads.Length]; beadSwell = new float[beads.Length]; }
             for (var i = 0; i < beads.Length; i++)
             {
                 if (beads[i] == null) continue;
                 var tone = i < StrandKept ? Array.IndexOf(RouteIds, keptTellings[i]) : -1;
                 var kept = tone >= 0 && tone < beadTones.Length && beadTones[tone] != null;
                 beads[i].sharedMaterial = kept ? beadTones[tone] : beadEmpty;
-                beads[i].transform.localScale = Vector3.one * (kept ? BeadSize : BeadSize * 0.55f);
+                // A bead threaded during this visit swells once as it joins the strand; beads from earlier visits are simply there.
+                if (kept && !beadKept[i] && strandShown && !reducedMotion) beadSwell[i] = 1;
+                else if (!kept) beadSwell[i] = 0;
+                beadKept[i] = kept;
+                if (beadSwell[i] <= 0) beads[i].transform.localScale = Vector3.one * (kept ? BeadSize : BeadSize * 0.55f);
             }
+            strandShown = true;
         }
         public const float BeadSize = 0.024f;
+        /// <summary>A bead is still swelling onto the strand.</summary>
+        public bool BeadSwelling => beadSwell.Any(b => b > 0);
+
+        /// <summary>Whether the story stands on the visitor's own table, so the intake can offer the way back to the stand.</summary>
+        public void SetOwnTable(bool value)
+        {
+            if (ownTable == value) return;
+            ownTable = value;
+            RefreshIntake();
+        }
+
+        public int HeirloomCount => heirlooms.Length;
+        /// <summary>The heirlooms are out to be chosen: a hand that reaches one begins its telling.</summary>
+        public bool HeirloomsOffered => intake && !paused && !detailsOpen && carried < 0 && routes != null && !routes.Hidden;
+        /// <summary>The middle of an heirloom in the world, where a hand closes on it.</summary>
+        public Vector3 HeirloomPosition(int index) => index >= 0 && index < heirlooms.Length && heirlooms[index] != null
+            ? heirlooms[index].position + TableRoot.up * (0.04f * TableRoot.lossyScale.y) : TableRoot.position;
+        /// <summary>0 to 1: how near a hand is to an heirloom. It rises a little to meet the hand.</summary>
+        public void SetHeirloomReach(int index, float nearness)
+        {
+            if (index < 0 || index >= heirloomReach.Length) return;
+            heirloomReach[index] = Mathf.Clamp01(nearness);
+        }
+        public float HeirloomReach(int index) => index >= 0 && index < heirloomReach.Length ? heirloomReach[index] : 0;
+        /// <summary>A hand has closed on an heirloom: the same choice as touching its card.</summary>
+        public bool ChooseHeirloom(int index)
+        {
+            if (!HeirloomsOffered || index < 0 || index >= heirlooms.Length || index >= RouteIds.Length) return false;
+            SelectRoute(RouteIds[index]);
+            return true;
+        }
 
         /// <summary>When the fire can be asked aloud, the page's question button says so.</summary>
         public void SetSpokenQuestions(bool value)
@@ -317,6 +375,13 @@ namespace Sankofa.Runtime.Personal
             if (part > captionPage) SetReadingPart(part);
         }
 
+        /// <summary>Shows the end of the page, as when something has been added after the words already read.</summary>
+        public void ShowLastReadingPart()
+        {
+            if (intake || detailsOpen || closing || captionPages.Count == 0) return;
+            if (captionPage != captionPages.Count - 1) SetReadingPart(captionPages.Count - 1);
+        }
+
         public void ResetReadingPosition()
         {
             previousCaption = previousChapterTitle = null;
@@ -340,6 +405,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (chapter == null) throw new ArgumentNullException(nameof(chapter));
             LastChapter = chapter;
+            var fromClosing = closing;
             intake = false; error = closing = detailsOpen = decisionOpen = false;
             ShowOnly(readingRoot);
             var choices = chapter.Choices ?? Array.Empty<string>();
@@ -347,7 +413,8 @@ namespace Sankofa.Runtime.Personal
             // The prompt is presentation: it follows the page's own words and is never part of the story or its narration.
             var text = offeringChoice ? chapter.Caption + "\n\n" + (string.IsNullOrWhiteSpace(chapter.ChoicePrompt) ? DefaultChoicePrompt : chapter.ChoicePrompt) : chapter.Caption;
             var samePage = previousChapterTitle == chapter.Title && chapterIndex == chapter.Index;
-            var retainedPart = previousCaption == text && samePage ? captionPage : 0;
+            // Stepping back from the ending returns to the part of the page that was being read before it.
+            var retainedPart = previousCaption == text && samePage ? (fromClosing ? partBeforeClosing : captionPage) : 0;
             chapterIndex = chapter.Index; chapterCount = Mathf.Max(1, chapter.Count);
             SetText(chapterTitle, chapter.Title);
             PaginateCaption(text, retainedPart);
@@ -401,11 +468,14 @@ namespace Sankofa.Runtime.Personal
 
         public void ShowClosing(string message = "A new question can begin another visit.")
         {
+            if (!closing) partBeforeClosing = captionPage;
             intake = false; error = decisionOpen = detailsOpen = offeringChoice = false; closing = true;
             ShowOnly(readingRoot);
             SetText(pageNumber, "WHAT YOU CARRY FORWARD");
             SetText(chapterTitle, "The next page is yours");
-            SetText(caption, message);
+            // The ending is measured like any page: at a larger text size it continues on a second part, never clipped.
+            closingMessage = message;
+            PaginateCaption(message, 0);
             SetQuestions(Array.Empty<string>());
             RefreshControls();
             SetFire(Sankofa.Core.Story.FireState.Resting);
@@ -437,6 +507,7 @@ namespace Sankofa.Runtime.Personal
             if (detailBody != null) detailBody.fontSize = authoredDetailSize * (value ? 1.15f : 1);
             if (consentBody != null) consentBody.fontSize = 0.14f * (value ? 1.15f : 1);
             if (previousCaption != null && !intake && !detailsOpen && !closing) PaginateCaption(previousCaption, captionPage);
+            else if (closing && !detailsOpen && closingMessage != null) PaginateCaption(closingMessage, captionPage);
             if (detailsOpen) RefreshModal();
         }
 
@@ -528,7 +599,7 @@ namespace Sankofa.Runtime.Personal
             var edit = ("edit", seed.Length == 0 ? "Add my question" : "Edit my question");
             if (intakeActions != null) intakeActions.Show(onlineAvailable
                 ? new[] { ("local", "Read prepared story"), edit, ("create", "Create my story") }
-                : selfTurning && stage != null && seed.Length == 0 ? new[] { edit, ("about", "How it works") }
+                : selfTurning && stage != null && seed.Length == 0 ? new[] { edit, ("about", "How it works"), ownTable ? ("stand", "Use the story stand") : ("room", "Use my table") }
                 : new[] { ("local", seed.Length == 0 ? "Begin the story" : "Begin with my question"), edit, ("about", "How it works") });
             if (keptActions != null) { keptActions.Show(new[] { ("reopen", "Reopen kept story"), ("forget", "Forget kept story") }); keptActions.Hidden = !hasKeptStory || paused || detailsOpen || intakeRoot == null || !intakeRoot.activeSelf; }
             if (intakeHeading != null) intakeHeading.gameObject.SetActive(!hasKeptStory);
@@ -567,7 +638,9 @@ namespace Sankofa.Runtime.Personal
             var items = new List<(string Id, string Label)>();
             if (closing)
             {
-                if (canBack && !selfTurning) items.Add(("back", "Previous page"));
+                if (captionPage > 0) items.Add(("back", "Earlier text"));
+                else if (canBack && !selfTurning) items.Add(("back", "Previous page"));
+                if (captionPage + 1 < captionPages.Count) items.Add(("next", "More text"));
                 if (canSave) items.Add(("save", "Keep this story"));
                 items.Add(("again", selfTurning ? "Another story" : "Another question"));
             }
@@ -575,7 +648,10 @@ namespace Sankofa.Runtime.Personal
             {
                 if (!selfTurning && (canBack || captionPage > 0)) items.Add(("back", "Previous page"));
                 var morePage = captionPage + 1 < captionPages.Count;
-                if (!selfTurning && (canNext || morePage)) items.Add(("next", morePage ? "Continue reading" : offeringChoice ? "Let the fire choose" : "Next page"));
+                var ending = offeringChoice && !string.IsNullOrWhiteSpace(LastChapter?.ContinueLabel) ? LastChapter.ContinueLabel : null;
+                if (!selfTurning && (canNext || morePage)) items.Add(("next", morePage ? "Continue reading" : ending ?? (offeringChoice ? "Let the fire choose" : "Next page")));
+                // Where pages turn themselves, the one thing a visitor may still need to say is that they are done.
+                else if (selfTurning && ending != null && canNext && !morePage) items.Add(("next", ending));
                 if (canAsk) items.Add(("ask", spokenQuestions ? "Ask the fire" : "Explore context"));
                 items.Add(("sources", "About this story"));
             }
@@ -656,6 +732,7 @@ namespace Sankofa.Runtime.Personal
             // Choosing an heirloom carries it to the fire. Without an online path, that choice is also the beginning.
             var index = Array.IndexOf(RouteIds, id);
             if (index >= 0 && index < heirlooms.Length && heirlooms[index] != null) { carried = index; carry = 0; carryFrom = heirlooms[index].localPosition; }
+            for (var i = 0; i < heirloomReach.Length; i++) heirloomReach[i] = 0;
             if (!onlineAvailable) StartLocalRequested?.Invoke();
         }
         static readonly string[] RouteIds = { "journeys", "trade-household", "place-water" };
@@ -669,6 +746,8 @@ namespace Sankofa.Runtime.Personal
             if (id == "local") StartLocalRequested?.Invoke();
             else if (id == "edit") SeedEditRequested?.Invoke();
             else if (id == "about") AboutRequested?.Invoke();
+            else if (id == "room") RoomRequested?.Invoke();
+            else if (id == "stand") RecenterRequested?.Invoke();
             else if (id == "create")
             {
                 detailsOpen = true; modalUsesConsent = true; ShowOnly(cloudConsentRoot);
@@ -687,7 +766,7 @@ namespace Sankofa.Runtime.Personal
         }
         void TransportAction(string id)
         {
-            if (id == "back") { if (!closing && captionPage > 0) SetReadingPart(captionPage - 1); else BackRequested?.Invoke(); }
+            if (id == "back") { if (captionPage > 0) SetReadingPart(captionPage - 1); else BackRequested?.Invoke(); }
             else if (id == "next") { if (captionPage + 1 < captionPages.Count) SetReadingPart(captionPage + 1); else NextRequested?.Invoke(); }
             else if (id == "ask") AskRequested?.Invoke();
             else if (id == "save") SaveRequested?.Invoke();
@@ -813,7 +892,7 @@ namespace Sankofa.Runtime.Personal
         {
             captionPage = Mathf.Clamp(index, 0, captionPages.Count - 1);
             SetText(caption, captionPages[captionPage]);
-            SetText(pageNumber, $"PAGE {chapterIndex + 1:00} / {chapterCount:00}" + (captionPages.Count > 1 ? $"   •   {captionPage + 1} / {captionPages.Count}" : ""));
+            if (!closing) SetText(pageNumber, $"PAGE {chapterIndex + 1:00} / {chapterCount:00}" + (captionPages.Count > 1 ? $"   •   {captionPage + 1} / {captionPages.Count}" : ""));
             pageTurn = reducedMotion ? 0 : 1;
             RefreshControls();
         }
@@ -824,6 +903,8 @@ namespace Sankofa.Runtime.Personal
             RefreshGourdInvite();
             if (paused) return;
             CarryHeirloom();
+            LiftHeirlooms();
+            SwellBeads();
             if (popUp < 1)
             {
                 popUp = reducedMotion ? 1 : Mathf.Min(1, popUp + Time.deltaTime / PopUpSeconds);
@@ -875,9 +956,36 @@ namespace Sankofa.Runtime.Personal
 
         void ReturnHeirlooms()
         {
-            if (carried >= 0 && carried < heirlooms.Length && heirlooms[carried] != null) heirlooms[carried].localPosition = carryFrom;
             carried = -1; carry = 1;
-            foreach (var item in heirlooms) if (item != null) { item.localScale = Vector3.one; item.gameObject.SetActive(true); }
+            for (var i = 0; i < heirlooms.Length; i++)
+            {
+                if (heirlooms[i] == null) continue;
+                if (i < heirloomRest.Length) heirlooms[i].localPosition = heirloomRest[i];
+                if (i < heirloomReach.Length) heirloomReach[i] = 0;
+                heirlooms[i].localScale = Vector3.one; heirlooms[i].gameObject.SetActive(true);
+            }
+        }
+
+        /// <summary>An heirloom that is waiting rises a little toward a hand that reaches for it, and settles when the hand goes.</summary>
+        void LiftHeirlooms()
+        {
+            for (var i = 0; i < heirlooms.Length && i < heirloomRest.Length; i++)
+            {
+                if (heirlooms[i] == null || i == carried) continue;
+                var lift = intake && !reducedMotion ? heirloomReach[i] * HeirloomLift : 0;
+                var at = heirloomRest[i] + Vector3.up * lift;
+                heirlooms[i].localPosition = Vector3.MoveTowards(heirlooms[i].localPosition, at, Time.deltaTime * 0.12f);
+            }
+        }
+
+        void SwellBeads()
+        {
+            for (var i = 0; i < beads.Length && i < beadSwell.Length; i++)
+            {
+                if (beadSwell[i] <= 0 || beads[i] == null) continue;
+                beadSwell[i] = Mathf.Max(0, beadSwell[i] - Time.deltaTime / BeadSwellSeconds);
+                beads[i].transform.localScale = Vector3.one * BeadSize * (1 + 0.8f * Mathf.Sin(beadSwell[i] * Mathf.PI));
+            }
         }
 
         void RestorePages()

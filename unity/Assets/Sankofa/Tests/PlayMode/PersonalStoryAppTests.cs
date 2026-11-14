@@ -157,7 +157,7 @@ namespace Sankofa.Tests
                 Assert.That(Panel("Start choices").Ids, Does.Not.Contain("local"), "an heirloom begins the telling; the page offers no second start");
                 yield return Press("Interest choices", "journeys");
                 Assert.That(Panel("Turn a page").Ids, Has.None.EqualTo("next").And.None.EqualTo("back"), "self-turning pages carry no page-turning buttons");
-                var pages = new List<string>(); var part = 0; var parts = 1; var choiceAtFigures = false;
+                var pages = new List<string>(); var part = 0; var parts = 1; var choiceAtFigures = false; var otherSideAtHerFigure = false;
                 for (var waited = 0f; waited < 90f && app.Session.State == PersonalStoryState.Reading; waited += Time.unscaledDeltaTime)
                 {
                     var id = app.Session.Chapter.Id;
@@ -172,13 +172,26 @@ namespace Sankofa.Tests
                         choiceAtFigures = true;
                         Assert.That(Panel("Questions beside the story").Ids, Is.Empty, "the choice stands at the figures, not twice");
                     }
+                    if (app.OtherSideOffered && !Panel("Follow wambui").Hidden)
+                    {
+                        // Once the waiting woman's side is told, the late woman's side is offered at her figure.
+                        otherSideAtHerFigure = true;
+                        Assert.That(id, Is.EqualTo("journeys.meeting"));
+                        Assert.That(view.Stage.Progress, Is.EqualTo(1f), "a side is told to its end before the other is offered");
+                        Assert.That(Panel("Follow wambui").Ids, Is.EqualTo(new[] { "choice:0" }));
+                        Assert.That(Panel("Follow naserian").Hidden, Is.True, "the side already heard is not offered again");
+                        Assert.That(view.Caption, Does.EndWith("turn it."), "the page says how the stage is turned");
+                        Assert.That(Panel("Turn a page").Ids, Does.Contain("next"), "a visitor may end here rather than hear the other side");
+                    }
                     yield return null;
                 }
                 Assert.That(choiceAtFigures, Is.True, "both sides were offered at the figures before the fire chose");
+                Assert.That(otherSideAtHerFigure, Is.True, "the unheard side was offered before the fire turned the stage");
                 Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing), "a visitor who only watches reaches the ending");
-                Assert.That(pages.Count, Is.EqualTo(3), string.Join(", ", pages));
+                Assert.That(pages, Is.EqualTo(new[] { "journeys.arrival", "journeys.context", "journeys.meeting", "journeys.late" }), "left alone, the fire turns the stage and both sides are heard");
+                Assert.That(app.Session.Heard.Select(side => side.Id), Is.EqualTo(new[] { "journeys.follow.waiting", "journeys.follow.late" }));
                 Assert.That(app.Session.FollowedByChoice, Is.False, "an unanswered choice is the fire's, never recorded as the visitor's");
-                Assert.That(view.Caption, Does.StartWith("The fire chose"));
+                Assert.That(view.Caption, Does.StartWith("You heard both sides of this meeting."));
                 Assert.That(app.HasKept, Is.False, "watching never saves");
                 yield return new WaitForSecondsRealtime(1f);
                 Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing), "the ending waits for the visitor");
@@ -241,6 +254,230 @@ namespace Sankofa.Tests
             Assert.That(app.Strand.Count, Is.Zero);
             Assert.That(view.StrandKept, Is.Zero);
             Assert.That(new Sankofa.Storage.PersonalStrandStore(directory).Load().Count, Is.Zero);
+        }
+
+        /// <summary>A hand whose palm is at a point in the world, fingers forward, as a tracked hand would report it.</summary>
+        static Sankofa.Interaction.HandSample PalmAt(Vector3 palm)
+        {
+            System.Numerics.Vector3 N(Vector3 v) => new System.Numerics.Vector3(v.x, v.y, v.z);
+            return new Sankofa.Interaction.HandSample
+            {
+                Wrist = N(palm + new Vector3(0, 0, -0.045f)), MiddleProximal = N(palm + new Vector3(0, 0, 0.045f)),
+                IndexProximal = N(palm + new Vector3(0.025f, 0, 0.04f)), LittleProximal = N(palm + new Vector3(-0.03f, 0, 0.035f)),
+                IndexTip = N(palm + new Vector3(0.03f, 0, 0.12f)), MiddleTip = N(palm + new Vector3(0, 0, 0.13f)), RingTip = N(palm + new Vector3(-0.015f, 0, 0.125f)),
+            };
+        }
+        static Sankofa.Runtime.Input.HandSource AHand() => UnityEngine.Object.FindObjectsByType<Sankofa.Runtime.Input.HandSource>(FindObjectsSortMode.None).First();
+        IEnumerator Until(Func<bool> met, float seconds)
+        {
+            for (var deadline = Time.realtimeSinceStartup + seconds; !met() && Time.realtimeSinceStartup < deadline;) yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator OnceASideIsToldAHandSweptAcrossTheStageTurnsItToTheOther()
+        {
+            app.TurnsPages = true;
+            view.SetReducedMotion(false);
+            var stage = view.Stage; var hand = AHand();
+            // A point in the stage's own space: x toward the visitor's right, y up, z away, from the turntable's centre.
+            Vector3 OverStage(float x, float y, float z) => stage.transform.parent.TransformPoint(stage.transform.localPosition + new Vector3(x, y, z));
+            Func<Sankofa.Interaction.HandSample> Sweep(float from, float to, float seconds)
+            {
+                var began = Time.time;
+                return () => PalmAt(OverStage(Mathf.Lerp(from, to, Mathf.Clamp01((Time.time - began) / seconds)), 0.20f, -0.36f));
+            }
+            Time.timeScale = 8;
+            try
+            {
+                yield return Press("Interest choices", "trade-household");
+                yield return Until(() => app.Session.OffersChoice && !Panel("Follow naserian").Hidden, 30f);
+                Assert.That(app.Session.OffersChoice, Is.True);
+                yield return Press("Follow naserian", "choice:1");
+                Assert.That(app.Session.Chapter.Id, Is.EqualTo("trade-household.expected"));
+                Assert.That(app.Session.FollowedByChoice, Is.True);
+                Assert.That(app.OtherSideOffered, Is.False, "the other side is not offered while this one is still being told");
+                yield return Until(() => stage.Standing, 10f);
+                // A sweep made before the side is told turns nothing.
+                Time.timeScale = 1;
+                hand.Simulated = Sweep(-0.18f, 0.18f, 0.4f);
+                yield return new WaitForSeconds(0.6f);
+                hand.Simulated = null;
+                Assert.That(app.Session.Chapter.Id, Is.EqualTo("trade-household.expected"));
+                Assert.That(stage.Turning, Is.False);
+                Time.timeScale = 8;
+                yield return Until(() => app.OtherSideOffered, 30f);
+            }
+            finally { Time.timeScale = 1; }
+            Assert.That(app.OtherSideOffered, Is.True, "once her side is told, the other woman's is offered");
+            yield return null; yield return null;
+            Assert.That(view.Caption, Does.EndWith("turn it."));
+            Assert.That(Panel("Follow wambui").Hidden, Is.False, "the woman not yet heard can also be chosen at her figure");
+            Assert.That(Panel("Follow wambui").Ids, Is.EqualTo(new[] { "choice:0" }));
+            Assert.That(Panel("Turn a page").Ids, Does.Contain("next"));
+
+            // Part of a sweep leans the stage with the hand; when the hand stops, the stage settles back and nothing turns.
+            hand.Simulated = Sweep(-0.04f, 0.08f, 0.3f);
+            yield return Until(() => stage.Lean > 3f, 1.5f);
+            Assert.That(stage.Lean, Is.GreaterThan(3f), "the stage leans toward the hand before it gives way");
+            yield return Until(() => stage.Lean < 0.2f, 2.5f);
+            Assert.That(stage.Lean, Is.LessThan(0.2f), "a hand that stops lets the stage settle");
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo("trade-household.expected"));
+
+            // A whole sweep turns it: the stage folds, turns the way the hand went, and rises on the other woman.
+            hand.Simulated = Sweep(0.18f, -0.18f, 0.4f);
+            yield return Until(() => app.Session.Chapter.Id == "trade-household.agreement", 2f);
+            hand.Simulated = null;
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo("trade-household.agreement"));
+            Assert.That(app.Session.FollowedByChoice, Is.True, "turning the stage by hand is the visitor's own choice");
+            Assert.That(app.Session.Heard.Select(side => side.Id), Is.EqualTo(new[] { "trade-household.follow.more", "trade-household.follow.less" }));
+            Assert.That(stage.Turning, Is.True);
+            Assert.That(app.OtherSideOffered, Is.False, "with both sides heard there is nothing left to turn to");
+            Time.timeScale = 8;
+            try
+            {
+                yield return Until(() => !stage.Turning && stage.Rise >= 1, 10f);
+                Assert.That(stage.Mirrored, Is.True);
+                Assert.That(stage.FigurePlace("wambui").z, Is.LessThan(stage.FigurePlace("naserian").z), "the woman now followed stands nearest the visitor");
+                yield return Until(() => app.Session.State == PersonalStoryState.Closing, 40f);
+            }
+            finally { Time.timeScale = 1; }
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing));
+            Assert.That(view.Caption, Does.StartWith("You heard both sides of this meeting."));
+            var words = view.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(t => t.name == "Narrative captions");
+            words.ForceMeshUpdate(true, true);
+            Assert.That(words.isTextOverflowing, Is.False, "the ending fits its page");
+
+            // Keeping threads a bead for each side heard in this sitting.
+            yield return Press("Turn a page", "save");
+            Assert.That(app.Strand.Beads.Select(b => b.ToString()), Is.EqualTo(new[] { "trade-household/trade-household.follow.more", "trade-household/trade-household.follow.less" }));
+            Assert.That(view.StrandKept, Is.EqualTo(2));
+            Assert.That(view.Caption, Does.Contain("Both sides are threaded").And.Contain("2 of 6"));
+            words.ForceMeshUpdate(true, true);
+            Assert.That(words.isTextOverflowing, Is.False, "what was kept fits its page");
+            Assert.That(view.BeadSwelling, Is.True, "the new beads swell onto the strand");
+            yield return Until(() => !view.BeadSwelling, 3f);
+            Assert.That(view.BeadSwelling, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator AVisitorMayEndAfterOneSideAndKeepOnlyThatBead()
+        {
+            app.TurnsPages = true;
+            Time.timeScale = 8;
+            try
+            {
+                yield return Press("Interest choices", "place-water");
+                yield return Until(() => app.OtherSideOffered, 60f);
+                Assert.That(app.OtherSideOffered, Is.True);
+                Assert.That(app.Session.Chapter.Id, Is.EqualTo("place-water.return"), "left to the fire, the first side is the authored one");
+            }
+            finally { Time.timeScale = 1; }
+            yield return Press("Turn a page", "next");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing));
+            Assert.That(view.Caption, Does.StartWith("The fire chose to stay with the one who remembers."), "ending early is never recorded as hearing both sides");
+            yield return Press("Turn a page", "save");
+            Assert.That(app.Strand.Beads.Select(b => b.ToString()), Is.EqualTo(new[] { "place-water/place-water.follow.remembers" }), "a side not heard earns no bead");
+            Assert.That(view.Caption, Does.Contain("1 of 6"));
+        }
+
+        [UnityTest]
+        public IEnumerator AHandThatReachesAnHeirloomBeginsItsTelling()
+        {
+            var hand = AHand();
+            Assert.That(view.HeirloomCount, Is.EqualTo(3));
+            // A hand coming near makes the heirloom rise a little to meet it, and begins nothing.
+            hand.Simulated = () => PalmAt(view.HeirloomPosition(2) + new Vector3(0, 0.16f, -0.05f));
+            yield return new WaitForSecondsRealtime(0.5f);
+            Assert.That(view.HeirloomReach(2), Is.GreaterThan(0.2f));
+            Assert.That(view.HeirloomReach(0), Is.LessThan(view.HeirloomReach(2)), "the heirloom nearest the hand answers most");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            // A hand passing through does not choose; closing on it for a moment does.
+            hand.Simulated = () => PalmAt(view.HeirloomPosition(2));
+            yield return Until(() => app.Session.State == PersonalStoryState.Reading, 2f);
+            hand.Simulated = null;
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading), "the water pot itself begins its telling, not only its card");
+            Assert.That(app.Session.Story.Interest, Is.EqualTo("place-water"));
+            Assert.That(view.HeirloomsOffered, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator RestingAHandOnATableSetsTheStoryThereAndTheStandCanAlwaysBeRestored()
+        {
+            var placement = UnityEngine.Object.FindFirstObjectByType<StoryTablePlacement>();
+            var hand = AHand();
+            var stand = view.TableRoot.Find("Virtual table");
+            var head = Camera.main.transform;
+            var eye = head.position.y < .45f ? new Vector3(head.position.x, 1.15f, head.position.z) : head.position;
+            var forward = Vector3.ProjectOnPlane(head.forward, Vector3.up).normalized;
+            var right = Vector3.Cross(Vector3.up, forward);
+            Vector3 Reach(float ahead, float below, float aside = 0) => eye + forward * ahead + right * aside + Vector3.down * below;
+            placement.Recenter();
+            var standAt = view.TableRoot.position;
+            Assert.That(placement.UsesSurface, Is.False);
+            Assert.That(placement.PassthroughActive, Is.False, "the story begins in its own dark room, never in the visitor's without being asked");
+            Assert.That(stand.gameObject.activeSelf, Is.True);
+
+            // In the editor there is no room scan, so asking for the visitor's own table goes straight to their hand.
+            yield return Press("Always available controls", "options");
+            yield return Press("Return and recovery actions", "room");
+            Assert.That(placement.AwaitingHand, Is.True);
+            Assert.That(view.ModalText, Does.Contain("rest an open hand"));
+            Assert.That(Panel("Return and recovery actions").Ids, Is.EqualTo(new[] { "stand" }));
+
+            // A hand in the lap and a hand moving across the table set nothing.
+            hand.Simulated = () => PalmAt(Reach(0.2f, 0.55f));
+            yield return new WaitForSecondsRealtime(1.4f);
+            Assert.That(placement.AwaitingHand, Is.True, "a hand in the lap is not a table");
+            var slid = Time.realtimeSinceStartup;
+            hand.Simulated = () => PalmAt(Reach(0.5f, 0.40f, -0.2f + (Time.realtimeSinceStartup - slid) * 0.2f));
+            yield return new WaitForSecondsRealtime(1.4f);
+            Assert.That(placement.AwaitingHand, Is.True, "a hand still moving has not come to rest");
+
+            // A hand laid still, off to one side, shows how high the table is and how near it begins.
+            var table = Reach(0.5f, 0.40f, 0.15f);
+            hand.Simulated = () => PalmAt(table);
+            yield return Until(() => !placement.AwaitingHand, 4f);
+            hand.Simulated = null;
+            Assert.That(placement.UsesSurface, Is.True);
+            Assert.That(view.TableRoot.position.y, Is.EqualTo(table.y - StoryTablePlacement.PalmAboveSurface).Within(0.002f), "the story stands at the height the hand found");
+            var offset = view.TableRoot.position - eye;
+            Assert.That(Vector3.Dot(offset, right), Is.EqualTo(0).Within(0.01f), "a hand resting to one side does not pull the story out of view");
+            Assert.That(Vector3.Dot(offset, forward), Is.EqualTo(0.80f).Within(0.01f), "the story begins just beyond the hand");
+            Assert.That(stand.gameObject.activeSelf, Is.False, "the virtual stand gives way to the real table");
+            yield return null; yield return null;
+            Assert.That(Panel("Return and recovery actions").Hidden, Is.True, "the request closes once the story is set down");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+            Assert.That(view.CapabilityLabel, Does.Contain("On your table"));
+
+            // Recenter always brings the stand back.
+            yield return Press("Always available controls", "options");
+            yield return Press("Return and recovery actions", "recenter");
+            Assert.That(placement.UsesSurface, Is.False);
+            Assert.That(stand.gameObject.activeSelf, Is.True);
+            Assert.That(Vector3.Distance(view.TableRoot.position, standAt), Is.LessThan(0.001f));
+
+            // Declining the request keeps the stand, and so does never resting a hand at all.
+            yield return Press("Always available controls", "options");
+            yield return Press("Return and recovery actions", "room");
+            yield return Press("Return and recovery actions", "stand");
+            Assert.That(placement.AwaitingHand, Is.False);
+            Assert.That(placement.UsesSurface, Is.False);
+            Assert.That(stand.gameObject.activeSelf, Is.True);
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Intake));
+        }
+
+        [UnityTest]
+        public IEnumerator WherePagesTurnThemselvesTheFirstPageOffersTheVisitorsOwnTable()
+        {
+            var placement = UnityEngine.Object.FindFirstObjectByType<StoryTablePlacement>();
+            app.TurnsPages = true; yield return null;
+            Assert.That(Panel("Start choices").Ids, Is.EqualTo(new[] { "edit", "about", "room" }), "using the visitor's own table is offered on the first page, not buried in a menu");
+            yield return Press("Start choices", "room");
+            Assert.That(placement.AwaitingHand, Is.True);
+            yield return Press("Return and recovery actions", "stand");
+            Assert.That(placement.AwaitingHand, Is.False);
+            Assert.That(view.IntakeVisible, Is.True);
+            Assert.That(Panel("Start choices").Ids, Is.EqualTo(new[] { "edit", "about", "room" }));
         }
 
         /// <summary>A microphone that records a short tone, so no real audio device is touched.</summary>
@@ -616,6 +853,9 @@ namespace Sankofa.Tests
                 Assert.That(app.Session.FollowedByChoice, Is.EqualTo(choose), "continuing is the fire's choice, never recorded as the visitor's");
                 Assert.That(app.Session.Chapter.Id, Is.EqualTo(choose ? "journeys.late" : "journeys.meeting"));
                 endings.Add(app.Session.Chapter.Narration);
+                // With hand-turned pages the side not yet heard is offered on this page, and ending here is one action.
+                Assert.That(app.OtherSideOffered, Is.True);
+                Assert.That(Panel("Questions beside the story").Ids, Is.EqualTo(new[] { "choice:0" }));
                 yield return ReachEnding();
                 Assert.That(view.Caption, Does.StartWith(choose ? "You chose to find the one who is late." : "The fire chose to stay with the one who waits."));
                 Assert.That(view.Caption, Does.Contain(choose ? "stay with the one who waits" : "find the one who is late"), "the unheard side is named as a reason to return");
