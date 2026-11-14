@@ -34,7 +34,7 @@ Everything works with hands alone, seated and offline. Documented pages are mark
 
 Unity 6 with Meta XR Core SDK and MR Utility Kit 207 and OpenXR hands. The story rules, the session and every gesture are plain C# with no engine dependency, tested outside Unity; the scene, stage and room are thin adapters around them. The application owns what may happen next: no model drives the stage, the choices or the save.
 
-The scenery and figures are AI-generated illustrations cut into layers and staged by hand; the narration is synthetic speech; the fire, brook and night are attributed field recordings. There is no AI-generated music. Room data and hand positions never leave the headset.
+The scenery and figures are AI-generated illustrations cut into layers and staged by hand; the narration is synthetic speech; the fire, the brook, the night and the stage's own rustle are field recordings, credited in the app. There is no AI-generated music. Room data and hand positions never leave the headset.
 
 ## What's next
 
@@ -48,15 +48,15 @@ This entry is a new Unity application for Meta Quest, built during the competiti
 
 ## Hand interactions (optional field)
 
-Sankofa has no controller path to fall back on, so each step was designed around what a seated person already does with their hands. You reach for the object you want and close your hand on it. You hold a hand to the fire and it flares. You set a gourd down between two people. You sweep the stage round the way you would turn a table to see the other side of something on it, and it leans with your hand before it gives way. Where your room has no scanned table, you show the app your table by resting your hand on it. Every one of these also has a labelled plaque that can be touched or pinched from a distance, and a visitor who does nothing still hears a whole story. What excites us is that none of this needed a new gesture to be taught: the hands already knew.
+Sankofa is designed for empty hands, so each step was built around what a seated person already does with them. You reach for the object you want and close your hand on it. You hold a hand to the fire and it flares. You set a gourd down between two people. You sweep the stage round the way you would turn a table to see the other side of something on it, and it leans with your hand before it gives way. Where your room has no scanned table, you show the app your table by resting your hand on it. Each choice also has a labelled plaque that can be touched or pinched from a distance, and a visitor who does nothing after the first touch still hears a whole story. What excites us is that none of this needed a new gesture to be taught: the hands already knew.
 
 ## Judge walkthrough
 
-Sit and set the controllers aside; nothing is asked for at launch. Close a hand on the **gourd**, or touch its card. At the turning point, choose **Follow the one who brought less** at her figure. When **Set the gourd down** appears, use it. When the page says the meeting has another side, sweep a hand across the stage. At the ending, **Keep this story** and watch two beads join the strand. Optional: **Use my table** on the first page. Pause, Options (recenter, stand height, larger text, still pages, captions only) and Leave stay on the page throughout. The full version is the [testing guide](../product/testing-guide.md).
+Sit and set the controllers aside. The app asks for nothing until you choose **Use my table**. Close a hand on the **gourd**, or touch its card. At the turning point, choose **Follow the one who brought less** at her figure. When **Set the gourd down** appears, use it. When the page says the meeting has another side, sweep a hand across the stage. At the ending, **Keep this story** and watch two beads join the strand. Optional: **Use my table** on the first page. Pause, Options (recenter, stand height, larger text, still pages, captions only) and Leave stay on the page throughout. The full version is the [testing guide](../product/testing-guide.md).
 
 ## Private release notes — exclude from public copy
 
-- Inspiration, What it does, How we built it and What's next come to 492 words; Devpost suggests 500 or fewer. The target launch date is its own field: confirm it with the entrant.
+- Inspiration, What it does, How we built it and What's next come to 501 words; Devpost suggests 500 or fewer. The target launch date is its own field: confirm it with the entrant.
 - Every interaction named above is implemented and software-tested only. None has run on a headset, and the November 14 changes have not yet run in Unity. Before publishing, decide whether to say so in the entry. Do not add any sentence that implies device testing.
 - The division recommends a changelog: [what was added during the window](changelog.md) is written to be quoted or linked.
 - The video may use Meta XR Simulator footage and must be labelled as such. The [shot list](access-handoff.md#capture-one-story-well--target-230) follows this copy.
