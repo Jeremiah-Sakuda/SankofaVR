@@ -10,10 +10,21 @@ namespace Sankofa.Flow
     /// <summary>Owns the accepted telling and navigation. Late network replies never change a newer visit.</summary>
     public sealed class PersonalStorySession
     {
+        /// <summary>One perspective taken on this visit: which, who chose it, and how long the route was once it was taken.</summary>
+        sealed class Step
+        {
+            public PersonalStoryChoice Side;
+            public bool Chosen;
+            public int RouteLength;
+            /// <summary>The perspectives that were offered where this one was taken.</summary>
+            public IReadOnlyList<PersonalStoryChoice> Offered;
+        }
+
         int requestVersion;
         PersonalStoryState beforeDetails;
         PersonalStoryRequest request;
         readonly List<int> route = new List<int> { 0 };
+        readonly List<Step> steps = new List<Step>();
         public PersonalStoryState State { get; private set; } = PersonalStoryState.Intake;
         public PersonalStoryDocument Story { get; private set; }
         public int ChapterIndex => route[route.Count - 1];
@@ -24,11 +35,27 @@ namespace Sankofa.Flow
         public int PageCount => Story == null ? 0 : route.Count - 1 + PersonalStoryRoutes.RemainingPages(Story, ChapterIndex);
         public IReadOnlyList<PersonalStoryChapter> PagesBefore => Story == null ? new PersonalStoryChapter[0] : route.Take(route.Count - 1).Select(i => Story.Chapters[i]).ToArray();
         public bool OffersChoice => State == PersonalStoryState.Reading && PersonalStoryRoutes.HasChoices(Chapter);
-        /// <summary>The perspective followed at the last choice point, and whether the visitor chose it or let the default stand.</summary>
-        public PersonalStoryChoice Followed { get; private set; }
-        public bool FollowedByChoice { get; private set; }
-        /// <summary>Perspectives offered alongside the one followed, which a later reading could take.</summary>
-        public IReadOnlyList<PersonalStoryChoice> NotFollowed { get; private set; } = new PersonalStoryChoice[0];
+        /// <summary>The perspective being followed now, and whether the visitor chose it or let the fire choose.</summary>
+        public PersonalStoryChoice Followed => steps.Count > 0 ? steps[steps.Count - 1].Side : null;
+        public bool FollowedByChoice => steps.Count > 0 && steps[steps.Count - 1].Chosen;
+        /// <summary>Every perspective heard on this visit, in the order heard.</summary>
+        public IReadOnlyList<PersonalStoryChoice> Heard => steps.Select(s => s.Side).ToArray();
+        /// <summary>Perspectives of the same meeting not yet heard on this visit, in authored order.</summary>
+        public IReadOnlyList<PersonalStoryChoice> NotFollowed
+        {
+            get
+            {
+                if (steps.Count == 0) return new PersonalStoryChoice[0];
+                var offered = steps[steps.Count - 1].Offered;
+                return offered.Where(c => !steps.Any(s => ReferenceEquals(s.Offered, offered) && s.Side == c)).ToArray();
+            }
+        }
+        /// <summary>
+        /// One side has been told to its end and another has not been heard on this visit. The visitor may hear it
+        /// now, from where the sides part, without the opening again; or finish with <see cref="Next"/>.
+        /// </summary>
+        public bool OffersOtherSide => State == PersonalStoryState.Reading && steps.Count > 0 && NotFollowed.Count > 0
+            && !PersonalStoryRoutes.HasChoices(Chapter) && PersonalStoryRoutes.Continue(Story, ChapterIndex) < 0;
         public PersonalStoryQuestion Question { get; private set; }
         public bool Paused { get; private set; }
         public string Problem { get; private set; }
@@ -105,9 +132,25 @@ namespace Sankofa.Flow
             var choices = Chapter.Choices;
             var target = PersonalStoryRoutes.IndexOf(Story, choices[index].Next);
             if (target <= ChapterIndex) return false;
-            Followed = choices[index]; FollowedByChoice = chosen;
-            NotFollowed = choices.Where((c, i) => i != index).ToArray();
             route.Add(target);
+            steps.Add(new Step { Side = choices[index], Chosen = chosen, RouteLength = route.Count, Offered = choices });
+            Question = null; Changed?.Invoke(); return true;
+        }
+
+        /// <summary>
+        /// Tells another side of the same meeting once one side has ended. <paramref name="index"/> counts within
+        /// <see cref="NotFollowed"/>. Pass <paramref name="chosen"/> false when the fire turned the stage because the
+        /// visitor waited, so that is never recorded as their choice.
+        /// </summary>
+        public bool HearOtherSide(int index, bool chosen)
+        {
+            if (Paused || !OffersOtherSide) return false;
+            var unheard = NotFollowed;
+            if (index < 0 || index >= unheard.Count) return false;
+            var target = PersonalStoryRoutes.IndexOf(Story, unheard[index].Next);
+            if (target < 0 || route.Contains(target)) return false;
+            route.Add(target);
+            steps.Add(new Step { Side = unheard[index], Chosen = chosen, RouteLength = route.Count, Offered = steps[steps.Count - 1].Offered });
             Question = null; Changed?.Invoke(); return true;
         }
 
@@ -118,15 +161,15 @@ namespace Sankofa.Flow
             else if (route.Count > 1)
             {
                 route.RemoveAt(route.Count - 1);
-                // Stepping back to a choice reopens it; the earlier path is no longer the one being followed.
-                if (PersonalStoryRoutes.HasChoices(Chapter)) ClearFollowed();
+                // Stepping back past where a side was taken undoes it: back to a choice reopens it, and back from a
+                // second side returns to the first side's ending with the second no longer heard.
+                steps.RemoveAll(s => s.RouteLength > route.Count);
             }
             else return false;
             Question = null; Changed?.Invoke(); return true;
         }
 
-        void ResetRoute() { route.Clear(); route.Add(0); ClearFollowed(); }
-        void ClearFollowed() { Followed = null; FollowedByChoice = false; NotFollowed = new PersonalStoryChoice[0]; }
+        void ResetRoute() { route.Clear(); route.Add(0); steps.Clear(); }
 
         public bool Ask(int index)
         {
