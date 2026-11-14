@@ -41,11 +41,13 @@ namespace Sankofa.Interaction
 
         /// <summary>From -1 to 1: the share of a full sweep made so far, positive toward the visitor's right.</summary>
         public float Lean { get; private set; }
+        /// <summary>A tracked hand is in front of the stage now, where a sweep is read, whether or not it is moving.</summary>
+        public bool Present { get; private set; }
 
         public void Reset()
         {
             trail.Clear();
-            Lean = 0; lost = 0; rest = 0;
+            Lean = 0; lost = 0; rest = 0; Present = false;
         }
 
         /// <summary>
@@ -54,6 +56,7 @@ namespace Sankofa.Interaction
         public int Update(bool tracked, Vector3 palm, double deltaSeconds)
         {
             var dt = Math.Max(0, deltaSeconds);
+            Present = tracked && Inside(palm);
             if (rest > 0)
             {
                 rest -= dt;

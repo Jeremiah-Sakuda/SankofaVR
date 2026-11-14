@@ -102,6 +102,27 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void AHandAtTheStageIsKnownBeforeItMoves()
+        {
+            // The fire holds its own turn while a hand is where a sweep would be read.
+            var gesture = new TurnGesture();
+            Assert.That(gesture.Present, Is.False);
+            gesture.Update(true, At(0.1f), Frame);
+            Assert.That(gesture.Present, Is.True, "a still hand in front of the stage");
+            gesture.Update(true, At(0.1f, 0.02f), Frame);
+            Assert.That(gesture.Present, Is.False, "a hand down at the page's buttons is not at the stage");
+            gesture.Update(false, At(0.1f), Frame);
+            Assert.That(gesture.Present, Is.False, "an untracked hand");
+            gesture.Update(true, At(0.1f), Frame);
+            gesture.Reset();
+            Assert.That(gesture.Present, Is.False);
+            // It is still known while the stage rests after a turn.
+            Move(gesture, At(-0.15f), At(0.15f), 0.45);
+            gesture.Update(true, At(0.15f), Frame);
+            Assert.That(gesture.Present, Is.True);
+        }
+
+        [Test]
         public void AGentleDeliberateSweepIsEnoughAndDirectionFollowsTheHand()
         {
             // Twenty centimetres in just under the time allowed: an unhurried sweep still turns the stage.

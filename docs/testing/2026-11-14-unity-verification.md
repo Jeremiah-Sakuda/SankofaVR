@@ -27,8 +27,9 @@ Run them with `SANKOFA_ROOM` and `SANKOFA_PRESENT` unset. New or changed tests, 
 | EditMode `TheStoryFacesAwayFromWhicheverEdgeTheVisitorSitsAt`, `TheStorySitsInFrontOfTheVisitorAndWhollyOnTheTable`, `ALongTableIsStillTheVisitorsWhenTheySitAtOneEndOfIt` | Seating on a scanned table | A real fault in the seating maths: these passed in a numeric replica |
 | EditMode `TheShippedManifestAsksNothingOfTheVisitorAtLaunch` | `unityplayer.SkipPermissionsDialog` is `true` | The manifest was made afresh from Meta's template, which writes `false`; set the value back to `true` and restore the three microphone removals |
 | PlayMode `PagesTurnThemselvesOnceToldAndAnUnansweredChoiceGoesToTheFire` (changed) | A watching visitor hears four pages and both sides | If the page count is three, the fire did not turn the stage: look at `TurnPageWhenTold` |
-| PlayMode `OnceASideIsToldAHandSweptAcrossTheStageTurnsItToTheOther` | Offer, lean, sweep, turn, both beads kept | It moves a simulated hand in real time and must finish its sweeps within the fire's ten seconds. On a slow or busy machine a timing failure here is the test's, not the feature's: rerun it alone before changing code |
+| PlayMode `OnceASideIsToldAHandSweptAcrossTheStageTurnsItToTheOther` | Offer, lean, sweep, turn, both beads kept | It moves a simulated hand in real time. The fire holds its own turn while that hand is at the stage, so the sweeps are not racing it; if it still fails on timing, rerun it alone before changing code |
 | PlayMode `AVisitorMayEndAfterOneSideAndKeepOnlyThatBead` | **End here**, one bead | |
+| PlayMode `TheFireDoesNotTurnTheStageFromUnderAHandThatIsAtIt` | The fire's own turn waits while a hand is at the stage | |
 | PlayMode `AHandThatReachesAnHeirloomBeginsItsTelling` | Heirloom rises, then begins | |
 | PlayMode `WherePagesTurnThemselvesAPagesQuestionsWaitUntilItIsToldAndAnAnswerDoesNotTellItAgain` | Questions appear when the page is told; an answer does not restart the page | |
 | PlayMode `RestingAHandOnATableSetsTheStoryThereAndTheStandCanAlwaysBeRestored`, `WherePagesTurnThemselvesTheFirstPageOffersTheVisitorsOwnTable` | Hand placement, recovery, first-page action | They assume the editor has no room: `SANKOFA_ROOM` must be unset |
@@ -61,7 +62,7 @@ Then, in the editor with `SANKOFA_PRESENT=1`, watch one telling without touching
 `SANKOFA_PRESENT=1` with **Sankofa → Play Personal Story Table in XR Simulator** gives the headset presentation. With the simulator's hands:
 
 - reach an heirloom itself;
-- at the offer, sweep a hand sideways in front of the stage, about twenty centimetres in under a second;
+- at the offer, sweep a hand sideways in front of the stage, about twenty centimetres in under a second. The fire waits up to twenty seconds more while a hand is held in front of the stage, so there is time to place the simulator's hand first;
 - choose **Use my table**. Without `SANKOFA_ROOM=1` the editor goes straight to the resting hand.
 
 `SANKOFA_ROOM=1` lets the editor show the simulator's synthetic room and read its scan, for recording. This path has never run. If the scan throws or finds no table, the request to rest a hand should appear with the reason in the page's status line.
