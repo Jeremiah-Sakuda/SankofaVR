@@ -239,6 +239,22 @@ namespace Sankofa.Runtime.Personal
             NextWelcomeLine();
         }
 
+        /// <summary>
+        /// Back at the fire after an ending, the griot names a side the strand has not yet threaded and the heirloom
+        /// that leads to it, in the words and recordings of the return welcome. Nothing is said to a visitor who has
+        /// kept nothing, or everything.
+        /// </summary>
+        public void SuggestNext()
+        {
+            if (view == null || session.State != PersonalStoryState.Intake) return;
+            var next = strand.Count > 0 ? strand.NextUnheard() : null;
+            var side = next == null ? null : KeptStrand.Sides(next.Telling).FirstOrDefault(s => s.Id == next.Side);
+            if (side == null) return;
+            welcome = new[] { PersonalStoryVoice.ReturnInvitation(next.Telling, side.Label) };
+            welcomeLine = -1;
+            NextWelcomeLine();
+        }
+
         void NextWelcomeLine()
         {
             welcomeLine++;
@@ -674,7 +690,9 @@ namespace Sankofa.Runtime.Personal
         {
             if (keyboard.IsOpen) { keyboard.Close(); Render(); return; }
             if (session.ReturnToStory()) return;
+            var fromEnding = session.State == PersonalStoryState.Closing;
             AbortPending(); StopVoice(); session.Cancel();
+            if (fromEnding && Presenting) SuggestNext();
         }
         void ShowSources() { StopVoice(); session.Sources(); }
         void ShowOptions()

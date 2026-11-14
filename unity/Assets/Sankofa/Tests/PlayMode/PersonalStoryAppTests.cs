@@ -241,6 +241,16 @@ namespace Sankofa.Tests
             }
             finally { Time.timeScale = 1; }
 
+            // Back at the fire in the same sitting, the griot can name that side at once, without the greeting.
+            app.SuggestNext(); yield return null;
+            Assert.That(app.Welcoming, Is.True);
+            Assert.That(view.Caption, Is.EqualTo("Choose the bundle, and you could find the one who is late."));
+            Assert.That(Panel("Interest choices").Hidden, Is.False, "the heirlooms stay in reach while the griot speaks");
+            Time.timeScale = 6;
+            try { yield return Until(() => !app.Welcoming, 10f); }
+            finally { Time.timeScale = 1; }
+            Assert.That(view.Caption, Is.EqualTo(StoryTableView.StandingInvitation));
+
             // Keeping the same side again adds no second bead; forgetting removes the telling and the strand.
             yield return Press("Kept story choices", "reopen");
             yield return ReachEnding();
