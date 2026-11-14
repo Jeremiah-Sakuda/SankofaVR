@@ -2,6 +2,8 @@
 
 November 10, 2026 · Proposed text and acceptance cases; no runtime text or audio changed
 
+**November 14 status.** Applied, as recorded in the [decision log](../../decisions.md): the three first-page questions with their proposed answers; the water telling's shorter C1 sentence as spoken text, with the full passage kept as its question; the gourd telling's documented page moved to the C6 trade passage, with the museum's gourd (C7) as its question; and the reveal boundary, by offering a page's questions only once it has been told where pages turn themselves. Not applied: the shorter C6 wording, which needs the entrant's approval and a new recording, so both tellings still say the full approved passage; the proposed captions on the heirloom cards, which need a look at how they fit the cards; and the two revised return lines, which need recordings.
+
 Read with the [Entertainment finish plan](../../product/entertainment-finish-plan.md). Baseline: `b860e31`. Claude owns the in-progress voice/app integration. This brief is for the next content pass once that work has a checkpoint. It preserves all three tellings and their two sides; it does not add a new episode, era, culture, generation pipeline or family-data form.
 
 ## Editorial decision

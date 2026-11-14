@@ -103,6 +103,10 @@ The first must print `401`. The second must show `"answers":"configured"` if a p
 
 A reply of `mode: bundled` with `provider_rejected` or `provider_auth_unavailable` usually means a key or sign-in has lapsed.
 
+## Switching it on in the app
+
+The November 14 manifest removes the microphone from the build: three `uses-permission` lines marked `tools:node="remove"` in `unity/Assets/Plugins/Android/AndroidManifest.xml`. To ship asking the fire aloud, delete those three lines, set the scene's service endpoint and access token, and turn on the app's **Spoken Questions** switch. With the lines still in place the app asks, is refused at once and shows the page's own questions. `AndroidManifestTests.TheJudgedBuildCarriesNoMicrophone` will then fail by design; change it with the decision.
+
 ## Switching it off
 
 In order of severity, each taking effect on restart:

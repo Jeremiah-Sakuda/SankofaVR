@@ -85,6 +85,8 @@ namespace Sankofa.Runtime.Personal
         const float TurnAfterSeconds = 1.6f, ChoiceWaitSeconds = 14f;
         /// <summary>How long the fire waits, once one side is told, before it turns the stage to the other itself.</summary>
         public const float OtherSideWaitSeconds = 10f;
+        /// <summary>How long a told page that has questions waits for one before it turns.</summary>
+        public const float QuestionWaitSeconds = 5f;
         /// <summary>What the page adds once one side of a meeting is told. Presentation: never part of the story or its narration.</summary>
         public const string OtherSidePrompt = "This meeting has another side. Sweep a hand across the stage to turn it.";
         /// <summary>What ending a telling after one side is called.</summary>
@@ -92,15 +94,38 @@ namespace Sankofa.Runtime.Personal
         string[] welcome;
         int welcomeLine = -1;
         float welcomeClock, welcomeLength, pageRest;
-        bool pageSpoken, pageTold, otherSideOpen, askingForHand;
-        string turnKey;
+        bool pageSpoken, pageTold, askingForHand;
+        string turnKey, toldPage, pageKey;
+        int pageKeyVersion, pageKeyNumber;
+        PersonalStoryChapter pageKeyChapter;
         TurnGesture[] turns = Array.Empty<TurnGesture>();
         TouchGesture[,] reaches = new TouchGesture[0, 0];
         /// <summary>
         /// One side of the meeting has been told and the other may be heard now: at its figure, by a hand sweeping the
         /// stage round, or left to the fire. Hand-turned pages offer it as soon as the side's page opens.
         /// </summary>
-        public bool OtherSideOffered => session.OffersOtherSide && (!TurnsPages || otherSideOpen);
+        public bool OtherSideOffered => session.OffersOtherSide && (!TurnsPages || PageToldOnce);
+        /// <summary>
+        /// The page being read has been told to its end at least once. Where pages turn themselves, what a page offers
+        /// beyond its telling waits for this: its questions, which would otherwise say what the page has not yet said,
+        /// and the other side of its meeting. Coming back from an answer does not tell the page again.
+        /// </summary>
+        public bool PageToldOnce => toldPage != null && toldPage == PageKey();
+        /// <summary>The page's own questions may be asked now.</summary>
+        public bool QuestionsOffered => session.State == PersonalStoryState.Reading && (!TurnsPages || PageToldOnce);
+
+        /// <summary>Names the page being read, or null between pages. Built once per page: it is asked for every frame.</summary>
+        string PageKey()
+        {
+            if (session.State != PersonalStoryState.Reading || session.Chapter == null) return null;
+            var chapter = session.Chapter;
+            if (pageKey == null || pageKeyVersion != session.RequestVersion || pageKeyNumber != session.PageNumber || !ReferenceEquals(pageKeyChapter, chapter))
+            {
+                pageKeyVersion = session.RequestVersion; pageKeyNumber = session.PageNumber; pageKeyChapter = chapter;
+                pageKey = pageKeyVersion + ":" + pageKeyNumber + ":" + chapter.Id;
+            }
+            return pageKey;
+        }
         /// <summary>The griot is still saying the welcome; the heirlooms can be chosen throughout.</summary>
         public bool Welcoming => welcome != null;
         /// <summary>The welcome line now on the page, or null once the standing invitation has returned.</summary>
@@ -250,9 +275,9 @@ namespace Sankofa.Runtime.Personal
         /// </summary>
         void TurnPageWhenTold()
         {
-            var reading = session.State == PersonalStoryState.Reading && session.Chapter != null;
-            var key = reading ? session.RequestVersion + ":" + session.PageNumber + ":" + session.Chapter.Id : null;
-            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; otherSideOpen = false; }
+            var key = PageKey();
+            var reading = key != null;
+            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; }
             if (!reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
             var speaking = voice != null && voice.isPlaying;
             if (pageSpoken && !speaking && voice.clip != null && voice.time <= 0.01f)
@@ -270,16 +295,30 @@ namespace Sankofa.Runtime.Personal
             if (!told) { pageRest = 0; return; }
             // A question held until the page was told is heard now, before any page turns.
             if (askWhenTold) { askWhenTold = false; pageRest = 0; BeginSpokenQuestion(); return; }
+            if (toldPage != key)
+            {
+                // The page is told. What it may now offer appears: its questions, and the other side of its meeting.
+                // Its last words stay in view and the fire turns to the visitor.
+                toldPage = key; pageRest = 0;
+                if (TurnsPages)
+                {
+                    Render(); view.ShowLastReadingPart();
+                    if (session.OffersOtherSide || HasQuestions) view.SetFireState(Sankofa.Core.Story.FireState.Listening);
+                }
+                return;
+            }
             if (!TurnsPages) return;
-            // One side of the meeting is told: the page now offers the other, and its last words stay in view.
-            if (session.OffersOtherSide && !otherSideOpen) { otherSideOpen = true; pageRest = 0; Render(); view.ShowLastReadingPart(); return; }
             pageRest += Time.deltaTime;
-            if (pageRest < (session.OffersChoice ? ChoiceWaitSeconds : session.OffersOtherSide ? OtherSideWaitSeconds : TurnAfterSeconds)) return;
+            var wait = session.OffersChoice ? ChoiceWaitSeconds : session.OffersOtherSide ? OtherSideWaitSeconds : HasQuestions ? QuestionWaitSeconds : TurnAfterSeconds;
+            if (pageRest < wait) return;
             pageRest = 0;
             // Left alone, the fire turns the stage itself, so a visitor who only watches still hears both sides.
             if (session.OffersOtherSide) { HearOtherSide(0, false, 0); return; }
             StopVoice(); session.Next();
         }
+
+        /// <summary>The page being read has something a visitor could ask.</summary>
+        bool HasQuestions => session.Chapter != null && (session.Chapter.Questions.Count > 0 || SpokenQuestionsAvailable);
 
         /// <summary>
         /// Turns the stage to the side of the meeting not yet heard. <paramref name="chosen"/> records whether the
@@ -431,6 +470,9 @@ namespace Sankofa.Runtime.Personal
             }
         }
 
+        /// <summary>A telling is beginning or being reopened: no page of it has been told yet.</summary>
+        void ResetReadingPosition() { toldPage = null; view.ResetReadingPosition(); }
+
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
         PersonalStoryRequest Request() => new PersonalStoryRequest(region, period, interest, question: seed);
 
@@ -438,7 +480,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (session.Paused) return;
             AbortPending(); StopVoice(); ClearClips();
-            keyboard.Close(); decision = null; narrationToken = null; storyToken = null; view.ResetReadingPosition();
+            keyboard.Close(); decision = null; narrationToken = null; storyToken = null; ResetReadingPosition();
             var request = Request(); var version = session.Begin(request);
             if (session.State != PersonalStoryState.Preparing) return;
             var result = BundledPersonalStoryComposer.Compose(request);
@@ -449,7 +491,7 @@ namespace Sankofa.Runtime.Personal
         public void StartGenerated()
         {
             if (session.Paused) return;
-            AbortPending(); StopVoice(); ClearClips(); keyboard.Close(); decision = null; narrationToken = null; view.ResetReadingPosition();
+            AbortPending(); StopVoice(); ClearClips(); keyboard.Close(); decision = null; narrationToken = null; ResetReadingPosition();
             personalReason = null; storyToken = null;
             var input = Request(); var version = session.Begin(input);
             if (session.State != PersonalStoryState.Preparing) return;
@@ -544,15 +586,16 @@ namespace Sankofa.Runtime.Personal
                         Caption = PersonalStoryVoice.Spoken(session.Chapter.Narration), ArtKey = session.Chapter.Illustration,
                         ImageLabel = TruthLabel(session.Chapter.Truth),
                         PreviousPageTitles = session.PagesBefore.Select(c => c.Title).TakeLast(2).ToArray(),
-                        Questions = session.Chapter.Questions.Select(q => q.Label).ToArray(),
+                        Questions = QuestionsOffered ? session.Chapter.Questions.Select(q => q.Label).ToArray() : Array.Empty<string>(),
                         Choices = sides.Select(c => c.Label).ToArray(),
                         ChoiceIds = sides.Select(c => c.Id).ToArray(),
                         ChoicePrompt = otherSide ? OtherSidePrompt : null,
                         ContinueLabel = otherSide ? EndHereLabel : null,
                     });
                     view.SetSpokenQuestions(SpokenQuestionsAvailable);
-                    view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0 || SpokenQuestionsAvailable, false);
-                    if (narrationEnabled && voice.clip == null && voiceRequest == null) SpeakCurrent();
+                    view.SetControlState(session.PageNumber > 1, true, QuestionsOffered && HasQuestions, false);
+                    // A page already told is not told again when the visitor comes back to it from an answer or a notice.
+                    if (narrationEnabled && voice.clip == null && voiceRequest == null && !PageToldOnce) SpeakCurrent();
                     break;
                 case PersonalStoryState.Question:
                     view.RenderQuestion(session.Question.Label, PersonalStoryVoice.Spoken(session.Question.Answer), TruthLabel(session.Question.Truth)); break;
@@ -699,7 +742,7 @@ namespace Sankofa.Runtime.Personal
         public bool Reopen()
         {
             if (session.Paused) return false;
-            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; storyToken = null; personalReason = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
+            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; storyToken = null; personalReason = null; ResetReadingPosition(); return session.OpenSaved(kept); }
             catch (Exception) { ShelfProblem("Your kept story could not be opened. It has not been replaced.", () => Reopen()); return false; }
         }
         public void Forget()

@@ -19,15 +19,15 @@ The [personal story table scope](personal-story-table-mvp.md) is the active impl
 | SK-05 — Integrity | Exact approved historical passages cite C1/C6/C7. Reconstructed scenes are labelled imagined. Visitor accounts never become verified history, and no name or location establishes genealogy |
 | SK-06 — Language and captions | English interface and text are active. Second-language acceptance is explicitly deferred. Current verification is muted/caption-first; optional narration requires a separate listening and rights pass |
 | SK-07 — Spatial presentation | An illustrated journal and fire occupy a nearby story table. Gallery frame entry/return is retained comparison work, not the current MVP journey |
-| SK-08 — Participation | Deliberate selection, page control and contextual questions shape exploration. Physical flour exchange is not claimed for the new table scene |
+| SK-08 — Participation | Deliberate selection, page control and contextual questions shape exploration. A hand on an heirloom begins its telling; a side is chosen at its figure; a hand swept across the stage turns it to the other side of the same meeting; the gourd can be set down by hand. Each has a labelled alternative and a passive outcome. Physical flour exchange is not claimed for the new table scene |
 | SK-09 — Questions | Authored or service-supplied bounded contextual answers and source details return to the same chapter. Live freeform conversation, voice input and speech recognition are deferred |
 | SK-10 — Application authority | Validate stories before display; the application owns state, cancellation, pause and permitted actions. Late provider replies cannot replace a newer request |
 | SK-11 — Assets | Approved existing local illustrations only. Dynamic image generation is deferred. No AI-generated music |
-| SK-12 — Memory | Explicit Keep stores realised content. Reopen reads that content without new generation; new exploration is a separate action. Provide deletion and visible save failure |
+| SK-12 — Memory | Explicit Keep stores realised content and threads a bead for each side heard in the sitting. Reopen reads that content without new generation; new exploration is a separate action. Provide deletion and visible save failure |
 | SK-13/14 — Recovery | A complete labelled bundled story works without a service. Preserve choices for retry, reject invalid outputs and avoid silent saves or substitutions |
 | SK-15 — Comfort | Seated use, legible text, one-hand paths, pause, recenter and manual height adjustment; verify actual-device reach, passthrough and rendering |
 | SK-16 — Data | Consent before cloud transmission; no room geometry in story requests. Minimise saved personal data and verify provider retention before stronger privacy claims |
-| SK-17 — Room presence | Optional local MRUK table fitting changes placement and footprint. Missing/denied room data leaves an adjustable virtual stand usable |
+| SK-17 — Room presence | The room is shown only after the visitor asks to use their own table. Local MRUK table fitting changes placement and footprint; with missing or denied room data a resting hand sets the table's height. An adjustable virtual stand stays usable throughout |
 | SK-18 — Release evidence | Separate core/service tests, Unity checks, simulator captures, actual Quest evidence, cultural review and rights/release acceptance. Publish accurate capability and adaptation disclosures |
 
 ## Current release boundary

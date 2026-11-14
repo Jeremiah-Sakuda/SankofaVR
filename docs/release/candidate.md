@@ -1,5 +1,7 @@
 # Sankofa candidate builds
 
+**November 14, 2026: no build yet contains that day's changes.** They were written without Unity and must pass the [verification list](../testing/2026-11-14-unity-verification.md) first. The next build should then show no `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS` or `BLUETOOTH` among its permissions, since the manifest now removes them, and `unityplayer.SkipPermissionsDialog` set to `true`. Record its identity here as a new section; the builds below are earlier ones.
+
 ## Griot visit with spoken questions, switched off — November 10, 2026
 
 Built from clean committed source **6f40764** on `feature/griot-visit` with Unity 6000.3.25f1 in muted batch mode. It replaces the build from `f7ec6d8` recorded below and adds the ask-the-fire path described in the [decision record](../decisions.md). The switch is off and no service endpoint is set in the scene, so this build behaves as the earlier one: the page's question button opens the page's own questions.

@@ -1,27 +1,29 @@
 # Testing Sankofa — the pop-up story table
 
-November 9, 2026 · Scene `StoryTable` · Read the [candidate record](../release/candidate.md) for the exact build. This guide doubles as the judges' testing instructions in the [Devpost draft](../release/submission-draft.md).
+November 14, 2026 · Scene `StoryTable` · Read the [candidate record](../release/candidate.md) for the exact build. This guide doubles as the judges' testing instructions in the [Devpost draft](../release/submission-draft.md). It describes the November 14 changes, which have not yet run in Unity; the [verification list](../testing/2026-11-14-unity-verification.md) comes first.
 
-Each telling runs about 2 to 3 minutes; the walkthrough below, which visits both sides of the gourd telling, takes about 6 to 8. It is seated and hands only. Controllers are optional. No account, network or microphone is needed. The prepared tellings are complete offline.
+One sitting hears both sides of one meeting and takes about four minutes. It is seated and hands only. Controllers are optional. No account, network or microphone is needed, and nothing is asked for at launch. The prepared tellings are complete offline.
 
 ## Hands
 
 | To | Do |
 |---|---|
 | Press a plaque or button | Touch it with a fingertip, or point and pinch. The press lands when you release the pinch |
-| Begin a story | Touch the label card in front of an heirloom on the stage: a bundle, a gourd or a water pot |
+| Begin a story | Close a hand on an heirloom on the stage (a bundle, a gourd or a water pot), touch its label card, or point and pinch at the card from your seat |
+| Turn the stage | When a page says "This meeting has another side", sweep an open hand sideways in front of the stage, about a hand's length. The stage leans with your hand, then folds and turns. Touching the plaque over the other woman does the same; so does waiting ten seconds |
+| Use your own table | **Use my table** on the first page, or in Options. If your room scan holds a table near you the story moves onto it. Otherwise rest an open hand on your table and hold it still for a moment |
 | Set the gourd down | When the gourd glows and the plaque **Set the gourd down** appears over it, touch or pinch the plaque. It stays for a few seconds; if you wait, the story sets the gourd down itself |
-| Pause, adjust, leave | **Pause**, **Options** and **Leave** stay at the front of the page. Options holds Recenter, table fitting, stand height, voice, motion and text size |
+| Pause, adjust, leave | **Pause**, **Options** and **Leave** stay at the front of the page. Options holds Recenter, **Use my table**, stand height, voice, motion and text size |
 
 ## Judge walkthrough
 
 1. Sit, set the controllers aside and let the table settle in front of you. If it sits too high or far, open **Options** and use **Recenter** or the stand height.
-2. Touch the **gourd** card. The fire takes the gourd and a paper theatre rises from the table: dusk, a river and two women.
-3. Read or listen. At the turning point, choose whose side to follow. Plaques above each woman and buttons on the page do the same thing. Choose **Follow the one who brought less**. The stage folds, turns and brings her forward. (If you simply turn the page, the fire chooses, and the ending says so.)
+2. Reach for the **gourd** and close a hand on it, or touch its card. The fire takes the gourd and a paper theatre rises from the table: dusk, a river and two women.
+3. Listen. The pages turn themselves. At the turning point, choose whose side to follow at the plaque above each woman. Choose **Follow the one who brought less**. The stage folds, turns and brings her forward. (If you only watch, the fire chooses after a few seconds.)
 4. When the gourd glows and **Set the gourd down** appears, press it: the gourd moves between the women. If you wait, the story continues and the women set it down themselves. Either way, they make their own agreement.
-5. At the ending, the fire names the side you followed and the side you have not heard. Press **Keep this story**.
-6. Touch the gourd again and choose **Wait with the one who expected more**. The stage turns to her side, and the same meeting shows what accepting less costs her.
-7. Optional: **Explore context** answers a question beside the page and returns to the same place. **About this story** shows what is documented and what is imagined. From the first page, **Reopen kept story** replays exactly what you kept, without generating anything new; **Forget kept story** deletes it.
+5. When her side is told, the page says the meeting has another side. Sweep a hand across the stage. It turns to the woman who expected more, and the same meeting shows what accepting less costs her. (**End here** ends the telling after one side instead.)
+6. At the ending, press **Keep this story**. Two beads, one for each side you heard, join the strand on the stage's rim. A strand holds six: two sides of each of the three tellings.
+7. Optional: when a page has been told its questions appear beneath it for a few seconds, and **Explore context** answers one and returns to the same place without telling the page again. **About this story** shows what is documented and what is imagined. From the first page, **Reopen kept story** replays exactly what you kept, without generating anything new; **Forget kept story** deletes it.
 
 The bundle and the water pot begin the other two prepared tellings. Each has its own choice of side.
 
@@ -31,13 +33,13 @@ Pages marked **Documented context** quote a sourced passage (source details on r
 
 ## Optional checks
 
-- **Table fitting** (optional; implemented but not yet tried on a headset): Options → **Fit my table** asks for scene permission, then moves the theatre onto a detected table. Denying permission or having no table leaves the adjustable stand in place.
+- **Your own table** (optional; not yet tried on a headset): **Use my table** shows your room, a little dimmed, and asks for scene permission. If your room scan holds a table near you, the theatre moves onto it, at the edge you sit at. If not, or if you decline, rest an open hand on your table for a moment and the theatre stands there. **Recenter** in Options always brings the virtual stand back.
 - **Pause and recovery:** Pause holds the narration and the stage. Taking the headset off is designed to pause as well.
 - **Comfort:** Options offers larger text, reduced motion (the stage appears without folding or turning) and voice off (captions only).
 
 ## Known limits
 
-Verified with automated tests and desktop renders. No physical Quest was available during development, so real hand-tracking feel, table fitting and sustained frame rate on a headset are unmeasured. The story's cultural review is still open, which is why each telling says it is a draft. Online story generation exists in the codebase but is not part of the judged build.
+Verified with automated tests and desktop renders. No physical Quest was available during development, so real hand-tracking feel, the sweep, table fitting, the room behind the story and sustained frame rate on a headset are unmeasured. The story's cultural review is still open, which is why each telling says it is a draft. Online story generation exists in the codebase but is not part of the judged build.
 
 ---
 

@@ -431,7 +431,7 @@ namespace Sankofa.Runtime.Personal
             SetPreviousPages(chapter.PreviousPageTitles);
             choiceFigures = offeringChoice && stage != null ? (chapter.ChoiceIds ?? Array.Empty<string>()).Select(id => stage.Staging?.FigureFor(id)).ToArray() : Array.Empty<string>();
             if (offeringChoice) SetChoices(choices); else SetQuestions(chapter.Questions);
-            pageTurn = reducedMotion ? 0 : 1;
+            if (!samePage) pageTurn = reducedMotion ? 0 : 1;
             RefreshControls();
             SetFire(Sankofa.Core.Story.FireState.Telling);
         }
@@ -891,9 +891,11 @@ namespace Sankofa.Runtime.Personal
         void SetReadingPart(int index)
         {
             captionPage = Mathf.Clamp(index, 0, captionPages.Count - 1);
+            // The page stirs when its words change, not when only the actions beneath them do.
+            var sameWords = caption != null && caption.text == captionPages[captionPage];
             SetText(caption, captionPages[captionPage]);
             if (!closing) SetText(pageNumber, $"PAGE {chapterIndex + 1:00} / {chapterCount:00}" + (captionPages.Count > 1 ? $"   •   {captionPage + 1} / {captionPages.Count}" : ""));
-            pageTurn = reducedMotion ? 0 : 1;
+            if (!sameWords) pageTurn = reducedMotion ? 0 : 1;
             RefreshControls();
         }
 

@@ -381,6 +381,42 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator WherePagesTurnThemselvesAPagesQuestionsWaitUntilItIsToldAndAnAnswerDoesNotTellItAgain()
+        {
+            app.TurnsPages = true;
+            yield return Press("Interest choices", "trade-household");
+            var questions = Panel("Questions beside the story"); var transport = Panel("Turn a page");
+            var page = app.Session.Chapter.Id;
+            Assert.That(app.PageToldOnce, Is.False);
+            Assert.That(questions.Ids, Is.Empty, "a question shown now would say what the page has not yet said");
+            Assert.That(transport.Ids, Does.Not.Contain("ask"));
+            Assert.That(transport.Ids, Does.Contain("sources"), "what is documented and what is imagined can be asked at any moment");
+
+            view.Stage.Seek(1);
+            yield return Until(() => app.PageToldOnce, 3f);
+            yield return null;
+            Assert.That(app.PageToldOnce, Is.True);
+            Assert.That(questions.Ids, Is.EqualTo(new[] { "0" }), "once the page is told, its question is offered");
+            Assert.That(questions.Hidden, Is.False);
+            Assert.That(transport.Ids, Does.Contain("ask"));
+
+            yield return Press(questions, "0");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
+            Assert.That(view.ModalText, Does.Contain("She left a portion at home"));
+            yield return Press("Return and recovery actions", "continue");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo(page));
+            Assert.That(app.PageToldOnce, Is.True, "coming back from an answer does not tell the page again");
+            Assert.That(view.Stage.Progress, Is.EqualTo(1f));
+            Assert.That(questions.Ids, Is.EqualTo(new[] { "0" }), "its question is still there to ask");
+
+            // Left alone, the told page waits a little for a question, then turns, and the next page starts untold.
+            yield return Until(() => app.Session.PageNumber == 2, PersonalStoryApp.QuestionWaitSeconds + 4f);
+            Assert.That(app.Session.PageNumber, Is.EqualTo(2));
+            Assert.That(app.PageToldOnce, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator AHandThatReachesAnHeirloomBeginsItsTelling()
         {
             var hand = AHand();
