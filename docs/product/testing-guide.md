@@ -2,7 +2,7 @@
 
 November 14, 2026 · Scene `StoryTable` · Read the [candidate record](../release/candidate.md) for the exact build. This guide doubles as the judges' testing instructions in the [Devpost draft](../release/submission-draft.md). It describes the November 14 changes, which have not yet run in Unity; the [verification list](../testing/2026-11-14-unity-verification.md) comes first.
 
-One sitting hears both sides of one meeting and takes about four minutes. It is seated and hands only. Controllers are optional. No account, network or microphone is needed, and nothing is asked for at launch. The prepared tellings are complete offline.
+One sitting hears both sides of one meeting and takes about four minutes. It is seated and hands only. Controllers are optional. No account, network or microphone is needed, and the app asks for nothing until you choose **Use my table**. The prepared tellings are complete offline.
 
 ## Hands
 

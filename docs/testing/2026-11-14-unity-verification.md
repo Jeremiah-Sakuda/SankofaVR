@@ -8,7 +8,7 @@ The scene file is unchanged and does not need rebuilding: no builder code and no
 
 Open the project once, or run any batch command, and read the console.
 
-- A compile error in `StoryTablePlacement.cs` would be a Meta SDK member that differs from the stand-ins. The file uses only members the earlier version already used, plus `Behaviour.enabled` on the passthrough layer.
+- `StoryTablePlacement.cs` uses only Meta SDK members the earlier version already used, plus `Behaviour.enabled` on the passthrough layer; each was found in the 207 source. A compile error anywhere is more likely a Unity 6 difference from the 2021 reference assemblies the type-check used.
 - `Flame.shader` now reads `Blend One One, Zero One`. A pink fire means the shader failed to compile.
 
 ## 2. Tests
@@ -31,11 +31,13 @@ Run them with `SANKOFA_ROOM` and `SANKOFA_PRESENT` unset. New or changed tests, 
 | PlayMode `AVisitorMayEndAfterOneSideAndKeepOnlyThatBead` | **End here**, one bead | |
 | PlayMode `TheFireDoesNotTurnTheStageFromUnderAHandThatIsAtIt` | The fire's own turn waits while a hand is at the stage | |
 | PlayMode `AHandThatReachesAnHeirloomBeginsItsTelling` | Heirloom rises, then begins | |
+| PlayMode `TheStagesShortSoundsAreInTheBuildAndShort` | The two stage sounds import and load | If a sound was deleted on purpose, delete its name from this test and from the core test `TableSoundTests` |
 | PlayMode `WherePagesTurnThemselvesAPagesQuestionsWaitUntilItIsToldAndAnAnswerDoesNotTellItAgain` | Questions appear when the page is told; an answer does not restart the page | |
 | PlayMode `RestingAHandOnATableSetsTheStoryThereAndTheStandCanAlwaysBeRestored`, `WherePagesTurnThemselvesTheFirstPageOffersTheVisitorsOwnTable` | Hand placement, recovery, first-page action | They assume the editor has no room: `SANKOFA_ROOM` must be unset |
 | PlayMode `TheOtherSideOfAMeetingTurnsTheStageAllTheWayRoundAndTheStageLeansWithAHand`, `OnceASideIsToldItsPageOffersTheOtherAndAWayToEnd` | Stage and page on their own | |
 | PlayMode `EveryEndingIsReadableInFullAtBothTextSizes` | No ending is clipped; one page at the standard size | If an ending needs two parts at the standard size, shorten its sentence in `PersonalStoryApp.KeepInvitation` |
 | PlayMode `ChoosingASideChangesTheEndingAndContinuingLetsTheFireChoose` (changed) | Hand-turned pages offer the other side on the page | |
+| PlayMode `KeepingThreadsABeadAndTheGriotNamesAnUnheardSideOnReturn` (changed) | Back at the fire the griot names an unheard side without the greeting | |
 
 ## 3. Look
 
@@ -47,7 +49,7 @@ New frames `17-other-side-offered-72`, `17-other-side-offered-82` and `18-other-
 
 - the plaque over the woman not yet heard is readable and not behind scenery, and the page's last line ("Sweep a hand across the stage to turn it.") is whole;
 - **End here** sits in the page's action row without crowding it;
-- the first page shows **Add my question**, **How it works** and **Use my table** in one row.
+- the first page shows **Add my question**, **How it works** and **Use my table** in one row, with the line "Reach for an heirloom, or point and pinch its card." whole above them.
 
 Then, in the editor with `SANKOFA_PRESENT=1`, watch one telling without touching anything: each page's questions should appear as its voice ends and the page turn five seconds later; the fire should choose a side after fourteen seconds, turn the stage again ten seconds after that side is told, and reach the ending with both sides heard. Judge the pauses by ear: `QuestionWaitSeconds`, `ChoiceWaitSeconds` and `OtherSideWaitSeconds` in `PersonalStoryApp` set them. Watch the second turn in particular. It is a fold, one whole turn of the turntable and a rise; if a whole turn reads as too much, `PopUpStage.BeginPhase` is where a half turn and a mirrored restaging would go.
 
@@ -55,7 +57,8 @@ Then, in the editor with `SANKOFA_PRESENT=1`, watch one telling without touching
 
 - `p-145300bc4d3cdf9c.mp3` is the water telling's documented page, cut without re-encoding from the longer recording at 9.07 seconds. Listen to its last word: it should end cleanly after "cool waters".
 - Play any quiet clip after any loud one from before (`p-76313a1b54b65b12`, the return greeting, was the loudest; `p-e92d128aa0306221` among the quietest). They should now sit together. `python3 scripts/level_table_narration.py --dry-run` prints the levels.
-- The fire's loop is very quiet by measurement (about −45 LUFS at its volume) but its crackles peak near full scale, so only ears can say whether it is present enough. Its volume is `.28f` in `PersonalStoryApp.StartFireSound`.
+- With `SANKOFA_PRESENT=1`, choose a side and listen to the stage turn: a flap as it folds (`Resources/Sounds/stage-fold.wav`) and a rustle as the scenery stands (`stage-rise.wav`). Both are cuts of the tent recording, chosen by measurement. If either sounds wrong, delete the file and its `.meta`, and its line in `Art/Recorded/derived-sounds.json`: the app is then silent there. A better CC0 paper sound under the same name needs no code change, only a new record of its source. Their volumes are `.32f` and `.28f` in `PersonalStoryApp.SoundTheTable`.
+- The fire's loop is very quiet by measurement (about −45 LUFS at its volume) but its crackles peak near full scale, so only ears can say whether it is present enough. Its volume is `FireVolume` in `PersonalStoryApp`; it now rises for a moment when the fire answers a hand or takes an heirloom.
 
 ## 5. Simulator
 

@@ -47,7 +47,13 @@ namespace Sankofa.Runtime.Personal
         UnityWebRequest pendingAudio;
         bool largeText;
         string personalReason;
-        AudioSource fireSound, riverSound, nightSound;
+        AudioSource fireSound, riverSound, nightSound, cues;
+        readonly Dictionary<string, AudioClip> cueClips = new Dictionary<string, AudioClip>();
+        bool stageWasTurning, stageRiseCued;
+        float stageRiseBefore, fireFlare;
+        const float FireVolume = .28f;
+        /// <summary>The short sounds the stage makes, by the names of their files under Resources/Sounds.</summary>
+        public const string FoldSound = "stage-fold", RiseSound = "stage-rise";
         readonly float[] speech = new float[256];
         readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
         public static string StoreFolderOverride;
@@ -176,7 +182,7 @@ namespace Sankofa.Runtime.Personal
             voice = gameObject.AddComponent<AudioSource>(); voice.playOnAwake = false; voice.volume = narrationEnabled ? .85f : 0; voice.spatialBlend = .75f;
             view.StartLocalRequested += StartPrepared;
             view.StartRequested += StartGenerated;
-            view.RouteSelected += id => interest = id;
+            view.RouteSelected += id => { interest = id; fireFlare = 1; };
             view.RegionSelected += id => region = id;
             view.PeriodSelected += id => period = id;
             view.SeedEditRequested += EditSeed;
@@ -425,10 +431,50 @@ namespace Sankofa.Runtime.Personal
         void StartFireSound()
         {
             if (!Presenting) return;
-            fireSound = Loop("Fire sound", fireRecording, .28f, view.FirePosition);
+            fireSound = Loop("Fire sound", fireRecording, FireVolume, view.FirePosition);
             // The stage's water and night are silent until a telling stands, and step back while the griot speaks.
             riverSound = Loop("Stage river", riverRecording, 0, view.StagePosition);
             nightSound = Loop("Stage night", nightRecording, 0, view.StagePosition);
+            // The stage's own short sounds come from the same place as its water and night.
+            var source = new GameObject("Stage cues");
+            source.transform.SetParent(transform, false);
+            cues = source.AddComponent<AudioSource>();
+            cues.playOnAwake = false; cues.loop = false; cues.spatialBlend = .9f; cues.dopplerLevel = 0;
+            cues.rolloffMode = AudioRolloffMode.Logarithmic; cues.minDistance = .6f; cues.maxDistance = 12f;
+        }
+
+        /// <summary>
+        /// A short sound at a place on the table, on the headset only. A sound whose file is not in the build is
+        /// simply not played, so any of them can be removed or replaced without touching this code.
+        /// </summary>
+        void Cue(string name, Vector3 at, float volume)
+        {
+            if (cues == null || session.Paused) return;
+            if (!cueClips.TryGetValue(name, out var clip)) cueClips[name] = clip = Resources.Load<AudioClip>("Sounds/" + name);
+            if (clip == null) return;
+            cues.transform.position = at;
+            cues.PlayOneShot(clip, volume);
+        }
+
+        /// <summary>
+        /// The paper stage is heard as well as seen: a flap as it folds to turn, a rustle as its scenery stands up.
+        /// The fire is a little louder for a moment when it answers a hand or takes an heirloom.
+        /// </summary>
+        void SoundTheTable()
+        {
+            if (cues == null) return;
+            if (fireSound != null)
+            {
+                fireFlare = Mathf.MoveTowards(fireFlare, 0, Time.deltaTime / 1.2f);
+                fireSound.volume = FireVolume * (1 + fireFlare);
+            }
+            var stage = view.Stage;
+            if (stage == null) return;
+            if (stage.Turning && !stageWasTurning) Cue(FoldSound, view.StagePosition, .32f);
+            stageWasTurning = stage.Turning;
+            if (stage.Rise <= 0.01f) stageRiseCued = false;
+            else if (!stageRiseCued && stage.Rise > stageRiseBefore) { stageRiseCued = true; Cue(RiseSound, view.StagePosition, .28f); }
+            stageRiseBefore = stage.Rise;
         }
 
         AudioSource Loop(string name, AudioClip clip, float volume, Vector3 at)
@@ -477,6 +523,7 @@ namespace Sankofa.Runtime.Personal
             TurnByHand();
             ReachForHeirlooms();
             WarmToHands();
+            SoundTheTable();
             TickVoice();
         }
 
@@ -489,7 +536,7 @@ namespace Sankofa.Runtime.Personal
             foreach (var hand in hands)
             {
                 if (hand == null || !hand.Tracked || (hand.PalmCenter - flame).sqrMagnitude > HandWarmthMetres * HandWarmthMetres) continue;
-                view.AcknowledgeHand(); handWarmth = 0.9f;
+                view.AcknowledgeHand(); handWarmth = 0.9f; fireFlare = 1;
                 return;
             }
         }
@@ -682,7 +729,7 @@ namespace Sankofa.Runtime.Personal
                 "Documented pages are marked and sourced. The people and their meetings are imagined: they are not an account of anyone's ancestors, and nothing here recovers a real relative.\n\n" +
                 "At the end you can keep a telling on this device and reopen it exactly, without a connection. Each side you keep threads a bead on your strand.\n\n" +
                 "Use my table sets the story on your own table: one found in your room scan, or wherever you rest a hand. Nothing about your room leaves the headset.\n\n" +
-                "Sounds from Freesound: \u201ccampfire sound\u201d by SterckxS (CC BY 3.0); \u201cBabbling Brook HQ Seamless Wav Loop\u201d by celldroid (CC BY 4.0); \u201ccrickets\u201d by selcukartut, recorded in the Maasai Mara (CC0). The narrator is a synthetic voice.",
+                "Sounds from Freesound: \u201ccampfire sound\u201d by SterckxS (CC BY 3.0); \u201cBabbling Brook HQ Seamless Wav Loop\u201d by celldroid (CC BY 4.0); \u201ccrickets\u201d by selcukartut, recorded in the Maasai Mara (CC0); \u201cwindy tent\u201d by bruno.auzet (CC0). The narrator is a synthetic voice.",
                 new[] { ("return", "Return") }, _ => Render());
         }
 

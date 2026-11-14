@@ -1,0 +1,29 @@
+{
+  "about": "Short sounds cut by scripts/derive_table_sounds.py from the field recordings in this folder; nothing synthesised. The cuts were placed by measurement and have not been listened to. They live in Resources/Sounds; the app plays a sound only when its file is there.",
+  "sounds": [
+    {
+      "file": "stage-fold.wav",
+      "for": "the stage folds before it turns",
+      "source": "tent.wav",
+      "source_sha256": "25d99098e579210fc5dcb2de815bd3e69da49deaf486a94b548f541245e51527",
+      "title": "windy tent.wav",
+      "author": "bruno.auzet",
+      "licence": "CC0 1.0",
+      "page": "https://freesound.org/people/bruno.auzet/sounds/527434/",
+      "edit": "0.62 s from 23.47 s, high-pass 140 Hz, fades 0.015 s in and 0.18 s out, level +1.7 dB to a peak of -3 dBFS",
+      "sha256": "49910b1565e9533ac182fbd87dc2058a3359d5e45e7e12fdaea1c78a9c33c254"
+    },
+    {
+      "file": "stage-rise.wav",
+      "for": "the scenery stands up",
+      "source": "tent.wav",
+      "source_sha256": "25d99098e579210fc5dcb2de815bd3e69da49deaf486a94b548f541245e51527",
+      "title": "windy tent.wav",
+      "author": "bruno.auzet",
+      "licence": "CC0 1.0",
+      "page": "https://freesound.org/people/bruno.auzet/sounds/527434/",
+      "edit": "1.05 s from 26.16 s, high-pass 140 Hz, fades 0.06 s in and 0.35 s out, level +7.1 dB to a peak of -3 dBFS",
+      "sha256": "a5d2d72e8984a147070704cf7d9bca4dfc2b208fbbb27741f018fd66b6d9f5cb"
+    }
+  ]
+}

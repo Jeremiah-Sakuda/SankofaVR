@@ -688,6 +688,19 @@ namespace Sankofa.Tests
         }
 
         [Test]
+        public void TheStagesShortSoundsAreInTheBuildAndShort()
+        {
+            // The app plays them on the headset only; here they are checked as assets. A missing one is simply silent.
+            foreach (var name in new[] { PersonalStoryApp.FoldSound, PersonalStoryApp.RiseSound })
+            {
+                var clip = Resources.Load<AudioClip>("Sounds/" + name);
+                Assert.That(clip, Is.Not.Null, name);
+                Assert.That(clip.channels, Is.EqualTo(1), name);
+                Assert.That(clip.length, Is.InRange(0.3f, 1.5f), name);
+            }
+        }
+
+        [Test]
         public void ARecordingAtAnotherRateOrInStereoBecomesMonoAtTheServicesRate()
         {
             var stereo48k = new float[48000 * 2];
