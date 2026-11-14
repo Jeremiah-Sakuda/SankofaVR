@@ -282,6 +282,36 @@ namespace Sankofa.Tests
         {
             for (var deadline = Time.realtimeSinceStartup + seconds; !met() && Time.realtimeSinceStartup < deadline;) yield return null;
         }
+        /// <summary>A point in the stage's own space: x toward the visitor's right, y up, z away, from the turntable's centre.</summary>
+        Vector3 OverStage(float x, float y, float z) => view.Stage.transform.parent.TransformPoint(view.Stage.transform.localPosition + new Vector3(x, y, z));
+
+        [UnityTest]
+        public IEnumerator TheFireDoesNotTurnTheStageFromUnderAHandThatIsAtIt()
+        {
+            app.TurnsPages = true;
+            view.SetReducedMotion(false);
+            var stage = view.Stage; var hand = AHand();
+            Time.timeScale = 8;
+            try
+            {
+                yield return Press("Interest choices", "journeys");
+                yield return Until(() => app.OtherSideOffered, 60f);
+                Assert.That(app.OtherSideOffered, Is.True);
+                var side = app.Session.Chapter.Id;
+                // A hand held in front of the stage, not yet moving: the visitor is about to turn it themselves.
+                hand.Simulated = () => PalmAt(OverStage(0.05f, 0.20f, -0.36f));
+                yield return new WaitForSeconds(PersonalStoryApp.OtherSideWaitSeconds + 4f);
+                Assert.That(app.Session.Chapter.Id, Is.EqualTo(side), "the fire waits while a hand is at the stage");
+                Assert.That(stage.Turning, Is.False);
+                Assert.That(app.OtherSideOffered, Is.True);
+                // The hand goes away without turning it. The fire then turns the stage, and says it was the fire.
+                hand.Simulated = null;
+                yield return Until(() => app.Session.Chapter.Id != side, 6f);
+                Assert.That(app.Session.Heard.Count, Is.EqualTo(2));
+                Assert.That(app.Session.FollowedByChoice, Is.False);
+            }
+            finally { Time.timeScale = 1; hand.Simulated = null; }
+        }
 
         [UnityTest]
         public IEnumerator OnceASideIsToldAHandSweptAcrossTheStageTurnsItToTheOther()
@@ -289,8 +319,6 @@ namespace Sankofa.Tests
             app.TurnsPages = true;
             view.SetReducedMotion(false);
             var stage = view.Stage; var hand = AHand();
-            // A point in the stage's own space: x toward the visitor's right, y up, z away, from the turntable's centre.
-            Vector3 OverStage(float x, float y, float z) => stage.transform.parent.TransformPoint(stage.transform.localPosition + new Vector3(x, y, z));
             Func<Sankofa.Interaction.HandSample> Sweep(float from, float to, float seconds)
             {
                 var began = Time.time;

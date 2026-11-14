@@ -87,6 +87,8 @@ namespace Sankofa.Runtime.Personal
         public const float OtherSideWaitSeconds = 10f;
         /// <summary>How long a told page that has questions waits for one before it turns.</summary>
         public const float QuestionWaitSeconds = 5f;
+        /// <summary>How much longer the fire will wait while a hand is at the stage, about to turn it.</summary>
+        public const float HandHoldSeconds = 20f;
         /// <summary>What the page adds once one side of a meeting is told. Presentation: never part of the story or its narration.</summary>
         public const string OtherSidePrompt = "This meeting has another side. Sweep a hand across the stage to turn it.";
         /// <summary>What ending a telling after one side is called.</summary>
@@ -94,7 +96,8 @@ namespace Sankofa.Runtime.Personal
         string[] welcome;
         int welcomeLine = -1;
         float welcomeClock, welcomeLength, pageRest;
-        bool pageSpoken, pageTold, askingForHand, voiceHeld;
+        bool pageSpoken, pageTold, askingForHand, voiceHeld, handAtStage;
+        float handHold;
         string turnKey, toldPage, pageKey;
         int pageKeyVersion, pageKeyNumber;
         PersonalStoryChapter pageKeyChapter;
@@ -293,7 +296,7 @@ namespace Sankofa.Runtime.Personal
         {
             var key = PageKey();
             var reading = key != null;
-            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; }
+            if (key != turnKey) { turnKey = key; pageRest = 0; handHold = 0; pageTold = pageSpoken = false; askWhenTold = false; }
             if (!reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
             var speaking = voice != null && voice.isPlaying;
             if (pageSpoken && !speaking && voice.clip != null && voice.time <= 0.01f)
@@ -324,6 +327,8 @@ namespace Sankofa.Runtime.Personal
                 return;
             }
             if (!TurnsPages) return;
+            // A hand at the stage is about to turn it. The fire does not turn it from under that hand, for a while.
+            if (session.OffersOtherSide && handAtStage && handHold < HandHoldSeconds) { handHold += Time.deltaTime; return; }
             pageRest += Time.deltaTime;
             var wait = session.OffersChoice ? ChoiceWaitSeconds : session.OffersOtherSide ? OtherSideWaitSeconds : HasQuestions ? QuestionWaitSeconds : TurnAfterSeconds;
             if (pageRest < wait) return;
@@ -361,9 +366,10 @@ namespace Sankofa.Runtime.Personal
             {
                 foreach (var turn in turns) turn.Reset();
                 stage.SetLean(0);
+                handAtStage = false;
                 return;
             }
-            var lean = 0f;
+            var lean = 0f; var present = false;
             var table = stage.transform.parent;
             for (var i = 0; i < hands.Length; i++)
             {
@@ -371,9 +377,11 @@ namespace Sankofa.Runtime.Personal
                 // The hand in the stage's own space, taken from its parent so the stage's lean never feeds back into it.
                 var palm = tracked ? (table != null ? table.InverseTransformPoint(hands[i].PalmCenter) : hands[i].PalmCenter) - stage.transform.localPosition : Vector3.zero;
                 var swept = turns[i].Update(tracked, new System.Numerics.Vector3(palm.x, palm.y, palm.z), Time.deltaTime);
-                if (swept != 0) { stage.SetLean(0); HearOtherSide(0, true, swept); return; }
+                if (swept != 0) { stage.SetLean(0); handAtStage = false; HearOtherSide(0, true, swept); return; }
                 if (Mathf.Abs(turns[i].Lean) > Mathf.Abs(lean)) lean = turns[i].Lean;
+                present |= turns[i].Present;
             }
+            handAtStage = present;
             stage.SetLean(lean);
         }
 
