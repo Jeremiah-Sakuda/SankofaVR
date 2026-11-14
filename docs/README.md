@@ -8,6 +8,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 |---|---|
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
 | [Entertainment finish plan](product/entertainment-finish-plan.md) | November 10 PM audit: complements Claude's voice integration with story, interaction, acceptance and submission priorities |
+| [November 14 assumptions, for PM challenge](reviews/2026-11-14-assumptions-for-challenge.md) | What the November 14 cloud session assumed, where it departed from the November 10 PM plan, the case against each assumption and what each change costs to cut |
 | [Judged-path audit](reviews/2026-10-26-judged-path-audit.md) | The build as judges would install it, assumptions challenged, the perspective-choice/voice/intake iteration and the critical path to submission |
 | [Personal table implementation and panel](reviews/2026-10-18-personal-table-iteration.md) | October 18–19 software/live-service evidence, implemented judge findings and remaining acceptance |
 | [Personal story table MVP](product/personal-story-table-mvp.md) | Active direction: inherited fragments/questions, illustrated table presence, bounded generation/fallback, hands input and explicit save/reopen |
