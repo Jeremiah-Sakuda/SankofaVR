@@ -59,6 +59,14 @@ The engine-free folders build outside Unity as .NET Standard 2.1 with C# 9, the 
 dotnet test dotnet/Sankofa.Tests
 ```
 
+Where Unity is not installed, as in a cloud session, the Unity scripts can still be type-checked:
+
+```sh
+sh dotnet/Sankofa.UnityCheck/check.sh
+```
+
+It compiles the runtime scripts as built for the headset and for the editor, the PlayMode tests and the story table's two EditMode test files against Unity's own reference assemblies (2021.3, the newest published on NuGet) and hand-written stand-ins for the packages that are not on NuGet: TextMesh Pro, the Meta XR SDK, MR Utility Kit and the Input System. The stand-ins carry signatures only; add a member there when unchanged, Unity-verified code starts using one. It catches the C# mistakes a compiler catches. It is not a Unity compile, it runs no test, and it is not part of continuous integration.
+
 GitHub Actions runs these tests alongside the documentation check. Unity commands, the simulator and headset installation are in the [Unity README](../unity/README.md). Run the .NET tests after changing the core, flow, gestures or episode data; run the EditMode tests and regenerate the scene after changing runtime or editor code.
 
 Keep approved runtime assets with source provenance in the [asset register](asset-register.md). Raw downloads go in ignored `vendor/`; experiments, logs and builds go in ignored `artifacts/`; personal data and recordings stay in their ignored folders; unlicensed candidates belong in ignored `unity/Assets/LocalOnly/`, which builds refuse to include. Keep source, synthetic fixtures, project settings and Unity `.meta` files versioned.
