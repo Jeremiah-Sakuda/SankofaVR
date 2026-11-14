@@ -32,7 +32,7 @@ Everything works with hands alone, seated and offline. Documented pages are mark
 
 ## How we built it
 
-Unity 6 with Meta XR Core SDK and MR Utility Kit 207 and OpenXR hands. The story rules, the session and every gesture are plain C# with no engine dependency, tested outside Unity; the scene, stage and room are thin adapters around them. The application owns what may happen next: no model drives the stage, the choices or the save.
+Unity 6, Meta XR Core SDK and MR Utility Kit 207, OpenXR hands. The story rules, the session and every gesture are plain C# with no engine dependency, tested outside Unity; the scene, stage and room are thin adapters around them. The application owns what may happen next: no model drives the stage, the choices or the save.
 
 The scenery and figures are AI-generated illustrations cut into layers and staged by hand; the narration is synthetic speech; the fire, the brook, the night and the stage's own rustle are field recordings, credited in the app. There is no AI-generated music. Room data and hand positions never leave the headset.
 
@@ -56,7 +56,7 @@ Sit and set the controllers aside. The app asks for nothing until you choose **U
 
 ## Private release notes — exclude from public copy
 
-- Inspiration, What it does, How we built it and What's next come to 501 words; Devpost suggests 500 or fewer. The target launch date is its own field: confirm it with the entrant.
+- Inspiration, What it does, How we built it and What's next come to 499 words; Devpost suggests 500 or fewer. The target launch date is its own field: confirm it with the entrant.
 - Every interaction named above is implemented and software-tested only. None has run on a headset, and the November 14 changes have not yet run in Unity. Before publishing, decide whether to say so in the entry. Do not add any sentence that implies device testing.
 - The division recommends a changelog: [what was added during the window](changelog.md) is written to be quoted or linked.
 - The video may use Meta XR Simulator footage and must be labelled as such. The [shot list](access-handoff.md#capture-one-story-well--target-230) follows this copy.
