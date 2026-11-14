@@ -67,7 +67,7 @@ I can trim the clip and add titles with `ffmpeg` if you give me the raw recordin
 2. Copy the text from the [submission draft](submission-draft.md): name, tagline (140 characters), inspiration, what it does, how we built it, what's next, what changed from the original Sankofa, and the optional paragraph on hand interactions. Paste the judge walkthrough from the [testing guide](../product/testing-guide.md) as the testing instructions.
 3. Choose **Track: Entertainment** and **Division: Adapted / Significantly Updated Experience**. Adapted entries must include "a summary description of the new features/capabilities added"; the "What changed" section covers this.
 4. Add the **Competition channel invite link**, the **public video link** and a **target launch date**. The launch date is your decision; it is required unless the app is already on the store.
-5. Add screenshots from `docs/media/` (for example `story-table-perspective-turn.png`).
+5. Add screenshots from `docs/media/` (for example `story-table-perspective-turn.png`), and paste or link the [changelog](changelog.md): the division recommends one.
 6. Submit, then reopen the entry and check every link while signed out. A screenshot of the form does not count as proof of entry under the rules.
 
 ## Decisions only you can make
