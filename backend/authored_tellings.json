@@ -20,6 +20,13 @@
           "sources": [],
           "questions": [
             {
+              "id": "journeys.leaving",
+              "label": "Why is she thinking of leaving?",
+              "answer": "Imagined scene: Home is still a walk away, and the light is going. If she leaves, she can reach it before dark. If she stays, someone may find her waiting.",
+              "truth": "reconstructed",
+              "sources": []
+            },
+            {
               "id": "journeys.account",
               "label": "Does this tell my ancestor's journey?",
               "answer": "Imagined scene: No ancestor's journey is established here. A fragment can guide curiosity about movement and encounters; it cannot establish anyone's biography.",
@@ -122,29 +129,27 @@
           "sources": [],
           "questions": [
             {
-              "id": "trade-household.context",
-              "label": "Did communities trade in this region?",
-              "answer": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
-              "truth": "historical",
-              "sources": [
-                "C6"
-              ]
+              "id": "trade-household.rest",
+              "label": "Why didn't she bring the rest?",
+              "answer": "Imagined scene: She left a portion at home. Bringing it would fill the promised gourd, but empty that place beside her own hearth. She is carrying the cost of that choice to the meeting.",
+              "truth": "reconstructed",
+              "sources": []
             }
           ]
         },
         {
           "id": "trade-household.vessel",
-          "title": "A vessel with a source",
-          "narration": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
+          "title": "An exchange in context",
+          "narration": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
           "illustration": "cast-atlas",
           "truth": "historical",
           "sources": [
-            "C7"
+            "C6"
           ],
           "questions": [
             {
               "id": "trade-household.vessel.more",
-              "label": "What does the museum example tell us?",
+              "label": "What do museums record about gourds?",
               "answer": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
               "truth": "historical",
               "sources": [
@@ -231,6 +236,13 @@
           "sources": [],
           "questions": [
             {
+              "id": "place-water.matters",
+              "label": "Why does finding this place matter?",
+              "answer": "Imagined scene: She promised to show the traveller a place she remembers. The uncertainty is not only about the bend. It is whether she can share what that place meant to her.",
+              "truth": "reconstructed",
+              "sources": []
+            },
+            {
               "id": "place-water.map",
               "label": "Is this the exact historical riverbank?",
               "answer": "Imagined scene: The painted bank is a reconstruction. It does not locate a particular household, meeting or ancestor.",
@@ -242,7 +254,7 @@
         {
           "id": "place-water.name",
           "title": "A name with limits",
-          "narration": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters. Spelling and pronunciation still need review by a Maa speaker.",
+          "narration": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters.",
           "illustration": "scenery-atlas",
           "truth": "historical",
           "sources": [

@@ -13,7 +13,7 @@ namespace Sankofa.Tests
     public class PersonalStoryVoiceTests
     {
         [TestCase("journeys", "journeys.arrival", "journeys.context", "journeys.meeting", "scenery-atlas", "scenery-atlas", "cast-atlas", "C6")]
-        [TestCase("trade-household", "trade-household.load", "trade-household.vessel", "trade-household.agreement", "cast-atlas", "cast-atlas", "cast-atlas", "C7")]
+        [TestCase("trade-household", "trade-household.load", "trade-household.vessel", "trade-household.agreement", "cast-atlas", "cast-atlas", "cast-atlas", "C6")]
         [TestCase("place-water", "place-water.listening", "place-water.name", "place-water.return", "scenery-atlas", "scenery-atlas", "modern-river", "C1")]
         public void VoicePassPreservesContextIdsArtAndEvidence(string interest, string first, string context, string last, string firstArt, string contextArt, string lastArt, string claim)
         {
@@ -115,6 +115,39 @@ namespace Sankofa.Tests
                         Assert.That(chapter.Narration, Does.Not.Contain(oldInstruction).IgnoreCase);
                 Assert.That(story.Chapters.SelectMany(c => c.Questions).Any(), Is.True, "Evidence and reconstruction questions remain available separately.");
             }
+        }
+
+        /// <summary>
+        /// What the griot tells on a documented page is the documented sentence itself. Notes about review and about
+        /// what a museum example cannot show are for a visitor who asks, in that page's question and its sources.
+        /// </summary>
+        [Test]
+        public void DocumentedPagesAreToldWithoutRegisterNotesAndTheNotesStayWithinReach()
+        {
+            Assert.That(PersonalStoryCatalog.NamingFact, Does.StartWith(PersonalStoryCatalog.NamingClaim), "the told sentence is the approved passage's own first sentence");
+            Assert.That(PersonalStoryCatalog.IsApprovedHistory(PersonalStoryCatalog.NamingClaim, new[] { "C1" }), Is.True);
+            Assert.That(PersonalStoryCatalog.IsApprovedHistory(PersonalStoryCatalog.NamingClaim, new[] { "C6" }), Is.False);
+            Assert.That(PersonalStoryCatalog.IsApprovedHistory(PersonalStoryCatalog.NamingClaim + " And more.", new[] { "C1" }), Is.False);
+            foreach (var interest in PersonalStoryCatalog.Interests)
+            {
+                var story = BundledPersonalStoryComposer.Compose(new PersonalStoryRequest("enkare-nairobi", "1850s", interest)).Story;
+                foreach (var chapter in story.Chapters)
+                    foreach (var note in new[] { "need review", "museum", "does not establish" })
+                        Assert.That(chapter.Narration, Does.Not.Contain(note).IgnoreCase, chapter.Id);
+                var documented = story.Chapters.Single(c => c.Truth == "historical");
+                Assert.That(PersonalStoryCatalog.IsApprovedHistory(documented.Narration, documented.Sources), Is.True, documented.Id);
+                Assert.That(documented.Questions.All(q => q.Truth == "historical" && PersonalStoryCatalog.IsApprovedHistory(q.Answer, q.Sources)), Is.True, documented.Id);
+                // The opening's first question is about the person in it, not about the register.
+                Assert.That(story.Chapters[0].Questions[0].Label, Does.StartWith("Why"), interest);
+                Assert.That(story.Chapters[0].Questions[0].Truth, Is.EqualTo("reconstructed"));
+            }
+            var water = BundledPersonalStoryComposer.Compose(new PersonalStoryRequest("enkare-nairobi", "1850s", "place-water")).Story;
+            Assert.That(water.Chapters[1].Narration, Is.EqualTo(PersonalStoryCatalog.NamingClaim));
+            Assert.That(water.Chapters[1].Questions.Single().Answer, Is.EqualTo(PersonalStoryCatalog.NamingFact), "the review note is still there for a visitor who asks");
+            var trade = BundledPersonalStoryComposer.Compose(new PersonalStoryRequest("enkare-nairobi", "1850s", "trade-household")).Story;
+            Assert.That(trade.Chapters[1].Narration, Is.EqualTo(PersonalStoryCatalog.TradeFact), "the exchange is set in the documented trade, not in a museum vessel of another kind");
+            Assert.That(trade.Chapters[1].Questions.Single().Answer, Is.EqualTo(PersonalStoryCatalog.VesselFact));
+            Assert.That(trade.Sources.Select(s => s.Id), Is.EquivalentTo(new[] { "C6", "C7" }));
         }
     }
 }

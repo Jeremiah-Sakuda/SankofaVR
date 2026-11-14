@@ -29,7 +29,10 @@
       "bytes": 165548,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.0,
+      "true_peak_dbfs": -1.5,
+      "level_steps": 0
     },
     {
       "interest": "journeys",
@@ -38,7 +41,7 @@
       "truth": "historical",
       "hash": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0",
       "text_sha256": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0",
-      "audio_sha256": "b0586248442aa339c560fce0f3f83c79935299acb6e5d7abdeb748725c271a59",
+      "audio_sha256": "7746d247eb42dec3158a51023bb6700680fbb47dc41e267b403d03b834c815ab",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -50,7 +53,10 @@
       "sample_rate_hertz": 24000,
       "channels": 1,
       "spoken": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
-      "spoken_sha256": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0"
+      "spoken_sha256": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0",
+      "loudness_lufs": -19.4,
+      "true_peak_dbfs": -0.8,
+      "level_steps": 1
     },
     {
       "interest": "journeys",
@@ -63,7 +69,7 @@
       "resource_id": "Narration/personal-table/p-3e2451d216356a36",
       "spoken": "She chooses to put the bundle down. For a while there is only the water and the fire. Then the missing woman comes round the bend, holding her gourd close. 'I thought you would have gone.' The waiting woman moves her bundle aside. 'I nearly did.' They sit in the space it leaves. When they rise, the path home is darker, but neither follows it alone.",
       "spoken_sha256": "3e2451d216356a36dda2d89188648369fd22afe4643acef2951e4399b4262228",
-      "audio_sha256": "25fbe2a962582498262cd0068058e1adc75703a87478f8081abafa540e4907ba",
+      "audio_sha256": "fb6d06b7ac964804fc2687bfa21773eae0f488cd9158321c989e0552bd63bdff",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -72,7 +78,10 @@
       "bytes": 136652,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.6,
+      "true_peak_dbfs": -2.6,
+      "level_steps": -1
     },
     {
       "interest": "journeys",
@@ -85,7 +94,7 @@
       "resource_id": "Narration/personal-table/p-57adc43ffde6bfd3",
       "spoken": "On the far side of the water, the late woman is still walking. The path has taken longer than she planned, and the gourd she carries grows heavier with every step. The light is going. If she turns back now, she can send word tomorrow, and nobody will blame her. But a message cannot sit beside someone at dusk. She chooses to keep walking, holding the gourd close, not knowing whether anyone is still there. At the bend she stops. A bundle has been set down by the water, and beside it, a woman is waiting.",
       "spoken_sha256": "57adc43ffde6bfd356e793c75ce733f6673267173a40a436e78f77db6f8e59f6",
-      "audio_sha256": "c8a22590eddd3408bb43f4262178c27489a76cd7c974ab68f91e58e8f929c4a1",
+      "audio_sha256": "a1b631c9406ccfec4fdcbbe627b2197bb8a219a4662c65e8662e151c776afa46",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -94,7 +103,10 @@
       "bytes": 191372,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.2,
+      "true_peak_dbfs": -1.9,
+      "level_steps": -1
     },
     {
       "interest": "trade-household",
@@ -116,28 +128,34 @@
       "bytes": 152300,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.4,
+      "true_peak_dbfs": -2.4,
+      "level_steps": 0
     },
     {
       "interest": "trade-household",
       "chapter_id": "trade-household.vessel",
-      "text": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
+      "text": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
       "truth": "historical",
-      "hash": "1ecac776d41d912db44a16bfe6a026f6b98f8b171e75038b7d0f4d26cf0df504",
-      "text_sha256": "1ecac776d41d912db44a16bfe6a026f6b98f8b171e75038b7d0f4d26cf0df504",
-      "audio_sha256": "c6c0889dcca4bd762b227255e5310925af7a42a50499d792f6ab34c118969811",
+      "hash": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0",
+      "text_sha256": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0",
+      "audio_sha256": "7746d247eb42dec3158a51023bb6700680fbb47dc41e267b403d03b834c815ab",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
       "date": "2026-10-19",
-      "length_seconds": 24.648,
-      "bytes": 98592,
-      "filename": "p-1ecac776d41d912d.mp3",
-      "resource_id": "Narration/personal-table/p-1ecac776d41d912d",
+      "length_seconds": 17.496,
+      "bytes": 69984,
+      "filename": "p-4b6687075c1f422a.mp3",
+      "resource_id": "Narration/personal-table/p-4b6687075c1f422a",
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "spoken": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
-      "spoken_sha256": "1ecac776d41d912db44a16bfe6a026f6b98f8b171e75038b7d0f4d26cf0df504"
+      "spoken": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
+      "spoken_sha256": "4b6687075c1f422a27211246298182a3ef193533ba74ce125f7eb3e77d10b4f0",
+      "loudness_lufs": -19.4,
+      "true_peak_dbfs": -0.8,
+      "level_steps": 1
     },
     {
       "interest": "trade-household",
@@ -159,7 +177,10 @@
       "bytes": 198668,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.7,
+      "true_peak_dbfs": -0.6,
+      "level_steps": 0
     },
     {
       "interest": "trade-household",
@@ -181,7 +202,10 @@
       "bytes": 199820,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.0,
+      "true_peak_dbfs": -0.1,
+      "level_steps": 0
     },
     {
       "interest": "place-water",
@@ -194,7 +218,7 @@
       "resource_id": "Narration/personal-table/p-422bf80a8695a2d8",
       "spoken": "Come, sit where the fire catches the water. A woman brings a younger traveller to the bank she remembers. 'Here,' she says. But the traveller points to the next bend. 'You said the path opened beside the reeds.' The woman looks at the water, then at the bundle she has set down. She had promised to show a place. Now she is no longer sure she has found it.",
       "spoken_sha256": "422bf80a8695a2d8be73de9d28f500aa28adfa1f8d5082830c92c52b2a7a904d",
-      "audio_sha256": "f64ceb5a35b1f5830f9dfd56c9e47e1e40724d5a1ecd8a725c9fa864503e1391",
+      "audio_sha256": "ecbae790a38607330125a85168f1bb656da5d325eca82928a088a7e48202be2c",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -203,28 +227,36 @@
       "bytes": 157772,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.7,
+      "true_peak_dbfs": -1.4,
+      "level_steps": -1
     },
     {
       "interest": "place-water",
       "chapter_id": "place-water.name",
-      "text": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters. Spelling and pronunciation still need review by a Maa speaker.",
+      "text": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters.",
       "truth": "historical",
-      "hash": "639dd1ec06746dd0c429effc41a55f2f3ed7f1fde7934ef7f7c5e1c5e26c15d3",
-      "text_sha256": "639dd1ec06746dd0c429effc41a55f2f3ed7f1fde7934ef7f7c5e1c5e26c15d3",
-      "audio_sha256": "5037d4b9953521b9b337617346d5a963b02e10ff0589ab4ea6bbf06fabd7336e",
+      "hash": "145300bc4d3cdf9c75278cceead6ec630f3a7e119818ebf7b35e82dc1731153d",
+      "text_sha256": "145300bc4d3cdf9c75278cceead6ec630f3a7e119818ebf7b35e82dc1731153d",
+      "audio_sha256": "ab1135486980343c149153019c19594393df7815b7dd7471d3b7ae7051798c1f",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
       "date": "2026-10-19",
-      "length_seconds": 15.456,
-      "bytes": 61824,
-      "filename": "p-639dd1ec06746dd0.mp3",
-      "resource_id": "Narration/personal-table/p-639dd1ec06746dd0",
+      "length_seconds": 9.072,
+      "bytes": 36288,
+      "filename": "p-145300bc4d3cdf9c.mp3",
+      "resource_id": "Narration/personal-table/p-145300bc4d3cdf9c",
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "spoken": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters. Spelling and pronunciation still need review by a Maa speaker.",
-      "spoken_sha256": "639dd1ec06746dd0c429effc41a55f2f3ed7f1fde7934ef7f7c5e1c5e26c15d3"
+      "spoken": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters.",
+      "spoken_sha256": "145300bc4d3cdf9c75278cceead6ec630f3a7e119818ebf7b35e82dc1731153d",
+      "derived_from": "p-639dd1ec06746dd0.mp3",
+      "edit": "The recording of the whole passage, cut at the pause after its first sentence without re-encoding. No words were synthesised again.",
+      "loudness_lufs": -19.0,
+      "true_peak_dbfs": -5.4,
+      "level_steps": -2
     },
     {
       "interest": "place-water",
@@ -246,7 +278,10 @@
       "bytes": 181388,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -20.2,
+      "true_peak_dbfs": -1.1,
+      "level_steps": 0
     },
     {
       "interest": "place-water",
@@ -259,7 +294,7 @@
       "resource_id": "Narration/personal-table/p-e92d128aa0306221",
       "spoken": "The younger traveller came to be shown a place, and she was sure of the reeds. Now she watches the older woman look from the water to the bundle and back, and understands that the bend may have moved, or the memory has. She could press: 'You said the reeds.' She could walk ahead to prove it. Instead she chooses a different question. 'What did it sound like?' The older woman closes her eyes to answer. Years from now, the traveller will remember that sound better than any bend, and she will be the one who is not quite sure where it was.",
       "spoken_sha256": "e92d128aa03062210bf155e5638f62482d7c1b73fe8437b6616370368c7c8099",
-      "audio_sha256": "9ffd3703085199a55a850737e1e0ff69a489eac32a2d454405cc3d88043ee306",
+      "audio_sha256": "4477fe36cce610d3b41ed0c996a5c688b20750b8c814df245a340575777f55e7",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -268,10 +303,13 @@
       "bytes": 236780,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.9,
+      "true_peak_dbfs": -1.3,
+      "level_steps": -1
     }
   ],
-  "updated_utc": "2026-11-10T20:28:40.759079+00:00",
+  "updated_utc": "2026-11-14T06:10:03.222861+00:00",
   "archived_chapters": [
     {
       "interest": "journeys",
@@ -575,6 +613,44 @@
       "channels": 1,
       "synthesis_attempts": 1,
       "archived": "2026-11-10: recorded with the spoken \"Imagined scene:\" label; kept so tellings saved earlier still find their voice"
+    },
+    {
+      "interest": "trade-household",
+      "chapter_id": "trade-household.vessel",
+      "text": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
+      "truth": "historical",
+      "hash": "1ecac776d41d912db44a16bfe6a026f6b98f8b171e75038b7d0f4d26cf0df504",
+      "text_sha256": "1ecac776d41d912db44a16bfe6a026f6b98f8b171e75038b7d0f4d26cf0df504",
+      "audio_sha256": "c6c0889dcca4bd762b227255e5310925af7a42a50499d792f6ab34c118969811",
+      "provider": "GoogleCloudTextToSpeech",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Kore",
+      "date": "2026-10-19",
+      "length_seconds": 24.648,
+      "bytes": 98592,
+      "filename": "p-1ecac776d41d912d.mp3",
+      "resource_id": "Narration/personal-table/p-1ecac776d41d912d",
+      "sample_rate_hertz": 24000,
+      "channels": 1
+    },
+    {
+      "interest": "place-water",
+      "chapter_id": "place-water.name",
+      "text": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters. Spelling and pronunciation still need review by a Maa speaker.",
+      "truth": "historical",
+      "hash": "639dd1ec06746dd0c429effc41a55f2f3ed7f1fde7934ef7f7c5e1c5e26c15d3",
+      "text_sha256": "639dd1ec06746dd0c429effc41a55f2f3ed7f1fde7934ef7f7c5e1c5e26c15d3",
+      "audio_sha256": "5037d4b9953521b9b337617346d5a963b02e10ff0589ab4ea6bbf06fabd7336e",
+      "provider": "GoogleCloudTextToSpeech",
+      "model": "gemini-3.1-flash-tts-preview",
+      "voice": "Kore",
+      "date": "2026-10-19",
+      "length_seconds": 15.456,
+      "bytes": 61824,
+      "filename": "p-639dd1ec06746dd0.mp3",
+      "resource_id": "Narration/personal-table/p-639dd1ec06746dd0",
+      "sample_rate_hertz": 24000,
+      "channels": 1
     }
   ],
   "archive_reason": "Earlier realised story texts retain their hashed recordings for saved replay. Current authored chapters use the chapters list.",
@@ -594,7 +670,10 @@
       "bytes": 13292,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.1,
+      "true_peak_dbfs": -2.0,
+      "level_steps": 0
     },
     {
       "line_id": "welcome.fires",
@@ -611,7 +690,10 @@
       "bytes": 46412,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.0,
+      "true_peak_dbfs": -1.0,
+      "level_steps": 0
     },
     {
       "line_id": "welcome.imagined",
@@ -628,7 +710,10 @@
       "bytes": 35660,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.9,
+      "true_peak_dbfs": -0.5,
+      "level_steps": 0
     },
     {
       "line_id": "welcome.invitation",
@@ -636,7 +721,7 @@
       "text_sha256": "8399b810ad5366528e1512f842779cb2b97c490b6be96434138146ce39b57b1c",
       "filename": "p-8399b810ad536652.mp3",
       "resource_id": "Narration/personal-table/p-8399b810ad536652",
-      "audio_sha256": "7e32108c0055ffccf98c8450ab1ccb32b0a78b5f8ae8628fee5d54e5bf3d0280",
+      "audio_sha256": "3335bca2b597a4315ef495c586ffb8894248a5d9ad65689a072989d360f70c18",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -645,7 +730,10 @@
       "bytes": 46892,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.5,
+      "true_peak_dbfs": -3.6,
+      "level_steps": -2
     },
     {
       "line_id": "welcome.return",
@@ -653,7 +741,7 @@
       "text_sha256": "76313a1b54b65b12ccdeba8bb7d91cfcfc21aa0c28497f1d055245ecd0080b5e",
       "filename": "p-76313a1b54b65b12.mp3",
       "resource_id": "Narration/personal-table/p-76313a1b54b65b12",
-      "audio_sha256": "6b8a3ac55d902e133a42294a349cf5a6f1f279bc743e950708d4e991ae4d69e0",
+      "audio_sha256": "5ca280ac395478f008b0a9ac5a2d79ca97f0676181cd8f20200a6c42055a6398",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -662,7 +750,10 @@
       "bytes": 16940,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.8,
+      "true_peak_dbfs": -4.4,
+      "level_steps": 2
     },
     {
       "line_id": "return.journeys.follow.waiting",
@@ -679,7 +770,10 @@
       "bytes": 26540,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.8,
+      "true_peak_dbfs": -0.9,
+      "level_steps": 0
     },
     {
       "line_id": "return.journeys.follow.late",
@@ -687,7 +781,7 @@
       "text_sha256": "622390f2801af1143735a69523243f1c54a60fbd566717e419a22fc90fa0e514",
       "filename": "p-622390f2801af114.mp3",
       "resource_id": "Narration/personal-table/p-622390f2801af114",
-      "audio_sha256": "6f6f70a881c3f7d96dd93a57dc63fce534c100cc5b8f4b1502fa0b0867ff00d2",
+      "audio_sha256": "725c03123e9daef7d936cb6c8b752aaf844c45691c8004456db5e16cf486c103",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -696,7 +790,10 @@
       "bytes": 30572,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.8,
+      "true_peak_dbfs": -5.3,
+      "level_steps": -2
     },
     {
       "line_id": "return.trade-household.follow.less",
@@ -704,7 +801,7 @@
       "text_sha256": "965bc782b4418607e4fc114c975ace4c3177d0dad641ae12bf465fc78c7f960d",
       "filename": "p-965bc782b4418607.mp3",
       "resource_id": "Narration/personal-table/p-965bc782b4418607",
-      "audio_sha256": "4d1e6eded71921b31a7b0135294a65dfe59d04e756610ee9a023608670f116c8",
+      "audio_sha256": "69eee39eb5cab5107dfc019421f248a4fae29efa5a87ee7ff8538bd2eb703e95",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -713,7 +810,10 @@
       "bytes": 29900,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.8,
+      "true_peak_dbfs": -3.9,
+      "level_steps": -1
     },
     {
       "line_id": "return.trade-household.follow.more",
@@ -730,7 +830,10 @@
       "bytes": 29612,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.8,
+      "true_peak_dbfs": -0.0,
+      "level_steps": 0
     },
     {
       "line_id": "return.place-water.follow.remembers",
@@ -738,7 +841,7 @@
       "text_sha256": "b312a583e462a02c77be197428378c2f27b25288c046a0d34800e5c8542267c2",
       "filename": "p-b312a583e462a02c.mp3",
       "resource_id": "Narration/personal-table/p-b312a583e462a02c",
-      "audio_sha256": "f6fa34bdb87095b78750eed3f22e76a900656b84884fef0b49d441db7b07ae52",
+      "audio_sha256": "bf1cd42b9082dd2efc76d073b043dbd33b4e17908cc123901d5075af8e9644f9",
       "provider": "GoogleCloudTextToSpeech",
       "model": "gemini-3.1-flash-tts-preview",
       "voice": "Kore",
@@ -747,7 +850,10 @@
       "bytes": 30668,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -19.9,
+      "true_peak_dbfs": -4.6,
+      "level_steps": -2
     },
     {
       "line_id": "return.place-water.follow.traveller",
@@ -764,8 +870,17 @@
       "bytes": 28268,
       "sample_rate_hertz": 24000,
       "channels": 1,
-      "synthesis_attempts": 1
+      "synthesis_attempts": 1,
+      "loudness_lufs": -18.8,
+      "true_peak_dbfs": -3.0,
+      "level_steps": 0
     }
   ],
-  "spoken_note": "Recordings are of the spoken words: a chapter's stored text without its leading \"Imagined scene: \" disclosure, which the page shows as a label and the welcome says once. Lines are what the griot says outside a telling."
+  "spoken_note": "Recordings are of the spoken words: a chapter's stored text without its leading \"Imagined scene: \" disclosure, which the page shows as a label and the welcome says once. Lines are what the griot says outside a telling.",
+  "levelling": {
+    "target_lufs": -19.3,
+    "step_db": 1.5,
+    "method": "MP3 global-gain steps (mp3gain -g); no decoding or re-encoding. Measured with ffmpeg ebur128.",
+    "note": "Levels are measurements, not a listening review. level_steps on each clip undoes exactly."
+  }
 }

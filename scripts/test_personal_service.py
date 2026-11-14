@@ -22,7 +22,7 @@ import wave
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from backend.ask import MAX_ANSWER_WORDS, MAX_AUDIO_BASE64, accept_answer, authored_match, bundled_reply, revealed_pages
-from backend.content import ANSWER_SCHEMA, AUTHORED_TELLINGS, HISTORICAL, SOURCES, UNKNOWN_STORY
+from backend.content import ANSWER_SCHEMA, AUTHORED_TELLINGS, HISTORICAL, SOURCES, TOLD, UNKNOWN_STORY, approved_forms
 from backend.contracts import ProposalError, RequestError, StoryRequest, bundled_proposal, compose_story, strict_json, validate_proposal, validate_story
 from backend.providers import ANSWER_INSTRUCTION, Cancellation, Cancelled, GeminiProvider, GoogleAuth, GoogleNarrationProvider, ProviderError, StubProvider
 from backend.server import MAX_ASK_REQUEST_BYTES, Limits, PersonalStoryHTTPServer, PersonalStoryService
@@ -168,6 +168,17 @@ class ContractTests(unittest.TestCase):
             proposal["chapters"][0]["narration"] = "Imagined scene: The traveller waits by the " + word + "."
             with self.subTest(word=word), self.assertRaises(ProposalError):
                 validate_proposal(proposal)
+
+    def test_a_told_sentence_is_history_only_under_its_own_claim(self):
+        story, _ = PersonalStoryService().create(PUBLIC_REQUEST, Cancellation())
+        told = deepcopy(story)
+        told["chapters"][1]["narration"] = TOLD["C1"]
+        validate_story(told)
+        for mutate in [lambda s: s["chapters"][1].update(narration=TOLD["C1"] + " And more."), lambda s: s["chapters"][1].update(sources=["C6"]), lambda s: s["chapters"][2].update(narration=TOLD["C1"])]:
+            changed = deepcopy(told)
+            mutate(changed)
+            with self.assertRaises(ProposalError):
+                validate_story(changed)
 
     def test_historical_text_source_urls_and_art_cannot_be_laundered(self):
         story, _ = PersonalStoryService().create(PUBLIC_REQUEST, Cancellation())
@@ -543,6 +554,14 @@ class AskContractTests(unittest.TestCase):
         water = AUTHORED_TELLINGS["bundled.enkare-nairobi.1850s.place-water.v1"]
         reply, _ = ask(PersonalStoryService(Answers({"answer": HISTORICAL["C1"], "truth": "historical", "sources": ["C1"]})), "What does the name mean?", story=water, chapter="place-water.name")
         self.assertEqual((reply["mode"], reply["truth"], reply["sources"]), ("generated", "historical", ["C1"]))
+        # The sentence the griot tells on that page is the passage's own first sentence, and is approved as told.
+        self.assertEqual(water["chapters"][1]["narration"], TOLD["C1"])
+        self.assertTrue(HISTORICAL["C1"].startswith(TOLD["C1"]))
+        self.assertEqual(approved_forms("C6"), (HISTORICAL["C6"],))
+        reply, _ = ask(PersonalStoryService(Answers({"answer": TOLD["C1"], "truth": "reconstructed", "sources": []})), "What does the name mean?", story=water, chapter="place-water.name")
+        self.assertEqual((reply["truth"], reply["answer"], reply["sources"]), ("historical", TOLD["C1"], ["C1"]))
+        reply, reason = ask(PersonalStoryService(Answers({"answer": TOLD["C1"], "truth": "historical", "sources": ["C1"]})), "What does the name mean?")
+        self.assertEqual((reply["mode"], reason), ("bundled", "provider_invalid_response"), "the told sentence of another telling is not an answer here either")
 
     def test_unusable_provider_output_becomes_the_labelled_bundled_reply(self):
         sixty = " ".join(["fire"] * 60)

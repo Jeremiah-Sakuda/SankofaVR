@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import re
 import struct
 
-from .content import ANSWER_SCHEMA, DISCLOSURE, HISTORICAL, SOURCES, UNKNOWN_STORY
+from .content import ANSWER_SCHEMA, DISCLOSURE, HISTORICAL, SOURCES, UNKNOWN_STORY, approved_forms
 from .contracts import ProposalError, RequestError, text
 
 MAX_QUESTION_UNITS = 500
@@ -203,13 +203,13 @@ def accept_answer(proposal, inquiry):
         answer = text(proposal["answer"], MAX_ANSWER_UNITS)
         if len(answer.split()) > MAX_ANSWER_WORDS:
             raise ValueError()
-        for claim, passage in passages(inquiry.story).items():
-            if answer == passage:
+        for claim in passages(inquiry.story):
+            if answer in approved_forms(claim):
                 return {"schema": ANSWER_SCHEMA, "mode": "generated", "kind": "answer", "answer": answer, "truth": "historical", "sources": [claim]}
         folded = answer.casefold()
         # New wording is imagined. Refuse what would read as a record: an approved passage of another telling,
         # figures and dates, addresses, and statements about the visitor's own family.
-        if answer in HISTORICAL.values() or re.search(r"\d|www\.", folded) or any(phrase in folded for phrase in IDENTITY_ASSERTIONS):
+        if any(answer in approved_forms(claim) for claim in HISTORICAL) or re.search(r"\d|www\.", folded) or any(phrase in folded for phrase in IDENTITY_ASSERTIONS):
             raise ValueError()
         return {"schema": ANSWER_SCHEMA, "mode": "generated", "kind": "answer", "answer": answer, "truth": "reconstructed", "sources": []}
     except (ValueError, KeyError, TypeError):

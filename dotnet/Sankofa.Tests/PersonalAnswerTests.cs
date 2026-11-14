@@ -55,6 +55,7 @@ namespace Sankofa.Tests
             // The journeys telling declares only C6, so another passage cannot be cited beside it.
             Assert.That(Codes(Generated(PersonalStoryCatalog.NamingFact, "historical", "C1")), Does.Contain("source.reference"));
             Assert.That(Codes(Generated(PersonalStoryCatalog.NamingFact, "historical", "C1"), Story("place-water"), "place-water.name"), Is.Empty);
+            Assert.That(Codes(Generated(PersonalStoryCatalog.NamingClaim, "historical", "C1"), Story("place-water"), "place-water.name"), Is.Empty, "the told sentence is approved too");
             Assert.That(Codes(Generated(PersonalStoryCatalog.TradeFact, "historical", "C7"), Story("trade-household"), "trade-household.vessel"), Does.Contain("history.unapproved"),
                 "a declared source that belongs to another passage");
             Assert.That(Codes(Generated(sources: "C9")), Does.Contain("source.reference"));

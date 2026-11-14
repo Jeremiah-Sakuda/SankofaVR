@@ -23,6 +23,18 @@ HISTORICAL = {
     "C6": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
     "C7": "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.",
 }
+# A passage as the griot tells it, where that is shorter than the passage: its first sentence, word for word.
+# PersonalStoryCatalog.NamingClaim mirrors this. The review note stays with the whole passage for a visitor who asks.
+TOLD = {
+    "C1": "Nairobi's name is commonly traced to a Maa phrase meaning cool waters.",
+}
+
+
+def approved_forms(claim):
+    """Every exact wording under which a claim may be labelled historical."""
+    return (HISTORICAL[claim],) + ((TOLD[claim],) if claim in TOLD else ())
+
+
 SOURCES = {
     "C1": {"id": "C1", "title": "Nairobi City County Assembly: clean drinking water motion", "url": "https://nairobiassembly.go.ke/motion/provision-of-free-clean-drinking-water-in-hotels-and-other-public-areas/"},
     "C6": {"id": "C6", "title": "John Overton (1988): The Origins of the Kikuyu Land Problem", "url": "https://www.cambridge.org/core/journals/african-studies-review/article/abs/origins-of-the-kikuyu-land-problem-land-alienation-and-land-use-in-kiambu-kenya-18951920/01BDC3BCB4D2A9AC40F00F52500F1916"},
