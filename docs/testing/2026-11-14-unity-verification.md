@@ -25,7 +25,7 @@ Run them with `SANKOFA_ROOM` and `SANKOFA_PRESENT` unset. New or changed tests, 
 | Test | Checks | If it fails |
 |---|---|---|
 | EditMode `TheStoryFacesAwayFromWhicheverEdgeTheVisitorSitsAt`, `TheStorySitsInFrontOfTheVisitorAndWhollyOnTheTable`, `ALongTableIsStillTheVisitorsWhenTheySitAtOneEndOfIt` | Seating on a scanned table | A real fault in the seating maths: these passed in a numeric replica |
-| EditMode `TheShippedManifestAsksNothingOfTheVisitorAtLaunch` | `unityplayer.SkipPermissionsDialog` is `true` | Meta's manifest tool rewrote the manifest; set the value back to `true` |
+| EditMode `TheShippedManifestAsksNothingOfTheVisitorAtLaunch` | `unityplayer.SkipPermissionsDialog` is `true` | The manifest was made afresh from Meta's template, which writes `false`; set the value back to `true` and restore the three microphone removals |
 | PlayMode `PagesTurnThemselvesOnceToldAndAnUnansweredChoiceGoesToTheFire` (changed) | A watching visitor hears four pages and both sides | If the page count is three, the fire did not turn the stage: look at `TurnPageWhenTold` |
 | PlayMode `OnceASideIsToldAHandSweptAcrossTheStageTurnsItToTheOther` | Offer, lean, sweep, turn, both beads kept | It moves a simulated hand in real time and must finish its sweeps within the fire's ten seconds. On a slow or busy machine a timing failure here is the test's, not the feature's: rerun it alone before changing code |
 | PlayMode `AVisitorMayEndAfterOneSideAndKeepOnlyThatBead` | **End here**, one bead | |
@@ -68,4 +68,4 @@ Then, in the editor with `SANKOFA_PRESENT=1`, watch one telling without touching
 
 ## 6. What only a headset can answer
 
-Whether anything is asked at launch; whether the sweep and the resting hand read real hands; whether the scanned table's axes match what the code assumes; whether the room shows correctly behind the story and at a sensible brightness; reach to the heirlooms and plaques from a real seat; frame rate. None of these has evidence. If a headset becomes available for even ten minutes, launch, **Use my table**, and one sweep are the three things to try.
+Whether anything is asked at launch; whether the sweep and the resting hand read real hands; whether the story lands on a scanned table as intended (its axis conventions match the MRUK source, read on November 14, but no scan has been tried); whether the room shows correctly behind the story and at a sensible brightness; reach to the heirlooms and plaques from a real seat; frame rate. None of these has evidence. If a headset becomes available for even ten minutes, launch, **Use my table**, and one sweep are the three things to try.

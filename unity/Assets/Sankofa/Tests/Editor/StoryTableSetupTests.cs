@@ -20,8 +20,9 @@ namespace Sankofa.Tests
         [Test]
         public void TheShippedManifestAsksNothingOfTheVisitorAtLaunch()
         {
-            // Unity's player asks for every declared runtime permission as the app opens unless this is set. Meta's
-            // manifest tool writes it as false, so a regenerated manifest must be corrected before a build.
+            // Older Unity players asked for every declared runtime permission as the app opened unless this was set.
+            // Meta's manifest template writes it as false, so a manifest made afresh from that template must be
+            // corrected before a build.
             var manifest = System.IO.File.ReadAllText("Assets/Plugins/Android/AndroidManifest.xml");
             Assert.That(manifest, Does.Contain("android:name=\"unityplayer.SkipPermissionsDialog\" android:value=\"true\""),
                 "the room scan and the microphone are asked for only when a visitor chooses the feature that needs them");

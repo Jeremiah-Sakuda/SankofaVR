@@ -18,8 +18,9 @@ namespace Sankofa.Tests
         [Test]
         public void NothingIsAskedOfTheVisitorAtLaunch()
         {
-            // Unity's player asks for every declared runtime permission as the app opens unless this is set. The app asks
-            // for each one itself, at the moment a visitor chooses the feature that needs it: the room scan when they
+            // Older Unity players asked for every declared runtime permission as the app opened unless this was set; the
+            // manual has not described that dialog since 2021, and the value is set so that no player shows it. The app
+            // asks for each one itself, at the moment a visitor chooses the feature that needs it: the room scan when they
             // choose their own table, and the microphone, in a build that carries it, when they agree to ask aloud.
             var skip = Manifest().Descendants("meta-data").Single(m => (string)m.Attribute(Android + "name") == "unityplayer.SkipPermissionsDialog");
             Assert.That((string)skip.Attribute(Android + "value"), Is.EqualTo("true"));
