@@ -94,7 +94,7 @@ namespace Sankofa.Runtime.Personal
         string[] welcome;
         int welcomeLine = -1;
         float welcomeClock, welcomeLength, pageRest;
-        bool pageSpoken, pageTold, askingForHand;
+        bool pageSpoken, pageTold, askingForHand, voiceHeld;
         string turnKey, toldPage, pageKey;
         int pageKeyVersion, pageKeyNumber;
         PersonalStoryChapter pageKeyChapter;
@@ -575,8 +575,14 @@ namespace Sankofa.Runtime.Personal
             if (view == null) return;
             view.SetStrand(strand.Beads.Select(b => b.Telling).ToArray());
             view.SetPaused(session.Paused); keyboard.Suspend(session.Paused);
-            if (session.Paused) { voice.Pause(); foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null) s.Pause(); return; }
-            if (voice.clip != null && narrationEnabled && !voice.isPlaying) voice.UnPause();
+            if (session.Paused)
+            {
+                // Only a voice that is speaking is held, so a page that has finished is never started again by a resume.
+                if (voice.isPlaying) { voice.Pause(); voiceHeld = true; }
+                foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null) s.Pause();
+                return;
+            }
+            if (voiceHeld) { voiceHeld = false; if (voice.clip != null && narrationEnabled && !voice.isPlaying) voice.UnPause(); }
             foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null && !s.isPlaying) s.UnPause();
             if (decision != null || keyboard.IsOpen) return;
             var story = session.Story;
@@ -797,7 +803,7 @@ namespace Sankofa.Runtime.Personal
         void AbortPending() { if (pending != null) { pending.Abort(); pending = null; } }
         void StopVoice()
         {
-            if (voice != null) { voice.Stop(); voice.clip = null; }
+            if (voice != null) { voice.Stop(); voice.clip = null; voiceHeld = false; }
             if (pendingAudio != null) { pendingAudio.Abort(); pendingAudio = null; }
             if (voiceRequest != null) { StopCoroutine(voiceRequest); voiceRequest = null; }
         }
