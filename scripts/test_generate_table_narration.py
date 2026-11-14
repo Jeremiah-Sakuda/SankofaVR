@@ -28,6 +28,15 @@ class TableNarrationTests(unittest.TestCase):
     def test_only_pending_chapters_are_selected(self):
         self.assertEqual([e["text"] for e in table.pending(self.manifest)], ["New words."])
 
+    def test_a_chapter_is_recorded_without_its_spoken_label_and_a_line_as_written(self):
+        chapter = {"chapter_id": "c", "text": "Imagined scene: She waits.", "text_sha256": "x", "spoken": "She waits.", "spoken_sha256": "y"}
+        line = {"line_id": "welcome.come", "text": "Come. Sit with me.", "text_sha256": "z"}
+        self.assertEqual(table.spoken(chapter), ("She waits.", "y"))
+        self.assertEqual(table.spoken(line), ("Come. Sit with me.", "z"))
+        self.assertEqual([table.name(chapter), table.name(line)], ["c", "welcome.come"])
+        manifest = {"chapters": [dict(chapter, status="pending-recording")], "lines": [dict(line, status="pending-recording")]}
+        self.assertEqual([table.name(e) for e in table.pending(manifest)], ["c", "welcome.come"])
+
     def test_shipped_manifest_lists_the_new_perspectives_as_pending_or_recorded(self):
         manifest = json.loads((table.ROOT / table.MANIFEST).read_text(encoding="utf-8"))
         ids = {e["chapter_id"] for e in manifest["chapters"]}

@@ -32,6 +32,8 @@ namespace Sankofa.Runtime.Personal
 
         const float FoldedAngle = 88f, RiseSeconds = 0.9f, FoldSeconds = 0.35f, SpinSeconds = 0.8f, Stagger = 0.06f;
         const float StepSeconds = 0.7f, PoseSeconds = 0.4f, WordsPerSecond = 2.3f, InviteSeconds = 6f;
+        /// <summary>How far the whole stage leans with a sweeping hand before it gives way and turns.</summary>
+        public const float LeanDegrees = 12f;
         static readonly int FrameA = Shader.PropertyToID("_FrameA"), FrameB = Shader.PropertyToID("_FrameB");
         static readonly int PoseBlend = Shader.PropertyToID("_PoseBlend"), Visibility = Shader.PropertyToID("_Visibility"), Highlight = Shader.PropertyToID("_Highlight");
 
@@ -53,7 +55,10 @@ namespace Sankofa.Runtime.Personal
         MaterialPropertyBlock block;
         Phase phase = Phase.Resting;
         float rise, phaseTime, spinFrom, spinTo, clock, length = 1;
-        bool mirrored, narrationDriven, paused, reducedMotion, waiting;
+        bool mirrored, narrationDriven, paused, reducedMotion, waiting, fullTurn;
+        float lean, leanTarget;
+        int spinSign = 1;
+        Quaternion restRotation = Quaternion.identity;
         TableStaging.Chapter chapter;
         int nextBeat;
         string gourdPlace = TableStaging.GourdHidden, gourdHolder;
@@ -67,6 +72,10 @@ namespace Sankofa.Runtime.Personal
         public float Rise => rise;
         public bool Mirrored => mirrored;
         public bool Turning => phase == Phase.Folding || phase == Phase.Spinning;
+        /// <summary>The scenery stands and nothing is turning: a hand may turn the stage now.</summary>
+        public bool Standing => phase == Phase.Standing && rise >= 1 && !waiting && chapter != null;
+        /// <summary>Degrees the stage is leaning with a hand at this moment.</summary>
+        public float Lean => lean * LeanDegrees;
         public string ChapterId => chapter?.Id;
         /// <summary>0..1 through the current chapter's narration.</summary>
         public float Progress => Mathf.Clamp01(clock / Mathf.Max(0.01f, length));
@@ -89,6 +98,7 @@ namespace Sankofa.Runtime.Personal
         void Awake()
         {
             block = new MaterialPropertyBlock();
+            restRotation = transform.localRotation;
             foreach (var figure in figures.Where(f => f != null && f.Root != null))
                 actors[figure.Id] = new Actor { Figure = figure, From = figure.Root.localPosition, To = figure.Root.localPosition };
             sceneryRest = scenery.Select(s => s != null ? s.localPosition : Vector3.zero).ToArray();
@@ -106,6 +116,7 @@ namespace Sankofa.Runtime.Personal
             foreach (var actor in actors.Values) actor.Shown = false;
             SetGourd(TableStaging.GourdHidden, null, true);
             if (mirrored) { mirrored = false; if (turntable != null) turntable.localRotation = Quaternion.identity; }
+            fullTurn = false; spinSign = 1; leanTarget = 0;
             phase = Phase.Resting; phaseTime = 0;
             if (reducedMotion) rise = 0;
             Apply();
@@ -120,14 +131,18 @@ namespace Sankofa.Runtime.Personal
             var next = Staging?.For(chapterId);
             if (!newPage && chapter != null && chapter.Id == chapterId) return;
             // A page turned mid-turn settles the turntable where its current side belongs before anything else moves.
-            if (Turning) SetMirror(mirrored);
+            if (Turning) { SetMirror(mirrored); fullTurn = false; }
+            var previous = chapter;
             chapter = next ?? new TableStaging.Chapter { Id = chapterId, Entry = TableStaging.Stay };
             nextBeat = 0; clock = 0; narrationDriven = false; accepted = null; VisitorPassedGourd = false;
             var words = string.IsNullOrWhiteSpace(text) ? 0 : text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Length;
             length = Mathf.Max(4f, words / WordsPerSecond + 1.5f);
             offered = Array.Empty<string>();
             var wantMirror = chapter.Entry == TableStaging.Turn;
-            if (wantMirror != mirrored && rise > 0.01f && !reducedMotion) { BeginPhase(Phase.Folding); return; }
+            // Going from one side of the meeting to the other turns the stage again. Both sides are staged for the same
+            // facing, so it folds, turns all the way round and rises on the other woman.
+            var sideToSide = previous != null && previous.Id != chapter.Id && previous.Entry == TableStaging.Turn && wantMirror && mirrored;
+            if ((wantMirror != mirrored || sideToSide) && rise > 0.01f && !reducedMotion) { fullTurn = sideToSide; BeginPhase(Phase.Folding); return; }
             if (wantMirror != mirrored) SetMirror(wantMirror);
             Arrive(snap: rise < 0.01f || reducedMotion);
             if (phase != Phase.Standing) BeginPhase(reducedMotion ? Phase.Standing : Phase.Rising);
@@ -147,6 +162,15 @@ namespace Sankofa.Runtime.Personal
 
         public void SetPaused(bool value) => paused = value;
 
+        /// <summary>
+        /// While a hand sweeps across the stage it leans with the hand: <paramref name="share"/> runs from -1 to 1,
+        /// positive toward the visitor's right. The near rim follows the hand, as a table that spins would.
+        /// </summary>
+        public void SetLean(float share) => leanTarget = Mathf.Clamp(share, -1f, 1f);
+
+        /// <summary>The next turn goes the way the hand went: positive toward the visitor's right.</summary>
+        public void TurnToward(int direction) => spinSign = direction > 0 ? -1 : 1;
+
         /// <summary>While an answer, source or notice is open over the stage, the scene lies down and its clock waits.</summary>
         public void SetWaiting(bool value)
         {
@@ -161,7 +185,8 @@ namespace Sankofa.Runtime.Personal
         {
             reducedMotion = value;
             if (!value) return;
-            if (Turning) { SetMirror(!mirrored); Arrive(true); }
+            if (Turning) { SetMirror(fullTurn ? mirrored : !mirrored); fullTurn = false; Arrive(true); }
+            lean = leanTarget = 0; transform.localRotation = restRotation;
             phase = chapter == null ? Phase.Resting : Phase.Standing;
             rise = chapter == null ? 0 : 1;
             foreach (var a in actors.Values) { a.Step = 1; a.Blend = 1; a.Rise = a.Shown ? 1 : 0; }
@@ -172,7 +197,12 @@ namespace Sankofa.Runtime.Personal
         /// <summary>Moves the staging clock, as when the visitor reads ahead without narration.</summary>
         public void Seek(float progress) { clock = Mathf.Clamp01(progress) * length; Advance(); }
 
-        void BeginPhase(Phase value) { phase = value; phaseTime = 0; if (value == Phase.Spinning) { spinFrom = mirrored ? 180 : 0; spinTo = spinFrom + 180; } }
+        void BeginPhase(Phase value)
+        {
+            phase = value; phaseTime = 0;
+            if (value != Phase.Spinning) return;
+            spinFrom = mirrored ? 180 : 0; spinTo = spinFrom + (fullTurn ? 360 : 180) * spinSign;
+        }
 
         void SetMirror(bool value)
         {
@@ -272,6 +302,7 @@ namespace Sankofa.Runtime.Personal
             {
                 rise = Mathf.Max(0, rise - dt / FoldSeconds);
                 foreach (var a in actors.Values) a.Rise = Mathf.Min(a.Rise, rise);
+                LeanWithHand(dt);
                 Apply();
                 return;
             }
@@ -289,11 +320,16 @@ namespace Sankofa.Runtime.Personal
                     if (rise <= 0) BeginPhase(Phase.Spinning);
                     break;
                 case Phase.Spinning:
-                    var t = Mathf.Clamp01(phaseTime / SpinSeconds);
+                    var t = Mathf.Clamp01(phaseTime / (fullTurn ? SpinSeconds * 1.5f : SpinSeconds));
                     if (turntable != null) turntable.localRotation = Quaternion.Euler(0, Mathf.Lerp(spinFrom, spinTo, t * t * (3 - 2 * t)), 0);
-                    if (t >= 1) { SetMirror(!mirrored); Arrive(true); foreach (var a in actors.Values) a.Rise = 0; BeginPhase(Phase.Rising); }
+                    if (t >= 1)
+                    {
+                        SetMirror(fullTurn ? mirrored : !mirrored); fullTurn = false; spinSign = 1;
+                        Arrive(true); foreach (var a in actors.Values) a.Rise = 0; BeginPhase(Phase.Rising);
+                    }
                     break;
             }
+            LeanWithHand(dt);
             if (chapter != null && !Turning)
             {
                 if (!narrationDriven) clock = Mathf.Min(length, clock + dt);
@@ -312,6 +348,13 @@ namespace Sankofa.Runtime.Personal
             gourdGlow = Mathf.MoveTowards(gourdGlow, GourdInvited ? 0.6f + 0.4f * Mathf.Sin(Time.time * 3f) : 0, dt * 3f);
             gourdTo = GourdTarget();
             Apply();
+        }
+
+        /// <summary>The whole stage leans a little with a sweeping hand, and settles back when the hand stops or the stage turns.</summary>
+        void LeanWithHand(float dt)
+        {
+            lean = Mathf.MoveTowards(lean, Standing && !reducedMotion ? leanTarget : 0, dt * 5f);
+            transform.localRotation = restRotation * Quaternion.Euler(0, -lean * LeanDegrees, 0);
         }
 
         void Apply()

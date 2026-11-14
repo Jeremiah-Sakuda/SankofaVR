@@ -7,6 +7,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | Document | What it holds |
 |---|---|
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
+| [Entertainment finish plan](product/entertainment-finish-plan.md) | November 10 PM audit: complements Claude's voice integration with story, interaction, acceptance and submission priorities |
 | [Judged-path audit](reviews/2026-10-26-judged-path-audit.md) | The build as judges would install it, assumptions challenged, the perspective-choice/voice/intake iteration and the critical path to submission |
 | [Personal table implementation and panel](reviews/2026-10-18-personal-table-iteration.md) | October 18–19 software/live-service evidence, implemented judge findings and remaining acceptance |
 | [Personal story table MVP](product/personal-story-table-mvp.md) | Active direction: inherited fragments/questions, illustrated table presence, bounded generation/fallback, hands input and explicit save/reopen |
@@ -32,6 +33,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 |---|---|
 | [Enkare Nairobi](content/enkare-nairobi/README.md) | The setting and how the story is built |
 | [Stories](content/enkare-nairobi/stories.md) | The draft narration, beat by beat, with claim references |
+| [Story-table editorial handoff](content/enkare-nairobi/table-editorial-pass.md) | Proposed concise context, dramatic questions, personal interests and return hooks for the current pop-up tellings |
 | [Scenes](content/enkare-nairobi/scenes.md) | What each scene stages, where, and what is built |
 | [Source register](content/enkare-nairobi/sources.md) | Every claim with its sources, confidence and verification; questions for the family |
 

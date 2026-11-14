@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Sankofa.Core.Json;
 using Sankofa.Core.Personal;
 using Sankofa.Flow;
+using Sankofa.Interaction;
 using Sankofa.Runtime.App;
 using Sankofa.Runtime.Input;
 using Sankofa.Runtime.UI;
@@ -19,7 +19,7 @@ namespace Sankofa.Runtime.Personal
 {
     /// <summary>Composition for personal intake, checked content, a reusable room-aware table and explicit Keep.</summary>
     [DefaultExecutionOrder(500)]
-    public sealed class PersonalStoryApp : MonoBehaviour
+    public sealed partial class PersonalStoryApp : MonoBehaviour
     {
         [Tooltip("Public HTTPS service root. Never place provider credentials in this scene.")]
         [SerializeField] string serviceEndpoint = "";
@@ -33,6 +33,8 @@ namespace Sankofa.Runtime.Personal
         StoryTablePlacement placement;
         StoryTableKeyboard keyboard;
         PersonalStoryStore store;
+        PersonalStrandStore strands;
+        KeptStrand strand = new KeptStrand();
         readonly PersonalStorySession session = new PersonalStorySession();
         string region = "enkare-nairobi", period = "1850s", interest = "trade-household", seed = "";
         UnityWebRequest pending;
@@ -59,10 +61,90 @@ namespace Sankofa.Runtime.Personal
             get => serviceEndpoint;
             set { serviceEndpoint = value ?? ""; if (view != null && session.State == PersonalStoryState.Intake && decision == null) Render(); }
         }
-        public bool OnlineAvailable => Endpoint() != null;
+        /// <summary>The sides of tellings this visitor has kept: one bead each, at most six.</summary>
+        public KeptStrand Strand => strand;
+        [Tooltip("Offers Create my story at the intake when a story service is configured. Turn off for a build whose service only answers questions.")]
+        [SerializeField] bool onlineCreation = true;
+        public bool OnlineCreation { get => onlineCreation; set { onlineCreation = value; if (view != null && session.State == PersonalStoryState.Intake && decision == null) Render(); } }
+        public bool OnlineAvailable => onlineCreation && Endpoint() != null;
         public string PersonalReason => personalReason;
         public string ServiceAccessToken { set => serviceAccessToken = value ?? ""; }
         public bool NarrationEnabled => narrationEnabled;
+
+        /// <summary>
+        /// The headset presentation: the griot speaks, welcomes the visitor and turns the pages. Editor, simulator and
+        /// batch sessions start silent and hand-turned unless SANKOFA_PRESENT=1 asks for the presentation, as when
+        /// recording the simulator.
+        /// </summary>
+        static bool Presenting => !Application.isEditor || Environment.GetEnvironmentVariable("SANKOFA_PRESENT") == "1";
+
+        /// <summary>What a first-time visitor hears and reads before choosing, ending on the invitation that stays.</summary>
+        public static readonly string[] FirstWelcome = PersonalStoryVoice.Welcome.ToArray();
+        /// <summary>What a visitor with a kept telling hears instead.</summary>
+        public static readonly string[] ReturnWelcome = PersonalStoryVoice.ReturnWelcome.ToArray();
+        const float TurnAfterSeconds = 1.6f, ChoiceWaitSeconds = 14f;
+        /// <summary>How long the fire waits, once one side is told, before it turns the stage to the other itself.</summary>
+        public const float OtherSideWaitSeconds = 10f;
+        /// <summary>How long a told page that has questions waits for one before it turns.</summary>
+        public const float QuestionWaitSeconds = 5f;
+        /// <summary>What the page adds once one side of a meeting is told. Presentation: never part of the story or its narration.</summary>
+        public const string OtherSidePrompt = "This meeting has another side. Sweep a hand across the stage to turn it.";
+        /// <summary>What ending a telling after one side is called.</summary>
+        public const string EndHereLabel = "End here";
+        string[] welcome;
+        int welcomeLine = -1;
+        float welcomeClock, welcomeLength, pageRest;
+        bool pageSpoken, pageTold, askingForHand;
+        string turnKey, toldPage, pageKey;
+        int pageKeyVersion, pageKeyNumber;
+        PersonalStoryChapter pageKeyChapter;
+        TurnGesture[] turns = Array.Empty<TurnGesture>();
+        TouchGesture[,] reaches = new TouchGesture[0, 0];
+        /// <summary>
+        /// One side of the meeting has been told and the other may be heard now: at its figure, by a hand sweeping the
+        /// stage round, or left to the fire. Hand-turned pages offer it as soon as the side's page opens.
+        /// </summary>
+        public bool OtherSideOffered => session.OffersOtherSide && (!TurnsPages || PageToldOnce);
+        /// <summary>
+        /// The page being read has been told to its end at least once. Where pages turn themselves, what a page offers
+        /// beyond its telling waits for this: its questions, which would otherwise say what the page has not yet said,
+        /// and the other side of its meeting. Coming back from an answer does not tell the page again.
+        /// </summary>
+        public bool PageToldOnce => toldPage != null && toldPage == PageKey();
+        /// <summary>The page's own questions may be asked now.</summary>
+        public bool QuestionsOffered => session.State == PersonalStoryState.Reading && (!TurnsPages || PageToldOnce);
+
+        /// <summary>Names the page being read, or null between pages. Built once per page: it is asked for every frame.</summary>
+        string PageKey()
+        {
+            if (session.State != PersonalStoryState.Reading || session.Chapter == null) return null;
+            var chapter = session.Chapter;
+            if (pageKey == null || pageKeyVersion != session.RequestVersion || pageKeyNumber != session.PageNumber || !ReferenceEquals(pageKeyChapter, chapter))
+            {
+                pageKeyVersion = session.RequestVersion; pageKeyNumber = session.PageNumber; pageKeyChapter = chapter;
+                pageKey = pageKeyVersion + ":" + pageKeyNumber + ":" + chapter.Id;
+            }
+            return pageKey;
+        }
+        /// <summary>The griot is still saying the welcome; the heirlooms can be chosen throughout.</summary>
+        public bool Welcoming => welcome != null;
+        /// <summary>The welcome line now on the page, or null once the standing invitation has returned.</summary>
+        public string WelcomeLine => welcome != null && welcomeLine >= 0 && welcomeLine < welcome.Length ? welcome[welcomeLine] : null;
+        /// <summary>
+        /// A page turns itself once the griot has finished it, and an unanswered choice is left to the fire. The
+        /// visitor can still turn sooner, go back or pause. On by default wherever the headset presentation is.
+        /// </summary>
+        public bool TurnsPages
+        {
+            get => turnsPages;
+            set { turnsPages = value; if (view != null) view.SetSelfTurning(value); }
+        }
+        bool turnsPages;
+        HandSource[] hands;
+        float handWarmth;
+        const float HandWarmthMetres = 0.26f;
+        /// <summary>A hand closes on an heirloom within this distance of its middle, held for a moment.</summary>
+        static readonly TouchSettings HeirloomTouch = new TouchSettings { Radius = 0.07f, Dwell = 0.2, FeedbackRange = 0.30f };
 
         void Awake()
         {
@@ -74,13 +156,20 @@ namespace Sankofa.Runtime.Personal
             keyboard = gameObject.AddComponent<StoryTableKeyboard>();
             keyboard.Configure(view, view.StylePanel);
             var panels = view.Panels.Concat(new[] { keyboard.Panel }).ToArray();
-            var hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
+            hands = FindObjectsByType<HandSource>(FindObjectsSortMode.None);
+            turns = hands.Select(_ => new TurnGesture()).ToArray();
+            reaches = new TouchGesture[hands.Length, view.HeirloomCount];
+            for (var h = 0; h < hands.Length; h++) for (var i = 0; i < view.HeirloomCount; i++) reaches[h, i] = new TouchGesture(HeirloomTouch);
             foreach (var panel in panels) foreach (var hand in hands) { var source = hand; panel.AddFingertip(() => source.Fingertip); }
             foreach (var pointer in FindObjectsByType<PointerSource>(FindObjectsSortMode.None)) pointer.ConfigurePanels(panels);
-            store = new PersonalStoryStore(StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story"));
+            var folder = StoreFolderOverride ?? Path.Combine(Application.persistentDataPath, "personal-story");
+            store = new PersonalStoryStore(folder);
+            strands = new PersonalStrandStore(folder);
+            strand = strands.Load();
             // On the headset the griot reads aloud by default, beside full captions. Editor, simulator and batch sessions
             // start silently; Options switches either way.
-            narrationEnabled = !Application.isEditor;
+            narrationEnabled = Presenting;
+            TurnsPages = Presenting;
             voice = gameObject.AddComponent<AudioSource>(); voice.playOnAwake = false; voice.volume = narrationEnabled ? .85f : 0; voice.spatialBlend = .75f;
             view.StartLocalRequested += StartPrepared;
             view.StartRequested += StartGenerated;
@@ -91,9 +180,14 @@ namespace Sankofa.Runtime.Personal
             view.NextRequested += () => { StopVoice(); session.Next(); };
             view.BackRequested += () => { StopVoice(); session.Back(); };
             view.QuestionSelected += id => { if (int.TryParse(id, out var index)) { StopVoice(); session.Ask(index); } };
-            view.ChoiceSelected += id => { if (int.TryParse(id, out var index) && session.OffersChoice) { StopVoice(); session.Choose(index); } };
+            view.ChoiceSelected += id =>
+            {
+                if (!int.TryParse(id, out var index)) return;
+                if (session.OffersChoice) { StopVoice(); session.Choose(index); }
+                else if (OtherSideOffered) HearOtherSide(index, true, 0);
+            };
             view.AboutRequested += ShowAbout;
-            view.AskRequested += () => { StopVoice(); session.Ask(0); };
+            view.AskRequested += AskTheFire;
             view.SourceDetailsRequested += ShowSources;
             view.SaveRequested += RequestKeep;
             view.PauseRequested += () => session.Pause(!session.Paused);
@@ -105,16 +199,19 @@ namespace Sankofa.Runtime.Personal
             view.ContinueRequested += Continue;
             view.RetryRequested += StartGenerated;
             view.LeaveRequested += RequestLeave;
-            view.DecisionSelected += id => { var action = decision; decision = null; action?.Invoke(id); };
+            view.DecisionSelected += id => { var action = decision; decision = null; askingForHand = false; action?.Invoke(id); };
             keyboard.Edited += value => view.ShowDecision(value.Length >= StoryTableKeyboard.MaximumLength ? "Limit reached • 500 / 500" : $"Your question • {value.Length} / 500", (value.Length == 0 ? "What would you like to understand?" : value) + "\n\nNothing is sent while you type. Delete text to make room if you reach the limit.", Array.Empty<(string, string)>());
             keyboard.Committed += value => { seed = value; decision = null; session.Cancel(); };
             keyboard.Cancelled += () => { decision = null; Render(); };
             session.Changed += Render;
             placement.StatusChanged += message =>
             {
+                view.SetOwnTable(placement.UsesSurface);
                 if (session.State == PersonalStoryState.Intake) view.SetStatus(message);
                 else if (session.State == PersonalStoryState.Reading) view.SetStatus(Capability(session.Story) + " • " + message);
             };
+            placement.HandAsked += AskForARestingHand;
+            placement.HandSettled += () => { view.SetOwnTable(placement.UsesSurface); if (askingForHand) { askingForHand = false; decision = null; Render(); } };
             OVRManager.HMDUnmounted += OnFocusLost;
             OVRManager.InputFocusLost += OnFocusLost;
             OVRManager.HMDMounted += OnFocusRestored;
@@ -125,17 +222,201 @@ namespace Sankofa.Runtime.Personal
         {
             if (view == null) return;
             var eye = Camera.main;
-            placement.Configure(view, eye != null ? eye.transform : null);
+            placement.Configure(view, eye != null ? eye.transform : null, hands);
             reducedMotion = ExperienceSettings.Load().ReducedMotion;
             view.SetReducedMotion(reducedMotion);
             StartFireSound();
             Render();
+            if (Presenting) BeginWelcome();
+        }
+
+        /// <summary>Begins the spoken welcome on the intake. A first visit and a return are greeted differently.</summary>
+        public void BeginWelcome()
+        {
+            if (view == null || session.State != PersonalStoryState.Intake) return;
+            welcome = strand.Count > 0 ? PersonalStoryVoice.ReturnWelcomeFor(strand).ToArray() : HasKept ? ReturnWelcome : FirstWelcome;
+            welcomeLine = -1;
+            NextWelcomeLine();
+        }
+
+        /// <summary>
+        /// Back at the fire after an ending, the griot names a side the strand has not yet threaded and the heirloom
+        /// that leads to it, in the words and recordings of the return welcome. Nothing is said to a visitor who has
+        /// kept nothing, or everything.
+        /// </summary>
+        public void SuggestNext()
+        {
+            if (view == null || session.State != PersonalStoryState.Intake) return;
+            var next = strand.Count > 0 ? strand.NextUnheard() : null;
+            var side = next == null ? null : KeptStrand.Sides(next.Telling).FirstOrDefault(s => s.Id == next.Side);
+            if (side == null) return;
+            welcome = new[] { PersonalStoryVoice.ReturnInvitation(next.Telling, side.Label) };
+            welcomeLine = -1;
+            NextWelcomeLine();
+        }
+
+        void NextWelcomeLine()
+        {
+            welcomeLine++;
+            if (welcome == null || welcomeLine >= welcome.Length) { EndWelcome(); return; }
+            var line = welcome[welcomeLine];
+            var clip = narrationEnabled ? Resources.Load<AudioClip>("Narration/personal-table/" + PersonalStoryVoice.ClipName(line)) : null;
+            var words = line.Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Length;
+            // A recorded line holds for its own length; an unrecorded one for long enough to be read.
+            welcomeLength = clip != null ? clip.length + .6f : Mathf.Max(2.6f, words / 2.6f + 1.2f);
+            welcomeClock = 0;
+            view.SetInvitation(line);
+            if (clip != null) PlayClip(clip);
+        }
+
+        void EndWelcome()
+        {
+            if (welcome == null) return;
+            welcome = null; welcomeLine = -1;
+            view.SetInvitation(null);
+        }
+
+        void TellWelcome()
+        {
+            if (welcome == null) return;
+            if (session.State != PersonalStoryState.Intake) { EndWelcome(); return; }
+            if (session.Paused || decision != null || keyboard.IsOpen) return;
+            welcomeClock += Time.deltaTime;
+            if (welcomeClock >= welcomeLength) NextWelcomeLine();
+        }
+
+        /// <summary>
+        /// Turns the page once it has been told: when its recording ends, or, without a voice, when the stage has
+        /// finished performing it. A page that offers a choice waits longer, then the fire chooses.
+        /// </summary>
+        void TurnPageWhenTold()
+        {
+            var key = PageKey();
+            var reading = key != null;
+            if (key != turnKey) { turnKey = key; pageRest = 0; pageTold = pageSpoken = false; askWhenTold = false; }
+            if (!reading || session.Paused || decision != null || keyboard.IsOpen) { pageRest = 0; return; }
+            var speaking = voice != null && voice.isPlaying;
+            if (pageSpoken && !speaking && voice.clip != null && voice.time <= 0.01f)
+            {
+                // The recording has ended: the stage and captions reach the end of the page with it.
+                view.SetNarrationProgress(voice.clip.length, voice.clip.length);
+                pageSpoken = false; pageTold = true;
+            }
+            var stage = view.Stage;
+            var voiced = voice != null && voice.clip != null;
+            if (TurnsPages && !voiced && voiceRequest == null) view.FollowStageClock();
+            var told = !speaking && voiceRequest == null
+                && (voiced ? pageTold : stage != null && stage.Progress >= 1f)
+                && (stage == null || (!stage.Turning && !stage.Waiting));
+            if (!told) { pageRest = 0; return; }
+            // A question held until the page was told is heard now, before any page turns.
+            if (askWhenTold) { askWhenTold = false; pageRest = 0; BeginSpokenQuestion(); return; }
+            if (toldPage != key)
+            {
+                // The page is told. What it may now offer appears: its questions, and the other side of its meeting.
+                // Its last words stay in view and the fire turns to the visitor.
+                toldPage = key; pageRest = 0;
+                if (TurnsPages)
+                {
+                    Render(); view.ShowLastReadingPart();
+                    if (session.OffersOtherSide || HasQuestions) view.SetFireState(Sankofa.Core.Story.FireState.Listening);
+                }
+                return;
+            }
+            if (!TurnsPages) return;
+            pageRest += Time.deltaTime;
+            var wait = session.OffersChoice ? ChoiceWaitSeconds : session.OffersOtherSide ? OtherSideWaitSeconds : HasQuestions ? QuestionWaitSeconds : TurnAfterSeconds;
+            if (pageRest < wait) return;
+            pageRest = 0;
+            // Left alone, the fire turns the stage itself, so a visitor who only watches still hears both sides.
+            if (session.OffersOtherSide) { HearOtherSide(0, false, 0); return; }
+            StopVoice(); session.Next();
+        }
+
+        /// <summary>The page being read has something a visitor could ask.</summary>
+        bool HasQuestions => session.Chapter != null && (session.Chapter.Questions.Count > 0 || SpokenQuestionsAvailable);
+
+        /// <summary>
+        /// Turns the stage to the side of the meeting not yet heard. <paramref name="chosen"/> records whether the
+        /// visitor asked for it; <paramref name="direction"/> is the way their hand swept, or 0.
+        /// </summary>
+        void HearOtherSide(int index, bool chosen, int direction)
+        {
+            if (!session.OffersOtherSide || session.Paused) return;
+            if (direction != 0 && view.Stage != null) view.Stage.TurnToward(direction);
+            StopVoice();
+            session.HearOtherSide(index, chosen);
+        }
+
+        /// <summary>
+        /// While the other side is offered, a hand swept sideways in front of the stage turns it. The stage leans with
+        /// the hand first, so the visitor feels it give before it turns.
+        /// </summary>
+        void TurnByHand()
+        {
+            var stage = view.Stage;
+            if (stage == null) return;
+            var armed = OtherSideOffered && session.State == PersonalStoryState.Reading && !session.Paused && decision == null && !keyboard.IsOpen && stage.Standing;
+            if (!armed)
+            {
+                foreach (var turn in turns) turn.Reset();
+                stage.SetLean(0);
+                return;
+            }
+            var lean = 0f;
+            var table = stage.transform.parent;
+            for (var i = 0; i < hands.Length; i++)
+            {
+                var tracked = hands[i] != null && hands[i].Tracked;
+                // The hand in the stage's own space, taken from its parent so the stage's lean never feeds back into it.
+                var palm = tracked ? (table != null ? table.InverseTransformPoint(hands[i].PalmCenter) : hands[i].PalmCenter) - stage.transform.localPosition : Vector3.zero;
+                var swept = turns[i].Update(tracked, new System.Numerics.Vector3(palm.x, palm.y, palm.z), Time.deltaTime);
+                if (swept != 0) { stage.SetLean(0); HearOtherSide(0, true, swept); return; }
+                if (Mathf.Abs(turns[i].Lean) > Mathf.Abs(lean)) lean = turns[i].Lean;
+            }
+            stage.SetLean(lean);
+        }
+
+        /// <summary>
+        /// A hand that reaches an heirloom itself, rather than its card, begins that telling. The heirloom rises a little
+        /// to meet the hand first.
+        /// </summary>
+        void ReachForHeirlooms()
+        {
+            var offered = view.HeirloomsOffered && session.State == PersonalStoryState.Intake && !session.Paused && decision == null && !keyboard.IsOpen;
+            for (var i = 0; i < view.HeirloomCount; i++)
+            {
+                var nearness = 0f; var taken = false;
+                var middle = view.HeirloomPosition(i);
+                for (var h = 0; h < hands.Length; h++)
+                {
+                    var touch = reaches[h, i];
+                    if (!offered || hands[h] == null || !hands[h].Tracked) { touch.Reset(); continue; }
+                    taken |= touch.Update(hands[h].Sample, new System.Numerics.Vector3(middle.x, middle.y, middle.z), Time.deltaTime);
+                    nearness = Mathf.Max(nearness, touch.Proximity);
+                }
+                view.SetHeirloomReach(i, nearness);
+                if (!taken) continue;
+                foreach (var touch in reaches) touch.Reset();
+                view.ChooseHeirloom(i);
+                return;
+            }
+        }
+
+        /// <summary>The visitor is asked to rest a hand on their own table; the room is showing so they can see it.</summary>
+        void AskForARestingHand()
+        {
+            StopVoice();
+            Decide("Use your own table",
+                "Reach forward and rest an open hand on your table. Hold it still for a moment and the story will stand there.\n\nOnly your hand's position is read, on this headset.",
+                new[] { ("stand", "Keep the story stand") }, _ => { placement.Recenter(); Render(); });
+            askingForHand = true;
         }
 
         /// <summary>The fire is heard where it burns. Headset only, like the voice; the tabletop view itself creates no sound.</summary>
         void StartFireSound()
         {
-            if (Application.isEditor) return;
+            if (!Presenting) return;
             fireSound = Loop("Fire sound", fireRecording, .28f, view.FirePosition);
             // The stage's water and night are silent until a telling stands, and step back while the griot speaks.
             riverSound = Loop("Stage river", riverRecording, 0, view.StagePosition);
@@ -183,7 +464,30 @@ namespace Sankofa.Runtime.Personal
             var speaking = voice != null && voice.isPlaying;
             StageSound(riverSound, .16f, speaking);
             StageSound(nightSound, .09f, speaking);
+            TellWelcome();
+            TurnPageWhenTold();
+            TurnByHand();
+            ReachForHeirlooms();
+            WarmToHands();
+            TickVoice();
         }
+
+        /// <summary>A hand held to the fire makes it swell and throw sparks: the first thing a visitor's hands do here.</summary>
+        void WarmToHands()
+        {
+            handWarmth -= Time.deltaTime;
+            if (handWarmth > 0 || hands == null || session.Paused) return;
+            var flame = view.FirePosition + Vector3.up * 0.14f;
+            foreach (var hand in hands)
+            {
+                if (hand == null || !hand.Tracked || (hand.PalmCenter - flame).sqrMagnitude > HandWarmthMetres * HandWarmthMetres) continue;
+                view.AcknowledgeHand(); handWarmth = 0.9f;
+                return;
+            }
+        }
+
+        /// <summary>A telling is beginning or being reopened: no page of it has been told yet.</summary>
+        void ResetReadingPosition() { toldPage = null; view.ResetReadingPosition(); }
 
         public void SetSeed(string question) { seed = question ?? ""; view.SetSeedText(seed); }
         PersonalStoryRequest Request() => new PersonalStoryRequest(region, period, interest, question: seed);
@@ -192,7 +496,7 @@ namespace Sankofa.Runtime.Personal
         {
             if (session.Paused) return;
             AbortPending(); StopVoice(); ClearClips();
-            keyboard.Close(); decision = null; narrationToken = null; view.ResetReadingPosition();
+            keyboard.Close(); decision = null; narrationToken = null; storyToken = null; ResetReadingPosition();
             var request = Request(); var version = session.Begin(request);
             if (session.State != PersonalStoryState.Preparing) return;
             var result = BundledPersonalStoryComposer.Compose(request);
@@ -203,8 +507,8 @@ namespace Sankofa.Runtime.Personal
         public void StartGenerated()
         {
             if (session.Paused) return;
-            AbortPending(); StopVoice(); ClearClips(); keyboard.Close(); decision = null; narrationToken = null; view.ResetReadingPosition();
-            personalReason = null;
+            AbortPending(); StopVoice(); ClearClips(); keyboard.Close(); decision = null; narrationToken = null; ResetReadingPosition();
+            personalReason = null; storyToken = null;
             var input = Request(); var version = session.Begin(input);
             if (session.State != PersonalStoryState.Preparing) return;
             var endpoint = Endpoint();
@@ -255,6 +559,7 @@ namespace Sankofa.Runtime.Personal
                 if (story != null && session.Accept(version, story))
                 {
                     narrationToken = call.GetResponseHeader("X-Sankofa-Narration-Token");
+                    storyToken = call.GetResponseHeader("X-Sankofa-Story-Token");
                     if (story.Mode == "bundled")
                     {
                         if (!string.IsNullOrWhiteSpace(seed)) personalReason = BundledPersonalStoryComposer.Compose(input).Reason;
@@ -268,6 +573,7 @@ namespace Sankofa.Runtime.Personal
         void Render()
         {
             if (view == null) return;
+            view.SetStrand(strand.Beads.Select(b => b.Telling).ToArray());
             view.SetPaused(session.Paused); keyboard.Suspend(session.Paused);
             if (session.Paused) { voice.Pause(); foreach (var s in new[] { fireSound, riverSound, nightSound }) if (s != null) s.Pause(); return; }
             if (voice.clip != null && narrationEnabled && !voice.isPlaying) voice.UnPause();
@@ -287,25 +593,32 @@ namespace Sankofa.Runtime.Personal
                 case PersonalStoryState.Reading:
                     // The first page says what the visitor's own words changed; later pages return to the setting.
                     view.RenderStory(story.Title, session.PageNumber == 1 && personalReason != null ? personalReason : "Enkare Nairobi • around the 1850s", Capability(story));
+                    // A page offers the sides of its meeting to follow, or, once one side is told, the side still unheard.
+                    var otherSide = OtherSideOffered;
+                    var sides = session.OffersChoice ? session.Chapter.Choices : otherSide ? session.NotFollowed : Array.Empty<PersonalStoryChoice>();
                     view.RenderChapter(new StoryTableChapterViewData
                     {
                         Index = session.PageNumber - 1, Count = session.PageCount, Id = session.Chapter.Id, Title = session.Chapter.Title,
-                        Caption = session.Chapter.Narration, ArtKey = session.Chapter.Illustration,
+                        Caption = PersonalStoryVoice.Spoken(session.Chapter.Narration), ArtKey = session.Chapter.Illustration,
                         ImageLabel = TruthLabel(session.Chapter.Truth),
                         PreviousPageTitles = session.PagesBefore.Select(c => c.Title).TakeLast(2).ToArray(),
-                        Questions = session.Chapter.Questions.Select(q => q.Label).ToArray(),
-                        Choices = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Label).ToArray() : Array.Empty<string>(),
-                        ChoiceIds = session.OffersChoice ? session.Chapter.Choices.Select(c => c.Id).ToArray() : Array.Empty<string>(),
+                        Questions = QuestionsOffered ? session.Chapter.Questions.Select(q => q.Label).ToArray() : Array.Empty<string>(),
+                        Choices = sides.Select(c => c.Label).ToArray(),
+                        ChoiceIds = sides.Select(c => c.Id).ToArray(),
+                        ChoicePrompt = otherSide ? OtherSidePrompt : null,
+                        ContinueLabel = otherSide ? EndHereLabel : null,
                     });
-                    view.SetControlState(session.PageNumber > 1, true, session.Chapter.Questions.Count > 0, false);
-                    if (narrationEnabled && voice.clip == null && voiceRequest == null) SpeakCurrent();
+                    view.SetSpokenQuestions(SpokenQuestionsAvailable);
+                    view.SetControlState(session.PageNumber > 1, true, QuestionsOffered && HasQuestions, false);
+                    // A page already told is not told again when the visitor comes back to it from an answer or a notice.
+                    if (narrationEnabled && voice.clip == null && voiceRequest == null && !PageToldOnce) SpeakCurrent();
                     break;
                 case PersonalStoryState.Question:
-                    view.RenderQuestion(session.Question.Label, session.Question.Answer, TruthLabel(session.Question.Truth)); break;
+                    view.RenderQuestion(session.Question.Label, PersonalStoryVoice.Spoken(session.Question.Answer), TruthLabel(session.Question.Truth)); break;
                 case PersonalStoryState.Sources:
                     view.ShowSourceDetails("What this telling knows", SourcesText()); break;
                 case PersonalStoryState.Closing:
-                    view.ShowClosing(Followed(story) + "\n\nKeep these exact pages on this device, or return to your choices without saving.");
+                    view.ShowClosing(Followed(story) + "\n\n" + KeepInvitation(story));
                     view.SetControlState(true, false, false, true); break;
             }
         }
@@ -319,15 +632,30 @@ namespace Sankofa.Runtime.Personal
             : thread == "place-water"
                 ? "Who followed the path beside the water? A question about journeys can follow the people next."
                 : "What did the travellers bring to their meeting? A question about trade can follow what they carried.";
-        /// <summary>Names the side the visitor followed, honestly distinguishing their choice from the fire's default, and the side still unheard.</summary>
+        /// <summary>
+        /// Names what was heard: both sides of the meeting, or the one side followed, honestly distinguishing the
+        /// visitor's choice from the fire's default, with the side still unheard.
+        /// </summary>
         string Followed(PersonalStoryDocument story)
         {
             var followed = session.Followed;
             if (followed == null) return ReturnInvitation(story.Interest);
+            if (session.Heard.Count > 1 && session.NotFollowed.Count == 0) return "You heard both sides of this meeting.";
             var text = (session.FollowedByChoice ? "You chose to " : "The fire chose to ") + Lower(followed.Label) + ".";
             if (session.NotFollowed.Count > 0) text += " Another time, you could " + Lower(session.NotFollowed[0].Label) + ".";
             return text;
         }
+        /// <summary>What keeping would do, said before the visitor decides. Saving stays an explicit choice.</summary>
+        string KeepInvitation(PersonalStoryDocument story)
+        {
+            var beads = BeadsToThread(story).Count;
+            return beads == 0 ? "Keep these exact pages on this device, or leave them unsaved."
+                : "Keep this telling to thread " + (beads == 1 ? "its bead" : "both beads") + " on your strand, or leave it unsaved.";
+        }
+        /// <summary>The sides heard in this sitting that a prepared telling can thread as beads, whether or not they are on the strand already.</summary>
+        List<PersonalStoryChoice> BeadsToThread(PersonalStoryDocument story) =>
+            story == null || story.Mode != "bundled" ? new List<PersonalStoryChoice>()
+                : session.Heard.Where(side => side != null && KeptStrand.IsKnown(story.Interest, side.Id)).ToList();
         static string Lower(string label) => string.IsNullOrEmpty(label) ? "" : char.ToLowerInvariant(label[0]) + label.Substring(1);
 
         void ShowAbout()
@@ -336,9 +664,10 @@ namespace Sankofa.Runtime.Personal
             StopVoice();
             Decide("How it works",
                 "Touch an heirloom to begin its telling. If you add a question first, recognised words in it choose which telling the fire begins.\n\n" +
-                "Each telling reaches a moment where you choose whose side to follow. If you simply turn the page, the fire chooses.\n\n" +
+                "Each telling reaches a meeting with two sides. You choose whose side to follow, then sweep a hand across the stage to turn it and hear the other. If you only watch, the fire chooses and turns the stage for you.\n\n" +
                 "Documented pages are marked and sourced. The people and their meetings are imagined: they are not an account of anyone's ancestors, and nothing here recovers a real relative.\n\n" +
-                "At the end you can keep a telling on this device and reopen it exactly, without a connection.\n\n" +
+                "At the end you can keep a telling on this device and reopen it exactly, without a connection. Each side you keep threads a bead on your strand.\n\n" +
+                "Use my table sets the story on your own table: one found in your room scan, or wherever you rest a hand. Nothing about your room leaves the headset.\n\n" +
                 "Sounds from Freesound: \u201ccampfire sound\u201d by SterckxS (CC BY 3.0); \u201cBabbling Brook HQ Seamless Wav Loop\u201d by celldroid (CC BY 4.0); \u201ccrickets\u201d by selcukartut, recorded in the Maasai Mara (CC0). The narrator is a synthetic voice.",
                 new[] { ("return", "Return") }, _ => Render());
         }
@@ -361,7 +690,9 @@ namespace Sankofa.Runtime.Personal
         {
             if (keyboard.IsOpen) { keyboard.Close(); Render(); return; }
             if (session.ReturnToStory()) return;
+            var fromEnding = session.State == PersonalStoryState.Closing;
             AbortPending(); StopVoice(); session.Cancel();
+            if (fromEnding && Presenting) SuggestNext();
         }
         void ShowSources() { StopVoice(); session.Sources(); }
         void ShowOptions()
@@ -370,7 +701,7 @@ namespace Sankofa.Runtime.Personal
             Decide("Make yourself comfortable", "These choices affect presentation. They do not change or save your story.",
                 new[] { ("motion", reducedMotion ? "Gentle motion on" : "Still pages"), ("text", largeText ? "Standard text" : "Larger text"),
                     ("listen", narrationEnabled ? "Captions only" : "Read aloud"), ("lower", "Lower the stand"), ("raise", "Raise the stand"),
-                    ("recenter", "Recenter"), ("room", "Fit my table"), ("return", "Return") }, id =>
+                    ("recenter", "Recenter"), ("room", "Use my table"), ("return", "Return") }, id =>
                 {
                     if (id == "motion") { reducedMotion = !reducedMotion; view.SetReducedMotion(reducedMotion); }
                     else if (id == "text") { largeText = !largeText; view.SetLargeText(largeText); }
@@ -383,7 +714,11 @@ namespace Sankofa.Runtime.Personal
                 });
         }
         void Decide(string title, string text, IReadOnlyList<(string Id, string Label)> actions, Action<string> onAnswer)
-        { decision = onAnswer; view.ShowDecision(title, text, actions); }
+        {
+            // Any other notice takes the place of the request to rest a hand; a hand that then settles closes nothing.
+            askingForHand = false;
+            decision = onAnswer; view.ShowDecision(title, text, actions);
+        }
 
         void RequestKeep()
         {
@@ -394,22 +729,47 @@ namespace Sankofa.Runtime.Personal
         }
         void Keep()
         {
-            try { store.Keep(session.Story); view.ShowClosing("Kept on this device. You can reopen the same telling or forget it from your story table."); }
+            try
+            {
+                store.Keep(session.Story);
+                var bead = ThreadBead();
+                view.SetStrand(strand.Beads.Select(b => b.Telling).ToArray());
+                view.ShowClosing("Kept on this device. " + bead + "You can reopen the same telling or forget it from your story table.");
+            }
             catch (Exception) { view.ShowClosing("This story could not be kept. It is still open; try Keep again or leave without saving."); }
             view.SetControlState(true, false, false, true);
+        }
+        /// <summary>
+        /// Keeping a prepared telling threads a bead for each side heard in this sitting, whoever chose it. A side
+        /// already on the strand adds nothing. A generated telling has no sides and no bead.
+        /// </summary>
+        string ThreadBead()
+        {
+            var story = session.Story; var sides = BeadsToThread(story);
+            if (sides.Count == 0) return "";
+            try
+            {
+                var added = false;
+                foreach (var side in sides) added |= strand.Add(story.Interest, side.Id);
+                if (added) strands.Save(strand);
+            }
+            catch (Exception) { strand = strands.Load(); return "Its bead could not be threaded this time. "; }
+            if (strand.IsComplete) return "Your strand now holds all six sides. ";
+            return (sides.Count > 1 ? "Both sides are threaded on your strand: " : "A bead is threaded for this side: ") + strand.Count + " of " + KeptStrand.Capacity + ". ";
         }
         public bool Reopen()
         {
             if (session.Paused) return false;
-            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; personalReason = null; view.ResetReadingPosition(); return session.OpenSaved(kept); }
+            try { var kept = store.Load(); if (kept == null) return false; AbortPending(); StopVoice(); ClearClips(); narrationToken = null; storyToken = null; personalReason = null; ResetReadingPosition(); return session.OpenSaved(kept); }
             catch (Exception) { ShelfProblem("Your kept story could not be opened. It has not been replaced.", () => Reopen()); return false; }
         }
         public void Forget()
         {
             if (session.Paused) return;
-            Decide("Forget your kept story?", "This removes the story kept on this device.", new[] { ("forget", "Forget kept story"), ("cancel", "Keep it") }, id =>
+            Decide("Forget your kept story?", "This removes the story kept on this device and the beads on your strand.", new[] { ("forget", "Forget kept story"), ("cancel", "Keep it") }, id =>
             {
-                if (id == "forget") { try { store.Forget(); } catch (Exception) { ShelfProblem("The kept story could not be removed.", Forget); return; } }
+                // Forgetting removes everything kept about earlier visits: the telling and the strand of sides heard.
+                if (id == "forget") { try { store.Forget(); strands.Forget(); strand = new KeptStrand(); } catch (Exception) { ShelfProblem("The kept story could not be removed.", Forget); return; } }
                 Render();
             });
         }
@@ -441,15 +801,14 @@ namespace Sankofa.Runtime.Personal
             if (pendingAudio != null) { pendingAudio.Abort(); pendingAudio = null; }
             if (voiceRequest != null) { StopCoroutine(voiceRequest); voiceRequest = null; }
         }
-        static string AudioKey(string text)
-        {
-            using (var hash = SHA256.Create()) return "p-" + BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(text))).Replace("-", "").ToLowerInvariant().Substring(0, 16);
-        }
         void SpeakCurrent()
         {
             if (!narrationEnabled || session.State != PersonalStoryState.Reading || session.Paused || session.Chapter == null) return;
-            var key = AudioKey(session.Chapter.Narration);
+            // The recording is of the spoken words. A telling kept before the label left the recordings still finds its
+            // earlier clip by its full stored text.
+            var key = PersonalStoryVoice.ClipName(PersonalStoryVoice.Spoken(session.Chapter.Narration));
             var clip = Resources.Load<AudioClip>("Narration/personal-table/" + key);
+            if (clip == null) clip = Resources.Load<AudioClip>("Narration/personal-table/" + PersonalStoryVoice.ClipName(session.Chapter.Narration));
             if (clip == null) clips.TryGetValue(key, out clip);
             if (clip != null) { PlayClip(clip); return; }
             var endpoint = Endpoint();
@@ -483,11 +842,12 @@ namespace Sankofa.Runtime.Personal
             if (!narrationEnabled || clip == null || session.Paused) return;
             voice.transform.position = view.FirePosition;
             voice.clip = clip; voice.volume = .85f; voice.Play();
+            pageSpoken = session.State == PersonalStoryState.Reading;
         }
         void ClearClips() { foreach (var clip in clips.Values) if (clip != null) Destroy(clip); clips.Clear(); }
         void OnDestroy()
         {
-            AbortPending(); StopVoice(); ClearClips();
+            AbortPending(); AbortAsk(); StopListening(false); StopVoice(); ClearClips();
             OVRManager.HMDUnmounted -= OnFocusLost; OVRManager.InputFocusLost -= OnFocusLost;
             OVRManager.HMDMounted -= OnFocusRestored; OVRManager.InputFocusAcquired -= OnFocusRestored;
             session.Changed -= Render;

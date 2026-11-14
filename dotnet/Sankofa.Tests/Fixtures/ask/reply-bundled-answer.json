@@ -1,0 +1,11 @@
+{
+  "schema": "sankofa.personal-answer.v1",
+  "mode": "bundled",
+  "kind": "answer",
+  "question_id": "journeys.context.more",
+  "answer": "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.",
+  "truth": "historical",
+  "sources": [
+    "C6"
+  ]
+}

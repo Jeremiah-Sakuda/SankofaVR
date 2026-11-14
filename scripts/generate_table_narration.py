@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Record the story table's pending chapters in the same griot voice as its existing recordings.
+"""Record the story table's pending chapters and lines in the same griot voice as its existing recordings.
 
-The table app finds a chapter's recording by the hash of its exact text, under
-unity/Assets/Sankofa/Resources/Narration/personal-table/p-<first 16 hex>.mp3. The manifest
-unity/Assets/Sankofa/Content/personal-table.narration.json lists every bundled chapter; entries with
-"status": "pending-recording" have approved text and no audio yet, and play as captions. The .NET test
-PersonalStoryVoiceTests.NarrationManifestMatchesEveryBundledChapterAndItsRecording keeps the manifest
-in step with the composer.
+The table app finds a recording by the hash of the exact words spoken, under
+unity/Assets/Sankofa/Resources/Narration/personal-table/p-<first 16 hex>.mp3. For a chapter the spoken
+words are its stored text without the leading "Imagined scene: " disclosure, which the page shows as a
+label and the welcome says once. The manifest unity/Assets/Sankofa/Content/personal-table.narration.json
+lists every bundled chapter and every line the griot says outside a telling; entries with
+"status": "pending-recording" have approved words and no audio yet, and play as captions. The .NET tests
+in PersonalStoryVoiceTests keep the manifest in step with the composer and the welcome.
 
 Uses Google Cloud Text-to-Speech with the caller's gcloud login and the manifest's own model, voice and
 direction, so new chapters match the earlier ones:
@@ -35,8 +36,19 @@ FOLDER = "unity/Assets/Sankofa/Resources/Narration/personal-table"
 
 
 def pending(manifest):
-    """Chapters whose text is approved but which have no recording yet."""
-    return [entry for entry in manifest["chapters"] if entry.get("status") == "pending-recording"]
+    """Chapters and lines whose words are approved but which have no recording yet."""
+    return [entry for entry in manifest["chapters"] + manifest.get("lines", []) if entry.get("status") == "pending-recording"]
+
+
+def name(entry):
+    return entry.get("chapter_id") or entry.get("line_id")
+
+
+def spoken(entry):
+    """The words to record and their expected hash: a chapter's spoken form, or a line's own text."""
+    if "spoken" in entry:
+        return entry["spoken"], entry["spoken_sha256"]
+    return entry["text"], entry["text_sha256"]
 
 
 def write_meta(clip):
@@ -51,10 +63,10 @@ def write_meta(clip):
 
 
 def record(entry, manifest, folder, access):
-    text = entry["text"]
+    text, expected = spoken(entry)
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    if digest != entry["text_sha256"] or entry["filename"] != "p-" + digest[:16] + ".mp3":
-        raise RuntimeError(f"{entry['chapter_id']}: manifest text and hash disagree; run the .NET tests first")
+    if digest != expected or entry["filename"] != "p-" + digest[:16] + ".mp3":
+        raise RuntimeError(f"{name(entry)}: manifest text and hash disagree; run the .NET tests first")
     audio = narration.synthesize(text, manifest["model"], manifest["voice"], manifest["direction"], access)
     clip = folder / entry["filename"]
     wav = clip.with_suffix(".candidate.wav")
@@ -66,7 +78,7 @@ def record(entry, manifest, folder, access):
         seconds = narration.duration(candidate)
         maximum = min(75, max(15, len(text.split()) * 0.75 + 10))
         if not 0.5 <= seconds <= maximum:
-            raise RuntimeError(f"{entry['chapter_id']}: clip duration {seconds:.2f}s outside 0.5..{maximum:.1f}s; retry")
+            raise RuntimeError(f"{name(entry)}: clip duration {seconds:.2f}s outside 0.5..{maximum:.1f}s; retry")
         candidate.replace(clip)
     finally:
         wav.unlink(missing_ok=True)
@@ -89,7 +101,7 @@ def main():
     path = ROOT / MANIFEST
     manifest = json.loads(path.read_text(encoding="utf-8"))
     todo = pending(manifest)
-    print(f"{len(todo)} pending chapter(s): " + ", ".join(e["chapter_id"] for e in todo), file=sys.stderr)
+    print(f"{len(todo)} pending recording(s): " + ", ".join(name(e) for e in todo), file=sys.stderr)
     if args.dry_run or not todo:
         return
     access = narration.token()
@@ -97,10 +109,10 @@ def main():
     for entry in todo:
         try:
             record(entry, manifest, ROOT / FOLDER, access)
-            print("voiced", entry["chapter_id"], file=sys.stderr)
+            print("voiced", name(entry), file=sys.stderr)
         except (RuntimeError, subprocess.CalledProcessError) as error:
-            failed.append(entry["chapter_id"])
-            print("FAILED", entry["chapter_id"], str(error)[:200], file=sys.stderr)
+            failed.append(name(entry))
+            print("FAILED", name(entry), str(error)[:200], file=sys.stderr)
     if not pending(manifest):
         manifest.pop("pending_note", None)
     manifest["updated_utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()

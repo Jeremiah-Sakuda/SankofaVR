@@ -13,6 +13,11 @@ namespace Sankofa.Core.Personal
         public const string Region = "enkare-nairobi";
         public const string Period = "1850s";
         public const string NamingFact = "Nairobi's name is commonly traced to a Maa phrase meaning cool waters. Spelling and pronunciation still need review by a Maa speaker.";
+        /// <summary>
+        /// The naming passage as it is told: its first sentence, word for word. The review note is about the register,
+        /// not the history, so it stays with the full passage in the page's question and source details.
+        /// </summary>
+        public const string NamingClaim = "Nairobi's name is commonly traced to a Maa phrase meaning cool waters.";
         public const string TradeFact = "Before 1900, trade linked pastoral Maasai and predominantly agricultural Kikuyu communities around Kiambu; settlement and economic activity overlapped.";
         public const string VesselFact = "A National Museums of Kenya exhibit describes a Maasai gourd used for milk or blood and smoked inside with oloirien wood. This museum example does not establish the design of every vessel used in the 1850s.";
         public const string ReconstructionPrefix = "Imagined scene: ";
@@ -60,7 +65,7 @@ namespace Sankofa.Core.Personal
         }
         public static bool IsApprovedHistory(string text, IReadOnlyList<string> cited)
         {
-            var expected = text == NamingFact ? "C1" : text == TradeFact ? "C6" : text == VesselFact ? "C7" : null;
+            var expected = text == NamingFact || text == NamingClaim ? "C1" : text == TradeFact ? "C6" : text == VesselFact ? "C7" : null;
             return expected != null && cited != null && cited.Count == 1 && cited[0] == expected;
         }
     }

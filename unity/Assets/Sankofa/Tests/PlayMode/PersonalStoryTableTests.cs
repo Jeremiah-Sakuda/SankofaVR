@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using Sankofa.Core.Personal;
 using Sankofa.Runtime.Personal;
 using TMPro;
 using UnityEngine;
@@ -149,6 +150,16 @@ namespace Sankofa.Tests
             Assert.That(naserian.Hidden, Is.False, "each perspective stands at the feet of the figure it follows");
             yield return new WaitForSecondsRealtime(0.7f);
             if (capture) { Capture("13-stage-choice-72", 72); Capture("13-stage-choice-82"); }
+            if (capture)
+            {
+                // The headset presentation: pages turn themselves, so the page carries no turning buttons or second choice.
+                view.SetSelfTurning(true); view.RenderChapter(view.LastChapter);
+                view.SetStrand(new[] { "trade-household", "journeys" });
+                for (var settle = Time.realtimeSinceStartup + 0.6f; Time.realtimeSinceStartup < settle;) yield return null;
+                Capture("16-self-turning-choice-72", 72);
+                view.SetStrand(new string[0]);
+                view.SetSelfTurning(false); view.RenderChapter(view.LastChapter); yield return null;
+            }
             var chosen = ""; view.ChoiceSelected = id => chosen = id;
             yield return new WaitForSecondsRealtime(0.33f);
             naserian.PressFromPointer("choice:1"); yield return null;
@@ -210,6 +221,162 @@ namespace Sankofa.Tests
         }
 
         static class TableStagingPlace { public const string With = Sankofa.Core.Personal.TableStaging.GourdWith; }
+
+        [UnityTest]
+        public IEnumerator TheOtherSideOfAMeetingTurnsTheStageAllTheWayRoundAndTheStageLeansWithAHand()
+        {
+            var stage = view.Stage;
+            view.SetReducedMotion(false);
+            StoryTableChapterViewData Side(string id, string title, int index) => new StoryTableChapterViewData
+                { Id = id, Index = index, Count = 4, Title = title, Caption = "Imagined scene: The other woman reached the water first, her own share wrapped and ready.", ArtKey = "cast-atlas", ImageLabel = "Imagined scene" };
+            IEnumerator Settle(float seconds)
+            {
+                for (var deadline = Time.realtimeSinceStartup + seconds; (stage.Turning || stage.Rise < 1) && Time.realtimeSinceStartup < deadline;) yield return null;
+            }
+            Assert.That(stage.Standing, Is.False, "nothing can be turned while the stage lies flat");
+            view.RenderChapter(Side("trade-household.expected", "The one who expected more", 2));
+            yield return Settle(4f);
+            Assert.That(stage.Mirrored, Is.True);
+            Assert.That(stage.Standing, Is.True);
+            Assert.That(stage.FigurePlace("naserian").z, Is.LessThan(stage.FigurePlace("wambui").z));
+
+            // A hand part-way through a sweep leans the whole stage with it, toward the hand, and lets it settle back.
+            var rest = stage.transform.localRotation;
+            stage.SetLean(1);
+            for (var deadline = Time.realtimeSinceStartup + 1.5f; stage.Lean < PopUpStage.LeanDegrees - 0.2f && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(stage.Lean, Is.EqualTo(PopUpStage.LeanDegrees).Within(0.2f));
+            Assert.That(Quaternion.Angle(stage.transform.localRotation, rest), Is.EqualTo(PopUpStage.LeanDegrees).Within(0.3f));
+            Assert.That((stage.transform.localRotation * Vector3.back).x, Is.GreaterThan(0), "the near rim goes the way the hand goes: to the visitor's right");
+            stage.SetLean(0);
+            for (var deadline = Time.realtimeSinceStartup + 1.5f; stage.Lean > 0.01f && Time.realtimeSinceStartup < deadline;) yield return null;
+            Assert.That(Quaternion.Angle(stage.transform.localRotation, rest), Is.LessThan(0.05f));
+
+            // Both sides are staged for the same facing, so reaching the other woman folds the scene and turns it right round.
+            stage.TurnToward(1);
+            view.RenderChapter(Side("trade-household.agreement", "The agreement belongs to the women", 3));
+            Assert.That(stage.Turning, Is.True, "the other side of the same meeting turns the stage again");
+            Assert.That(stage.Standing, Is.False);
+            stage.SetLean(1); yield return null; yield return null;
+            Assert.That(stage.Lean, Is.LessThan(0.01f), "a turning stage does not lean");
+            stage.SetLean(0);
+            yield return Settle(5f);
+            Assert.That(stage.Mirrored, Is.True);
+            Assert.That(stage.ChapterId, Is.EqualTo("trade-household.agreement"));
+            Assert.That(stage.FigurePlace("wambui").z, Is.LessThan(stage.FigurePlace("naserian").z), "the woman now followed stands nearest the visitor");
+            Assert.That(stage.GourdHolder, Is.EqualTo("wambui"), "each side opens with its own arrangement, not the last one's");
+
+            // Still pages: the other side simply stands, and no hand moves the stage.
+            view.SetReducedMotion(true);
+            view.RenderChapter(Side("trade-household.expected", "The one who expected more", 2));
+            Assert.That(stage.Turning, Is.False);
+            Assert.That(stage.Rise, Is.EqualTo(1));
+            Assert.That(stage.ChapterId, Is.EqualTo("trade-household.expected"));
+            stage.SetLean(1); yield return null; yield return null;
+            Assert.That(stage.Lean, Is.EqualTo(0));
+            view.SetReducedMotion(false);
+        }
+
+        [UnityTest]
+        public IEnumerator OnceASideIsToldItsPageOffersTheOtherAndAWayToEnd()
+        {
+            var chosen = ""; var ended = 0;
+            view.ChoiceSelected = id => chosen = id; view.NextRequested = () => ended++;
+            view.SetReducedMotion(true);
+            var side = new StoryTableChapterViewData
+            {
+                Id = "journeys.meeting", Index = 2, Count = 4, Title = "What a traveller carries onward", Caption = "She chooses to put the bundle down. They sit in the space it leaves.",
+                ArtKey = "cast-atlas", ImageLabel = "Imagined scene", Questions = new[] { "What could I ask a relative next?" },
+            };
+            view.RenderChapter(side); view.SetControlState(true, true, true, false);
+            view.Stage.Seek(1); yield return null; yield return null;
+            var questions = view.Panels.Single(p => p.name == "Questions beside the story");
+            var transport = view.Panels.Single(p => p.name == "Turn a page");
+            var late = view.Panels.Single(p => p.name == "Follow wambui");
+            Assert.That(questions.Ids, Is.EqualTo(new[] { "0" }));
+            Assert.That(late.Hidden, Is.True, "nobody is offered while the side is only being told");
+
+            // The same page, once told: the unheard side stands at her figure and the page says how to turn to it.
+            var offered = new StoryTableChapterViewData
+            {
+                Id = side.Id, Index = side.Index, Count = side.Count, Title = side.Title, Caption = side.Caption, ArtKey = side.ArtKey, ImageLabel = side.ImageLabel, Questions = side.Questions,
+                Choices = new[] { "Find the one who is late" }, ChoiceIds = new[] { "journeys.follow.late" },
+                ChoicePrompt = "This meeting has another side. Sweep a hand across the stage to turn it.", ContinueLabel = "End here",
+            };
+            view.RenderChapter(offered); view.ShowLastReadingPart();
+            yield return null; yield return null;
+            Assert.That(view.Stage.Progress, Is.EqualTo(1f), "offering the other side does not begin the page again");
+            Assert.That(view.Caption, Does.EndWith("turn it."));
+            Assert.That(late.Hidden, Is.False); Assert.That(late.Ids, Is.EqualTo(new[] { "choice:0" }));
+            Assert.That(view.Panels.Single(p => p.name == "Follow naserian").Hidden, Is.True);
+            Assert.That(questions.Ids, Is.EqualTo(new[] { "choice:0" }), "with hand-turned pages the offer is also within reach on the page");
+            Assert.That(transport.Ids, Is.EqualTo(new[] { "back", "next", "ask", "sources" }));
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") { Capture("17-other-side-offered-72", 72); Capture("17-other-side-offered-82"); }
+
+            // Where pages turn themselves the offer stands at her figure alone, and ending here is the one page action added.
+            view.SetSelfTurning(true); view.RenderChapter(offered); view.ShowLastReadingPart();
+            yield return null;
+            Assert.That(questions.Ids, Is.Empty);
+            Assert.That(transport.Ids, Is.EqualTo(new[] { "next", "ask", "sources" }));
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1") Capture("18-other-side-self-turning-72", 72);
+            yield return new WaitForSecondsRealtime(0.33f);
+            late.PressFromPointer("choice:0"); yield return null;
+            Assert.That(chosen, Is.EqualTo("0"));
+            yield return new WaitForSecondsRealtime(0.33f);
+            transport.PressFromPointer("next"); yield return null;
+            Assert.That(ended, Is.EqualTo(1), "ending after one side is one action");
+            // A page that offers no choice never grows a page-turning button where pages turn themselves.
+            view.RenderChapter(side);
+            Assert.That(transport.Ids, Is.EqualTo(new[] { "ask", "sources" }));
+            view.SetSelfTurning(false); view.SetReducedMotion(false);
+        }
+
+        [UnityTest]
+        public IEnumerator EveryEndingIsReadableInFullAtBothTextSizes()
+        {
+            var words = view.GetComponentsInChildren<TMP_Text>(true).Single(x => x.name == "Narrative captions");
+            var transport = view.Panels.Single(p => p.name == "Turn a page");
+            var endings = new[]
+            {
+                "You heard both sides of this meeting.\n\nKeep this telling to thread both beads on your strand, or leave it unsaved.",
+                "You chose to wait with the one who expected more. Another time, you could follow the one who brought less.\n\nKeep this telling to thread its bead on your strand, or leave it unsaved.",
+                "The fire chose to stay with the one who remembers. Another time, you could walk with the younger traveller.\n\nKeep this telling to thread its bead on your strand, or leave it unsaved.",
+                "Kept on this device. Both sides are threaded on your strand: 4 of 6. You can reopen the same telling or forget it from your story table.",
+                "Kept on this device. Your strand now holds all six sides. You can reopen the same telling or forget it from your story table.",
+            };
+            string Plain(string text) => System.Text.RegularExpressions.Regex.Replace(text, "\\s+", " ").Trim();
+            var turnedBack = 0; view.BackRequested = () => turnedBack++;
+            view.SetReducedMotion(true);
+            foreach (var large in new[] { false, true })
+            {
+                view.SetLargeText(large);
+                foreach (var ending in endings)
+                {
+                    view.ShowClosing(ending); view.SetControlState(true, false, false, true);
+                    yield return null;
+                    var read = new System.Collections.Generic.List<string>();
+                    for (var part = 0; part < 6; part++)
+                    {
+                        words.ForceMeshUpdate(true, true);
+                        Assert.That(words.isTextOverflowing, Is.False, (large ? "larger text: " : "") + view.Caption);
+                        read.Add(view.Caption);
+                        Assert.That(transport.Ids, Does.Contain("save").And.Contain("again"), "keeping and leaving stay in reach on every part of the ending");
+                        if (!transport.Ids.Contains("next")) break;
+                        yield return new WaitForSecondsRealtime(0.32f);
+                        transport.PressFromPointer("next"); yield return null;
+                    }
+                    Assert.That(Plain(string.Join(" ", read)), Is.EqualTo(Plain(ending)), "the whole ending can be read, never clipped");
+                    if (!large) Assert.That(read.Count, Is.EqualTo(1), "at the standard size an ending is one page: " + ending);
+                }
+            }
+            // On the first part of an ending, going back still returns to the story's last page.
+            Assert.That(turnedBack, Is.Zero);
+            view.SetLargeText(false);
+            view.ShowClosing(endings[0]); view.SetControlState(true, false, false, true);
+            yield return new WaitForSecondsRealtime(0.32f);
+            transport.PressFromPointer("back"); yield return null;
+            Assert.That(turnedBack, Is.EqualTo(1));
+            view.SetReducedMotion(false);
+        }
 
         /// <summary>
         /// Review frames of the stage in motion at a fixed 12 frames per second: a telling rises, its figures take their
@@ -403,7 +570,11 @@ namespace Sankofa.Tests
             app.SetSeed("What did a household carry for trade?"); app.StartPrepared();
             yield return null;
             Assert.That(app.Session.Story.Interest, Is.EqualTo("trade-household"));
-            Assert.That(view.Caption, Does.StartWith(app.Session.Chapter.Narration.Substring(0, 30)));
+            // The page shows the words the griot speaks; the stored disclosure is the page's label, not part of the caption.
+            Assert.That(app.Session.Chapter.Narration, Does.StartWith(PersonalStoryCatalog.ReconstructionPrefix));
+            Assert.That(view.Caption, Does.StartWith(PersonalStoryVoice.Spoken(app.Session.Chapter.Narration).Substring(0, 30)));
+            Assert.That(view.Caption, Does.Not.Contain("Imagined scene"));
+            Assert.That(view.GetComponentsInChildren<TMP_Text>(true).Single(t => t.name == "Illustration context").text, Is.EqualTo("Imagined scene"));
             foreach (var fov in new[] { 60, 72, 82 }) AssertControlsInForwardView(fov);
             if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") == "1")
                 foreach (var fov in new[] { 60, 72, 82 }) Capture("04-actual-story-" + fov, fov);

@@ -374,8 +374,10 @@ namespace Sankofa.Tests
             // A story table chapter is a whole paragraph; its recording is bounded by its own words, exactly as
             // scripts/generate_table_narration.py bounds a take, so a runaway take fails however short the text.
             var table = Sankofa.Core.Json.JsonText.ParseObject(System.IO.File.ReadAllText("Assets/Sankofa/Content/personal-table.narration.json"));
-            var chapterWords = table.GetArray("chapters").Cast<Sankofa.Core.Json.JsonObject>()
-                .ToDictionary(c => c.GetString("filename"), c => c.GetString("text").Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries).Length);
+            // Current chapters, the welcome lines and retained earlier recordings are each bounded by their own words.
+            var chapterWords = table.GetArray("chapters").Concat(table.GetArray("lines")).Concat(table.GetArray("archived_chapters")).Cast<Sankofa.Core.Json.JsonObject>()
+                .GroupBy(c => c.GetString("filename"))
+                .ToDictionary(g => g.Key, g => g.First().GetString("text").Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries).Length);
             foreach (var path in AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Sankofa/Resources/Narration" }).Select(AssetDatabase.GUIDToAssetPath))
             {
                 var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);

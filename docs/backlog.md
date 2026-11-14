@@ -22,6 +22,9 @@ October 18: the [personal story table MVP](product/personal-story-table-mvp.md) 
 - [ ] PT-12 — Record the three new perspective chapters (`scripts/generate_table_narration.py`) and listen to all twelve with the fire before shipping voice-on by default.
 - [ ] PT-13 — Pop-up illustration: separate the existing layers in depth on each page turn, reduced-motion static; verify caption/control clearance in captures and overdraw on device. *Progress:* implemented in `StoryTableView` with a projected-clearance PlayMode test (type-checked only); Unity run, captures and device review remain.
 - [ ] PT-14 — Replace the single-option place and period buttons with one line of text; confirm the intake fits the forward lenses.
+- [x] PT-15 — Both sides of a meeting in one sitting: the other side offered once one is told, a hand sweep that turns the stage, the fire's own turn, **End here**, and a bead for each side kept. Core checks pass; the Unity side is written and type-checked and [must be run](testing/2026-11-14-unity-verification.md).
+- [x] PT-16 — The room off until asked; **Use my table** from the first page; scanned-table seating at the visitor's edge; resting-hand placement when there is no scan or table; no permission asked at launch. Core checks pass; Unity and device behaviour unverified.
+- [ ] PT-17 — Run the November 14 Unity verification list, then a release build; try launch, **Use my table** and one sweep on any Quest 3 or 3S that can be borrowed.
 
 ## Previous illustrated-theatre sprints
 

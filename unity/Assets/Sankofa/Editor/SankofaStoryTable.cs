@@ -60,17 +60,16 @@ namespace Sankofa.EditorTools
             SetArray(view, "heirlooms", heirlooms);
             SetArray(view, "figureChoices", plaques);
 
-            // One open page in front of the stage holds the words and every action, low enough to keep the stage in view.
-            var page = Point(table, "Story page", new Vector3(0, 0.072f, -0.222f));
+            // A caption card leans at the front edge of the table with its far edge resting just over the stage rim. From
+            // the seat it covers only the empty front of the stage floor, so the scenery and both figures are seen whole,
+            // and everything on it stays inside a narrow forward field of view. It carries the words being spoken, their
+            // truth label and the few actions a telling needs.
+            var page = Point(table, "Story page", new Vector3(0, 0.078f, -0.215f));
             page.localRotation = Quaternion.Euler(66, 0, 0);
-            Prim(page, "Page shadow", PrimitiveType.Cube, new Vector3(0.004f, -0.004f, 0.006f), new Vector3(0.668f, 0.302f, 0.004f), shadow);
-            Prim(page, "Page paper", PrimitiveType.Cube, Vector3.zero, new Vector3(0.66f, 0.30f, 0.005f), paper);
+            Prim(page, "Page shadow", PrimitiveType.Cube, new Vector3(0.004f, -0.024f, 0.006f), new Vector3(0.668f, 0.258f, 0.004f), shadow);
+            Prim(page, "Page paper", PrimitiveType.Cube, new Vector3(0, -0.02f, 0), new Vector3(0.66f, 0.256f, 0.005f), paper);
             TableRule(page, new Vector3(0, 0.080f, -0.003f), 0.60f, brass);
-            Set(view, "heading", TableText(page, "Story name", "Sankofa", new Vector3(-0.15f, 0.133f, -0.004f), 0.12f, new Vector2(0.30f, 0.02f), TableInk, TextAlignmentOptions.Left));
-            Set(view, "subheading", TableText(page, "Story setting", "For the stories you never got to hear", new Vector3(0.11f, 0.133f, -0.004f), 0.08f, new Vector2(0.38f, 0.02f), TableInk, TextAlignmentOptions.Right));
-            var pageNumber = TableText(page, "Page number", "YOUR STORY TABLE", new Vector3(0, 0.114f, -0.004f), 0.07f, new Vector2(0.60f, 0.014f), TableInk);
-            Set(view, "pageNumber", pageNumber); Set(view, "intakeSummary", pageNumber);
-            Set(view, "chapterTitle", TableText(page, "Chapter title", "Every story begins with a question", new Vector3(0, 0.095f, -0.004f), 0.12f, new Vector2(0.60f, 0.02f), TableInk));
+            Set(view, "subheading", TableText(page, "Story setting", "For the stories you never got to hear", new Vector3(0, 0.092f, -0.004f), 0.08f, new Vector2(0.62f, 0.02f), TableInk));
             Set(view, "caption", TableText(page, "Narrative captions", "Choose what you would carry back.", new Vector3(0, 0.038f, -0.004f), 0.15f, new Vector2(0.62f, 0.076f), TableInk, TextAlignmentOptions.TopLeft));
             var seedPreview = TableText(page, "Your question preview", "", new Vector3(0, 0.038f, -0.005f), 0.14f, new Vector2(0.62f, 0.076f), TableInk, TextAlignmentOptions.TopLeft);
             Set(view, "seedText", seedPreview); seedPreview.gameObject.SetActive(false);
@@ -79,10 +78,10 @@ namespace Sankofa.EditorTools
             SetArray(view, "previousTitles", new Object[0]);
             SetArray(view, "turningPages", new Object[] { page });
 
-            // Intake and reading actions share the lower half of the page; only one set is shown at a time.
+            // Intake and reading actions share the card's one action row; only one set is shown at a time.
             var intake = Point(page, "Choose your story", Vector3.zero);
             Set(view, "intakeRoot", intake.gameObject);
-            // Centred between the two page labels and above the buttons (whose top edge is at -0.026), never behind them.
+            // Centred between the two labels and above the buttons (whose top edge is at -0.026), never behind them.
             Set(view, "intakeHeading", TableText(intake, "Intake heading", "", new Vector3(0, -0.0155f, -0.004f), 0.07f, new Vector2(0.28f, 0.011f), TableInk));
             Set(view, "keptActions", TablePanel(intake, "Kept story choices", new Vector3(0, -0.094f, -0.007f), 2, new Vector2(0.29f, 0.04f), ink));
             Set(view, "intakeActions", TablePanel(intake, "Start choices", new Vector3(0, -0.047f, -0.007f), 3, new Vector2(0.19f, 0.042f), ink));
@@ -116,6 +115,25 @@ namespace Sankofa.EditorTools
             Set(controls, "gap", 0.008f); Set(controls, "labelSize", 0.11f);
             Set(view, "controls", controls);
             Set(view, "fire", BuildStoryTableFire(table));
+
+            // The kept strand: six beads along the stage's rim on the fire's side, one for each side of a telling. A
+            // kept side's bead takes its heirloom's colour. They sit on the drum, which does not turn with the stage.
+            var strand = Point(table, "Kept strand", new Vector3(0.02f, 0.089f, 0.11f));
+            var beadEmpty = TableMaterial("Bead unthreaded", new Color(0.33f, 0.27f, 0.20f));
+            var beadTones = new Object[]
+            {
+                TableMaterial("Bead bundle", new Color(0.17f, 0.22f, 0.50f)),
+                TableMaterial("Bead gourd", new Color(0.72f, 0.46f, 0.20f)),
+                TableMaterial("Bead water pot", new Color(0.62f, 0.27f, 0.14f)),
+            };
+            var beads = new Object[6];
+            for (var i = 0; i < beads.Length; i++)
+            {
+                var angle = (-60f - i * 8f) * Mathf.Deg2Rad;
+                beads[i] = Prim(strand, "Bead " + (i + 1), PrimitiveType.Sphere, new Vector3(Mathf.Sin(angle) * 0.306f, 0, -Mathf.Cos(angle) * 0.306f),
+                    Vector3.one * StoryTableView.BeadSize * 0.55f, beadEmpty).GetComponent<Renderer>();
+            }
+            SetArray(view, "beads", beads); Set(view, "beadEmpty", beadEmpty); SetArray(view, "beadTones", beadTones);
 
             var pointerArt = new SankofaArtSet { Pointer = AssetDatabase.LoadAssetAtPath<Material>(SankofaArt.Folder + "/Pointer.mat") };
             BuildPointers(rig, pointerArt, view.Panels);
@@ -361,19 +379,20 @@ namespace Sankofa.EditorTools
             Static(parent, name, mesh, material);
         }
 
-        /// <summary>The griot's fire burns in a clay bowl at the front left of the table, beside the telling and within reach.</summary>
+        /// <summary>The griot's fire burns in a clay bowl beside the stage, within reach and inside a narrow forward view. It
+        /// is the storyteller's presence, so it is the largest thing on the table after the stage.</summary>
         static HearthFire BuildStoryTableFire(Transform table)
         {
-            var hearth = Point(table, "Griot fire", new Vector3(-0.45f, 0, -0.03f));
+            var hearth = Point(table, "Griot fire", new Vector3(-0.40f, 0, 0.02f));
             var clay = TableMaterial("Ember bowl", new Color(0.29f, 0.16f, 0.08f));
-            Prim(hearth, "Clay hearth", PrimitiveType.Cylinder, new Vector3(0, 0.012f, 0), new Vector3(0.16f, 0.012f, 0.16f), clay);
+            Prim(hearth, "Clay hearth", PrimitiveType.Cylinder, new Vector3(0, 0.012f, 0), new Vector3(0.21f, 0.012f, 0.21f), clay);
             for (var i = 0; i < 5; i++)
             {
                 var a = i * Mathf.PI * 2 / 5 + 0.3f;
-                Prim(hearth, "Hearth stone", PrimitiveType.Sphere, new Vector3(Mathf.Cos(a) * 0.072f, 0.026f, Mathf.Sin(a) * 0.072f), new Vector3(0.042f, 0.03f, 0.036f), TableMaterial("Hearth stones", new Color(0.24f, 0.22f, 0.20f)));
+                Prim(hearth, "Hearth stone", PrimitiveType.Sphere, new Vector3(Mathf.Cos(a) * 0.094f, 0.028f, Mathf.Sin(a) * 0.094f), new Vector3(0.054f, 0.038f, 0.046f), TableMaterial("Hearth stones", new Color(0.24f, 0.22f, 0.20f)));
             }
             var root = Point(hearth, "Quiet tabletop fire", new Vector3(0, 0.028f, 0));
-            root.localScale = Vector3.one * 0.34f;
+            root.localScale = Vector3.one * 0.44f;
             var fire = root.gameObject.AddComponent<HearthFire>();
             var flame = AssetDatabase.LoadAssetAtPath<Material>(SankofaArt.Folder + "/Flame.mat");
             var layers = new Object[3]; var flames = new Object[3];
@@ -385,7 +404,7 @@ namespace Sankofa.EditorTools
                 flames[i] = Prim(layer, "Flame", PrimitiveType.Quad, new Vector3(0, 0.5f, 0), Vector3.one, flame).GetComponent<Renderer>();
             }
             SetArray(fire, "layers", layers); SetArray(fire, "cards", flames);
-            Set(fire, "lightPower", 0.7f); Set(fire, "lightAttenuation", 2f);
+            Set(fire, "lightPower", 0.85f); Set(fire, "lightAttenuation", 2f);
             return fire;
         }
     }

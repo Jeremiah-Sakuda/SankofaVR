@@ -20,7 +20,9 @@ namespace Sankofa.Tests
         {
             var stories = PersonalStoryCatalog.Interests.Select(Story).ToArray();
             Assert.That(stories.Select(s => s.Chapters[0].Narration).Distinct().Count(), Is.EqualTo(3));
-            Assert.That(stories.Select(s => s.Chapters[1].Narration).Distinct().Count(), Is.EqualTo(3));
+            // The journey and the exchange share the documented trade that links their two communities; the water has its name.
+            Assert.That(stories.Select(s => s.Chapters[1].Narration).Distinct().Count(), Is.EqualTo(2));
+            Assert.That(stories.Select(s => s.Chapters[1].Questions[0].Label).Distinct().Count(), Is.EqualTo(3));
             Assert.That(stories.Select(s => s.Chapters[0].Questions[0].Label).Distinct().Count(), Is.EqualTo(3));
             Assert.That(stories.Select(s => s.Chapters[1].Illustration).Distinct().Count(), Is.GreaterThan(1));
             foreach (var story in stories)

@@ -1,6 +1,6 @@
 # Unity application
 
-**Status — October 18–19, 2026:** `StoryTable` is the active personal-story MVP. The complete caption-first flow is integrated, with 349 core, 32 service, 36 editor and 16 table-runtime checks passing, plus a separate authenticated actual Unity HTTP generation/narration smoke. All verification is muted. Quest, human, cultural and listening acceptance remain open. Earlier gallery evidence is preserved below.
+**Status — November 14, 2026:** the story table gained both sides in one sitting, a hand-turned stage, heirlooms that answer a hand, and placement on the visitor's own table. Those changes were written without Unity and are [not yet run](../docs/testing/2026-11-14-unity-verification.md). **Status — October 18–19, 2026:** `StoryTable` is the active personal-story MVP. The complete caption-first flow is integrated, with 349 core, 32 service, 36 editor and 16 table-runtime checks passing, plus a separate authenticated actual Unity HTTP generation/narration smoke. All verification is muted. Quest, human, cultural and listening acceptance remain open. Earlier gallery evidence is preserved below.
 
 | Item | Version or choice |
 |---|---|
@@ -8,7 +8,7 @@
 | Meta XR | `com.meta.xr.sdk.core` and `com.meta.xr.mrutilitykit` 207.0.0 from Meta's scoped registry |
 | XR runtime | Unity OpenXR 1.18.0 with the Meta Quest, Meta XR and hand interaction features; single-pass instanced (multiview) |
 | Rendering | Built-in pipeline, Vulkan, linear colour. Surfaces are lit analytically by one warm source (no Unity lights) |
-| Input | Hands first, through Meta's OpenXR hand skeleton: touch, open palm and fingertip presses, or point and pinch at a panel. Touch controllers are optional (point and pull the trigger). StoryTable supports optional passthrough/local table fitting, with an adjustable virtual stand fallback |
+| Input | Hands first, through Meta's OpenXR hand skeleton: touch, open palm and fingertip presses, or point and pinch at a panel. Touch controllers are optional (point and pull the trigger). StoryTable adds a sideways palm sweep that turns the stage and a hand closed on an heirloom. It starts on an adjustable virtual stand in its own room; **Use my table** shows the visitor's room and sets the story on a scanned table or wherever a hand rests |
 | Application id | `com.sankofa.quest`, provisional. A store release channel fixes it permanently; confirm before the first upload |
 
 ## Personal story table
@@ -28,7 +28,7 @@ UNITY="/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity
 
 The optional [service](../backend/README.md) uses server-side Google credentials. Local Editor configuration uses `SANKOFA_STORY_SERVICE` (loopback HTTP is permitted) and `SANKOFA_STORY_ACCESS_TOKEN`. The checked-in scene has an empty endpoint/token; its Android build completes prepared tellings without a server. Android online creation requires a separately configured HTTPS deployment and limited client access. Never embed Google credentials; a shipped client access token is extractable and needs server controls/rotation. The public-synthetic live test is a separate explicit opt-in, not part of regular offline tests.
 
-On Quest, **Fit my table** requests scene permission deliberately, waits for a bounded load and aligns the deck with the selected surface axes. Denial, missing data and timeout retain the virtual stand. Real-room alignment, reach, occlusion and sustained frame rate remain hardware gates. [Current scope](../docs/product/personal-story-table-mvp.md) and [implementation record](../docs/reviews/2026-10-18-personal-table-iteration.md) distinguish software evidence from acceptance.
+On Quest, **Use my table** (first page and Options) requests scene permission deliberately, waits for a bounded load and seats the deck on the nearest scanned table: aligned with its edges, facing away from the edge the visitor sits at. Denial, missing data, a timeout or no table nearby asks the visitor to rest a hand on their table instead, and the deck takes that height; declining keeps the virtual stand, and Recenter restores it. The room is shown only once the story is on the visitor's table. In the editor the room scan is off unless `SANKOFA_ROOM=1` is set, for recording the simulator's synthetic room; that path has never run. `SANKOFA_PRESENT=1` turns on the headset presentation (voice, welcome, self-turning pages). The manifest sets `unityplayer.SkipPermissionsDialog` to `true` so nothing is asked at launch; Meta's manifest tool writes `false`, and a core and an EditMode test fail if it comes back. Real-room alignment, reach, occlusion and sustained frame rate remain hardware gates. [Current scope](../docs/product/personal-story-table-mvp.md) and [implementation record](../docs/reviews/2026-10-18-personal-table-iteration.md) distinguish software evidence from acceptance.
 
 ## Earlier living gallery
 

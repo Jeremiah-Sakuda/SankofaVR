@@ -15,7 +15,9 @@ Shader "Sankofa/Flame"
     SubShader
     {
         Tags { "Queue"="Transparent" "RenderType"="Transparent" "IgnoreProjector"="True" }
-        Blend One One
+        // Light is added to the colour and alpha is left as it was. Where the visitor's room shows behind the story the
+        // eye buffer's alpha is its coverage, so a card that wrote alpha would black out the room around every flame.
+        Blend One One, Zero One
         ZWrite Off
         Cull Off
         Pass

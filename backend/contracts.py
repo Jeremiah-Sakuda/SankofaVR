@@ -6,7 +6,7 @@ import json
 import re
 import uuid
 
-from .content import ACCOUNT_DISCLOSURE, ART_IDS, DISCLOSURE, HISTORICAL, INTERESTS, PERIOD, REGION, SCHEMA, SOURCES, UNANSWERED
+from .content import ACCOUNT_DISCLOSURE, ART_IDS, DISCLOSURE, HISTORICAL, INTERESTS, PERIOD, REGION, SCHEMA, SOURCES, UNANSWERED, approved_forms
 
 
 class RequestError(ValueError):
@@ -206,7 +206,7 @@ def validate_story(story):
             if any(ref not in SOURCES for ref in refs):
                 raise ProposalError("Unknown source reference")
             if item["truth"] == "historical":
-                if len(refs) != 1 or prose != HISTORICAL[refs[0]]:
+                if len(refs) != 1 or prose not in approved_forms(refs[0]):
                     raise ProposalError("Historical wording must match the reviewed inventory")
             elif item["truth"] == "reconstructed":
                 if refs or (not prose.startswith(DISCLOSURE) and prose != UNANSWERED):

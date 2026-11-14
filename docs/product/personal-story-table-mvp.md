@@ -12,7 +12,7 @@ This is the active MVP scope. It supersedes the gallery as the primary journey w
 
 | Moment | Visitor experience | Required behaviour |
 |---|---|---|
-| Settle | A small fire and illustrated journal are close enough to use while seated | Start with an adjustable virtual stand; on compatible Quest hardware passthrough can retain the room |
+| Settle | A small fire and illustrated journal are close enough to use while seated | Start with an adjustable virtual stand in the story's own dark room; on compatible Quest hardware **Use my table** shows the room and sets the story on the visitor's table |
 | Bring a question | Choose a place, period and interest; optionally type a question or fragment | Hands-accessible keyboard and selection controls; no surname, microphone or identity inference required |
 | Confirm | Read the selected context and decide between prepared and online creation | Explicit consent before sending selected context, question and fragment to the configured service |
 | Follow the telling | Read illustrated chapters with a warm narrator's voice; each turned page's print rises in stereo depth like a pop-up book; on the headset the prepared voice reads by default beside full captions | Three pages on either route of a bundled telling, or a validated service telling; label generated versus bundled capability accurately |
@@ -55,7 +55,7 @@ Generated narration is transient, so reopening a generated telling can be captio
 
 ## Why the table matters
 
-The story has a physical place beside the visitor. A real table should change the journal's height and usable footprint; it is not merely a passthrough background. MR Utility Kit 207 integration reads locally available table surfaces after **Fit my table** is chosen. An explicit permission request follows Fit my table. The visitor can recenter or adjust the virtual stand when permission is denied, no suitable table is found, or room data is unavailable; permission/load waits are bounded. Deck axes remain aligned with the measured tabletop. A changed room must not prevent reading or reopening a telling.
+The story has a physical place beside the visitor. A real table should change the journal's height and usable footprint; it is not merely a passthrough background. MR Utility Kit 207 integration reads locally available table surfaces after **Use my table** is chosen, and an explicit permission request follows that choice. The deck keeps the measured tabletop's axes, faces away from the edge the visitor sits at and stays wholly on the top. When permission is denied, no suitable table is found or room data is unavailable, the visitor is asked to rest a hand on their table and the deck takes that height; they can also keep, recenter or adjust the virtual stand. Permission, load and hand waits are bounded. The room is shown only once the story is on the visitor's own table. A changed room must not prevent reading or reopening a telling.
 
 This is implementation intent backed by an adapter, not verified room behaviour. Quest surface orientation, scale, reach, occlusion, passthrough and sustained rendering still need actual-device evidence. Full seated use remains possible through the manual stand.
 
