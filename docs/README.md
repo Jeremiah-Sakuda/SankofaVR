@@ -45,6 +45,8 @@ Planning documents state intentions; decisions and the backlog record what has a
 | [Architecture](architecture.md) | Modules, contracts and permitted dependencies |
 | [Development guide](development.md) | Setup, module layout, scripts, checks and the local competition brief |
 | [Unity application](../unity/README.md) | Commands, tests, how the scenes and sound are made, simulator and headset |
+| [Unity verification after November 14](testing/2026-11-14-unity-verification.md) | What each new or changed test checks, what to look at and listen to, and how to read a failure |
+| [The first session with Unity](testing/2026-11-15-local-session.md) | Order of work on the Windows laptop, the gates moved from the PM pass, and the order of cuts |
 
 ## Provenance
 

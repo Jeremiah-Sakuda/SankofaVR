@@ -14,17 +14,17 @@ November 8, 2026. **Start with the [manual steps](manual-steps.md)** (November 9
 
 ## Capture one story well — target 2:30
 
-Revised November 14 for the one-sitting flow. The organisers ask for real play that makes the hands-first design clear in the first thirty seconds, and judges need not watch past three minutes.
+Revised November 14 for the one-sitting flow; on November 15 the PM pass asked for an opening on the flour dilemma, and the entrant has not settled what the entry leads with. The organisers ask for real play that makes the hands-first design clear in the first thirty seconds, and judges need not watch past three minutes.
 
 | Edit | Record from the final reviewed build |
 |---|---|
 | 0:00–0:10 | Open on the moment itself: a hand sweeps across the stage, it leans, folds, turns and rises on the other woman. Title over it: “One meeting. Two sides. Turn the story with your hand.” |
-| 0:10–0:30 | The fire: “Come. Sit with me.” A hand warms at the fire and it flares. A hand closes on the gourd; the fire takes it and the paper scenery stands up. |
+| 0:10–0:30 | The fire: “Come. Sit with me.” A hand warms at the fire and it flares. A hand reaches the gourd; the fire takes it and the paper scenery stands up. |
 | 0:30–0:55 | The first page, then the documented page with its label. Choose a side at her figure. Hold on the fold, the turn and her coming forward. |
 | 0:55–1:20 | Her side. A hand sets the gourd down between the women. Let one caption carry the point: she left a portion at home. |
 | 1:20–1:50 | “This meeting has another side.” The sweep again, in full this time, and the other woman's side: the meal she had planned around the flour. Let one caption land. |
 | 1:50–2:10 | The ending. Keep, and two beads swell onto the strand. Cut to a return: the griot names a side not yet heard. |
-| 2:10–2:22 | Only if it works in the simulator's room: **Use my table**, the room appears, the theatre settles on the table; or a hand rests on the table and the theatre stands there. |
+| 2:10–2:22 | Dropped by the [PM pass](../reviews/2026-11-14-assumptions-for-challenge.md#pm-pass) unless table placement has been seen working on a Quest. Give the time to the two sides. |
 | 2:22–2:30 | Title, Enkare Nairobi around the 1850s, and the disclosure: documented context is marked, the people are imagined. “Captured in Meta XR Simulator.” |
 
 Record actual Quest gameplay where possible. If needed, the [official FAQ](https://start-developer-competition-26.devpost.com/details/faqs) allows XR Simulator footage. Use Unity's **Sankofa → Play Personal Story Table in XR Simulator** with the muted launch command in the [Unity guide](../../unity/README.md#personal-story-table). Capture the prepared route, label the simulator footage and do not infer real-hand reliability from it. October 30 desktop stills and the fixed-cadence motion study are editing references, not submission footage. Capture without external participants' identifiable faces, voices, or personal details. Keep speech legible via captions. No local sound playback or public upload is authorized by this checklist.

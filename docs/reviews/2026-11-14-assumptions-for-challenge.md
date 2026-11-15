@@ -85,6 +85,28 @@ Each can go alone. None has a single named switch yet; the session can add one p
 | The microphone's removal | Delete three lines in the Android manifest and the core test that holds them |
 | Everything | Build from `6f40764` |
 
+## PM pass
+
+Evening of November 14, by the PM session the entrant appointed; relayed by the entrant on November 15 and condensed here. Its headline: freeze new features and make the gourd telling the entry. A judge sees why one woman brought less flour, turns the stage, and learns what accepting less costs the woman who was waiting.
+
+| Assumption | Call | What would change it |
+|---|---|---|
+| 1. One session is enough | **Change.** Start import and tests first, and prepare `6f40764` in parallel | A timed green run and a build that leave time for footage and an independent install |
+| 2. Room off until asked | **Keep.** Offer **Use my table** once the visitor knows what they are placing | Visitors missing it, with placement working on a Quest |
+| 3. The fire makes both choices | **Change.** Passive completion is a recovery path; the visitor gets a clear chance to choose a side and when to turn. The 14, 10 and 5 second waits are provisional | A timed, uncoached run |
+| 4. The sweep | **Keep, conditionally**, with the labelled pinch beside it. Working in the simulator is enough to film a simulator shot | Two unfamiliar seated visitors who cannot trigger it uncoached, or ordinary reaches triggering it: then it leaves the judged path and the footage |
+| 5. Both sides in one visit | **Keep**, reversing the November 10 return strategy. Keep **End here** | The second side feeling repetitive, or visitors unable to tell the two stakes apart |
+| 6. Prepared tellings carry the adaptation | **Keep.** Say that curiosity selects a prepared telling and the choice changes whose side is followed. No microphone or hosted generation in the judged build | A first-time visitor expecting family-history generation: fix the onboarding and the copy |
+| 7. Adapted division | **Keep** as intended; the sponsor classifies. Confirm Start membership now | Organiser guidance |
+| 8. Questions after their page | **Keep** | A visitor missing a question because the page turned |
+| 9. Sound by measurement | **Change.** Listen to the welcome, the whole gourd route, the cut water line and both stage sounds | Cut an awkward stage sound before rerecording anything |
+| 10. A resting hand | **Cut from the public promise** until tested. In the judged build only if placement and the return to the stand work on a Quest | A scan with a table, a missing or denied scan, recovery, and a hand on a lap or armrest as a false-placement check |
+| 11. The draft's claims | **Change.** Tie every claim to the signed build and what was observed | One complete hands-only offline run on the release APK |
+
+Its other calls: keep the heirloom answering a hand if it passes a reach test; describe the gourd action as selecting **Set the gourd down** while it is a label; defer new object labels, return recordings and visual polish; fix only readability or navigation problems someone actually meets. For isolated failures it cuts in this order: bad stage sounds, unreliable room placement, an unreliable sweep, a disruptive automatic second turn. Its go/no-go was 2 p.m. Eastern on November 15; [the local session's page](../testing/2026-11-15-local-session.md) carries the gates forward.
+
+**Not settled.** On November 15 the entrant said they are not convinced by the story part of this pass. The gourd telling as the entry, and what the entry leads with, stay open until the entrant decides.
+
 ## Not known at all
 
 Whether the build launches on a headset. Whether Start membership, the app, the Competition channel and a signing key exist. Whether the Meta XR Simulator can make the sweep for the video. Whether a first-time visitor understands what changed between the two sides. How any of it looks or sounds.

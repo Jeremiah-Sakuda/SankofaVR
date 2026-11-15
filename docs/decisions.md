@@ -858,3 +858,14 @@ What this does not establish. The sweep's distances and timings come from reason
 Checked later the same day against the source of the two pinned Meta packages (Core SDK and MR Utility Kit 207.0.0, downloaded from Meta's registry and read, not run). The room scan's conventions are what the seating code assumes: a table's anchor sits at the top of its volume with its forward axis pointing out of the top, and its size runs along its right and up axes. The passthrough layer is always an underlay, its `textureOpacity` is documented as the way to dim it, and enabling or disabling the component creates or removes the layer. The eye buffer is blended over an underlay with premultiplied alpha by default, which is why a shader that adds to alpha blacks out the room and why the flame no longer does. The scene permission is requested the way the kit's own remarks describe. None of this replaces seeing it on a headset. The new documented narration for the water telling is a lossless cut of the existing recording at 9.07 seconds, chosen by syllable count and not by ear.
 
 Verified in this session: 440 core checks, 67 service checks and the 4 levelling-script checks pass; the Unity runtime in device and editor configurations, the PlayMode tests and the two story-table EditMode files compile against reference assemblies with stand-ins for the Meta SDK. The comparison scenes were not regenerated and the story table's scene file is unchanged: nothing here adds a serialized field.
+
+## November 15, 2026 — the PM pass, and the first session with Unity
+
+The entrant appointed a separate PM session to challenge the November 14 work. Its calls are recorded [beside the assumptions they answer](reviews/2026-11-14-assumptions-for-challenge.md#pm-pass). Behaviour is frozen. Both sides in one visit, the dark room until asked and questions after their page are kept. The fire's own choices become a recovery path with provisional waits. The resting hand and room fitting leave the public copy until seen on a headset, and every claim in the entry is tied to the signed build.
+
+- **Applied, in documents only:** the [Devpost draft](release/submission-draft.md) and the video's shot list were cut back to those calls. No application behaviour changed.
+- **Not settled:** the entrant is not convinced by the pass's story direction, the gourd telling as the entry. No telling's words have changed.
+- **Gates moved, not met:** the pass's go/no-go was 2 p.m. Eastern on November 15, and Unity had not yet opened the project. [The local session's page](testing/2026-11-15-local-session.md) proposes the same gates from Sunday evening, for the entrant to confirm.
+- **Windows:** the laptop with Unity is a Windows machine. Three files that core tests compare with the app's exact output are now LF on every platform, by `.gitattributes`.
+
+Verified in this session: the workspace check and `git diff --check`. Nothing ran in Unity.
