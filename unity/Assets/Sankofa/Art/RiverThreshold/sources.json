@@ -1,0 +1,33 @@
+{
+  "additional_assets": [
+    {
+      "file": "river-at-blue-hour-v1.png",
+      "source": "exec-d9b91e05-8f29-4292-a9d3-715490c8dfe0.png",
+      "prompt": "Use case: illustration-story. Create one original cinematic WIDE 16:9 riverbank painting for the world surrounding a SEATED visitor in Sankofa VR. Same mature tactile gouache-and-ink animated-film art direction as an intimate firelit painting: deeply layered brushstrokes, midnight indigo, cool silver blue water, restrained amber on earth and reeds, cinematic chiaroscuro, no photorealism or glossy 3D. Viewpoint is a person quietly sitting LOW on the LEFT bank beside a narrow upland stream at blue hour. The river begins close at the lower RIGHT edge, curves naturally toward the CENTRE background, disappears between wooded banks. Broad low rounded stones and patches of dense reeds break the banks into irregular natural shapes; absolutely no straight canal edges. A quiet open patch of earth across the LOWER LEFT AND CENTRE foreground, with room where separate illustrated characters and a story table will be composited by Unity; do not draw people, furniture or pots. The horizon is LOW, around the middle of the image. Dark, layered upland trees and acacia-like silhouettes far back, modest violet hills, large deep-blue twilight sky with a few faint stars, a very subtle warm last light near the horizon. Not a vast desert, no savanna sunset spectacle. The stream feels near enough to hear. Foreground lower edge gradually darkens to charcoal-brown, outer left and right edges dark with trees for use on a curved panoramic screen. A beautiful deeply atmospheric illustrated location for a fictional encounter near Enkare Nairobi around the 1850s; not an archaeological reconstruction or claim of specific historical geography. Full bleed landscape, no frame, labels, captions, watermark, people, animals, buildings, vehicles or other modern elements. Emphasize inviting spatial depth and believable irregular riverbanks.",
+      "sha256": "d9fb14e9d3e859c2ccd9654f015116f255aa0064631693e4ddc991af8eb20315"
+    },
+    {
+      "file": "fire-and-threads-v1.png",
+      "source": "exec-111e37fc-f08d-435d-b409-96db5c49c0d0.png",
+      "prompt": "Use case: illustration-story. Original cinematic title-sequence painting for a mature illustrated VR story named Sankofa. Wide landscape 16:9, no text. An intimate small wood fire on a dark earthen bank at night, placed on the RIGHT third of the image. Beautiful fine painted flame tongues and intensely warm embers, a few thin golden trails of floating sparks that gradually resemble loose threads being carried toward a barely visible cool river in the upper background. Fire feels welcoming, human and quiet, not an explosion or magical portal. Deep midnight blue and charcoal shadows with restrained amber and copper highlights. LEFT half kept very dark, painterly negative space where titles will be typeset separately. Outer edges melt almost to black, no frame. Rich tactile gouache and ink, confident layered brush marks, cinematic chiaroscuro and subtle pigment grain, emotionally arresting visual like a hand-painted animated film opening. No people, faces, silhouettes, musical instruments, ritual symbols, patterned objects, historical authenticity claims, lettering, logos or watermark. Do not make a flat vector icon, cartoon, glossy 3D render, or photograph. One cohesive beautiful full-bleed painting with a softly suggested riverbank and grass, not a storyboard or grid.",
+      "sha256": "f157e2a7c64e7687dbbe3dffd068fe9ef43d3e310b12d198094cdb941338d598"
+    }
+  ],
+  "created": "2026-11-15",
+  "purpose": "Original opening illustration for the isolated seated river-threshold prototype",
+  "provider": "OpenAI",
+  "tool": "image_gen.imagegen",
+  "model": "Not exposed by tool",
+  "file": "hands-and-water-pot-v1.png",
+  "prompt": "Use case: illustration-story. Create an original cinematic opening painting for Sankofa, a seated illustrated VR story. WIDE 16:9 landscape. An intimate close-up of the weathered dark-brown hands of an older fictional East African woman cradling a small plain terracotta water pot beside a low fire at blue hour. Hands and rounded pot dominate the RIGHT half, pot complete with mouth and base visible, natural careful fingers, warm orange embers reflected in clay, quiet humanity. Her simple ochre wrap and ivory cloth subtly visible, no face required. LEFT half and outer edges dissolve into deep indigo-charcoal pigment and sparse amber sparks, generous quiet negative space for text placed later by Unity, NO text in the image. Lower area melts into warm black. Background is only an elusive suggestion of cool river water and grass, no buildings or landscape spectacle. Mature gouache-and-ink illustrated film, tactile brush marks, layered painted shadows, rich restrained amber against midnight blue, beautiful chiaroscuro, fine hand-made grain, cinematic composition with emotional restraint, no glossy 3D, no photorealism, no cartoon caricature, no fantasy symbols, no ethnographic costume claims. This is a fictional reconstruction and symbolic storytelling art, not a historical photograph. No frame, grid, signature, labels, watermark or lettering. Full bleed opaque background.",
+  "review_status": "Fictional symbolic illustration; visually inspected for composition. Not historical, cultural, device or release acceptance.",
+  "source": "exec-1287d341-aa5a-4aa5-923f-0c6007218452.png",
+  "terms_reference": "https://openai.com/policies/terms-of-use/",
+  "rights_status": "Release review of applicable account/service terms remains open. No web source code or illustrations imported. The separate provisional web music audition is local-only and is documented in the prototype brief.",
+  "sha256": "5036060bd453020f16c6ab863757a1e985bfd50bb971c90cfaab69b9fca9bf08",
+  "digest_baseline": {
+    "recorded_on": "2026-11-16",
+    "basis": "Current source-image bytes baselined after review of the November 16 painted-river capture. Original generation output identifiers, prompts and references are preserved.",
+    "limits": "A reviewed-byte baseline, not independent proof of source origin, ownership or rights clearance. Shared manifests also contain comparison inputs; this does not claim every listed image appeared in the capture."
+  }
+}

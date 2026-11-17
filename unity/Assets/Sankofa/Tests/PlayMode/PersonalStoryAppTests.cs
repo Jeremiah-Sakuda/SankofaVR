@@ -93,9 +93,37 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator AnUnconfiguredEditorOffersTheCompleteOfflineVisit()
+        {
+            var previousEndpoint = Environment.GetEnvironmentVariable("SANKOFA_STORY_SERVICE");
+            try
+            {
+                Environment.SetEnvironmentVariable("SANKOFA_STORY_SERVICE", null);
+                app.ServiceEndpoint = "";
+                app.TurnsPages = true;
+                app.SetSeed(""); app.Session.Cancel(); yield return null;
+                Assert.That(app.OnlineAvailable, Is.False);
+                Assert.That(Panel("Start choices").Ids, Does.Contain("room"));
+                Assert.That(Panel("Start choices").Ids, Does.Not.Contain("create"));
+                yield return Press("Interest choices", "trade-household");
+                Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
+                Assert.That(app.Session.Story.Mode, Is.EqualTo("bundled"));
+
+                // Configuration exposes online creation without sending a request.
+                Environment.SetEnvironmentVariable("SANKOFA_STORY_SERVICE", "http://127.0.0.1:9");
+                app.Session.Cancel(); yield return null;
+                Assert.That(app.OnlineAvailable, Is.True);
+                Assert.That(Panel("Start choices").Ids, Does.Contain("create"));
+            }
+            finally { Environment.SetEnvironmentVariable("SANKOFA_STORY_SERVICE", previousEndpoint); }
+        }
+
+        [UnityTest]
         public IEnumerator EachHeirloomBeginsADifferentPreparedTelling()
         {
-            var openings = new HashSet<string>(); var contexts = new HashSet<string>();
+            var openings = new HashSet<string>();
+            var perspectives = new HashSet<string>();
+            var questions = new HashSet<string>();
             foreach (var interest in PersonalStoryCatalog.Interests)
             {
                 app.Session.Cancel(); app.SetSeed(""); yield return null;
@@ -106,12 +134,17 @@ namespace Sankofa.Tests
                 Assert.That(app.Session.Story.Mode, Is.EqualTo("bundled"));
                 Assert.That(view.CapabilityLabel, Does.Contain("Prepared"));
                 openings.Add(app.Session.Story.Chapters[0].Narration);
-                contexts.Add(app.Session.Story.Chapters[1].Narration);
+                var context = app.Session.Story.Chapters[1];
+                Assert.That(PersonalStoryCatalog.IsApprovedHistory(context.Narration, context.Sources), Is.True,
+                    "shared history stays exact and correctly sourced; it is not rewritten for cosmetic variety");
+                perspectives.Add(string.Join("|", context.Choices.Select(choice => choice.Label)));
+                questions.Add(string.Join("|", app.Session.Chapter.Questions.Select(question => question.Label)));
                 Assert.That(view.Caption, Is.Not.Empty);
                 Assert.That(app.HasKept, Is.False, "starting and reading never save automatically");
             }
             Assert.That(openings.Count, Is.EqualTo(3));
-            Assert.That(contexts.Count, Is.EqualTo(3), "differences occur before the ending");
+            Assert.That(perspectives.Count, Is.EqualTo(3), "each telling offers different stakes before its ending");
+            Assert.That(questions.Count, Is.EqualTo(3), "the opening questions follow the chosen telling");
         }
 
         [UnityTest]
@@ -398,6 +431,104 @@ namespace Sankofa.Tests
         }
 
         [UnityTest]
+        public IEnumerator CaptureActualPreparedVisitForReview()
+        {
+            if (Environment.GetEnvironmentVariable("SANKOFA_CAPTURE") != "1")
+            { Assert.Ignore("Set SANKOFA_CAPTURE=1 for muted desktop images of the actual app."); yield break; }
+            // Actual initialized app, authored content and public actions. The review camera and input are synthetic;
+            // these are composition studies, not simulator footage, listening review or device evidence.
+            app.ServiceEndpoint = "";
+            app.TurnsPages = true;
+            app.Session.Cancel();
+            app.BeginWelcome();
+            yield return null;
+            Assert.That(Panel("Start choices").Ids, Does.Contain("room").And.Not.Contain("create").And.Not.Contain("local"));
+            PersonalStoryTableTests.Capture("20-actual-app-welcome-72", 72);
+
+            yield return Press("Interest choices", "trade-household");
+            var stage = view.Stage;
+            yield return Until(() => stage.Rise >= 1, 4f);
+            stage.Seek(.25f); yield return new WaitForSeconds(.6f);
+            PersonalStoryTableTests.Capture("21-actual-app-gourd-opening-72", 72);
+
+            // Move through accepted states to inspect the intended composition, without changing any story text.
+            Assert.That(app.Session.Next(), Is.True);
+            stage.Seek(.4f); yield return new WaitForSeconds(.6f);
+            Assert.That(app.Session.Chapter.Narration, Is.EqualTo(PersonalStoryCatalog.TradeFact));
+            PersonalStoryTableTests.Capture("22-actual-app-gourd-choice-72", 72);
+            yield return Press("Follow wambui", "choice:0");
+            yield return Until(() => !stage.Turning && stage.Rise >= 1, 4f);
+            stage.Seek(.6f); yield return new WaitForSeconds(.6f);
+            PersonalStoryTableTests.Capture("23-actual-app-first-side-72", 72);
+
+            stage.Seek(1);
+            yield return Until(() => app.OtherSideOffered, 3f);
+            Assert.That(app.OtherSideOffered, Is.True);
+            PersonalStoryTableTests.Capture("24-actual-app-other-side-offered-72", 72);
+            yield return Press("Follow naserian", "choice:0");
+            yield return Until(() => !stage.Turning && stage.Rise >= 1, 4f);
+            stage.Seek(.6f); yield return new WaitForSeconds(.6f);
+            PersonalStoryTableTests.Capture("25-actual-app-other-side-72", 72);
+
+            Assert.That(app.Session.Next(), Is.True);
+            yield return null;
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing));
+            Assert.That(app.Session.Heard.Count, Is.EqualTo(2));
+            Assert.That(view.ReadingPartCount, Is.EqualTo(1));
+            PersonalStoryTableTests.Capture("26-actual-app-both-sides-ending-72", 72);
+            yield return Press("Turn a page", "save");
+            yield return Until(() => !view.BeadSwelling, 3f);
+            Assert.That(app.Strand.Count, Is.EqualTo(2));
+            PersonalStoryTableTests.Capture("27-actual-app-kept-beads-72", 72);
+        }
+
+        [UnityTest]
+        public IEnumerator ActualEndingsFitOneStandardPageAndRemainCompleteAtLargeText()
+        {
+            var words = view.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(x => x.name == "Narrative captions");
+            string Plain(string text) => System.Text.RegularExpressions.Regex.Replace(text, "\\s+", " ").Trim();
+            foreach (var interest in PersonalStoryCatalog.Interests)
+            foreach (var route in new[] { -1, 0, 1, 2 }) // Fire's default, either chosen side, and both sides.
+            {
+                app.Session.Cancel(); app.SetSeed(""); view.SetLargeText(false);
+                yield return Press("Interest choices", interest);
+                // Drive accepted session states here: this checks the app's actual ending copy and geometry;
+                // gesture/transport tests separately cover reaching those states with hands and panel actions.
+                Assert.That(app.Session.Next(), Is.True);
+                Assert.That(app.Session.OffersChoice, Is.True);
+                if (route < 0) Assert.That(app.Session.Next(), Is.True);
+                else Assert.That(app.Session.Choose(route == 1 ? 1 : 0), Is.True);
+                if (route == 2) Assert.That(app.Session.HearOtherSide(0, true), Is.True);
+                Assert.That(app.Session.Next(), Is.True);
+                yield return null;
+                Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing));
+                Assert.That(view.ReadingPartCount, Is.EqualTo(1), interest + " route " + route + ": " + view.Caption);
+                var complete = view.Caption;
+                Assert.That(complete, Does.Contain(route == 2 ? "both beads" : "its bead").And.Contain("unsaved"));
+                if (route < 0) Assert.That(complete, Does.StartWith("The fire chose"));
+                else if (route < 2) Assert.That(complete, Does.StartWith("You chose"));
+                Assert.That(app.HasKept, Is.False);
+                words.ForceMeshUpdate(true, true);
+                Assert.That(words.isTextOverflowing, Is.False);
+
+                view.SetLargeText(true);
+                var read = new List<string>();
+                for (var part = 0; part < 6; part++)
+                {
+                    yield return null;
+                    words.ForceMeshUpdate(true, true);
+                    Assert.That(words.isTextOverflowing, Is.False, view.Caption);
+                    Assert.That(Panel("Turn a page").Ids, Does.Contain("save").And.Contain("again"));
+                    read.Add(view.Caption);
+                    if (!Panel("Turn a page").Ids.Contains("next")) break;
+                    yield return Press("Turn a page", "next");
+                }
+                Assert.That(Plain(string.Join(" ", read)), Is.EqualTo(Plain(complete)), "large text preserves the whole invitation");
+            }
+            view.SetLargeText(false);
+        }
+
+        [UnityTest]
         public IEnumerator AVisitorMayEndAfterOneSideAndKeepOnlyThatBead()
         {
             app.TurnsPages = true;
@@ -412,7 +543,7 @@ namespace Sankofa.Tests
             finally { Time.timeScale = 1; }
             yield return Press("Turn a page", "next");
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Closing));
-            Assert.That(view.Caption, Does.StartWith("The fire chose to stay with the one who remembers."), "ending early is never recorded as hearing both sides");
+            Assert.That(view.Caption, Does.StartWith("The fire chose to hear the one who remembers."), "ending early is never recorded as hearing both sides");
             yield return Press("Turn a page", "save");
             Assert.That(app.Strand.Beads.Select(b => b.ToString()), Is.EqualTo(new[] { "place-water/place-water.follow.remembers" }), "a side not heard earns no bead");
             Assert.That(view.Caption, Does.Contain("1 of 6"));
@@ -751,7 +882,7 @@ namespace Sankofa.Tests
         [UnityTest]
         public IEnumerator ContextQuestionsSourcesAndPauseReturnToTheSameReadingPart()
         {
-            app.StartPrepared(); yield return null;
+            yield return Press("Interest choices", "journeys");
             var chapter = app.Session.Chapter.Id;
             if (view.ReadingPartCount > 1) yield return Press("Turn a page", "next");
             var part = view.ReadingPart; var caption = view.Caption;
@@ -766,7 +897,32 @@ namespace Sankofa.Tests
                 yield return Press("Return and recovery actions", "modal-next");
                 shownSources.Add(view.ModalText);
             }
-            Assert.That(string.Join(" ", shownSources), Does.Contain("C6").And.Contain("cambridge.org").And.Not.Contain("John Overton"));
+            Assert.That(string.Join(" ", shownSources), Does.Contain("Imagined scene").And.Not.Contain("cambridge.org").And.Not.Contain("C6"),
+                "an answer about the fictional character must not borrow a historical citation");
+            yield return Press("Return and recovery actions", "continue");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
+            Assert.That(app.Session.Question.Answer, Is.EqualTo(answer));
+            yield return Press("Return and recovery actions", "continue");
+            Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Reading));
+            Assert.That(app.Session.Chapter.Id, Is.EqualTo(chapter));
+            Assert.That(view.ReadingPart, Is.EqualTo(part));
+            Assert.That(view.Caption, Is.EqualTo(caption));
+
+            // The next page is documented history. Ask through the page action, since its side panel offers perspectives.
+            for (var step = 0; step < 12 && !app.Session.OffersChoice; step++) yield return Press("Turn a page", "next");
+            Assert.That(app.Session.Chapter.Truth, Is.EqualTo("historical"));
+            chapter = app.Session.Chapter.Id; part = view.ReadingPart; caption = view.Caption;
+            yield return Press("Turn a page", "ask");
+            Assert.That(app.Session.Question.Truth, Is.EqualTo("historical"));
+            answer = app.Session.Question.Answer;
+            yield return Press("Return and recovery actions", "sources");
+            shownSources = new List<string> { view.ModalText };
+            while (view.ModalPart + 1 < view.ModalPartCount)
+            {
+                yield return Press("Return and recovery actions", "modal-next");
+                shownSources.Add(view.ModalText);
+            }
+            Assert.That(string.Join(" ", shownSources), Does.Contain("Documented context").And.Contain("C6").And.Contain("cambridge.org").And.Not.Contain("John Overton"));
             yield return Press("Return and recovery actions", "continue");
             Assert.That(app.Session.State, Is.EqualTo(PersonalStoryState.Question));
             Assert.That(app.Session.Question.Answer, Is.EqualTo(answer));

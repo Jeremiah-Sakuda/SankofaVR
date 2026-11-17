@@ -1,6 +1,8 @@
 # Unity verification after the November 14 changes
 
-For the next session with the Unity editor. The [decision record](../decisions.md#november-14-2026--both-sides-in-one-sitting-a-hand-that-turns-the-stage-and-the-visitors-own-table) says what changed and why. The changes were written without Unity: they compile against reference assemblies and stand-ins for the Meta SDK, and nothing below has run. Work down the list in order; each step says what a failure most likely means.
+**November 15 update:** Unity tests have now run on the Windows laptop. See the [results, corrections and desktop review](2026-11-15-story-table-verification.md). The listening, hands and room checks below remain acceptance tasks.
+
+Original November 14 checklist: the [decision record](../decisions.md#november-14-2026--both-sides-in-one-sitting-a-hand-that-turns-the-stage-and-the-visitors-own-table) says what changed and why. At that point the changes had only compiled against reference assemblies and stand-ins for the Meta SDK. Work down the remaining checks in order; each step says what a failure most likely means.
 
 The scene file is unchanged and does not need rebuilding: no builder code and no serialized field changed. Do not regenerate the comparison scenes.
 

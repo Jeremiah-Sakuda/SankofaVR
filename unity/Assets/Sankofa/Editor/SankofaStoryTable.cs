@@ -146,6 +146,7 @@ namespace Sankofa.EditorTools
                 Set(app, "fireRecording", Recording("small-fire"));
                 Set(app, "riverRecording", Recording("brook"));
                 Set(app, "nightRecording", Recording("crickets"));
+                SetPersonalCredits(app);
             }
             else Debug.LogWarning("[Sankofa] Story table presentation built without the application adapter.");
             reading.gameObject.SetActive(false); details.gameObject.SetActive(false); progress.gameObject.SetActive(false); consent.gameObject.SetActive(false);
@@ -153,6 +154,16 @@ namespace Sankofa.EditorTools
             EditorSceneManager.SaveScene(scene, StoryTableScene);
             AssetDatabase.SaveAssets();
             Debug.Log("[Sankofa] Story table scene built: " + StoryTableScene);
+        }
+
+        static void SetPersonalCredits(Component app)
+        {
+            Set(app, "creditsText", AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Sankofa/Content/credits.txt"));
+            SetArray(app, "fontNotices", new Object[]
+            {
+                AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Sankofa/Art/Fonts/AtkinsonHyperlegible/OFL.txt"),
+                AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt")
+            });
         }
 
         static Transform TableDeck(Transform table, string name, Vector3 at, Vector2 size, Material paper)

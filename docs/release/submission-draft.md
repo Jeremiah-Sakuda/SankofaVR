@@ -1,44 +1,44 @@
 # Sankofa — Devpost draft
 
-November 14, 2026 · Both sides, a stage turned by hand, the visitor's own table · Local copy. Intended entry: **Entertainment / Adapted or Significantly Updated**, pending eligibility and organiser classification. Nothing here has been published. The copy describes the November 14 build, whose Unity changes are [not yet verified](../testing/2026-11-14-unity-verification.md): cut any sentence whose feature does not survive that check.
+November 16, 2026 · Inspiration updated from the original Sankofa at the entrant's request · Local submission draft, unpublished. Intended entry: **Entertainment / Adapted or Significantly Updated**, pending eligibility and organiser classification. The [current verification record](../testing/2026-11-15-story-table-verification.md) separates software checks, desktop review and open device acceptance. The water telling leads the submission and demonstration; the [story comparison](access-handoff.md#why-the-water-story-leads) records the choice. This copy describes the prepared offline table visit pending the [release-scene decision](../product/delivery-plan.md#submission-plan--november-1618); online generation and spoken questions are outside the demonstration promise.
 
 ## Tagline
 
 **For the stories you never got to hear.**
 
-Alternate, if the card should say what it is (114 of 140 characters): *A paper theatre rises from your table. Choose whose side to follow, then turn the stage by hand to hear the other.*
+Descriptive card copy: *A paper theatre for the everyday lives behind history. Sit by the fire and turn a meeting to hear its other side.*
 
 ## Short description
 
-Sit by a fire and choose an heirloom. A paper theatre rises from your table and tells a meeting between two women. Follow one of them. Then sweep your hand across the stage: it folds, turns and tells the same meeting from the other side.
+Sankofa brings the everyday lives behind history to your table. Sit beside a fire and explore three illustrated tellings set around Enkare Nairobi in the 1850s. Follow one person through a meeting, then turn the paper stage with your hand to hear the other side. Documented context is marked; the people and meetings are imagined.
 
 ## Inspiration
 
-Sometimes all a family story leaves behind is an object or a question. The original web Sankofa invited people to bring those fragments to a storyteller, a griot. We wanted that invitation to have a place in the room: a small fire and a paper theatre close enough to touch.
+Sankofa began with the gap between knowing where a family comes from and feeling connected to the lives that came before. A place name or inherited fragment can carry enormous meaning, while the stories around it remain scattered or untold. Voice, imagery and oral storytelling can make that past more approachable.
 
-The name is an Akan word for going back to fetch what was left behind. What we most often leave behind is the other person's side. So every telling here is one meeting seen twice. A woman arrives with less flour than she promised. Follow her and you learn why she left some at home. Turn the stage and you learn what accepting less will cost the woman who was waiting. Neither is wrong, and you only understand the meeting when you have heard both.
+That motivation carries into Quest through a seated encounter: share the space of a telling, listen to one person, then hear the same meeting from someone else's perspective. The water story asks what it means to receive a memory and eventually become the person carrying it.
+
+Our first collection offers three authored tellings around Enkare Nairobi in the 1850s, alongside sourced historical context. The people and meetings are imagined. This is a way into curiosity about the past; it does not reconstruct a visitor's relatives or establish their ancestry.
 
 ## What it does
 
-A griot's fire welcomes you. Close a hand on a bundle, a gourd or a water pot and the fire takes it; painted scenery and two figures stand up from the table, and one of three tellings begins, set in Enkare Nairobi around the 1850s.
+Choose the water pot. A woman brings a younger traveller to a riverbank she remembers, then doubts she has found the right bend. Follow her as she admits the uncertainty and shares the sound she remembers. Turn the stage toward the younger traveller. Years later, she will carry that memory herself, with uncertainty of her own.
 
-The pages turn themselves, with captions throughout. At the turning point you choose whose side to follow at her figure, and the stage turns to bring her forward. When her side is told, sweep a hand across the stage and it turns again to the other woman. If you only watch, the fire makes both choices, so a whole sitting takes about four minutes.
+The meeting stays the same. What you understand about it changes.
 
-Keeping a telling threads a bead for each side you heard. Six beads, two for each telling, are the reason to come back, and the griot greets a returning visitor by naming a side they have not heard.
+A bundle and a gourd open two more tellings, about a journey and an exchange. Your chosen interest selects a telling; your hand chooses whose side to hear. Captions accompany prepared narration, pages can turn themselves, and the fire can choose if you prefer to watch. The characters make their own decisions.
 
-Choose **Use my table** and the story leaves its own dark room for yours: on a table from your room scan, at the edge where you sit, or, with no scan, wherever you rest a hand.
-
-Everything works with hands alone, seated and offline. Documented pages are marked and sourced; the people are imagined, and nothing claims to be anyone's ancestry.
+Keep deliberately, and a bead marks each side heard. Reopen the saved telling or explore a side still unheard. The full prepared visit runs offline and is designed for seated hands use. An adjustable stand keeps it nearby; **Use my table** offers local surface fitting. Quest hands, room fitting and performance still need hardware verification.
 
 ## How we built it
 
-Unity 6, Meta XR Core SDK and MR Utility Kit 207, OpenXR hands. The story rules, the session and every gesture are plain C# with no engine dependency, tested outside Unity; the scene, stage and room are thin adapters around them. The application owns what may happen next: no model drives the stage, the choices or the save.
+Unity 6 and Meta XR supply the scene, hands and room adapters. Engine-independent C# owns story state, source validation and saved replay. The application controls every accepted action and cancellation. Optional generation is separate from the complete prepared experience.
 
-The scenery and figures are AI-generated illustrations cut into layers and staged by hand; the narration is synthetic speech; the fire, the brook, the night and the stage's own rustle are field recordings, credited in the app. There is no AI-generated music. Room data and hand positions never leave the headset.
+AI-generated illustrations are layered and staged by hand. Prepared narration uses synthetic speech; environmental recordings are credited in the app. No AI-generated music is used. Room geometry stays in local placement code.
 
 ## What's next
 
-Listening and cultural review with people from the communities the first setting draws on, then more settings only where we can source and review them. A spoken question to the fire is built behind a switch and stays off until it has been tried on a headset.
+Next are headset and listening checks, cultural and pronunciation review, and sessions with newcomers to learn whether the second perspective changes their understanding. Further settings need their own sources and review. We want a visitor to leave remembering a person and carrying a question they want to explore.
 
 ## What changed from the original Sankofa
 
@@ -48,16 +48,23 @@ This entry is a new Unity application for Meta Quest, built during the competiti
 
 ## Hand interactions (optional field)
 
-Sankofa is designed for empty hands, so each step was built around what a seated person already does with them. You reach for the object you want and close your hand on it. You hold a hand to the fire and it flares. You set a gourd down between two people. You sweep the stage round the way you would turn a table to see the other side of something on it, and it leans with your hand before it gives way. Where your room has no scanned table, you show the app your table by resting your hand on it. Each choice also has a labelled plaque that can be touched or pinched from a distance, and a visitor who does nothing after the first touch still hears a whole story. What excites us is that none of this needed a new gesture to be taught: the hands already knew.
+The hand actions carry the meaning of the visit: reach for the water pot to begin and turn the stage toward the person whose side you want to hear. The theatre changes its arrangement to bring that figure forward. Each choice also has a labelled plaque for touch or distance selection. Automatic progression supports a visitor who prefers to watch. The separate gourd telling adds an invited action to set the vessel between the women. These interactions have software coverage with synthetic input; uncoached use and real-hand reliability still need hardware review.
 
 ## Judge walkthrough
 
-Sit and set the controllers aside. The app asks for nothing until you choose **Use my table**. Close a hand on the **gourd**, or touch its card. At the turning point, choose **Follow the one who brought less** at her figure. When **Set the gourd down** appears, use it. When the page says the meeting has another side, sweep a hand across the stage. At the ending, **Keep this story** and watch two beads join the strand. Optional: **Use my table** on the first page. Pause, Options (recenter, stand height, larger text, still pages, captions only) and Leave stay on the page throughout. The full version is the [testing guide](../product/testing-guide.md).
+Sit and set the controllers aside. Choose the **water pot**, labelled **Place & water**, by closing a hand on it or selecting its card. After the documented page, choose **Stay with the one who remembers**. When her side is told and the page offers another side, sweep a hand across the stage or select **Walk with the younger traveller**. Let her final sentence finish. At the ending, choose **Keep this story**; two beads mark the sides heard. Reopen the kept telling from the first page. Optional: try **Use my table**, or the gourd telling's **Set the gourd down** invitation. Pause, Options and Leave stay on the page. The full [testing guide](../product/testing-guide.md) includes the additional checks.
 
 ## Private release notes — exclude from public copy
 
-- Inspiration, What it does, How we built it and What's next come to 499 words; Devpost suggests 500 or fewer. The target launch date is its own field: confirm it with the entrant.
-- Every interaction named above is implemented and software-tested only. None has run on a headset, and the November 14 changes have not yet run in Unity. Before publishing, decide whether to say so in the entry. Do not add any sentence that implies device testing.
+- The target launch date needs an entrant-owned commitment before submission. Do not invent a date from the competition deadline.
+- On November 16 the entrant authorised reusing the [original Sankofa inspiration](https://devpost.com/software/sankofa-y47f9p). The section above adapts that published product motivation, not an independently supplied autobiographical incident. It omits the original audience-size statistic, which has not been verified for this entry. Do not invent a lost relative, interview, testimonial or childhood memory.
+- The entrant confirmed no headset or remote Quest tester is available. Produce actual XR Simulator footage and identify the simulated input mode; keep device hands/reach, room fitting, frame rate and comfort explicitly unverified. The river remains a release candidate until the scene decision; update the descriptive copy and walkthrough together if it is selected.
+- The audience and unmet need above are the product hypothesis, not measured demand. The water selection is an editorial judgement from the authored text and staging, not a measured emotional response. With five unfamiliar viewers, first show the opening and ask what they expect; then show both sides without explanatory pitch narration and ask what changed; finally ask what they would explore next and why. Expectations of recovered biography or physical-object scanning fail the promise check. Remembering only the turn animation fails the intended narrative payoff. This is a small formative check, not population evidence.
+- The emotional promise is exploration of context and perspective. The prepared release offers three authored tellings, not recovered family stories or unlimited personal generation. A physical heirloom is not scanned or imported. Keep this distinction clear in the edit.
+- Griot is the product's narrator framing, not a claim that the first East African setting represents a single pan-African storytelling tradition. Cultural review must address the framing as well as the story content.
+- The water story's payoff is the younger traveller becoming a keeper of the memory, with uncertainty of her own. Hearing a sound is already present in the older woman's side; do not sell it as a new revelation. No family relationship between the two women is established. The [shot list](access-handoff.md#capture-one-story-well--target-230) protects the younger traveller's final sentence and a pause after it.
+- A bead records a kept perspective. Six beads are finite content, not evidence of a habit or continuing retention. Personal input can select a prepared thread; the demo does not show fresh generation from a visitor's life.
+- Actual Unity checks are recorded in the current verification note. None establishes headset, listening or participant acceptance. Keep the material disclosure beside the public capability claim until the relevant check is complete.
 - The division recommends a changelog: [what was added during the window](changelog.md) is written to be quoted or linked.
 - The video may use Meta XR Simulator footage and must be labelled as such. The [shot list](access-handoff.md#capture-one-story-well--target-230) follows this copy.
 - Active [APK identity](candidate.md): the recorded candidate predates these changes. A new release build is needed after the Unity verification.

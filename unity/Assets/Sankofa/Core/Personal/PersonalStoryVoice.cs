@@ -37,6 +37,13 @@ namespace Sankofa.Core.Personal
         /// <summary>What the griot tells a returning visitor about a side they have not heard, and how to reach it.</summary>
         public static string ReturnInvitation(string telling, string sideLabel)
         {
+            // A short action label can change without changing the griot's already recorded invitation.
+            // Keep these exact spoken words so the manifest and its text-hashed recording remain valid.
+            if (telling == "place-water")
+            {
+                if (sideLabel == "Hear the one who remembers") sideLabel = "Stay with the one who remembers";
+                else if (sideLabel == "Hear the younger traveller") sideLabel = "Walk with the younger traveller";
+            }
             var side = string.IsNullOrEmpty(sideLabel) ? "" : char.ToLowerInvariant(sideLabel[0]) + sideLabel.Substring(1);
             return "Choose the " + Heirloom(telling) + ", and you could " + side + ".";
         }

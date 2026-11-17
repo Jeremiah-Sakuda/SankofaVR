@@ -1,6 +1,6 @@
-Sankofa borrows an Akan word from Ghana: go back and get it. What We Carry is a different, Kenyan telling, with fictional Kikuyu and Maasai traders. Their words, gifts and relationship are imagined; cultural and language review remain pending.
+Sankofa borrows an Akan word from Ghana: go back and get it. The Enkare Nairobi collection imagines everyday meetings around the 1850s, alongside marked historical context. The people and their relationships are fictional; these tellings do not establish anyone's ancestry. The earlier What We Carry comparison features fictional Kikuyu and Maasai traders. Cultural and language review remain pending.
 
-Illustrated theatre MVP: draft cast poses and scenery generated with OpenAI's built-in image generator for Sankofa. Fictional figures and theatrical landscapes, not verified portraits, dress or surveyed places. Cultural review pending. Prompts and asset hashes: Art/IllustratedTheatre/sources.json in the project.
+Illustrations: cast poses, scenery, river paintings, portraits and painted material studies generated with OpenAI's built-in image generator for Sankofa. Fictional figures and theatrical landscapes, not verified portraits, dress or surveyed places. Cultural review pending. The project keeps prompts, output references and reviewed-byte hashes in the IllustratedTheatre, RiverThreshold and RiverCohesion art manifests.
 
 Sounds: Freesound field recordings, trimmed, looped and mixed to mono for Sankofa.
 "campfire_01.wav" by matucha, CC BY 4.0, freesound.org/s/170247
@@ -12,7 +12,9 @@ Licences: creativecommons.org/licenses/by/4.0 and creativecommons.org/licenses/b
 
 Also from Freesound, dedicated to the public domain (CC0): crickets and Maasai camp nature sounds by selcukartut; Matatu Stage Sound by blacknoutproductions; city far away by felix.blume; windy tent by bruno.auzet; sheep bleat by Yuval; Swiss hills with animals with bells by BonnyOrbit.
 
-Figures and hair: Universal Base Characters (Standard) and Universal Animation Library by Quaternius, CC0. Project-made clothing and directed gestures. Textures: Poly Haven, CC0. Voice: synthetic narration made with Google Gemini text-to-speech. No music.
+Threshold sounds (CC0): "Ceramic Tink" by OwlStorm / Ashe Kirk, freesound.org/s/209014; water by Wigglesworth, freesound.org/s/842637. Stage fold/rise sounds derive from "windy tent" by bruno.auzet, freesound.org/s/527434. Trimmed, layered and levelled for Sankofa. CC0: creativecommons.org/publicdomain/zero/1.0.
+
+Other comparison assets: Universal Base Characters (Standard) and Universal Animation Library by Quaternius, CC0; project-made clothing and directed gestures; Poly Haven textures, CC0. Voice: synthetic narration made with Google Gemini text-to-speech. No music.
 
 Type: Atkinson Hyperlegible, copyright 2020 Braille Institute of America, Inc. Liberation Sans, copyright 2012 Red Hat, Inc., digitized data copyright 2010 Google Corporation. Both under the SIL Open Font License 1.1, scripts.sil.org/OFL.
 

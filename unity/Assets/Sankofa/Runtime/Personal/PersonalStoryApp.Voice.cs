@@ -49,6 +49,31 @@ namespace Sankofa.Runtime.Personal
         /// <summary>Replaces the microphone, as a test does; any recording under way is discarded.</summary>
         public void UseRecorder(IQuestionRecorder value) { StopListening(false); recorder = value; }
 
+        void ShowContextMenu()
+        {
+            if (session.State == PersonalStoryState.Closing && !session.Paused) { ShowSources(); return; }
+            if (session.State != PersonalStoryState.Reading || session.Paused || session.Chapter == null) return;
+            SuspendReadingVoice();
+            var actions = new List<(string, string)>();
+            if (QuestionsOffered)
+                for (var i = 0; i < session.Chapter.Questions.Count; i++)
+                    actions.Add(("question:" + i, session.Chapter.Questions[i].Label));
+            actions.Add(("sources", "About this story"));
+            if (creditsText != null) actions.Add(("credits", "Credits and licences"));
+            actions.Add(("return", "Return to the story"));
+            Decide("A closer look", QuestionsOffered
+                    ? "Follow a question, or see the sources behind this page."
+                    : "The fire is still telling this page. Its questions will follow; the sources are here whenever you need them.",
+                actions, id =>
+                {
+                    if (id == "sources") ShowSources();
+                    else if (id == "credits") ShowCredits();
+                    else if (id.StartsWith("question:", StringComparison.Ordinal)
+                        && int.TryParse(id.Substring(9), out var index) && QuestionsOffered) session.Ask(index);
+                    else Render();
+                });
+        }
+
         void AskTheFire()
         {
             if (session.State != PersonalStoryState.Reading || session.Paused || session.Chapter == null) return;

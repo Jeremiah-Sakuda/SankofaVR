@@ -157,6 +157,9 @@ namespace Sankofa.Runtime.Personal
             narrationDriven = true; length = clipLength; clock = Mathf.Min(seconds, clipLength);
         }
 
+        /// <summary>Captions-only presentation continues from this beat at the current pace after the voice stops.</summary>
+        public void ReleaseNarrationClock() => narrationDriven = false;
+
         /// <summary>Lights the figures who can be chosen; touching one belongs to the view's figure plaques.</summary>
         public void OfferFigures(IReadOnlyList<string> ids) => offered = ids?.Where(id => id != null).ToArray() ?? Array.Empty<string>();
 

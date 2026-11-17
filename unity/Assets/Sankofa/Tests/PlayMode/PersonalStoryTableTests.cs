@@ -39,6 +39,7 @@ namespace Sankofa.Tests
         [UnityTest]
         public IEnumerator PreparedAndOnlineStartsAreDistinctAndConsentIsDeliberate()
         {
+            view.SetOnlineAvailable(true); // This view test explicitly exercises a configured service.
             var prepared = 0; var online = 0;
             view.StartLocalRequested = () => prepared++;
             view.StartRequested = () => online++;
@@ -194,7 +195,7 @@ namespace Sankofa.Tests
             for (var deadline = Time.realtimeSinceStartup + 3f; stage.Rise < 1 && Time.realtimeSinceStartup < deadline;) yield return null;
             Assert.That(stage.Rise, Is.EqualTo(1)); Assert.That(stage.Mirrored, Is.True, "returning keeps the chosen side");
             // The application's own closing: the side followed, the side still unheard, and Keep.
-            view.ShowClosing("You chose to wait with the one who expected more. Another time, you could follow the one who brought less.\n\nKeep these exact pages on this device, or return to your choices without saving.");
+            view.ShowClosing("You chose to wait with the one who expected more. Next time, follow the one who brought less.\nKeep this telling with its bead, or leave it unsaved.");
             view.SetControlState(true, false, false, true);
             yield return new WaitForSecondsRealtime(0.3f);
             if (capture) Capture("15-stage-ending-72", 72);
@@ -337,9 +338,9 @@ namespace Sankofa.Tests
             var transport = view.Panels.Single(p => p.name == "Turn a page");
             var endings = new[]
             {
-                "You heard both sides of this meeting.\n\nKeep this telling to thread both beads on your strand, or leave it unsaved.",
-                "You chose to wait with the one who expected more. Another time, you could follow the one who brought less.\n\nKeep this telling to thread its bead on your strand, or leave it unsaved.",
-                "The fire chose to stay with the one who remembers. Another time, you could walk with the younger traveller.\n\nKeep this telling to thread its bead on your strand, or leave it unsaved.",
+                "You heard both sides of this meeting.\nKeep this telling with both beads, or leave it unsaved.",
+                "You chose to wait with the one who expected more. Next time, follow the one who brought less.\nKeep this telling with its bead, or leave it unsaved.",
+                "The fire chose to stay with the one who remembers. Next time, walk with the younger traveller.\nKeep this telling with its bead, or leave it unsaved.",
                 "Kept on this device. Both sides are threaded on your strand: 4 of 6. You can reopen the same telling or forget it from your story table.",
                 "Kept on this device. Your strand now holds all six sides. You can reopen the same telling or forget it from your story table.",
             };
@@ -584,6 +585,7 @@ namespace Sankofa.Tests
         public IEnumerator SeedPreviewSourcesAndOptionsStayReadableAndKeepTheirActionsClear()
         {
             var app = UnityEngine.Object.FindFirstObjectByType<PersonalStoryApp>();
+            app.ServiceEndpoint = "https://story.invalid"; // Consent preview only; this test sends no request.
             UnityEngine.Object.FindFirstObjectByType<StoryTablePlacement>().Recenter();
             app.SetSeed(string.Join(" ", Enumerable.Repeat("What did a household carry when journeys brought people to the river?", 7)));
             app.Session.Cancel(); yield return null;
@@ -665,7 +667,7 @@ namespace Sankofa.Tests
         /// </summary>
         const float TableGaze = 25f;
 
-        static void Capture(string name, float fieldOfView = 82, int width = 1600, int height = 1400)
+        internal static void Capture(string name, float fieldOfView = 82, int width = 1600, int height = 1400)
         {
             var directory = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "artifacts", "story-table"));
             Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(directory, name)));

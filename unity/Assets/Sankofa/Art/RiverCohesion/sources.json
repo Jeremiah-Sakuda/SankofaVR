@@ -1,0 +1,95 @@
+{
+  "created": "2026-11-15",
+  "tool": "OpenAI built-in image_gen.imagegen",
+  "scope": "User-requested illustrated / fully 3D character comparison; fictional reconstruction. No music generated.",
+  "assets": [
+    {
+      "file": "wambui-rest-v1.png",
+      "source": "exec-13912d35-f3be-4698-8a50-4c543fc42736.png",
+      "prompt": "Use case: illustration-story. A production character painting for Sankofa, an intimate seated VR telling. The first reference gives character identity, garment design and colour. The second reference sets the REQUIRED rich tactile gouache-and-ink brushwork, nuanced shadows and cinematic amber/indigo lighting. One complete full-body fictional woman, head through bare feet, entire silhouette centred with at least ten percent transparent padding on all sides. Actual TRANSPARENT BACKGROUND, no floor, no cast shadow, no scenery, no opaque rectangular backing, no labels or lettering. Mature, fine painted film art, layered pigment and fine visible strokes; natural anatomy, detailed hands, thoughtful human expression, no glossy 3D or flat cartoon outlines. No new jewellery, patterns or ethnographic motifs. Fictional theatrical clothing, not a historical authenticity claim. Gentle warm firelight from lower camera left, blue-hour soft sky rim. Render only Wambui, the LEFT-column character in reference 1: deep brown skin, short natural tightly curled hair, ochre wrapped garment and ivory shoulder cloth. Preserve her recognisable face and outfit; give her a mature, quietly observant presence. Standing in a three-quarter view facing slightly to the RIGHT, weight relaxed, arms comfortably at her sides, closed mouth, thoughtful and welcoming without a broad smile. Hands empty. No other figure.",
+      "references": [
+        "cast-atlas.png",
+        "hands-and-water-pot-v1.png"
+      ],
+      "sha256": "4b38e9590ce1098d39f18624b81956f710048d1fff42a1085658a7340365020f"
+    },
+    {
+      "file": "naserian-rest-v1.png",
+      "source": "exec-5898fc15-ec64-4999-8664-2a706a5bc4a3.png",
+      "prompt": "Use case: illustration-story. A production character painting for Sankofa, an intimate seated VR telling. The first reference gives character identity, garment design and colour. The second reference sets the REQUIRED rich tactile gouache-and-ink brushwork, nuanced shadows and cinematic amber/indigo lighting. One complete full-body fictional woman, head through bare feet, entire silhouette centred with at least ten percent transparent padding on all sides. Actual TRANSPARENT BACKGROUND, no floor, no cast shadow, no scenery, no opaque rectangular backing, no labels or lettering. Mature, fine painted film art, layered pigment and fine visible strokes; natural anatomy, detailed hands, thoughtful human expression, no glossy 3D or flat cartoon outlines. No new jewellery, patterns or ethnographic motifs. Fictional theatrical clothing, not a historical authenticity claim. Gentle warm firelight from lower camera left, blue-hour soft sky rim. Render only Naserian, the RIGHT-column character in reference 1: deep brown skin, short natural tightly curled hair, muted brick-red wrapped garment and indigo shoulder cloth. Preserve her recognisable face and outfit. A younger adult woman, quietly attentive, standing in a three-quarter view facing slightly LEFT toward her companion, hands loosely relaxed at her sides. Closed mouth, curiosity and a little uncertainty, no broad smile. Hands empty. No other figure.",
+      "references": [
+        "cast-atlas.png",
+        "hands-and-water-pot-v1.png"
+      ],
+      "sha256": "6edc7c5d86275d0066fe9828bdd062f4053a8ad21b4da970a7b30ab8bc4ea5d0"
+    },
+    {
+      "file": "river-materials-v1.png",
+      "source": "exec-5abe2004-9d94-45a4-a7bf-629f7690e631.png",
+      "prompt": "Create ONE square 2x2 seamless-style MATERIAL TEXTURE ATLAS to wrap actual 3D ground, rocks, tree trunks and leaves in Sankofa's VR riverside. Match the supplied river painting's mature tactile gouache-and-ink, nuanced brush marks, indigo dusk and subdued warm earth. Exact four equal quadrants, each flat unwrapped diffuse material edge-to-edge, no borders/gutters/text or object drawings. TOP LEFT: warm dark umber riverbank earth with ochre scumbling, fine grit, subtle pigment layering, very sparse tiny pebbles, no large cracks or footprints. TOP RIGHT: smooth dark slate river rock surface, blue-grey and muted mauve with sparse warm lichen speckles, soft irregular painted planes, no rock silhouette. BOTTOM LEFT: dark tree bark, charcoal umber with violet shadows, lengthwise fine cracks and wood grain, subtle amber brushed ridges. BOTTOM RIGHT: muted olive reeds and leaf surface, dark sage and ochre green layered brushstrokes, faint lengthwise fibres, no whole leaves or branches. Each material's edges similar in brightness for wrapping, no cast shadows, no lighting hotspot, no perspective. Original hand-painted film quality, not a photograph, not a flat vector pattern. Opaque background.",
+      "references": [
+        "river-at-blue-hour-v1.png"
+      ],
+      "sha256": "218e2fbb24daf09d8c3b5bfc85e0f2a49a4b340a12e3ba9c5f5bfbaa6fb3a3bd"
+    },
+    {
+      "file": "cast-materials-v1.png",
+      "source": "exec-9f722cc5-c57e-442a-8b0c-8f1e06233c4f.png",
+      "prompt": "Create ONE square 2x2 MATERIAL TEXTURE ATLAS for fully 3D characters in Sankofa. Match the supplied reference painting's sophisticated gouache brushwork. Exactly four equal quadrants, no borders, dividers, gutters, text, symbols or actual objects. TOP LEFT: ochre-yellow plain handwoven cloth, fine visible weave, gentle warm gold and brown scumbled pigment. TOP RIGHT: warm ivory cream plain handwoven cloth, soft muted flax fibres and restrained umber flecks. BOTTOM LEFT: muted brick-red cloth, fine dark madder woven grain, nuanced small painted strokes. BOTTOM RIGHT: deep warm brown skin-colour pigment surface, extremely subtle fine pore-like painted grain, warm umber and muted violet brown variation; no anatomical features, no scars or marks. This is a flat albedo material sheet, each quadrant full-bleed and approximately tileable with even illumination. No folds, body parts, seams, cast shadows, perspective, glossy highlights, photos or cartoon outlines. Rich fine layered painterly surface, visually coherent with the reference, restrained colour variation. Opaque.",
+      "references": [
+        "hands-and-water-pot-v1.png"
+      ],
+      "sha256": "2dc8341fdf8401123ee537ebf72b18b563ad3665f9a6ff623586895311a12352"
+    },
+    {
+      "file": "wambui-offer-v1.png",
+      "source": "exec-119cdc1c-4fe1-4424-92b8-f4256702cb6f.png",
+      "prompt": "Edit this fictional character into one additional story pose. Preserve EXACTLY the same recognisable woman, face, hair, skin tone, garment colours, fabric construction, mature gouache-and-ink texture and amber/indigo lighting. Keep camera angle, full-body scale, feet baseline and top of head registered to the source image as closely as possible so poses can swap in a VR scene. Keep the entire body including bare feet and hands inside the canvas, with genuine alpha transparency outside the silhouette. Do NOT add scenery, floor, cast shadow, opaque glow or background. She gently extends her EMPTY right palm at waist height toward the right, with the left hand nearby supporting the gesture. A thoughtful, slightly concerned expression with closed mouth; no broad smile. No objects in her hands. One full-body character only, no text or extra figures. This remains fictional theatrical illustration, not an authenticated portrait or costume.",
+      "references": [
+        "exec-13912d35-f3be-4698-8a50-4c543fc42736.png"
+      ],
+      "sha256": "af7c34010e5817a9b6853276686f110e5a5f18d68658b1362212bbb7b6652c67"
+    },
+    {
+      "file": "wambui-reflect-v1.png",
+      "source": "exec-ecf77f22-dd25-4770-ae6f-42a52a52b19b.png",
+      "prompt": "Edit this fictional character into one additional story pose. Preserve EXACTLY the same recognisable woman, face, hair, skin tone, garment colours, fabric construction, mature gouache-and-ink texture and amber/indigo lighting. Keep camera angle, full-body scale, feet baseline and top of head registered to the source image as closely as possible so poses can swap in a VR scene. Keep the entire body including bare feet and hands inside the canvas, with genuine alpha transparency outside the silhouette. Do NOT add scenery, floor, cast shadow, opaque glow or background. She remembers something: shoulders settled, chin gently lowered, eyes looking slightly down and right toward the nearby river, one relaxed open hand at waist height indicating the water, other hand resting naturally. Quiet warmth with a trace of uncertainty, closed mouth, no broad smile. Hands empty. One full-body character only, no text or extra figures. This remains fictional theatrical illustration, not an authenticated portrait or costume.",
+      "references": [
+        "exec-13912d35-f3be-4698-8a50-4c543fc42736.png"
+      ],
+      "sha256": "37f79e2da39f804b58835042b9ab02dc3d79fdf95d3f030096a5b395552a4db8"
+    },
+    {
+      "file": "naserian-offer-v1.png",
+      "source": "exec-641f3c05-b356-43da-a767-ab7eca05759e.png",
+      "prompt": "Edit this fictional character into one additional story pose. Preserve EXACTLY the same recognisable woman, face, hair, skin tone, garment colours, fabric construction, mature gouache-and-ink texture and amber/indigo lighting. Keep camera angle, full-body scale, feet baseline and top of head registered to the source image as closely as possible so poses can swap in a VR scene. Keep the entire body including bare feet and hands inside the canvas, with genuine alpha transparency outside the silhouette. Do NOT add scenery, floor, cast shadow, opaque glow or background. She opens both EMPTY hands at waist height toward the left to receive something, shoulders slightly forward, attentive questioning expression, mouth closed. No object in her hands. One full-body character only, no text or extra figures. This remains fictional theatrical illustration, not an authenticated portrait or costume.",
+      "references": [
+        "exec-5898fc15-ec64-4999-8664-2a706a5bc4a3.png"
+      ],
+      "sha256": "d517e7f255b224018ddfe5d4a2cd397114938821e445e02a9fdd3686d40b1538"
+    },
+    {
+      "file": "naserian-reflect-v1.png",
+      "source": "exec-41d80bdf-bf70-4a1e-9200-3de5920c0893.png",
+      "prompt": "Edit this fictional character into one additional story pose. Preserve EXACTLY the same recognisable woman, face, hair, skin tone, garment colours, fabric construction, mature gouache-and-ink texture and amber/indigo lighting. Keep camera angle, full-body scale, feet baseline and top of head registered to the source image as closely as possible so poses can swap in a VR scene. Keep the entire body including bare feet and hands inside the canvas, with genuine alpha transparency outside the silhouette. Do NOT add scenery, floor, cast shadow, opaque glow or background. She turns her attention toward her companion on the left, one hand gently resting near her upper chest, the other a small open palm at waist level. Thoughtful concern and understanding, closed mouth; no broad smile. Hands empty. One full-body character only, no text or extra figures. This remains fictional theatrical illustration, not an authenticated portrait or costume.",
+      "references": [
+        "exec-5898fc15-ec64-4999-8664-2a706a5bc4a3.png"
+      ],
+      "sha256": "8946ff86ea82b29bd32f9b5edad33d1f31e4ccba626422da54c5a72001c8f079"
+    }
+  ],
+  "model_reuse": {
+    "provider": "Quaternius",
+    "source": "https://quaternius.com/packs/universalbasecharacters.html",
+    "licence": "CC0-1.0",
+    "checked": "2026-11-15",
+    "local_record": "../Figures/base-characters.sources.json",
+    "note": "Reuse existing rigged models/garments from the preserved Hearth scene. No new purchased asset or model generation service."
+  },
+  "review": "Generated art and fictional costume are subject to visual, cultural, output-terms and release review. Neither new portraits nor model labels establish historical accuracy.",
+  "digest_baseline": {
+    "recorded_on": "2026-11-16",
+    "basis": "Current source-image bytes baselined after review of the November 16 painted-river capture. Original generation output identifiers, prompts and references are preserved.",
+    "limits": "A reviewed-byte baseline, not independent proof of source origin, ownership or rights clearance. Shared manifests also contain comparison inputs; this does not claim every listed image appeared in the capture."
+  }
+}

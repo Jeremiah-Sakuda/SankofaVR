@@ -1,8 +1,8 @@
 # Testing Sankofa — the pop-up story table
 
-November 14, 2026 · Scene `StoryTable` · Read the [candidate record](../release/candidate.md) for the exact build. This guide doubles as the judges' testing instructions in the [Devpost draft](../release/submission-draft.md). It describes the November 14 changes, which have not yet run in Unity; the [verification list](../testing/2026-11-14-unity-verification.md) comes first.
+Updated November 15, 2026 · Scene `StoryTable` · Read the [candidate record](../release/candidate.md) for the exact build. This guide doubles as the judges' testing instructions in the [Devpost draft](../release/submission-draft.md). The water telling leads the demonstration; the gourd is an additional interaction check. Actual software results are in the [November 15 verification record](../testing/2026-11-15-story-table-verification.md); headset and listening acceptance remain open.
 
-One sitting hears both sides of one meeting and takes about four minutes. It is seated and hands only. Controllers are optional. No account, network or microphone is needed, and the app asks for nothing until you choose **Use my table**. The prepared tellings are complete offline.
+One sitting can hear both sides of one meeting. It is designed for seated hands use; controllers are optional. No account, network or microphone is needed for the prepared tellings, which are complete offline. Choose **Use my table** to request room data; the adjustable stand works without it. The short demo is an edited visit, not a measurement of full-session duration.
 
 ## Hands
 
@@ -18,14 +18,14 @@ One sitting hears both sides of one meeting and takes about four minutes. It is 
 ## Judge walkthrough
 
 1. Sit, set the controllers aside and let the table settle in front of you. If it sits too high or far, open **Options** and use **Recenter** or the stand height.
-2. Reach for the **gourd** and close a hand on it, or touch its card. The fire takes the gourd and a paper theatre rises from the table: dusk, a river and two women.
-3. Listen. The pages turn themselves. At the turning point, choose whose side to follow at the plaque above each woman. Choose **Follow the one who brought less**. The stage folds, turns and brings her forward. (If you only watch, the fire chooses after a few seconds.)
-4. When the gourd glows and **Set the gourd down** appears, press it: the gourd moves between the women. If you wait, the story continues and the women set it down themselves. Either way, they make their own agreement.
-5. When her side is told, the page says the meeting has another side. Sweep a hand across the stage. It turns to the woman who expected more, and the same meeting shows what accepting less costs her. (**End here** ends the telling after one side instead.)
+2. Reach for the **water pot**, labelled **Place & water**, and close a hand on it, or select its card. The fire takes the object and a paper theatre rises from the table. A woman brings a younger traveller to a remembered riverbank and becomes unsure of the place.
+3. Listen or read the captions. After the documented page, choose **Stay with the one who remembers** at her figure. The stage turns to bring her forward. Follow her admission of uncertainty and her invitation to listen. If you only watch, the fire chooses a side after a few seconds.
+4. When her side is told, the page offers the other side. Sweep a hand across the stage, or select **Walk with the younger traveller**. The stage turns toward her. **End here** ends after one side instead.
+5. Let the younger traveller's entire final sentence finish before continuing. The telling moves from receiving a memory to carrying it herself in the future. The two women are imagined characters; no family relationship is asserted.
 6. At the ending, press **Keep this story**. Two beads, one for each side you heard, join the strand on the stage's rim. A strand holds six: two sides of each of the three tellings.
 7. Optional: when a page has been told its questions appear beneath it for a few seconds, and **Explore context** answers one and returns to the same place without telling the page again. **About this story** shows what is documented and what is imagined. From the first page, **Reopen kept story** replays exactly what you kept, without generating anything new; **Forget kept story** deletes it.
 
-The bundle and the water pot begin the other two prepared tellings. Each has its own choice of side.
+The bundle and the gourd begin the other two prepared tellings. Each has its own choice of side. The water telling has no **Set the gourd down** invitation.
 
 ## What is real and what is imagined
 
@@ -33,6 +33,7 @@ Pages marked **Documented context** quote a sourced passage (source details on r
 
 ## Optional checks
 
+- **Gourd interaction:** Begin the gourd telling and choose **Follow the one who brought less**. When **Set the gourd down** appears, select it and confirm that the vessel moves once. Hear the other side to discover what accepting less costs the woman who expected more; let that side's prop invitation resolve by itself. The opening already explains the portion left at home.
 - **Your own table** (optional; not yet tried on a headset): **Use my table** shows your room, a little dimmed, and asks for scene permission. If your room scan holds a table near you, the theatre moves onto it, at the edge you sit at. If not, or if you decline, rest an open hand on your table for a moment and the theatre stands there. **Recenter** in Options always brings the virtual stand back.
 - **Pause and recovery:** Pause holds the narration and the stage. Taking the headset off is designed to pause as well.
 - **Comfort:** Options offers larger text, reduced motion (the stage appears without folding or turning) and voice off (captions only).
