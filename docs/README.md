@@ -7,6 +7,7 @@ Planning documents state intentions; decisions and the backlog record what has a
 | Document | What it holds |
 |---|---|
 | [Product requirements](product/prd.md) | Vision, scope, journey, user stories, requirements and acceptance criteria |
+| [Rebuild specification](product/rebuild-spec.md) | November 17 direction, not yet adopted into the PRD: the visitor declares their people, a painted world rises around their own chair, and a bead is carried home. Lists the earlier rules it sets aside |
 | [Entertainment finish plan](product/entertainment-finish-plan.md) | November 10 PM audit: complements Claude's voice integration with story, interaction, acceptance and submission priorities |
 | [November 14 assumptions, for PM challenge](reviews/2026-11-14-assumptions-for-challenge.md) | What the November 14 cloud session assumed, where it departed from the November 10 PM plan, the case against each assumption and what each change costs to cut |
 | [Judged-path audit](reviews/2026-10-26-judged-path-audit.md) | The build as judges would install it, assumptions challenged, the perspective-choice/voice/intake iteration and the critical path to submission |
