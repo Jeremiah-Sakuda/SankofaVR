@@ -4,13 +4,15 @@
 
 Bring a place name, an inherited fragment or a question. A warm griot, present as a small fire, guides an illustrated telling on a nearby table. Your curiosity changes the thread you explore. Historical context is sourced; imagined scenes remain labelled. Sankofa does not recover ancestors or invent a real relative's biography.
 
-The [personal story table MVP](docs/product/personal-story-table-mvp.md) is the active direction. Choose an heirloom to raise a pop-up paper stage, follow one of two perspectives, then sweep a hand across the stage to turn it and hear the other side of the same meeting. The gourd telling includes an optional hand action. Typed questions can steer the prepared telling, and Keep saves the realised story with a bead for each side heard. The story begins in its own dark room on an adjustable virtual stand; **Use my table** shows the visitor's room and sets the story on their table, found in the room scan or shown by a resting hand. The visit is integrated and software-checked; the November 14 changes have [not yet run in Unity](docs/testing/2026-11-14-unity-verification.md), and room and hand behaviour is device-unverified.
+The [personal story table MVP](docs/product/personal-story-table-mvp.md) is the active direction. Choose an heirloom to raise a pop-up paper stage, follow one of two perspectives, then sweep a hand across the stage to turn it and hear the other side of the same meeting. The gourd telling includes an optional hand action. Typed questions can steer the prepared telling, and Keep saves the realised story with a bead for each side heard. The story begins in its own dark room on an adjustable virtual stand; **Use my table** shows the visitor's room and sets the story on their table, found in the room scan or shown by a resting hand. The November 14 changes have now run in Unity; the [November 15 verification record](docs/testing/2026-11-15-story-table-verification.md) records the failures, corrections and rechecks. Room and hand behaviour remains device-unverified.
 
 ![Sankofa pop-up theatre before and after choosing the other perspective](docs/media/story-table-perspective-turn.png)
 
 Muted desktop runtime captures with synthetic input. For the November release path, see the [ten-day plan](docs/product/delivery-plan.md) and [current APK identity](docs/release/candidate.md).
 
 ## Current status and source entry points
+
+**November 15 experiment:** [Water pot to riverside](docs/product/river-threshold-prototype.md) adds a separate cinematic opening and seated, hands-first transition into a human-scale illustrated encounter. Use **Sankofa > Play River Threshold Prototype in XR Simulator** to compare it with StoryTable. Its paintings, animation and provisional editor soundtrack are prototype work; this does not promote the scene to the accepted release path.
 
 | Piece | Personal story table MVP |
 |---|---|
@@ -22,7 +24,7 @@ Muted desktop runtime captures with synthetic input. For the November release pa
 | Images and sound | Existing illustrations on a pop-up stage; prepared voice and attributed ambience on headset. Listening remains unreviewed; no AI-generated music |
 | Memory | Explicit Keep, replacement confirmation, reopening without generation and deletion are implemented in the new scene |
 | Room | Off until asked. MRUK 207 table fitting seated at the visitor's edge, a resting-hand placement when there is no scan or table, passthrough only on the visitor's own table, and manual stand/recenter fallback; no room geometry sent to the story service |
-| Evidence | November 8: 371 core and 32 service checks pass; pop-up review APK built. October 30: 36 editor and 25 focused table runtime checks pass. Quest and listening acceptance remain open |
+| Evidence | November 15: 440 core, 67 service and 14 narration-script checks pass; Unity results and desktop review are in the current verification record. Quest and listening acceptance remain open; the recorded APK predates these changes |
 
 Historical text is restricted to C1/C6/C7 passages in the [source register](docs/content/enkare-nairobi/sources.md). Cultural and pronunciation acceptance remains pending. A citation or model-applied label cannot establish a new historical claim. Wider places, eras, second-language narration, dynamic images and live voice conversation remain deferred.
 

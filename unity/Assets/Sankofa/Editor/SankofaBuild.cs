@@ -36,6 +36,10 @@ namespace Sankofa.EditorTools
         [MenuItem("Sankofa/Build Personal Story Table APK")]
         public static void BuildPersonalStoryTable() => Build(SankofaSceneBuilder.StoryTableScene, OutputName);
 
+        /// <summary>Explicit illustrated-river review artifact. The default and signed release still target StoryTable.</summary>
+        [MenuItem("Sankofa/Build Painted River Review APK")]
+        public static void BuildRiverReview() => Build(SankofaSceneBuilder.RiverPaintedScene, "Sankofa-RiverPainted-Review.apk");
+
         public const string ReleaseOutputName = "Sankofa-StoryTable-release.apk";
 
         /// <summary>

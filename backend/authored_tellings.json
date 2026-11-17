@@ -274,12 +274,12 @@
           "choices": [
             {
               "id": "place-water.follow.remembers",
-              "label": "Stay with the one who remembers",
+              "label": "Hear the one who remembers",
               "next": "place-water.return"
             },
             {
               "id": "place-water.follow.traveller",
-              "label": "Walk with the younger traveller",
+              "label": "Hear the younger traveller",
               "next": "place-water.traveller"
             }
           ]

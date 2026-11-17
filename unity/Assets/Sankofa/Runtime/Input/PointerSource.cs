@@ -1,3 +1,4 @@
+using System.Linq;
 using Sankofa.Interaction;
 using Sankofa.Runtime.UI;
 using UnityEngine;
@@ -40,6 +41,10 @@ namespace Sankofa.Runtime.Input
 
         /// <summary>New modal panels share the same checked pointer path as the permanent controls.</summary>
         public void ConfigurePanels(PokePanel[] targets) => panels = targets ?? new PokePanel[0];
+
+        /// <summary>Registers contextual scene choices without discarding the existing recovery and keyboard panels.</summary>
+        public void AddPanels(PokePanel[] targets) => panels = (panels ?? new PokePanel[0])
+            .Concat(targets ?? new PokePanel[0]).Where(panel => panel != null).Distinct().ToArray();
 
         void Update()
         {

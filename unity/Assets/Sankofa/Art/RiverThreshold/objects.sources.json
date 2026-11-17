@@ -1,0 +1,32 @@
+{
+  "created": "2026-11-15",
+  "tool": "image_gen.imagegen (built-in)",
+  "purpose": "Painted material atlas for actual 3D vessels, cloth and wood; fire study sampled by curved flame meshes. Object cutout studies were visual references only and are not runtime props.",
+  "assets": [
+    {
+      "file": "painted-surfaces-v1.png",
+      "source": "exec-f4507c58-8c73-4716-9586-6321fd093b43.png",
+      "prompt": "Create a single 2x2 MATERIAL TEXTURE ATLAS for real three-dimensional objects in Sankofa VR, matching the mature tactile gouache-and-ink paint finish of the two references. This is NOT pictures of objects: every quadrant is an unwrapped flat material surface filling its entire square edge to edge. Exact four equal quadrants, no gutters, no dividers, no text, no labels. TOP LEFT: warm burnt-sienna terracotta clay, hand-painted layered pigment, fine horizontal turning marks, irregular worn flecks, muted orange and brown; TOP RIGHT: golden ochre dried bottle-gourd skin, subtle natural mottling and tiny pits, fine scumbled strokes, warm brown accents; BOTTOM LEFT: midnight indigo handwoven cloth, delicate visible intersecting woven fibres, navy and muted violet painterly variation, no actual folds; BOTTOM RIGHT: charred dark brown wood, lengthwise vertical grain, small cracks, charcoal paint, muted copper flecks, no actual fire. Each quadrant should be independently approximately tileable, consistent brightness across its edges, no cast shadows, no highlight hotspot, no vignette, no perspective, no object outline, no alpha. All surfaces rich with small layered brush marks and restrained larger pigment variation, beautifully hand-painted and subtly worn. Flat diffuse albedo textures meant to wrap a 3D mesh and receive lighting in Unity; no photograph, no photorealism, no glossy CGI, no thick vector strokes, no decorations or cultural symbols. Square high-resolution opaque texture atlas.",
+      "references": [
+        "hands-and-water-pot-v1.png",
+        "generated flour-gourd visual study"
+      ],
+      "sha256": "879495b855fda10fc89cba29035711938271e677ad04cddca2ead54b3b20fa4c"
+    },
+    {
+      "file": "painted-fire-study-v1.png",
+      "source": "exec-66cdba19-b892-4b2a-a19b-f70e40ef5d8d.png",
+      "prompt": "Create one isolated game-ready painted fire asset, matching the supplied Sankofa gouache-and-ink painting EXACTLY in brushwork, richness and restrained warm amber against indigo shadows. TRANSPARENT BACKGROUND. A small welcoming wood fire with four irregular charred logs, glowing orange coals, clearly separated curving amber flame tongues with visible pigment strokes, a few tiny sparks. Whole fire and complete logs visible, central composition with generous clear alpha padding on all four sides. View from slightly above as a seated person would see a small fire nearby. No scene, ground patch, bowl, circle of stones, hands, text, or cast-shadow rectangle. Flame tips rise above the logs; dark wood at base. Preserve painted texture in the luminous areas, no huge white blob, no photographic VFX, no generic smooth particle flame. One coherent standalone transparent RGBA cutout; landscape-ish fire silhouette fits inside a square image. This will replace the crude procedural flame and primitive base in the story, so make it look as beautifully hand-painted and tangible as the reference.",
+      "references": [
+        "fire-and-threads-v1.png"
+      ],
+      "sha256": "b2bfd4f0e6e316c39225f789a60da2fe1125ba00f6fc85cfebcc7ff49de9e434"
+    }
+  ],
+  "review": "Fictional illustrative surfaces, not historical objects or cultural acceptance. Same account/service terms review as the existing painting record. No music generated.",
+  "digest_baseline": {
+    "recorded_on": "2026-11-16",
+    "basis": "Current source-image bytes baselined after review of the November 16 painted-river capture. Original generation output identifiers, prompts and references are preserved.",
+    "limits": "A reviewed-byte baseline, not independent proof of source origin, ownership or rights clearance. Shared manifests also contain comparison inputs; this does not claim every listed image appeared in the capture."
+  }
+}

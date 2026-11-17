@@ -47,6 +47,10 @@ namespace Sankofa.Runtime.Personal
         public float HandProgress => awaitingHand && rests.Length > 0 ? rests.Max(r => r.Progress) : 0;
         public string Status { get; private set; } = "Adjustable story stand";
         public event Action<string> StatusChanged;
+        /// <summary>Deliberate recentering, including recovery of an initial untracked head; height changes are separate.</summary>
+        public event Action Recentered;
+        /// <summary>Raised before requesting room data or asking for a hand, so immersive presentation can withdraw.</summary>
+        public event Action RoomPlacementRequested;
         /// <summary>Raised when the visitor is asked to rest a hand on their table.</summary>
         public event Action HandAsked;
         /// <summary>Raised when that request ends, whether the story was set down, the stand returned or time ran out.</summary>
@@ -96,6 +100,13 @@ namespace Sankofa.Runtime.Personal
         public void Recenter()
         {
             if (view == null || head == null) return;
+            RestoreStand();
+            Recentered?.Invoke();
+        }
+
+        void RestoreStand()
+        {
+            if (view == null || head == null) return;
             placementVersion++; fitted = false; loading = false;
             EndHandRequest();
             ShowRoom(false);
@@ -112,7 +123,7 @@ namespace Sankofa.Runtime.Personal
         public void AdjustHeight(float amount)
         {
             heightAdjustment = Mathf.Clamp(heightAdjustment + amount, -.24f, .24f);
-            Recenter();
+            RestoreStand();
         }
 
         /// <summary>
@@ -123,6 +134,7 @@ namespace Sankofa.Runtime.Personal
         public async void FitRoomTable()
         {
             if (loading || view == null || head == null) return;
+            RoomPlacementRequested?.Invoke();
             if (!RoomCapable) { PlaceByHand(null); return; }
             var version = ++placementVersion;
             EndHandRequest();

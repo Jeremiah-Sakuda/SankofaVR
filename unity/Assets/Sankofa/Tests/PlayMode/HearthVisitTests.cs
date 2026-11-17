@@ -110,12 +110,19 @@ namespace Sankofa.Tests
             yield return WaitFor(() => stream.enabled, 15, "the directed exchange"); yield return null;
             Assert.That(receiver.SupportWeight, Is.GreaterThan(0.7f), "recipient supports her vessel too");
             StageClock.Paused = true;
+            var elapsed = typeof(FigureMotion).GetField("shareElapsed", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var pausedAt = (float)elapsed.GetValue(giver);
+            // This coroutine resumes between Update and LateUpdate: the exchange clock has advanced, but its
+            // bones still show the previous frame. Let that pending pose finish before comparing completed poses.
+            yield return null;
+            Assert.That((float)elapsed.GetValue(giver), Is.EqualTo(pausedAt), "pause stops the exchange clock immediately");
             var frame = giver.transform.parent;
             var bones = giver.GetComponentsInChildren<Transform>().Concat(receiver.GetComponentsInChildren<Transform>())
                 .Where(t => t.name == "neck_01" || t.name.StartsWith("hand_") || t.name.StartsWith("foot_")).ToArray();
             var positions = bones.Select(t => frame.InverseTransformPoint(t.position)).ToArray();
             var rotations = bones.Select(t => Quaternion.Inverse(frame.rotation) * t.rotation).ToArray();
             yield return new WaitForSeconds(0.4f);
+            Assert.That((float)elapsed.GetValue(giver), Is.EqualTo(pausedAt), "pause holds the exchange clock throughout the pose check");
             for (var i = 0; i < bones.Length; i++)
             {
                 Assert.That(Vector3.Distance(frame.InverseTransformPoint(bones[i].position), positions[i]), Is.LessThan(0.003f), bones[i].name + " paused position");

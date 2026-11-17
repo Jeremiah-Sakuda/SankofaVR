@@ -26,6 +26,7 @@ namespace Sankofa.Runtime.UI
             public Renderer Face;
             public TextMeshPro Label;
             public Vector2 Size;
+            public Vector3 AuthoredPosition;
             public readonly Dictionary<int, PokeGesture> Gestures = new Dictionary<int, PokeGesture>();
             public float Flash;
             public float Glow;
@@ -90,6 +91,33 @@ namespace Sankofa.Runtime.UI
 
         bool hidden;
         bool primaryLayout;
+
+        /// <summary>Changes a contextual dock's row width while invalidating any press on its old layout.</summary>
+        public void SetColumns(int count)
+        {
+            count = Mathf.Max(1, count);
+            if (columns == count) return;
+            var items = buttons.Select(b => (b.Id, b.Label.text)).ToArray();
+            columns = count;
+            foreach (var button in buttons) Destroy(button.Root);
+            buttons.Clear();
+            Show(items, primaryLayout);
+        }
+
+        /// <summary>Repositions the same hit faces without changing their dimensions or accepted actions.</summary>
+        public void ArrangeButtons(IReadOnlyDictionary<string, Vector3> positions)
+        {
+            var changed = false;
+            foreach (var button in buttons)
+            {
+                var position = positions != null && positions.TryGetValue(button.Id, out var target) ? target : button.AuthoredPosition;
+                if (button.Root.transform.localPosition == position) continue;
+                button.Root.transform.localPosition = position;
+                foreach (var gesture in button.Gestures.Values) gesture.Lost();
+                changed = true;
+            }
+            if (changed) { Revision++; pointerPress = pointed = null; }
+        }
 
         /// <summary>
         /// Set aside for a while, keeping its buttons: nothing shows and nothing can be pressed. The questions step
@@ -247,7 +275,7 @@ namespace Sankofa.Runtime.UI
             text.color = labelColor;
             text.text = label;
 
-            return new Button { Id = id, Root = root, Face = renderer, Label = text, Size = size, LabelSettled = go.activeInHierarchy };
+            return new Button { Id = id, Root = root, Face = renderer, Label = text, Size = size, AuthoredPosition = localPosition, LabelSettled = go.activeInHierarchy };
         }
 
         /// <summary>

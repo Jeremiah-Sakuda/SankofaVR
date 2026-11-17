@@ -1,31 +1,64 @@
 # Pop-up theatre release handoff
 
-November 8, 2026. **Start with the [manual steps](manual-steps.md)** (November 9): accounts, signing, upload, video and entry in order. No headset is available for this project; the XR Simulator path below is the primary capture path, not a fallback. Use the [current candidate](candidate.md), [ten-day plan](../product/delivery-plan.md#final-ten-days--november-818) and [Devpost draft](submission-draft.md). Earlier gallery footage and build IDs below are historical.
+Updated November 15, 2026. **Start with the [manual steps](manual-steps.md)**: accounts, signing, upload, video and entry in order. The water telling now leads the submission and demo; the gourd remains an additional interaction check. No headset is available for this project; the XR Simulator path below is the primary capture path. Use the [current candidate](candidate.md), [delivery plan](../product/delivery-plan.md#final-ten-days--november-818) and [Devpost draft](submission-draft.md). Earlier gallery footage and build IDs below are historical.
 
 ## One headset session: 30–45 minutes
 
 1. Connect an authorized Quest 3 or 3S. Install the exact review APK and compare its version with the [candidate record](candidate.md). Sit, enable hands and set the controllers aside. Start with the service unconfigured. Use Options → Recenter or adjust the stand if needed.
-2. Pick the gourd. Watch the stage rise. Follow the woman who brought less. At **Set the gourd down**, use the gourd or its labeled action and confirm it moves once. Finish, Keep, reopen the same telling, then Forget. Check that using a hand, not waiting for the cue, actually triggers the move.
-3. Return to the gourd and choose the other perspective. Check that the chosen woman comes forward and the scene shows what accepting less costs her. Let the gourd cue resolve on its own this time. Try a brief pause/resume, the source panel and leaving hands-only.
+2. Pick the water pot. Follow **Stay with the one who remembers**, then sweep to **Walk with the younger traveller** when the other side is offered. Check the selected figure comes forward and the final sentence is heard or read in full. Keep, reopen, then Forget. Try pause/resume, the source panel and leaving hands-only.
+3. Separately pick the gourd and follow the woman who brought less. At **Set the gourd down**, use the gourd or its labelled action and confirm it moves once. Check that the hand action, not waiting for the cue, triggers the move. Hear the other side and let its gourd cue resolve automatically. This additional check retains coverage of the interaction absent from the water telling.
 4. If room fitting is included in the demo, try it on a real table and confirm what height or footprint changes. Also check denied/missing room data and recovery to the stand. Check text and reach in each tested setup.
 5. Record device model, exact version, failed gestures, real frame rate over a sustained representative run and any discomfort. The judging rubric calls for at least 60 fps. Check the narration/ambience mix separately with an authorized listener; silent desktop tests establish neither pronunciation nor balance. If possible, ask a first-time visitor what changed when they chose a side before telling them the intended answer.
 
 `python3 scripts/quest_evidence.py` lists attached devices. With an authorized device, pass `--serial` and the exact local `--apk` to record a fingerprint and device observations. It neither installs nor launches; compare the observed installed version to the candidate. Capture actual app frame-rate data separately.
 
+## Why the water story leads
+
+**Lead with the water telling, “A name beside the water.”** The entrant asked for the stronger emotional payoff after the framing stress test. This is an editorial choice based on the [authored stories](../../unity/Assets/Sankofa/Core/Personal/BundledPersonalStoryComposer.cs), [staging](../../unity/Assets/Sankofa/Content/personal-table-staging.json) and [recording manifest](../../unity/Assets/Sankofa/Content/personal-table.narration.json). It is not a listening review or a measured audience preference.
+
+| Test | Water | Gourd |
+|---|---|---|
+| Connection to Sankofa's purpose | Someone wants to pass on what a place meant to her despite uncertainty; the listener later carries the memory herself | A household promise meets another household's needs; a strong story of generosity, with a less direct connection to inherited memory |
+| Change between perspectives | The older woman's admission becomes the younger traveller's future responsibility: she too will remember imperfectly | The opening already explains the portion left at home. The other side adds the cost of accepting less, not a new explanation of the shortfall |
+| Emotional ending | The younger traveller becomes the person who is no longer quite sure where it was; this connects receiving a story with eventually carrying it | The women agree to a smaller exchange; the second side makes that generosity more costly and understandable |
+| Visible participation | Select the water pot, choose a person, turn the stage and keep the telling | The same structure, plus the clearer physical action of setting down the gourd; gourd wins on the extra prop interaction |
+| Risk in a short edit | Quiet and dependent on words; cutting the final sentence or explaining it early would remove the payoff | Easy to establish the conflict, but the earlier pitch falsely treated an opening fact as a later revelation |
+
+Water wins for this submission's emotional promise. Preserve its complete final sentence and give it room to land. Keep the gourd in the build and the judge's optional checks; do not insert its prop action into the water footage or imply the water telling has it. The first water side already describes the traveller listening, so the reveal is her future role as the person carrying the memory. The characters are not established as relatives. The naming passage supplies bounded historical context, not proof of their meeting or of the exact riverbank.
+
 ## Capture one story well — target 2:30
 
-Revised November 14 for the one-sitting flow; on November 15 the PM pass asked for an opening on the flour dilemma, and the entrant has not settled what the entry leads with. The organisers ask for real play that makes the hands-first design clear in the first thirty seconds, and judges need not watch past three minutes.
+Revised November 15 around the water telling and the stronger promise: everyday lives behind history, explored through an explicitly imagined encounter. The [official judging guidance](https://start-developer-competition-26.devpost.com/details/judging) asks for honest gameplay led by the story and the project's distinctiveness. Judges need not watch past three minutes under the [rules](https://start-developer-competition-26.devpost.com/rules). Showing an actual hand selection within thirty seconds is our editorial choice. The main stage turn follows the first perspective so its narrative purpose is clear.
 
-| Edit | Record from the final reviewed build |
+| Edit | Actual gameplay and audio direction |
 |---|---|
-| 0:00–0:10 | Open on the moment itself: a hand sweeps across the stage, it leans, folds, turns and rises on the other woman. Title over it: “One meeting. Two sides. Turn the story with your hand.” |
-| 0:10–0:30 | The fire: “Come. Sit with me.” A hand warms at the fire and it flares. A hand reaches the gourd; the fire takes it and the paper scenery stands up. |
-| 0:30–0:55 | The first page, then the documented page with its label. Choose a side at her figure. Hold on the fold, the turn and her coming forward. |
-| 0:55–1:20 | Her side. A hand sets the gourd down between the women. Let one caption carry the point: she left a portion at home. |
-| 1:20–1:50 | “This meeting has another side.” The sweep again, in full this time, and the other woman's side: the meal she had planned around the flour. Let one caption land. |
-| 1:50–2:10 | The ending. Keep, and two beads swell onto the strand. Cut to a return: the griot names a side not yet heard. |
-| 2:10–2:22 | Dropped by the [PM pass](../reviews/2026-11-14-assumptions-for-challenge.md#pm-pass) unless table placement has been seen working on a Quest. Give the time to the two sides. |
-| 2:22–2:30 | Title, Enkare Nairobi around the 1850s, and the disclosure: documented context is marked, the people are imagined. “Captured in Meta XR Simulator.” |
+| 0:00–0:12 | Fire, a hand selecting **A water pot / Place & water**, and the stage rising. Pitch voice: “A place can matter to you before you know its past. Sankofa offers a story to begin with.” Small title: **Sankofa — Everyday lives behind history**. Context caption: **Three imagined tellings · Enkare Nairobi, 1850s**. |
+| 0:12–0:28 | Opening scene and actual captions. Pitch voice establishes only: “A woman brings a younger traveller to a riverbank she remembers.” Then let the prepared narration take over at “She had promised to show a place. Now she is no longer sure she has found it.” Show an edit at the jump; preserve the uncertainty. |
+| 0:28–0:40 | The actual **Documented context** page and its short naming passage, then select **Stay with the one who remembers**. No pitch voice. Keep the sourced label legible and distinguish it from the imagined scene that follows. |
+| 0:40–1:00 | Older woman's side, her figure forward. Use the prepared recording from “She chooses not to pretend” through “makes room for the traveller beside her.” Let her admission and invitation breathe. The full page's later modern-river coda is omitted from this short edit, not retold as part of the 1850s. |
+| 1:00–1:12 | Clearly cut to the actual offer of the other side. Pitch voice: “Now turn toward the younger traveller.” Show the hand sweep and the fold, turn and rise without cutting between input and response. If the recorded input is a plaque selection, say “Now choose the younger traveller” and show the selection. Never call an automatic turn or a pinch a sweep. |
+| 1:12–1:50 | Younger traveller's side, her figure forward and actual captions. Use the prepared recording from “Instead she chooses a different question” through the end of the chapter. No pitch voice or feature overlays. Keep **“What did it sound like?”** and the full sentence beginning **“Years from now”**. Her future uncertainty is the payoff. |
+| 1:50–2:00 | Hold the stage and the last caption for at least three seconds after the sentence ends. Then pitch voice: “The meeting stays the same. What you understand about it changes.” Do not cut to a menu while the final story line is still speaking. |
+| 2:00–2:14 | Ending, deliberate **Keep this story**, two beads, then a clearly cut return and **Reopen kept story**. Pitch voice: “Keep the telling to return to its exact pages. Another story is waiting by the fire.” Beads mark the visit; no claim of ongoing habit or unlimited content. |
+| 2:14–2:22 | Show the stand height adjustment in Options. Pitch voice: “The prepared visit works offline, seated, on an adjustable stand.” Only substitute a verified **Use my table** shot if it clearly shows fitting changing the placement; use the line “Use your own table, or keep the adjustable stand.” |
+| 2:22–2:30 | Return to the actual stage and product title. Pitch voice: “Sankofa. For the stories you never got to hear.” Small closing caption: **Documented context · Imagined people and meetings**. |
+
+Keep **Meta XR Simulator footage · Edited visit** visible from the first simulator frame. Cuts shorten a visit; they must not imply that omitted story pages or waits disappear in the application. Do not relabel synthetic review-camera PNGs as simulator footage. Include English captions for the pitch; the application's captions stay readable. Keep pitch narration separate from the prepared story audio, with no overlapping speech. Do not use generated video or fabricated family photographs to supply emotion.
+
+### Audio and pacing cues
+
+The existing manifest lists water recordings of 39.32 seconds (opening), 9.072 seconds (documented naming), 45.24 seconds (older woman's side) and 59.08 seconds (younger traveller). Their combined 152.712 seconds already exceed the 150-second target before welcome, hand actions or closing. This is necessarily an excerpted demo. Those are file metadata, not a listening or timing acceptance result; locate edit points by ear in the reviewed recording, not by estimated word offsets.
+
+| Chapter and local file | Required excerpt |
+|---|---|
+| `place-water.listening` — `p-422bf80a8695a2d8.mp3` | “She had promised to show a place. Now she is no longer sure she has found it.” |
+| `place-water.name` — `p-145300bc4d3cdf9c.mp3` | The full short naming passage; check the last word of this previously cut clip |
+| `place-water.return` — `p-76c08d22570c2a3c.mp3` | “She chooses not to pretend. 'I remember the water. I may have the bend wrong.' She lifts the bundle and makes room for the traveller beside her.” |
+| `place-water.traveller` — `p-e92d128aa0306221.mp3` | “Instead she chooses a different question. 'What did it sound like?' The older woman closes her eyes to answer. Years from now, the traveller will remember that sound better than any bend, and she will be the one who is not quite sure where it was.” |
+
+Files are under `unity/Assets/Sankofa/Resources/Narration/personal-table/`; the [manifest](../../unity/Assets/Sankofa/Content/personal-table.narration.json) records the exact text and assets. The water choice does not authorize regeneration or rewriting of the story or its recordings. No sound was played during this editorial comparison. Listen to the selected excerpts and capture a complete water visit before cutting. If a reviewed excerpt needs longer than its slot, drop the optional stand shot and shorten pitch narration first; retain the final story sentence, the hand action and the three-second pause. Keep the finished edit under three minutes. Do not stretch or accelerate the voice to fit.
+
+The adaptation sentence for a longer text field or optional card is: “The original web Sankofa invited a personal question; this Quest adaptation gives the telling a physical stage, hand-driven perspective changes and a complete prepared offline visit.” The planned demonstration shows that adapted visit; footage and audience acceptance are still to be obtained. Hosted generation, unrestricted heritage coverage and freeform conversation are not part of this edit.
 
 Record actual Quest gameplay where possible. If needed, the [official FAQ](https://start-developer-competition-26.devpost.com/details/faqs) allows XR Simulator footage. Use Unity's **Sankofa → Play Personal Story Table in XR Simulator** with the muted launch command in the [Unity guide](../../unity/README.md#personal-story-table). Capture the prepared route, label the simulator footage and do not infer real-hand reliability from it. October 30 desktop stills and the fixed-cadence motion study are editing references, not submission footage. Capture without external participants' identifiable faces, voices, or personal details. Keep speech legible via captions. No local sound playback or public upload is authorized by this checklist.
 

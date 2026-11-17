@@ -1,0 +1,35 @@
+{
+  "about": "Recorded foley for the river-threshold prototype. No sound synthesised. HQ previews edited with FFmpeg.",
+  "recordings": [
+    {
+      "file": "pot-touch.wav",
+      "title": "Ceramic Tink",
+      "author": "Ashe Kirk / Owlish Media (OwlStorm)",
+      "licence": "CC0 1.0",
+      "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "page": "https://freesound.org/people/OwlStorm/sounds/209014/",
+      "preview_url": "https://cdn.freesound.org/previews/209/209014_140737-hq.mp3",
+      "source_file": "vendor/freesound/river-threshold/ceramic-tink.mp3",
+      "source_sha256": "3a1e30743652d3d7b3b025e6552924b2e4111004704e23f03e2c21e23950a6b2",
+      "sha256": "2ac63a072d661afe58f2bcda71ad55bd70a991ece346069eeb0c8c41fde808b8",
+      "edit": "0..0.95 s; highpass 120 Hz, lowpass 5500 Hz, 0.25 s fade-out from 0.67 s; mono 24 kHz PCM16 WAV",
+      "verified_source_date": "2026-11-15",
+      "review": "Source page and file identity verified; no claim of historical sound or listening/device acceptance"
+    },
+    {
+      "file": "water-stir.wav",
+      "title": "Hands through water in ceramic bowl.",
+      "author": "Wigglesworth",
+      "licence": "CC0 1.0",
+      "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "page": "https://freesound.org/people/Wigglesworth/sounds/842637/",
+      "preview_url": "https://cdn.freesound.org/previews/842/842637_6775466-hq.mp3",
+      "source_file": "vendor/freesound/river-threshold/water-in-bowl.mp3",
+      "source_sha256": "0af5ad317c0f0187d6197170aab5ff8bceb887214e119557c259450d49d47afa",
+      "sha256": "679f7eb84c17470073f22092e14664ec05a38a6ab01c71d6b08971c84556db62",
+      "edit": "1.2..3.6 s; highpass 100 Hz, lowpass 7500 Hz, 0.08 s fade-in, 0.5 s fade-out from 1.9 s; mono 24 kHz PCM16 WAV",
+      "verified_source_date": "2026-11-15",
+      "review": "Source page and file identity verified; no claim of historical sound or listening/device acceptance"
+    }
+  ]
+}

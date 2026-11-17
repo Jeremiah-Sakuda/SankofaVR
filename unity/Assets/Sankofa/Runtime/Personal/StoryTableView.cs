@@ -77,6 +77,7 @@ namespace Sankofa.Runtime.Personal
         public Action StartRequested, StartLocalRequested, SeedEditRequested, SourceDetailsRequested;
         public Action NextRequested, BackRequested, AskRequested, SaveRequested, PauseRequested, RecenterRequested, RoomRequested, LeaveRequested, ContinueRequested, RetryRequested;
         public Action ReopenRequested, ForgetRequested, ComfortRequested, AboutRequested;
+        public Action ContextRequested;
         public Action<string> DecisionSelected;
 
         /// <summary>How long a newly threaded bead swells before it settles on the strand.</summary>
@@ -87,11 +88,15 @@ namespace Sankofa.Runtime.Personal
         string seed = "", currentTitle = "A question worth carrying";
         bool paused, reducedMotion, canBack, canNext, canAsk, canSave, detailsOpen, intake = true;
         bool error, closing, decisionOpen, hasKeptStory, offeringChoice, onlineAvailable = true;
+        bool closingReplay;
+        string closingNext;
         readonly List<string> captionPages = new List<string>();
         int captionPage, chapterIndex, chapterCount;
         string previousCaption, previousChapterTitle, closingMessage;
         int partBeforeClosing;
         float authoredCaptionSize, authoredChapterSize, authoredDetailSize;
+        Vector2 authoredCaptionBounds;
+        Vector3 authoredCaptionPosition;
         readonly List<string> modalPages = new List<string>();
         (string Id, string Label)[] modalActions = Array.Empty<(string Id, string Label)>();
         string modalTitle, modalContent;
@@ -113,6 +118,8 @@ namespace Sankofa.Runtime.Personal
         public const string StandingInvitation = PersonalStoryVoice.Invitation;
         string invitation;
         bool welcoming, selfTurning, spokenQuestions, ownTable, strandShown;
+        bool spatialStageVisible = true;
+        bool cinematicReading;
         float[] beadSwell = Array.Empty<float>();
         bool[] beadKept = Array.Empty<bool>();
         Vector3[] heirloomRest = Array.Empty<Vector3>();
@@ -124,6 +131,8 @@ namespace Sankofa.Runtime.Personal
         public PokePanel[] Panels => new[] { routes, regions, periods, intakeActions, keptActions, transport, questions, controls, detailActions, consentActions }.Concat(figureChoices).Concat(new[] { gourdInvite }).Where(p => p != null).ToArray();
         public string Caption => caption != null ? caption.text : "";
         public PopUpStage Stage => stage;
+        /// <summary>Whether its physical stage is visible and can truthfully offer a stage-based hand gesture.</summary>
+        public bool SpatialStageVisible => spatialStageVisible;
         /// <summary>The page last rendered, so presentation can be redrawn when only how it is shown has changed.</summary>
         public StoryTableChapterViewData LastChapter { get; private set; }
         /// <summary>Where the pop-up stage stands, for the sounds of its scene.</summary>
@@ -135,6 +144,30 @@ namespace Sankofa.Runtime.Personal
         public string CapabilityLabel => capability != null ? capability.text : "";
         public bool IntakeVisible => intake;
         public bool IsPaused => paused;
+        public bool CinematicReading => cinematicReading;
+
+        /// <summary>The surrounding story uses one context entry; all source and question actions remain available inside it.</summary>
+        public void SetCinematicReading(bool value)
+        {
+            if (cinematicReading == value) return;
+            cinematicReading = value;
+            if (caption != null)
+            {
+                var body = closing ? closingMessage : previousCaption;
+                var at = string.IsNullOrEmpty(body) || string.IsNullOrEmpty(caption.text) ? 0
+                    : Mathf.Max(0, body.IndexOf(caption.text, StringComparison.Ordinal));
+                var height = authoredCaptionBounds.y * (value ? .68f : 1);
+                caption.rectTransform.sizeDelta = new Vector2(authoredCaptionBounds.x, height);
+                caption.transform.localPosition = authoredCaptionPosition + Vector3.up * ((authoredCaptionBounds.y - height) * .5f);
+                if (!intake && !detailsOpen && body != null)
+                {
+                    PaginateCaption(body, 0);
+                    for (var i = captionPages.Count - 1; i >= 0; i--)
+                        if (body.IndexOf(captionPages[i], StringComparison.Ordinal) <= at) { SetReadingPart(i); break; }
+                }
+            }
+            RefreshControls();
+        }
         public int ReadingPart => captionPage;
         public int ReadingPartCount => captionPages.Count;
         public int ModalPart => modalPage;
@@ -173,6 +206,7 @@ namespace Sankofa.Runtime.Personal
             beadSwell = new float[beads.Length]; beadKept = new bool[beads.Length];
             CollectPrints();
             authoredCaptionSize = caption != null ? caption.fontSize : 0.23f;
+            if (caption != null) { authoredCaptionBounds = caption.rectTransform.sizeDelta; authoredCaptionPosition = caption.transform.localPosition; }
             authoredChapterSize = chapterTitle != null ? chapterTitle.fontSize : 0.22f;
             authoredDetailSize = detailBody != null ? detailBody.fontSize : 0.135f;
         }
@@ -257,6 +291,20 @@ namespace Sankofa.Runtime.Personal
             RefreshIntake();
             RefreshControls();
             if (offeringChoice && LastChapter != null && !intake && !detailsOpen && !closing) SetChoices(LastChapter.Choices ?? Array.Empty<string>());
+        }
+
+        /// <summary>A surrounding scene can replace the miniature stage while retaining reachable choices on the page.</summary>
+        public void SetSpatialStageVisible(bool value)
+        {
+            if (spatialStageVisible == value) return;
+            spatialStageVisible = value;
+            if (offeringChoice && LastChapter != null && !intake && !detailsOpen && !closing)
+            {
+                var part = captionPage; var wasLast = part == captionPages.Count - 1;
+                RenderChapter(LastChapter);
+                SetReadingPart(wasLast ? captionPages.Count - 1 : part);
+            }
+            RefreshFigureChoices(); RefreshGourdInvite();
         }
 
         /// <summary>How many beads the strand shows as kept.</summary>
@@ -419,7 +467,15 @@ namespace Sankofa.Runtime.Personal
             var choices = chapter.Choices ?? Array.Empty<string>();
             offeringChoice = choices.Length > 0;
             // The prompt is presentation: it follows the page's own words and is never part of the story or its narration.
-            var text = offeringChoice ? chapter.Caption + "\n\n" + (string.IsNullOrWhiteSpace(chapter.ChoicePrompt) ? DefaultChoicePrompt : chapter.ChoicePrompt) : chapter.Caption;
+            var prompt = string.IsNullOrWhiteSpace(chapter.ChoicePrompt) ? DefaultChoicePrompt
+                : spatialStageVisible ? chapter.ChoicePrompt : "This meeting has another side. Choose whose side to hear next.";
+            if (cinematicReading && string.IsNullOrWhiteSpace(chapter.ChoicePrompt))
+                prompt = selfTurning
+                    ? "Choose a side: point, pinch and release. Or wait and let the fire guide you."
+                    : "Choose a side: point, pinch and release. Take your time.";
+            else if (cinematicReading && selfTurning)
+                prompt = "Choose the other side, or wait and let the fire guide you.";
+            var text = offeringChoice ? chapter.Caption + "\n\n" + prompt : chapter.Caption;
             var samePage = previousChapterTitle == chapter.Title && chapterIndex == chapter.Index;
             // Stepping back from the ending returns to the part of the page that was being read before it.
             var retainedPart = previousCaption == text && samePage ? (fromClosing ? partBeforeClosing : captionPage) : 0;
@@ -491,6 +547,9 @@ namespace Sankofa.Runtime.Personal
 
         public void SetStatus(string message) => SetText(capability, message);
 
+        public void SetClosingReplay(bool available) { closingReplay = available; RefreshControls(); }
+        public void SetClosingNext(string label) { closingNext = label; RefreshControls(); }
+
         public void SetPaused(bool value)
         {
             paused = value;
@@ -553,7 +612,7 @@ namespace Sankofa.Runtime.Personal
             if (questions == null) return;
             var items = new List<(string Id, string Label)>();
             // With self-turning pages the choice stands at the figures alone; waiting leaves it to the fire.
-            var atFigures = selfTurning && stage != null && figureChoices.Any(p => p != null && p.Ids.Any());
+            var atFigures = selfTurning && spatialStageVisible && stage != null && figureChoices.Any(p => p != null && p.Ids.Any());
             for (var i = 0; i < Mathf.Min(2, labels.Count) && !atFigures; i++)
                 if (!string.IsNullOrWhiteSpace(labels[i])) items.Add((ChoicePrefix + i, labels[i]));
             questions.Show(items);
@@ -641,7 +700,15 @@ namespace Sankofa.Runtime.Personal
             for (var i = 0; i < heirlooms.Length; i++)
                 if (heirlooms[i] != null && i != carried) heirlooms[i].gameObject.SetActive(intake && !detailsOpen);
             // Only what a visitor may need at any moment stays in reach; placement and comfort live in Options.
-            if (controls != null) controls.Show(new[] { ("pause", paused ? "Resume" : "Pause"), ("options", "Options"), ("leave", "Leave") });
+            if (controls != null)
+            {
+                controls.SetColumns(cinematicReading ? 4 : 3);
+                var utility = new List<(string, string)>();
+                if (cinematicReading) utility.Add(("context", "Context"));
+                utility.Add(("pause", paused ? "Resume" : "Pause"));
+                utility.Add(("options", "Options")); utility.Add(("leave", "Leave"));
+                controls.Show(utility);
+            }
             if (transport == null) return;
             var items = new List<(string Id, string Label)>();
             if (closing)
@@ -650,7 +717,8 @@ namespace Sankofa.Runtime.Personal
                 else if (canBack && !selfTurning) items.Add(("back", "Previous page"));
                 if (captionPage + 1 < captionPages.Count) items.Add(("next", "More text"));
                 if (canSave) items.Add(("save", "Keep this story"));
-                items.Add(("again", selfTurning ? "Another story" : "Another question"));
+                if (closingReplay) items.Add(("reopen-closing", "Reopen kept telling"));
+                items.Add(("again", closingNext ?? (selfTurning ? "Another story" : "Another question")));
             }
             else
             {
@@ -660,12 +728,16 @@ namespace Sankofa.Runtime.Personal
                 if (!selfTurning && (canNext || morePage)) items.Add(("next", morePage ? "Continue reading" : ending ?? (offeringChoice ? "Let the fire choose" : "Next page")));
                 // Where pages turn themselves, the one thing a visitor may still need to say is that they are done.
                 else if (selfTurning && ending != null && canNext && !morePage) items.Add(("next", ending));
-                if (canAsk) items.Add(("ask", spokenQuestions ? "Ask the fire" : "Explore context"));
-                items.Add(("sources", "About this story"));
+                if (!cinematicReading)
+                {
+                    if (canAsk) items.Add(("ask", spokenQuestions ? "Ask the fire" : "Explore context"));
+                    items.Add(("sources", "About this story"));
+                }
             }
             transport.Show(items);
             transport.Hidden = intake || paused || detailsOpen || error || (progressRoot != null && progressRoot.activeSelf);
-            if (questions != null) questions.Hidden = intake || paused || detailsOpen || closing || error || (progressRoot != null && progressRoot.activeSelf);
+            if (questions != null) questions.Hidden = intake || paused || detailsOpen || closing || error
+                || (cinematicReading && !offeringChoice) || (progressRoot != null && progressRoot.activeSelf);
         }
 
         void SetPreviousPages(IReadOnlyList<string> titles)
@@ -777,13 +849,16 @@ namespace Sankofa.Runtime.Personal
             if (id == "back") { if (captionPage > 0) SetReadingPart(captionPage - 1); else BackRequested?.Invoke(); }
             else if (id == "next") { if (captionPage + 1 < captionPages.Count) SetReadingPart(captionPage + 1); else NextRequested?.Invoke(); }
             else if (id == "ask") AskRequested?.Invoke();
+            else if (id == "context") ContextRequested?.Invoke();
             else if (id == "save") SaveRequested?.Invoke();
             else if (id == "sources") SourceDetailsRequested?.Invoke();
             else if (id == "again") ContinueRequested?.Invoke();
+            else if (id == "reopen-closing") ReopenRequested?.Invoke();
         }
         void ControlAction(string id)
         {
             if (id == "pause") PauseRequested?.Invoke();
+            else if (id == "context") ContextRequested?.Invoke();
             else if (id == "recenter") RecenterRequested?.Invoke();
             else if (id == "room") RoomRequested?.Invoke();
             else if (id == "options") ComfortRequested?.Invoke();
@@ -886,13 +961,19 @@ namespace Sankofa.Runtime.Personal
 
         static int SentenceBoundary(string text, int fitted)
         {
-            for (var i = fitted - 1; i >= fitted * .55f; i--)
+            // A short preceding sentence is preferable to cutting the next sentence's emotional payoff in two.
+            for (var i = fitted - 1; i >= 0; i--)
             {
                 if (text[i] != '.' && text[i] != '?' && text[i] != '!') continue;
                 var end = i + 1;
                 while (end < fitted && (text[end] == '\'' || text[end] == '"' || text[end] == '’' || text[end] == '”')) end++;
                 if (end == text.Length || char.IsWhiteSpace(text[end])) return end;
             }
+            // A sentence longer than the viewport may still have a natural phrase break. Avoid leaving a few
+            // final words on their own, especially with large text, without shrinking or dropping any words.
+            if (text.Substring(fitted).Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length < 8)
+                for (var i = fitted - 1; i >= fitted * .4f; i--)
+                    if (text[i] == ',' || text[i] == ';' || text[i] == ':') return i + 1;
             return fitted;
         }
 
@@ -935,7 +1016,7 @@ namespace Sankofa.Runtime.Personal
             {
                 if (figureChoices[f] == null) continue;
                 var figure = f < TableStaging.Figures.Count ? TableStaging.Figures[f] : null;
-                var open = offeringChoice && !intake && !paused && !detailsOpen && !closing && !error && stage != null
+                var open = spatialStageVisible && offeringChoice && !intake && !paused && !detailsOpen && !closing && !error && stage != null
                     && !stage.Turning && stage.FigureShown(figure) && Array.IndexOf(choiceFigures, figure) >= 0;
                 if (figureChoices[f].Hidden == open) figureChoices[f].Hidden = !open;
             }
@@ -945,7 +1026,7 @@ namespace Sankofa.Runtime.Personal
         void RefreshGourdInvite()
         {
             if (gourdInvite == null || stage == null) return;
-            var open = stage.GourdInvited && !intake && !paused && !detailsOpen && !closing && !error;
+            var open = spatialStageVisible && stage.GourdInvited && !intake && !paused && !detailsOpen && !closing && !error;
             if (open) gourdInvite.transform.position = stage.GourdWorldPosition + TableRoot.up * 0.075f * TableRoot.lossyScale.y;
             if (gourdInvite.Hidden == open) gourdInvite.Hidden = !open;
         }

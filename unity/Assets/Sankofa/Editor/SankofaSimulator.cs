@@ -14,6 +14,18 @@ namespace Sankofa.EditorTools
     {
         const string ActivateMenu = "Window/Meta/Meta XR Simulator/Activate";
 
+        [MenuItem("Sankofa/Play River Threshold Prototype in XR Simulator")]
+        public static void PlayRiverThreshold() => Play(SankofaSceneBuilder.RiverPaintedScene);
+
+        [MenuItem("Sankofa/Compare River Cast/Earlier river prototype in XR Simulator")]
+        public static void PlayOriginalRiverThreshold() => Play(SankofaSceneBuilder.RiverThresholdScene);
+
+        [MenuItem("Sankofa/Compare River Cast/Painted figures in XR Simulator")]
+        public static void PlayRiverPainted() => Play(SankofaSceneBuilder.RiverPaintedScene);
+
+        [MenuItem("Sankofa/Compare River Cast/3D figures in XR Simulator")]
+        public static void PlayRiver3D() => Play(SankofaSceneBuilder.RiverSolidScene);
+
         [MenuItem("Sankofa/Play Personal Story Table in XR Simulator")]
         public static void PlayStoryTable()
         {
